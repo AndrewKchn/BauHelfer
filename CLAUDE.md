@@ -54,4 +54,6 @@ Copy `.env.example` to `.env` before the first run.
 4. Run `/ai-log`: drafts the AI_LOG entry and the PR "AI usage" section; the student edits.
 5. After "yes": the AI_LOG entry goes in its own last commit ("Add AI_LOG entry for #N"),
    then `gh pr create` with `Closes #N` in the body.
-6. The student merges on GitHub; board automation moves the card to Done.
+6. The student merges on GitHub with "Create a merge commit" (squash is disabled to keep the
+   separate commits); the branch is deleted and the card moves to Done automatically.
+   `main` is protected: no direct pushes, every change goes through a PR.
