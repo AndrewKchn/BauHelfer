@@ -1,0 +1,57 @@
+# BauHelfer
+
+Django job board for construction labourers in Munich. ReDi School final project: Claude writes
+code, the student reviews it, decides and defends it. Plan, data model and milestones:
+[docs/PLAN.md](docs/PLAN.md) — read it instead of guessing.
+
+## Commands
+
+```bash
+uv sync                                  # install dependencies
+uv run python manage.py runserver        # dev server (settings: config.settings.local)
+uv run python manage.py makemigrations   # after model changes
+uv run pytest                            # tests
+uv run ruff check . && uv run ruff format .
+```
+
+Copy `.env.example` to `.env` before the first run.
+
+## Structure
+
+- `config/settings/` — `base.py` (shared), `local.py` (dev), `production.py` (Render)
+- `templates/` — Django templates (HTMX + Tailwind)
+- `docs/PLAN.md` — plan; `docs/AI_LOG.md` — log of AI-assisted work
+- Django apps (`accounts/`, `jobs/`, `chat/`, …) are added ticket by ticket, see the plan
+
+## Conventions
+
+- Code, comments, docs, issues and commit messages in English.
+- Every UI string is wrapped in `gettext` / `{% translate %}`; from M5 also translated into all
+  7 languages (DE, EN, RU, UK, PL, RO, TR).
+- No secrets or personal data in the repo — it is public.
+- Keep it simple: Django built-ins first, no new dependency without asking.
+
+## Testing levels
+
+1. Unit tests first (TDD). The student reads them; commit them failing: "Add failing tests for …".
+2. Implementation until the tests pass.
+3. Integration tests with the Django test client.
+4. E2E (Playwright) only in the per-milestone test tickets.
+
+## Working with the student
+
+- The student is new to Django: explain each part as it is written.
+- Offer real choices with a recommendation; the student decides. Record when they reject or
+  change a suggestion — it goes into `docs/AI_LOG.md`.
+- Never commit, push or open a PR without an explicit "yes". Never merge.
+
+## Ticket workflow
+
+1. `gh issue view N`; check it is not blocked (`gh api repos/AndrewKchn/BauHelfer/issues/N/dependencies/blocked_by`).
+2. `gh issue develop N --checkout`; move the card on the "BauHelfer" board to In Progress.
+3. Tests → code → tests, as above. Separate commits: failing tests, then implementation, then
+   any fixes or integration tests.
+4. Run `/ai-log`: drafts the AI_LOG entry and the PR "AI usage" section; the student edits.
+5. After "yes": the AI_LOG entry goes in its own last commit ("Add AI_LOG entry for #N"),
+   then `gh pr create` with `Closes #N` in the body.
+6. The student merges on GitHub; board automation moves the card to Done.
