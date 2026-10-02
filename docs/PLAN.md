@@ -11,9 +11,8 @@ reviews it, makes the decisions and defends the project. Timeline: 2 months, ful
 (≈ 5 Oct – 1 Dec 2026). The school has no stack requirements. The student is new to Django, so Claude
 explains each part as it is built, and key decisions are recorded in `docs/AI_LOG.md`.
 
-The `Projects/ReDi` folder is currently an empty git repository with no remote. Goal of this step:
-fix the stack and architecture, split the work into milestones, and create the GitHub repository,
-labels, milestones, issues and project board. Application code is written later, issue by issue.
+The repository, labels, milestones, issues and project board are set up; application code is
+written issue by issue.
 
 ## Stack
 
@@ -26,7 +25,7 @@ labels, milestones, issues and project board. Application code is written later,
 | Map | **Leaflet + OpenStreetMap**, Nominatim geocoding | Free, no API keys |
 | Chat | HTMX polling every 3–5 s | Simpler than WebSockets, enough for the MVP |
 | Tests / quality | **pytest-django**, **ruff** | |
-| CI | **GitHub Actions**: ruff + pytest on every PR | |
+| CI | **GitHub Actions**: ruff, pytest, coverage on every PR; required to merge into `main` | |
 | Hosting | **Render, Frankfurt region** (web service + PostgreSQL), **gunicorn**, static files via **WhiteNoise** | Auto-deploy from `main`, data stays in the EU (GDPR). Free tier during development, paid tier for the defense |
 
 **Deploy from week one:** after M1 the project has a live version, and every merge to `main` updates the site.
@@ -60,6 +59,7 @@ BauHelfer/
 ├── translations/      # Claude API service + cache
 ├── templates/  static/  locale/
 ├── docs/PLAN.md  docs/AI_LOG.md
+├── CLAUDE.md  .claude/skills/ai-log/   # instructions and /ai-log skill for Claude Code
 ├── docker-compose.yml  pyproject.toml  render.yaml  .github/workflows/ci.yml
 ```
 
@@ -68,100 +68,140 @@ BauHelfer/
 `backend`, `frontend`, `database`, `i18n`, `ai`, `legal`, `devops`, `testing`, `docs`, `stretch`
 (+ default `bug` and `enhancement`; other default labels are removed).
 
-## Milestones and issues (55)
+## Milestones and issues (58)
 
-Each issue has a **Description** and a **Done when…** checklist.
+Each issue has a **Description** and a **Done when…** checklist. Numbers are GitHub issue numbers;
+the status of each issue lives on the board, not here.
 
 ### M1 · Foundation & First Deploy — due 11 Oct
-- Set up Django project structure and settings (`backend`)
-- PostgreSQL via Docker Compose + env config (`devops`, `database`)
-- Base layout template with Tailwind + HTMX, mobile-first (`frontend`)
-- GitHub Actions CI: ruff + pytest (`devops`, `testing`)
-- First deploy to Render (Frankfurt): gunicorn, WhiteNoise, auto-deploy from `main` (`devops`)
-- README: project idea, stack, how to run locally, live link (`docs`)
-- Start `docs/AI_LOG.md` — log of AI-assisted decisions (`docs`)
+- #1 Set up Django project structure and settings (`backend`)
+- #8 Custom User model with role (employer / worker) (`backend`, `database`) — must exist before
+  the first `migrate` on PostgreSQL in #2
+- #2 PostgreSQL via Docker Compose + env config (`devops`, `database`)
+- #4 GitHub Actions CI: ruff, pytest, coverage (`devops`, `testing`) — also makes the CI check
+  required in the "Protect main" ruleset
+- #5 First deploy to Render (Frankfurt): gunicorn, WhiteNoise, auto-deploy from `main` (`devops`)
+- #6 README: project idea, stack, how to run locally, live link (`docs`)
+- #7 Start `docs/AI_LOG.md` — log of AI-assisted decisions (`docs`)
+- #56 Protect main branch (`devops`)
+- #58 Development guardrails: `CLAUDE.md` and `/ai-log` skill (`devops`, `docs`)
+- #59 Sync `docs/PLAN.md` with board changes (`docs`)
 
 ### M2 · Accounts & Profiles — due 18 Oct
-- Custom User model with role (employer / worker) (`backend`, `database`)
-- Registration, login, logout, password reset (`backend`, `frontend`)
-- Role selection and onboarding flow (`frontend`)
-- Worker profile: team size, skills, languages, legal status (`backend`, `frontend`)
-- Employer profile (`backend`, `frontend`)
-- Work-permit confirmation checkbox at signup (`legal`)
-- Tests for accounts and profiles (`testing`)
+- #3 Base layout template with Tailwind + HTMX, mobile-first (`frontend`)
+- #9 Registration, login, logout, password reset (`backend`, `frontend`)
+- #10 Role selection and onboarding flow (`frontend`)
+- #11 Worker profile: team size, skills, languages, legal status (`backend`, `frontend`)
+- #12 Employer profile (`backend`, `frontend`)
+- #13 Work-permit confirmation checkbox at signup (`legal`)
+- #14 E2E tests (Playwright) and coverage review for M2 (`testing`)
 
 ### M3 · Jobs — due 25 Oct
-- Job model and migrations (`database`)
-- Create / edit / cancel job (employer) (`backend`, `frontend`)
-- Minimum-wage validation (13.90 €/h) (`backend`, `legal`)
-- Job list with filters: date, job type, district (HTMX) (`frontend`)
-- Job detail page (`frontend`)
-- Employer dashboard "My jobs" (`frontend`)
-- Tests for jobs (`testing`)
+- #15 Job model and migrations (`database`)
+- #16 Create / edit / cancel job (employer) (`backend`, `frontend`)
+- #17 Minimum-wage validation (13.90 €/h) (`backend`, `legal`)
+- #18 Job list with filters: date, job type, district (HTMX) (`frontend`)
+- #19 Job detail page (`frontend`)
+- #20 Employer dashboard "My jobs" (`frontend`)
+- #21 E2E tests (Playwright) and coverage review for M3 (`testing`)
 
 ### M4 · Applications — due 1 Nov
-- Apply to job (worker) with message and number of workers (`backend`, `frontend`)
-- Employer views applications per job (`frontend`)
-- Accept / reject application; job becomes "filled" when enough workers (`backend`)
-- Reveal contacts to both sides after acceptance (`backend`, `legal`)
-- Worker dashboard "My applications" (`frontend`)
-- Email notifications: new application, accepted / rejected (`backend`)
-- Tests for applications (`testing`)
+- #22 Apply to job (worker) with message and number of workers (`backend`, `frontend`)
+- #23 Employer views applications per job (`frontend`)
+- #24 Accept / reject application; job becomes "filled" when enough workers (`backend`)
+- #25 Reveal contacts to both sides after acceptance (`backend`, `legal`)
+- #26 Worker dashboard "My applications" (`frontend`)
+- #27 Email notifications: new application, accepted / rejected (`backend`)
+- #28 E2E tests (Playwright) and coverage review for M4 (`testing`)
 
 ### M5 · Multilingual & AI Translation — due 8 Nov
-- Django i18n setup + language switcher (DE, EN, RU, UK, PL, RO, TR) (`i18n`)
-- Translate UI strings into all languages (`i18n`)
-- Claude API translation service with DB cache (`ai`, `backend`)
-- Auto-translate job descriptions, "show original" toggle (`ai`, `frontend`)
-- Auto-translate application messages (`ai`)
-- Error handling and cost limits for the AI service + tests with mocked API (`ai`, `testing`)
+- #29 Django i18n setup + language switcher (DE, EN, RU, UK, PL, RO, TR) (`i18n`)
+- #30 Translate all existing UI strings from M2–M4 (`i18n`)
+- #31 Claude API translation service with DB cache (`ai`, `backend`)
+- #34 Error handling and cost limits for the AI service + tests with mocked API (`ai`, `testing`)
+  — done before the features that use the service (#32, #33, #36)
+- #32 Auto-translate job descriptions, "show original" toggle (`ai`, `frontend`)
+- #33 Auto-translate application messages (`ai`)
 
 ### M6 · Chat & Reviews — due 15 Nov
-- Chat per accepted application (HTMX polling) (`backend`, `frontend`)
-- Auto-translation of chat messages (`ai`)
-- Mark job as done (`backend`)
-- Reviews and ratings in both directions (`backend`, `frontend`)
-- Show rating on profiles and applications (`frontend`)
-- Tests for chat and reviews (`testing`)
+- #35 Chat per accepted application (HTMX polling) (`backend`, `frontend`)
+- #36 Auto-translation of chat messages (`ai`)
+- #37 Mark job as done (`backend`)
+- #38 Reviews and ratings in both directions (`backend`, `frontend`)
+- #39 Show rating on profiles and applications (`frontend`)
+- #40 E2E tests (Playwright) and coverage review for M6 (`testing`)
 
 ### M7 · Map, Legal & GDPR — due 22 Nov
-- Geocode job address (Nominatim) (`backend`)
-- Job map with Leaflet + "near me" filter (`frontend`)
-- Impressum, privacy policy, platform disclaimer pages (`legal`, `docs`)
-- Account deletion and personal-data export (GDPR) (`legal`, `backend`)
-- Admin panel for moderation: block user, remove job (`backend`)
+- #41 Geocode job address (Nominatim) (`backend`)
+- #42 Job map with Leaflet + "near me" filter (`frontend`)
+- #43 Impressum, privacy policy, platform disclaimer pages (`legal`, `docs`)
+- #44 Account deletion and personal-data export (GDPR) (`legal`, `backend`)
+- #45 Admin panel for moderation: block user, remove job (`backend`)
 
 ### M8 · Production & Defense — due 1 Dec
-- Production setup: paid Render plan, persistent DB, backups, optional custom domain (`devops`)
-- Demo seed data: employers, workers, jobs (`backend`)
-- Mobile and accessibility check, fix issues (`frontend`)
-- End-to-end manual test scenario, fix bugs (`testing`)
-- Final docs: architecture diagram, AI_LOG summary (`docs`)
-- Defense presentation and demo script (`docs`)
+- #46 Production setup: paid Render plan, persistent DB, backups, optional custom domain (`devops`)
+- #47 Demo seed data: employers, workers, jobs (`backend`)
+- #48 Mobile and accessibility check, fix issues (`frontend`)
+- #49 End-to-end manual test scenario, fix bugs (`testing`)
+- #50 Final docs: architecture diagram, AI_LOG summary (`docs`)
+- #51 Defense presentation and demo script (`docs`)
 
 ### Stretch (no due date)
-- Real crews: crew leader invites members (`stretch`)
-- Push / browser notifications for nearby jobs (`stretch`)
-- Real-time chat via WebSockets (Django Channels) (`stretch`)
-- Worker availability calendar (`stretch`)
+- #52 Real crews: crew leader invites members (`stretch`)
+- #53 Push / browser notifications for nearby jobs (`stretch`)
+- #54 Real-time chat via WebSockets (Django Channels) (`stretch`)
+- #55 Worker availability calendar (`stretch`)
 
-## Execution after approval (GitHub setup only, no application code)
+## Testing approach
 
-1. Rename branch `master` → `main`; first commit: `README.md` (idea + stack), `.gitignore` (Python),
-   `docs/PLAN.md` (this plan).
-2. `gh repo create AndrewKchn/BauHelfer --public --source . --remote origin --push`.
-3. Labels: remove unused defaults, create the 10 project labels (`gh label create`).
-4. 9 milestones with due dates (`gh api repos/AndrewKchn/BauHelfer/milestones -f title=… -f due_on=…`).
-5. 55 issues created by a script from the list above (`gh issue create --title --body --label --milestone`).
-6. Board: `gh project create --owner @me --title BauHelfer`, `gh project link` to the repo,
-   `gh project item-add` for every issue. Columns: Todo / In Progress / Done.
+Tests are part of every feature ticket, not separate tickets.
 
-The student creates the Render account during week one (M1 issue "First deploy").
+1. **Unit tests first (TDD).** Written before the code, read by the student, committed failing
+   ("Add failing tests for …").
+2. **Implementation** until the unit tests pass.
+3. **Integration tests** with the Django test client (view + form + DB) for the main flow.
+4. **E2E tests (Playwright)** once per milestone, in the milestone test tickets #14, #21, #28,
+   #40, together with a coverage review.
+
+CI (#4) runs ruff and pytest, fails below 80 % test coverage and 80 % docstring coverage, and is
+required to merge into `main`. #49 is the final manual end-to-end scenario before the defense.
+
+## Translation approach
+
+Translations are done inside each UI ticket, not in one late batch.
+
+- **From M2:** every UI string is wrapped in translation functions (`{% translate %}`,
+  `gettext_lazy`).
+- **#29 (M5)** sets up i18n and adds a CI check that fails on untranslated or fuzzy strings.
+- **#30** translates all strings written in M2–M4 into the 7 languages.
+- **From M5 on:** every UI ticket translates its own strings into all 7 languages.
+
+User content (job descriptions, application and chat messages) is translated by the Claude API
+(#31–#34, #36), not by `.po` files.
+
+## Board and workflow
+
+Board: [BauHelfer](https://github.com/users/AndrewKchn/projects/1), columns Todo / In Progress / Done.
+
+- **Sprints:** Iteration field "Sprint", one iteration per milestone with the same dates. The
+  Roadmap view uses it as the timeline. New issues get a Sprint too.
+- **Dependencies:** issues are linked with "blocked by". The filter `-is:blocked` shows what can
+  be started now.
+- **Ticket workflow** (details in `CLAUDE.md`): branch linked to the issue → In Progress →
+  failing tests, code, integration tests as separate commits → AI_LOG entry drafted with
+  `/ai-log` as the last commit → PR with `Closes #N` and an "AI usage" section → the student
+  merges. Board automation closes the issue and moves it to Done.
+- **`main` is protected** (ruleset "Protect main"): changes only through PRs, no force push, no
+  deletion, no bypass. Squash merge is disabled — PRs are merged with a merge commit, so the
+  separate commits stay in the history. Merged branches are deleted automatically.
 
 ## Verification
 
-- `gh repo view AndrewKchn/BauHelfer` — repository exists, README is shown.
 - `gh label list` — 12 labels; `gh api repos/AndrewKchn/BauHelfer/milestones --jq '.[].title'` — 9 milestones.
-- `gh issue list --limit 100 --json number --jq length` → 55; every issue has a milestone and a label.
-- `gh project item-list <number> --owner @me` — all 55 issues are on the board.
-- The student opens the repository and the board in the browser and checks how they look.
+- `gh issue list --state all --limit 100 --json number --jq length` → 58; every issue has a
+  milestone and a label.
+- `gh project item-list 1 --owner AndrewKchn` — all issues are on the board, each non-Stretch
+  issue has a Sprint.
+- `gh api repos/AndrewKchn/BauHelfer/rules/branches/main --jq '.[].type'` — `deletion`,
+  `non_fast_forward`, `pull_request` (+ the required CI check after #4).
+- The milestone lists above match the board.
