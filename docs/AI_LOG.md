@@ -190,3 +190,25 @@ I decided to close #56 now and move the two CI items ("CI check required", "fail
 can't be merged") to #4, so that two tickets don't hang in In Progress at the same time.
 
 **Learned:** what a ruleset is, and why bypass is off and 0 reviews are required.
+
+## 2026-10-02 · #59 Sync docs/PLAN.md with board changes
+
+**Task given to AI:** update `docs/PLAN.md` so that it tells the same story as the board after
+the planning changes of 2026-10-02 (list of changes in #59).
+
+**AI helped:**
+- Built the milestone lists from the real board (`gh issue list`), not from memory, and added
+  issue numbers. Issue status is not copied into the plan — it lives on the board, so the plan
+  doesn't go stale with every closed ticket.
+- Added the new sections: testing approach, translation approach, board and workflow (sprints,
+  dependencies, ticket workflow, protected `main`, merge rules).
+- Removed the one-time "Execution after approval" steps and the outdated "empty repository"
+  paragraph; updated the verification steps (58 issues, Sprint, ruleset).
+
+**AI failed:** nothing notable.
+
+**I overruled:** nothing — I accepted the recommended option for the outdated Context paragraph
+(replace it with one sentence about the current state).
+
+**Learned:** tickets change during the project, so the plan and other docs have to be synced
+with the board and its settings from time to time.
