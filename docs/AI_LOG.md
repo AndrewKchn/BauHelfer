@@ -114,3 +114,38 @@ them to the "⚙ View" button. Found because the screens didn't match; fixed wit
 
 **Learned:** why the custom User model must exist before the first migration; what TDD is
 (failing tests first); how blocked-by dependencies show the real order of work.
+
+## 2026-10-02 · #58 Development guardrails: CLAUDE.md and /ai-log skill
+
+**Task given to AI:** write `CLAUDE.md` (project instructions for Claude Code, under 60 lines)
+and an `/ai-log` project skill that drafts AI_LOG entries and the PR "AI usage" section, as
+described in #58.
+
+**AI helped:**
+- Proposed the structure of `CLAUDE.md`: commands, structure, conventions, testing levels,
+  how to work with me, ticket workflow. It moved the ticket workflow from its local memory into
+  the repo, so the process is visible to reviewers.
+- Designed the skill: it drafts from the current session, the issue and the git diff, leaves
+  `TODO` where the reason must come from me, and writes nothing without my confirmation.
+- Noticed that pytest-django is installed but not configured, so `uv run pytest` does not run
+  yet — this is needed at the start of #8, where the first tests are written.
+
+**AI failed:** it added a "Tests: what is covered, what is not" line to the PR "AI usage"
+section, which was not in the issue and is not about AI usage. Found when I read the skill and
+asked where the line came from.
+
+**I overruled:**
+- Commit order was my addition: tests, then code, then possible fixes, and the AI_LOG entry
+  always as a separate last commit. Logging the work with AI is not a feature of the app, so it
+  should be kept apart from the code.
+- AI suggested moving the tests line into a separate "Testing" section of the PR. I decided
+  that test cases don't belong in a PR and had it removed: the PR description should be about
+  the feature, tests should live separately.
+- I liked the idea of storing test cases somewhere (test names + `docs/TESTING.md`), but
+  postponed it — there are no tests yet; it comes back with #8.
+- I didn't want to re-read whole files after every AI edit. I chose: AI shows "before → after"
+  with links to the changed lines, and I check the diff in VS Code Source Control. I rejected
+  approving every single edit — too many clicks.
+
+**Learned:** what CLAUDE.md is and that Claude reads it at the start of every session; how a
+project skill in `.claude/skills/` becomes a `/command`.
