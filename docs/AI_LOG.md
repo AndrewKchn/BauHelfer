@@ -149,3 +149,44 @@ asked where the line came from.
 
 **Learned:** what CLAUDE.md is and that Claude reads it at the start of every session; how a
 project skill in `.claude/skills/` becomes a `/command`.
+
+## 2026-10-02 · Planning: Merge settings
+
+**Task given to AI:** I asked whether we should stop squashing PRs, how the merge commit should
+be named, and to delete the branches of merged PRs.
+
+**AI helped:**
+- Explained the three merge methods: squash glues all commits of a PR into one; a merge commit
+  keeps them and also shows where each ticket starts and ends; rebase keeps them in a straight
+  line without showing ticket boundaries.
+- Changed the repo settings: squash disabled, branches deleted after merge, merge commit =
+  PR title + PR description (so `git log --first-parent` reads as a list of features, and the
+  "AI usage" section stays in git history).
+- Deleted the branches of merged PRs #57, #60, #61, locally and on GitHub.
+
+**AI failed:** nothing notable — this was still setting up the process.
+
+**I overruled:** not squashing was my idea: I want the AI_LOG commits to stay separate and
+remain in the history.
+
+**Learned:** squash vs merge commit vs rebase, and what each one leaves in `main`.
+
+## 2026-10-02 · #56 Protect main branch
+
+**Task given to AI:** protect `main` so that changes get in only through pull requests.
+
+**AI helped:**
+- Noticed that #56 was blocked by #4 (CI does not exist yet) and proposed to protect `main` now
+  without the CI check.
+- Created the ruleset "Protect main": PR required, no force push, no deletion, 0 required
+  reviews (I can't approve my own PR), no bypass for admin, no "linear history" (it would
+  forbid merge commits).
+- Added the merge rule to the ticket workflow in `CLAUDE.md`.
+
+**AI failed:** nothing notable.
+
+**I overruled:** AI planned to keep #56 open until #4 and write "Part of #56" in the PR.
+I decided to close #56 now and move the two CI items ("CI check required", "failing test
+can't be merged") to #4, so that two tickets don't hang in In Progress at the same time.
+
+**Learned:** what a ruleset is, and why bypass is off and 0 reviews are required.
