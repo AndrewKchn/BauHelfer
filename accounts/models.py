@@ -1,0 +1,85 @@
+from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
+
+class UserManager(BaseUserManager):
+    """Creates users with email as the login instead of a username."""
+
+    use_in_migrations = True
+
+    def _create_user(self, email, password, **extra_fields):
+        if not email:
+            raise ValueError("The email must be set.")
+        user = self.model(email=self.normalize_email(email), **extra_fields)
+        user.set_password(password)  # stores a hash, never the plain password
+        user.save(using=self._db)
+        return user
+
+    def create_user(self, email, password=None, **extra_fields):
+        extra_fields.setdefault("is_staff", False)
+        extra_fields.setdefault("is_superuser", False)
+        return self._create_user(email, password, **extra_fields)
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        if extra_fields["is_staff"] is not True:
+            raise ValueError("Superuser must have is_staff=True.")
+        if extra_fields["is_superuser"] is not True:
+            raise ValueError("Superuser must have is_superuser=True.")
+        return self._create_user(email, password, **extra_fields)
+
+    @classmethod
+    def normalize_email(cls, email):
+        # The whole address, not only the domain: Anna@ and anna@ are one person.
+        return (email or "").strip().lower()
+
+    def get_by_natural_key(self, email):
+        # Used by authenticate(): log in with any capitalisation of the email.
+        return self.get(email__iexact=email)
+
+
+class User(AbstractUser):
+    """A BauHelfer account: an employer or a worker (or crew), logging in with email."""
+
+    class Role(models.TextChoices):
+        EMPLOYER = "employer", _("Employer")
+        WORKER = "worker", _("Worker")
+
+    class Language(models.TextChoices):
+        GERMAN = "de", "Deutsch"
+        ENGLISH = "en", "English"
+        RUSSIAN = "ru", "Русский"
+        UKRAINIAN = "uk", "Українська"
+        POLISH = "pl", "Polski"
+        ROMANIAN = "ro", "Română"
+        TURKISH = "tr", "Türkçe"
+
+    # Replace AbstractUser's username and first/last name with email and one name field.
+    username = None
+    first_name = None
+    last_name = None
+
+    email = models.EmailField(_("email"), unique=True)
+    name = models.CharField(_("name"), max_length=150, blank=True)
+    phone = models.CharField(_("phone"), max_length=30, blank=True)
+    # Empty until the user picks a role in onboarding (#10); admins have none.
+    role = models.CharField(_("role"), max_length=10, choices=Role.choices, blank=True)
+    preferred_language = models.CharField(
+        _("preferred language"),
+        max_length=2,
+        choices=Language.choices,
+        default=Language.ENGLISH,
+    )
+    work_permit_confirmed = models.BooleanField(
+        _("allowed to work in Germany"), default=False
+    )
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ()  # asked by createsuperuser besides email and password
+
+    objects = UserManager()
+
+    def __str__(self):
+        return self.email

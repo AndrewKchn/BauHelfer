@@ -266,3 +266,48 @@ For photos I took AI's recommendations, for my own reasons:
 
 **Learned:** why the app must stay stateless to run on several servers, and why uploaded
 files can't live on the Render disk.
+
+## 2026-10-03 · #8 Custom User model with role (employer / worker)
+
+**Task given to AI:** implement the custom User model before the first migration: email login,
+name, phone, `role`, `preferred_language`, `work_permit_confirmed`, visible in the admin. Tests
+first (TDD). I asked it to explain each part, because most of the work is done by Django itself.
+
+**AI helped:**
+- Offered four design choices with a recommendation: `AbstractUser` vs `AbstractBaseUser`, one
+  `name` field vs first/last name, role required vs empty until onboarding, default language.
+- Wrote 15 failing unit tests, then the model, manager, admin and admin forms; then 7
+  integration tests for the admin with the Django test client. Checked that the tests really
+  catch bugs by breaking the email lowercasing on purpose (4 tests failed).
+- Added a case-insensitive email (stored lowercase, login in any case), so one person
+  cannot get two accounts as `Anna@` and `anna@`.
+- Explained Django on a live demo with a temporary database: migrations and their SQL, the ORM
+  generating SQL, the request path (middleware → URL → view → template), CSRF and sessions.
+  Then explained the inheritance chain of `AbstractUser`, managers, password hashing, how
+  `authenticate()` reaches our code, and the in-memory test database with rollback per test.
+
+**AI failed:**
+- The model had a redundant `clean()`: Django's `AbstractUser.clean()` already normalizes the
+  email through our manager. Found while AI explained the code against Django's source; removed.
+- `ruff format` reformatted files outside the ticket (`config/`); AI noticed it and reverted
+  them. `ruff check .` already fails on `main` because the project has no ruff config — left
+  for #4 (CI).
+- When I asked to update the branch with `main`, AI rebased without checking the current
+  branch. Another session had switched to `sync-plan-job-photos`, so the rebase ran there
+  first. Nothing was lost; AI found it from the output and rebased the right branch.
+
+**I overruled:**
+- Default language `en` instead of AI's `de`: the school course is in English, so first of all
+  the project has to fit the learning format, not a real-world app.
+- I asked for a 3-layer architecture (views → `services.py` → models). AI showed how to do it
+  in Django, then I cancelled it: for learning it is better to keep Django's original structure
+  first and understand how it works. I already don't like that the tests live inside
+  `accounts/`; I will come back to this when the app grows.
+
+**Learned:**
+- How testing works in Django: a temporary database (in memory for SQLite) with every test
+  rolled back, and the test client that calls Django directly without a real server.
+- How to run the app locally, and how and where the database is created (`migrate` →
+  `db.sqlite3`). I want to come back to this later.
+- The Django admin is the base for moderation (#45): blocking a user is already the "Active"
+  checkbox. I clicked through the admin by hand and looked at the tables in a SQLite viewer.
