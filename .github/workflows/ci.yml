@@ -1,0 +1,56 @@
+# Runs linting and tests on every push and pull request.
+# If any step fails, the check turns red and the PR cannot be merged.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    # A throwaway PostgreSQL for this run, same version as docker-compose.yml.
+    services:
+      db:
+        image: postgres:17
+        env:
+          POSTGRES_DB: bauhelfer
+          POSTGRES_USER: bauhelfer
+          POSTGRES_PASSWORD: bauhelfer
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U bauhelfer -d bauhelfer"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    # Settings normally read from .env, which is not in the repo.
+    # These values exist only inside this CI run.
+    env:
+      SECRET_KEY: ci-only-not-secret
+      DATABASE_URL: postgres://bauhelfer:bauhelfer@localhost:5432/bauhelfer
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: uv sync --locked  # fails if uv.lock is out of date with pyproject.toml
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Check formatting
+        run: uv run ruff format --check .
+
+      - name: Tests with coverage (fails below 80%)
+        run: uv run pytest --cov
+
+      - name: Docstring coverage (fails below 80%)
+        run: uv run interrogate .
