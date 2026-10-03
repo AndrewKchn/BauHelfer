@@ -356,3 +356,55 @@ installed on my machine, so I installed it myself while AI wrote the tests and c
 **Learned:**
 - What a container, an image and a volume are, and why the data survives a restart.
 - Why the project is a modular monolith and not microservices.
+
+## 2026-10-03 · #4 GitHub Actions CI: ruff, pytest, coverage
+
+**Task given to AI:** Set up CI that runs ruff and pytest on every PR, measures test and
+docstring coverage (fail below 80%), adds pre-commit hooks, a PR template and a CI badge,
+makes the check required for merging into `main`, and proves that a failing test blocks
+the merge.
+
+**AI helped:**
+- Measured the starting point before writing any config: test coverage 99%, docstring
+  coverage 35.5% — so the docstring threshold would have failed CI on the first run.
+- Wrote `.github/workflows/ci.yml`: a `postgres:17` service container with a healthcheck,
+  `uv sync --locked`, `ruff check`, `ruff format --check`, `pytest --cov`, `interrogate`.
+- Coverage and interrogate settings in `pyproject.toml`: migrations, tests and server entry
+  points not counted; `__init__.py`, `__str__` and nested `Meta`/`TextChoices` skipped by
+  interrogate. Thresholds live in `pyproject.toml`, so a local run checks the same as CI.
+- Fixed the ruff errors left from #8: migrations excluded from ruff, two unused `# noqa`
+  removed, Django-generated files formatted (quotes only). Added docstrings in `accounts/`
+  (35.5% → 100%), turning existing comments into docstrings where they already explained
+  the method.
+- Explained that a `pull_request` workflow runs from the PR itself, so CI works before the
+  merge; that pushing workflow files needs the `workflow` token scope (I already had it);
+  how `git commit --fixup` + `git rebase --autosquash` fold a fix into an earlier commit.
+- Verified the merge block with a throwaway PR #69 (`assert False`): check `test` red,
+  merge state `BLOCKED`; closed without merging. Screenshot in my comment on #68:
+  https://github.com/AndrewKchn/BauHelfer/pull/68#issuecomment-5973204815
+
+**AI failed:**
+- Used `astral-sh/setup-uv@v10` — that tag does not exist (setup-uv only has exact tags
+  like `v10.2.0`); CI would have failed with "Unable to resolve action". I expected GitHub
+  to reject the YAML file and asked; while checking, AI found the wrong tag. Fixed before
+  the first push.
+- Wrote a PR template whose "AI usage" headings did not match the `/ai-log` format, and did
+  not notice that `gh pr create --body` ignores the template anyway.
+- Twice answered me in English although we talk in Russian.
+
+**I overruled:**
+- Dropped the PR template from the ticket (struck through in #4): it would only duplicate
+  what we already have — PRs are created with `gh pr create --body`, which ignores the
+  template, and `/ai-log` already writes the "AI usage" section.
+- AI recommended a separate fix commit for the `setup-uv` tag (visible in history); I chose
+  to fold the fix into the CI commit: I want a clean history.
+- AI recommended a local pre-commit hook (`uv run ruff`, one ruff version from `uv.lock`);
+  I kept the standard `ruff-pre-commit` hook with its own pinned version: the local hook is
+  not the setup the ruff documentation describes.
+- Reviewed every commit separately before it was made, instead of one batch of 4 commits.
+- AI was not allowed by its permission settings to change the "Protect main" ruleset; I
+  added the required check `test` myself in GitHub settings.
+
+**Learned:**
+- Nothing new in the CI idea itself: I set up similar CI on a previous project and was
+  already familiar with it. I think checking every change before the merge is the right way.
