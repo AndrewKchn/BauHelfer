@@ -8,6 +8,7 @@ code, the student reviews it, decides and defends it. Plan, data model and miles
 
 ```bash
 uv sync                                  # install dependencies
+docker compose up -d                     # start PostgreSQL (needed for runserver and tests)
 uv run python manage.py runserver        # dev server (settings: config.settings.local)
 uv run python manage.py makemigrations   # after model changes
 uv run pytest                            # tests
