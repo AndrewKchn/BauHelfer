@@ -1,0 +1,23 @@
+# Local PostgreSQL for development and tests. Start: docker compose up -d
+# The credentials below are for this local container only, never for production.
+name: bauhelfer
+
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: bauhelfer
+      POSTGRES_USER: bauhelfer
+      POSTGRES_PASSWORD: bauhelfer
+    ports:
+      - "127.0.0.1:5432:5432"  # reachable from this machine only
+    volumes:
+      - pgdata:/var/lib/postgresql/data  # data survives container restarts
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bauhelfer -d bauhelfer"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
