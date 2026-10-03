@@ -23,6 +23,7 @@ written issue by issue.
 | Database | **PostgreSQL** (Docker locally) | Django standard, same engine in production |
 | Text translation | **Claude API** (`claude-haiku-4-5`) | Handles construction slang and context; translations are cached in the DB |
 | Map | **Leaflet + OpenStreetMap**, Nominatim geocoding | Free, no API keys |
+| Job photos | **Cloudflare R2** (EU jurisdiction) via `django-storages` + `boto3`; **Pillow** for validation, resizing and EXIF stripping | The Render disk is wiped on every deploy. R2 is S3-compatible, free up to 10 GB with free egress, data stays in the EU, and the app stays stateless (can run several instances) |
 | Chat | HTMX polling every 3–5 s | Simpler than WebSockets, enough for the MVP |
 | Tests / quality | **pytest-django**, **ruff** | |
 | CI | **GitHub Actions**: ruff, pytest, coverage on every PR; required to merge into `main` | |
@@ -40,6 +41,7 @@ written issue by issue.
 - **Job**: employer, job type, description, `original_language`, address / district, coordinates,
   date and hours, number of workers, hourly rate in € (≥ `MINIMUM_WAGE = 13.90`),
   status open | filled | done | cancelled.
+- **JobPhoto**: job, image, uploaded_at; up to 5 per job, resized to max 1600 px, EXIF removed.
 - **Application**: job, worker, message, `workers_offered`, status pending | accepted | rejected.
 - **Translation**: translation cache (source text hash + language → translated text).
 - **Message**: chat within an accepted application.
@@ -68,7 +70,7 @@ BauHelfer/
 `backend`, `frontend`, `database`, `i18n`, `ai`, `legal`, `devops`, `testing`, `docs`, `stretch`
 (+ default `bug` and `enhancement`; other default labels are removed).
 
-## Milestones and issues (58)
+## Milestones and issues (59)
 
 Each issue has a **Description** and a **Done when…** checklist. Numbers are GitHub issue numbers;
 the status of each issue lives on the board, not here.
@@ -99,6 +101,8 @@ the status of each issue lives on the board, not here.
 ### M3 · Jobs — due 25 Oct
 - #15 Job model and migrations (`database`)
 - #16 Create / edit / cancel job (employer) (`backend`, `frontend`)
+- #64 Job photos: up to 5 per job, resize, strip EXIF, Cloudflare R2 storage (`backend`,
+  `frontend`, `devops`, `legal`) — after #16 and #5
 - #17 Minimum-wage validation (13.90 €/h) (`backend`, `legal`)
 - #18 Job list with filters: date, job type, district (HTMX) (`frontend`)
 - #19 Job detail page (`frontend`)
@@ -198,7 +202,7 @@ Board: [BauHelfer](https://github.com/users/AndrewKchn/projects/1), columns Todo
 ## Verification
 
 - `gh label list` — 12 labels; `gh api repos/AndrewKchn/BauHelfer/milestones --jq '.[].title'` — 9 milestones.
-- `gh issue list --state all --limit 100 --json number --jq length` → 58; every issue has a
+- `gh issue list --state all --limit 100 --json number --jq length` → 59; every issue has a
   milestone and a label.
 - `gh project item-list 1 --owner AndrewKchn` — all issues are on the board, each non-Stretch
   issue has a Sprint.
