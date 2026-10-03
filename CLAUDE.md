@@ -53,9 +53,12 @@ Copy `.env.example` to `.env` before the first run.
 2. `gh issue develop N --checkout`; move the card on the "BauHelfer" board to In Progress.
 3. Tests → code → tests, as above. Separate commits: failing tests, then implementation, then
    any fixes or integration tests.
-4. Run `/ai-log`: drafts the AI_LOG entry and the PR "AI usage" section; the student edits.
-5. After "yes": the AI_LOG entry goes in its own last commit ("Add AI_LOG entry for #N"),
+4. Go through the ticket's "Done when…" list: show each item with its evidence (test, commit,
+   CI run). After "yes", tick them in the issue (`- [ ]` → `- [x]` via `gh issue edit`);
+   closing the issue does not tick them.
+5. Run `/ai-log`: drafts the AI_LOG entry and the PR "AI usage" section; the student edits.
+6. After "yes": the AI_LOG entry goes in its own last commit ("Add AI_LOG entry for #N"),
    then `gh pr create` with `Closes #N` in the body.
-6. The student merges on GitHub with "Create a merge commit" (squash is disabled to keep the
+7. The student merges on GitHub with "Create a merge commit" (squash is disabled to keep the
    separate commits); the branch is deleted and the card moves to Done automatically.
    `main` is protected: no direct pushes, every change goes through a PR.
