@@ -212,3 +212,57 @@ the planning changes of 2026-10-02 (list of changes in #59).
 
 **Learned:** tickets change during the project, so the plan and other docs have to be synced
 with the board and its settings from time to time.
+
+## 2026-10-03 · Planning: Architecture review
+
+**Task given to AI:** explain how Django works and how BauHelfer is built: how it differs from
+a separate backend + frontend, and why there is no classic 3-layer structure. Then: explain the
+design of the finished system and its limits, how many users it can handle and how to scale it.
+
+**AI helped:**
+- Explained MTV, projects vs. apps, the three settings files and migrations on the example of
+  this repo; server-side rendering with HTMX vs. an SPA + API; where Django's layers are
+  (views/templates, models/forms, ORM) and when a `services.py` makes sense.
+- Drew the final system (Django monolith on Render + PostgreSQL + Claude API, Nominatim, email)
+  and listed its technical, product and legal limits.
+- Estimated capacity on the smallest Render plan (hundreds of active users, ~50–100 open chats)
+  and found the first bottleneck: synchronous Claude API calls block gunicorn workers. Listed
+  scaling steps from cheap to expensive (indexes and polling fixes → task queue → bigger
+  instance → several instances → Channels).
+
+**AI failed:** nothing notable.
+
+**I overruled:** nothing. Two decisions are still open: whether to show the exact address
+before an application is accepted, and whether to add a task queue for translations and email.
+
+**Learned:** the app keeps no state on the server (sessions in the DB, no local files), so it
+can run on several servers; the first thing to fix under load is the synchronous AI call, not
+the database.
+
+## 2026-10-03 · Planning: Job photos (#64)
+
+**Task given to AI:** I wanted employers to be able to add photos to a job — how much harder
+does that make the project? Then: explain each choice in detail (impact on the system,
+complexity, time, benefit).
+
+**AI helped:**
+- Compared 4 decisions (when, how many, storage, dependencies) by impact on the system,
+  complexity, time and benefit. Pointed out that the Render disk is wiped on every deploy,
+  that phone photos contain GPS in EXIF (GDPR), and that Django does not delete files with the record.
+- Created #64 (labels, M3, Sprint, blocked by #16 and #5, blocks #21), added photo items to #43,
+  #44, #45, and synced `docs/PLAN.md`.
+
+**AI failed:** to avoid touching my uncommitted #8 work, it created the PLAN.md branch in a
+git worktree in its temporary folder. I couldn't see the branch in VS Code.
+
+**I overruled:** I rejected the hidden worktree because it is not proper git flow. I made
+a commit on #8 first, and then the branch was created normally from `main` in the project folder.
+For photos I took AI's recommendations, for my own reasons:
+- MVP in M3, up to 5 photos — photos make the scope of work easy to understand, so the
+  employer doesn't need a long description.
+- Cloudflare R2 — easier to set up than AWS, and the free tier has no time limit.
+- New dependencies (Pillow, django-storages, boto3) — needed for R2 and for checking and
+  resizing images.
+
+**Learned:** why the app must stay stateless to run on several servers, and why uploaded
+files can't live on the Render disk.
