@@ -311,3 +311,48 @@ first (TDD). I asked it to explain each part, because most of the work is done b
   `db.sqlite3`). I want to come back to this later.
 - The Django admin is the base for moderation (#45): blocking a user is already the "Active"
   checkbox. I clicked through the admin by hand and looked at the tables in a SQLite viewer.
+
+## 2026-10-03 · #2 PostgreSQL via Docker Compose + env config
+
+**Task given to AI:** take the next ticket after #8 and run PostgreSQL locally with Docker
+Compose, so development and tests use the same database as production. Docker was not
+installed on my machine, so I installed it myself while AI wrote the tests and config.
+
+**AI helped:**
+- Found that the env config was already done in #1 (`django-environ` reads `DATABASE_URL`,
+  `psycopg` installed), so no Django code had to change.
+- Wrote 2 failing tests first: the database is PostgreSQL, and its major version is 17 (the
+  same as on Render). Then `docker-compose.yml` (`postgres:17`, port open to localhost only,
+  a volume for the data, a healthcheck), a new `DATABASE_URL` in `.env.example` and the
+  `docker compose up -d` command in `CLAUDE.md`. First `migrate` on PostgreSQL ran with the
+  custom User model from #8; 24 tests pass.
+- Gave install steps for Docker on Ubuntu (Engine and Desktop) and explained Engine vs
+  Desktop, and why Docker goes into the system and not into the project's `.venv`.
+- Explained the project structure file by file and the path of one request through Django;
+  explained that Django apps form a modular monolith, not microservices.
+- Explained how tests will run in GitHub Actions (#4): a `postgres:17` service container
+  per run instead of `docker-compose.yml`.
+- Showed how to check what runs in Docker (`docker ps`, `docker compose ps`, `docker stats`,
+  volumes, images, `psql` inside the container).
+
+**AI failed:**
+- Put the database test into `config/tests/`. I didn't like test files inside the settings
+  folder; moved to a root `tests/` folder before the first commit.
+- `ruff check .` still fails on files from #8 and `config/settings/` (no ruff config in the
+  project) — left for #4, as before.
+
+**I overruled:**
+- AI recommended Docker Engine from Docker's repository; I first chose Docker Desktop, then
+  installed Engine after all and use the Docker extension in VS Code instead of the Desktop
+  app. Engine runs directly in the system, not in a separate virtual machine, and its
+  licence is free.
+- AI first suggested moving all tests into one root `tests/` folder. I want tests per app;
+  only tests that belong to no single app (database check now, E2E later) go to the root
+  `tests/`. This is provisional — I will come back to it before the first E2E ticket (#14).
+- AI recommended `restart: unless-stopped` so the database starts after every reboot; I chose
+  to start it by hand with `docker compose up -d`: I don't want it running in the background,
+  and I want to see explicitly what is running.
+
+**Learned:**
+- What a container, an image and a volume are, and why the data survives a restart.
+- Why the project is a modular monolith and not microservices.
