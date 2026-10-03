@@ -1,5 +1,7 @@
 # BauHelfer
 
+[![CI](https://github.com/AndrewKchn/BauHelfer/actions/workflows/ci.yml/badge.svg)](https://github.com/AndrewKchn/BauHelfer/actions/workflows/ci.yml)
+
 A web app that connects construction specialists in Munich with general labourers and small crews
 for short-term work: clearing debris, demolition, carrying materials.
 
