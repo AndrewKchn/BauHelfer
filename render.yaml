@@ -1,0 +1,33 @@
+# Render Blueprint: describes the live server. Render reads this file from main.
+# Docs: https://render.com/docs/blueprint-spec
+# The database is not here: it runs on Supabase (Frankfurt), see DATABASE_URL below.
+
+services:
+  - type: web
+    name: bauhelfer  # address: bauhelfer.onrender.com (if the name is free)
+    runtime: python  # Python version from .python-version; uv comes with uv.lock
+    region: frankfurt  # data stays in the EU
+    plan: free
+    branch: main
+    autoDeployTrigger: checksPass  # deploy only after CI (ruff + pytest) is green
+
+    # Runs once per deploy: install packages (no dev tools), collect CSS/JS into staticfiles/.
+    buildCommand: >-
+      uv sync --locked --no-dev &&
+      uv run --no-sync python manage.py collectstatic --noinput
+
+    # Runs on every start. migrate first: if it fails, the server does not start and Render
+    # keeps the previous version online. (Pre-deploy commands are paid-only.)
+    startCommand: >-
+      uv run --no-sync python manage.py migrate --noinput &&
+      uv run --no-sync gunicorn config.wsgi
+
+    healthCheckPath: /  # Render switches to the new version only once this page answers
+
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      - key: SECRET_KEY
+        generateValue: true  # Render creates a random key once and keeps it
+      - key: DATABASE_URL
+        sync: false  # secret: Render asks for it when the Blueprint is created
