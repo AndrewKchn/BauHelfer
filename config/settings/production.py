@@ -1,6 +1,6 @@
 """Settings for the live server (Render). DEBUG is always off here."""
 
-from .base import *  # noqa: F403
+from .base import *
 
 DEBUG = False
 

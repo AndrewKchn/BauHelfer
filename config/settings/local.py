@@ -1,6 +1,6 @@
 """Settings for development on your own machine."""
 
-from .base import *  # noqa: F403
+from .base import *
 from .base import env
 
 DEBUG = env.bool("DEBUG", default=True)
