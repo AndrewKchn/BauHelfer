@@ -1,3 +1,5 @@
+"""User accounts: one User model for employers and workers, with email login."""
+
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -9,6 +11,7 @@ class UserManager(BaseUserManager):
     use_in_migrations = True
 
     def _create_user(self, email, password, **extra_fields):
+        """Save a user with a normalized email and a hashed password."""
         if not email:
             raise ValueError("The email must be set.")
         user = self.model(email=self.normalize_email(email), **extra_fields)
@@ -17,11 +20,13 @@ class UserManager(BaseUserManager):
         return user
 
     def create_user(self, email, password=None, **extra_fields):
+        """Create a normal user (employer or worker), without admin rights."""
         extra_fields.setdefault("is_staff", False)
         extra_fields.setdefault("is_superuser", False)
         return self._create_user(email, password, **extra_fields)
 
     def create_superuser(self, email, password=None, **extra_fields):
+        """Create an admin who can log in to /admin/ and has all permissions."""
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         if extra_fields["is_staff"] is not True:
@@ -32,11 +37,11 @@ class UserManager(BaseUserManager):
 
     @classmethod
     def normalize_email(cls, email):
-        # The whole address, not only the domain: Anna@ and anna@ are one person.
+        """Lowercase the whole address, not only the domain: Anna@ and anna@ are one person."""
         return (email or "").strip().lower()
 
     def get_by_natural_key(self, email):
-        # Used by authenticate(): log in with any capitalisation of the email.
+        """Find the user for authenticate(): log in with any capitalisation of the email."""
         return self.get(email__iexact=email)
 
 
