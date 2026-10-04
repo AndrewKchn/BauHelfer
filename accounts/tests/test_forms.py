@@ -1,9 +1,9 @@
-"""Unit tests for the registration form (#9)."""
+"""Unit tests for the registration and login forms (#9)."""
 
 import pytest
 from django.contrib.auth import get_user_model
 
-from accounts.forms import SignupForm
+from accounts.forms import LoginForm, SignupForm
 
 pytestmark = pytest.mark.django_db
 
@@ -89,3 +89,13 @@ def test_signup_with_weak_password_is_rejected():
 
     assert not form.is_valid()
     assert "password2" in form.errors
+
+
+def test_login_error_does_not_say_the_email_is_case_sensitive():
+    # Django's default text says "both fields may be case-sensitive"; our email is not.
+    User.objects.create_user(email="anna@example.com", password=GOOD_PASSWORD)
+    form = LoginForm(data={"username": "anna@example.com", "password": "wrong"})
+
+    assert not form.is_valid()
+    error = form.non_field_errors()[0]
+    assert error == "Wrong email or password."

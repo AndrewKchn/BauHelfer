@@ -117,7 +117,8 @@ def test_login_with_wrong_password_shows_an_error(client, user):
 
     assert response.status_code == 200
     assert not is_logged_in(client)
-    assertContains(response, "Please enter a correct email and password.")
+    assertContains(response, "Wrong email or password.")
+    assert "Note that both fields may be case-sensitive" not in response.text
     assertContains(response, 'role="alert"')
 
 

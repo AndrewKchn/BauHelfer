@@ -1,10 +1,12 @@
-"""Forms for signing up and for the user admin pages."""
+"""Forms for signing up, logging in and for the user admin pages."""
 
 from django.contrib.auth.forms import (
     AdminUserCreationForm,
+    AuthenticationForm,
     UserChangeForm,
     UserCreationForm,
 )
+from django.utils.translation import gettext_lazy as _
 
 from .models import User
 
@@ -36,3 +38,19 @@ class SignupForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = User
         fields = ("email",)
+
+
+class LoginForm(AuthenticationForm):
+    """Django's login form with an error text that fits email login.
+
+    The default text says "both fields may be case-sensitive", but our email is not:
+    UserManager.get_by_natural_key finds the user in any capitalisation.
+    """
+
+    def __init__(self, *args, **kwargs):
+        """Replace only the "wrong email or password" text, keep Django's other errors."""
+        super().__init__(*args, **kwargs)
+        self.error_messages = {
+            **self.error_messages,
+            "invalid_login": _("Wrong email or password."),
+        }
