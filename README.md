@@ -66,6 +66,10 @@ for you) and [Docker](https://docs.docker.com/get-docker/).
    uv run python manage.py migrate
    uv run python manage.py createsuperuser
    ```
+   `createsuperuser` asks for an **email** (you log in with it, there is no username) and a
+   **password** twice; the password is not shown while you type. For a simple password Django
+   asks `Bypass password validation and create user anyway? [y/N]` — answer `y` for local
+   development.
 6. Start the development server and open http://127.0.0.1:8000 (admin: http://127.0.0.1:8000/admin/):
    ```bash
    uv run python manage.py runserver
