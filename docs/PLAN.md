@@ -19,7 +19,7 @@ written issue by issue.
 | Part | Choice | Why |
 |---|---|---|
 | Backend | **Python 3.12 + Django 5** | Built-in auth, form validation, ORM, migrations, admin and i18n — everything BauHelfer needs. Fastest path to a working result |
-| Frontend | **Django templates + HTMX + Tailwind CSS** | The whole project stays in Python with minimal JavaScript. HTMX adds interactivity (filters, applications, chat). Tailwind gives a mobile-first layout |
+| Frontend | **Django templates + HTMX 2 + Tailwind CSS 4 + daisyUI 5** | The whole project stays in Python with minimal JavaScript. HTMX adds interactivity (filters, applications, chat). Tailwind gives a mobile-first layout. Decided in #3: **daisyUI** on top of Tailwind (short classes like `btn`, no own JS, so no clash with HTMX; Flowbite and plain Tailwind rejected). Tailwind is **built** by the standalone CLI via `pytailwindcss` (no Node.js), not loaded from a CDN: smaller CSS, no flash of unstyled page, and no visitor IPs sent to a CDN (GDPR). **HTMX 2.0.10**, not the new 4.0 (released Aug 2026): far more docs and examples. HTMX and daisyUI are downloaded files in the repo, served by WhiteNoise |
 | Database | **PostgreSQL**: Docker locally, **Supabase** (Frankfurt, free plan) in production | Django standard, same engine everywhere. Supabase instead of a Render database: Render's free database expires after 30 days, Supabase's does not (it pauses after 7 days without activity). Only plain PostgreSQL is used, via the Session pooler; Data API off, RLS on |
 | Text translation | **Claude API** (`claude-haiku-4-5`) | Handles construction slang and context; translations are cached in the DB |
 | Map | **Leaflet + OpenStreetMap**, Nominatim geocoding | Free, no API keys |

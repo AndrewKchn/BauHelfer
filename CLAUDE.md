@@ -10,6 +10,7 @@ code, the student reviews it, decides and defends it. Plan, data model and miles
 uv sync                                  # install dependencies
 uv run pre-commit install                # once per clone: ruff runs before every commit
 docker compose up -d                     # start PostgreSQL (needed for runserver and tests)
+uv run tailwindcss -i tailwind/input.css -o static/css/app.css --watch   # rebuild CSS on change
 uv run python manage.py runserver        # dev server (settings: config.settings.local)
 uv run python manage.py makemigrations   # after model changes
 uv run pytest                            # tests
@@ -21,7 +22,9 @@ Copy `.env.example` to `.env` before the first run.
 ## Structure
 
 - `config/settings/` — `base.py` (shared), `local.py` (dev), `production.py` (Render)
-- `templates/` — Django templates (HTMX + Tailwind)
+- `templates/` — Django templates; every page extends `base.html` (a test checks it)
+- `tailwind/` — `input.css` + `daisyui.mjs`, built into `static/css/app.css` (not in git)
+- `static/` — `js/htmx.min.js` (downloaded, served by WhiteNoise, no CDN)
 - `docs/PLAN.md` — plan; `docs/AI_LOG.md` — log of AI-assisted work
 - Django apps (`accounts/`, `jobs/`, `chat/`, …) are added ticket by ticket, see the plan
 

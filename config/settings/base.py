@@ -106,6 +106,7 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"  # collectstatic copies all static files here
+STATICFILES_DIRS = [BASE_DIR / "static"]  # project-wide CSS/JS (app.css, htmx.min.js)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

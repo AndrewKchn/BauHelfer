@@ -1,0 +1,18 @@
+/*
+ * Source for static/css/app.css. Build it with:
+ *   uv run tailwindcss -i tailwind/input.css -o static/css/app.css --minify
+ * Tailwind reads the files listed in @source and puts only the classes it finds into app.css.
+ * source(none): no automatic scan of the whole project (it would also read daisyui.mjs,
+ * which names every daisyUI class, and app.css would grow to ~370 KB).
+ */
+@import "tailwindcss" source(none);
+@source "../templates";  /* project templates */
+@source "../*/templates";  /* app templates, e.g. accounts/templates/ */
+
+/* daisyUI 5.7.47 (downloaded file): ready classes like btn, navbar, alert. Light theme only. */
+@plugin "./daisyui.mjs" {
+  themes: light --default;
+}
+
+/* Built in templates as alert-{{ message.level_tag }}, so the scanner cannot see them. */
+@source inline("alert-info alert-success alert-warning alert-error");

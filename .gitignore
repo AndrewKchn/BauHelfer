@@ -14,6 +14,8 @@ htmlcov/
 db.sqlite3
 media/
 staticfiles/
+# built from tailwind/input.css, see CLAUDE.md
+static/css/app.css
 
 # Environment
 .env
