@@ -11,9 +11,11 @@ services:
     branch: main
     autoDeployTrigger: checksPass  # deploy only after CI (ruff + pytest) is green
 
-    # Runs once per deploy: install packages (no dev tools), collect CSS/JS into staticfiles/.
+    # Runs once per deploy: install packages (no dev tools), build app.css from templates,
+    # collect CSS/JS into staticfiles/.
     buildCommand: >-
       uv sync --locked --no-dev &&
+      uv run --no-sync tailwindcss -i tailwind/input.css -o static/css/app.css --minify &&
       uv run --no-sync python manage.py collectstatic --noinput
 
     # Runs on every start. migrate first: if it fails, the server does not start and Render
@@ -27,6 +29,8 @@ services:
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: config.settings.production
+      - key: TAILWINDCSS_VERSION
+        value: v4.3.3  # Tailwind CLI version pytailwindcss downloads; same as ci.yml
       - key: SECRET_KEY
         generateValue: true  # Render creates a random key once and keeps it
       - key: DATABASE_URL

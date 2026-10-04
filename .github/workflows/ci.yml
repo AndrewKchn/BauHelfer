@@ -32,6 +32,7 @@ jobs:
     env:
       SECRET_KEY: ci-only-not-secret
       DATABASE_URL: postgres://bauhelfer:bauhelfer@localhost:5432/bauhelfer
+      TAILWINDCSS_VERSION: v4.3.3  # same as render.yaml
 
     steps:
       - uses: actions/checkout@v7
@@ -48,6 +49,9 @@ jobs:
 
       - name: Check formatting
         run: uv run ruff format --check .
+
+      - name: Build CSS  # app.css is not in git; the layout tests need it
+        run: uv run tailwindcss -i tailwind/input.css -o static/css/app.css --minify
 
       - name: Tests with coverage (fails below 80%)
         run: uv run pytest --cov

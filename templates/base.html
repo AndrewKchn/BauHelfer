@@ -1,0 +1,43 @@
+{% load i18n static %}<!doctype html>
+{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}BauHelfer{% endblock %}</title>
+  {# Both files come from our own server, not a CDN: no visitor IPs go to third parties (GDPR). #}
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script src="{% static 'js/htmx.min.js' %}" defer></script>
+</head>
+<body class="flex min-h-screen flex-col bg-base-200">
+  <header class="navbar bg-base-100 shadow-sm">
+    <div class="flex-1">
+      <a href="{% url 'home' %}" class="btn btn-ghost text-xl">BauHelfer</a>
+    </div>
+    {# Filled later: login/register (#9), menu by role (#10), language switcher (M5). #}
+    <nav class="flex-none" aria-label="{% translate 'Main navigation' %}">
+      {% block nav %}{% endblock %}
+    </nav>
+  </header>
+
+  {% if messages %}
+    <div class="mx-auto w-full max-w-3xl space-y-2 px-4 pt-4">
+      {% for message in messages %}
+        {# level_tag is info / success / warning / error; the alert-* classes are listed in tailwind/input.css #}
+        <div role="alert" class="alert alert-{{ message.level_tag }}">
+          <span>{{ message }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <main class="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
+    {% block content %}{% endblock %}
+  </main>
+
+  {# Impressum and privacy policy links come in M7 (#43). #}
+  <footer class="footer footer-center bg-base-100 p-4 text-sm">
+    <p>© {% now "Y" %} BauHelfer · {% translate "Munich" %}</p>
+  </footer>
+</body>
+</html>

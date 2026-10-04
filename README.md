@@ -31,7 +31,7 @@ English, Russian, Ukrainian, Polish, Romanian and Turkish.
 ## Stack
 
 - Python 3.12, Django 5
-- Django templates, HTMX, Tailwind CSS
+- Django templates, HTMX 2, Tailwind CSS 4 + daisyUI 5 (built with the standalone Tailwind CLI)
 - PostgreSQL
 - Claude API for translation
 - Leaflet + OpenStreetMap
@@ -70,7 +70,14 @@ for you) and [Docker](https://docs.docker.com/get-docker/).
    **password** twice; the password is not shown while you type. For a simple password Django
    asks `Bypass password validation and create user anyway? [y/N]` — answer `y` for local
    development.
-6. Start the development server and open http://127.0.0.1:8000 (admin: http://127.0.0.1:8000/admin/):
+6. Build the CSS (Tailwind CLI, no Node.js needed; the first run downloads it):
+   ```bash
+   export TAILWINDCSS_VERSION=v4.3.3   # the version CI and Render use
+   uv run tailwindcss -i tailwind/input.css -o static/css/app.css --minify
+   ```
+   `static/css/app.css` is not in git. While you change templates, keep it up to date in a
+   second terminal: `uv run tailwindcss -i tailwind/input.css -o static/css/app.css --watch`.
+7. Start the development server and open http://127.0.0.1:8000 (admin: http://127.0.0.1:8000/admin/):
    ```bash
    uv run python manage.py runserver
    ```
