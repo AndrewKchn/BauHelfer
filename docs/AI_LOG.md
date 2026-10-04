@@ -408,3 +408,56 @@ the merge.
 **Learned:**
 - Nothing new in the CI idea itself: I set up similar CI on a previous project and was
   already familiar with it. I think checking every change before the merge is the right way.
+
+## 2026-10-04 · #5 First deploy to Render (Frankfurt): gunicorn, WhiteNoise, auto-deploy from main
+
+**Task given to AI:** deploy the app to Render (Frankfurt) with gunicorn and WhiteNoise, with
+auto-deploy from `main`. Before starting I asked how to prepare, and to explain again why
+Render was chosen and what the alternatives are. I created the Render account (GitHub login)
+and the Supabase project myself.
+
+**AI helped:**
+- Listed what to prepare: Render account and GitHub app limited to this repo, free-tier
+  limits (sleep after 15 min, Render's free database expires after 30 days), the concepts
+  gunicorn / WhiteNoise / collectstatic / build vs start.
+- Compared Render with Koyeb, Railway, Fly.io, Heroku, PythonAnywhere and a Hetzner VPS
+  (EU region, free tier, managed PostgreSQL, effort for a beginner).
+- Explained what Supabase changes: Session pooler instead of the IPv6-only direct connection,
+  Data API off (Django tables are in `public`), automatic RLS, 7-day pause, 500 MB per project.
+  Suggested checking it first with `migrate` from my machine before touching Render.
+- Wrote 5 failing tests (`tests/test_deploy.py`), then the settings, `render.yaml` and
+  `.python-version`. Checked Render's docs instead of guessing: pre-deploy commands are
+  paid-only, uv is supported via `uv.lock`, the default Python would be 3.14.
+- Ran the build and start commands locally with production settings: hashed + gzipped static
+  files, `http` → `301 https`, wrong `Host` → `400`.
+- Explained every line of `render.yaml` and the permissions the Render GitHub app asks for.
+- After the deploy, checked the live site and that Render really reaches Supabase (a wrong
+  admin login returns the normal error, not a 500).
+
+**AI failed:**
+- Promised that `Refs #5` in the first PR would keep the issue open. The PR came from a branch
+  linked to the issue (`gh issue develop`), so merging it closed #5 and moved the card to Done.
+  I noticed it on the board; the issue was reopened.
+- Asked where to run migrations in a quick multiple-choice form with a short explanation.
+  I picked the recommended option, and later did not remember making that decision.
+- The first implementation produced 7 WhiteNoise warnings in the tests (no `staticfiles/`
+  locally); fixed with `WHITENOISE_AUTOREFRESH` in `local.py`.
+- Told me to look for the `migrate` output in Render's logs, but it is not there; the cause
+  is unknown. Verified via the Start Command in Render settings instead; noted in #5 that the
+  final proof comes with the first deploy that adds a migration (#11 / #15).
+
+**I overruled:**
+- Database on Supabase instead of Render: it is free without a trial period, and I already
+  had a Supabase account. I wanted to set it up first and only rewrite the plan and the
+  tickets if it works — the plan, #5 and #46 were updated after the live deploy.
+- Free plans only, also for the defense: it is a learning project. The plan said "paid tier
+  for the defense"; #46 is now "Demo readiness on free plans".
+- Migrations in the start command: I re-decided it after AI explained the options again
+  (build / start / pre-deploy). If a migration fails, the site stays on the working version.
+- AI called the "no empty host" test weak and offered to delete it; I kept it: it is a
+  safety net for future changes to this code.
+
+**Learned:**
+- What happens in one deploy: CI → build → start → health check, and why the old version
+  stays online if a step fails.
+- Why `DEBUG=False` needs WhiteNoise for static files and `ALLOWED_HOSTS` for the host name.
