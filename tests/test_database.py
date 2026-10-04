@@ -11,5 +11,5 @@ def test_database_is_postgresql():
 
 
 def test_postgresql_major_version_matches_production():
-    # pg_version is e.g. 170006 for 17.6; Render runs PostgreSQL 17.
+    # pg_version is e.g. 170006 for 17.6; production (Supabase) runs PostgreSQL 17.
     assert connection.pg_version // 10000 == 17

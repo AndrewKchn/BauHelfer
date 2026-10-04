@@ -5,6 +5,9 @@
 A web app that connects construction specialists in Munich with general labourers and small crews
 for short-term work: clearing debris, demolition, carrying materials.
 
+**Live:** https://bauhelfer.onrender.com (free hosting: the first visit after a quiet period can
+take up to a minute while the server wakes up)
+
 - **Employers** post a job: type of work, date, district, number of workers, hourly rate.
 - **Workers and crews** browse jobs and apply.
 - **Employers** accept applications; both sides then see each other's contacts.
@@ -22,8 +25,8 @@ Final project for the "Development with AI" course at [ReDI School of Digital In
 - Claude API for translation
 - Leaflet + OpenStreetMap
 - pytest-django, ruff, GitHub Actions
-- Hosting: Render (Frankfurt)
+- Hosting: Render (Frankfurt), database on Supabase (Frankfurt), both on free plans
 
 ## Status
 
-Planning. See [docs/PLAN.md](docs/PLAN.md) and the [issues](../../issues).
+In development: first deploy done (M1). See [docs/PLAN.md](docs/PLAN.md) and the [issues](../../issues).
