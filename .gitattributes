@@ -1,0 +1,3 @@
+# Downloaded third-party files: GitHub leaves them out of the language statistics.
+tailwind/daisyui.mjs linguist-vendored
+static/js/htmx.min.js linguist-vendored

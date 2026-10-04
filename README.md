@@ -32,6 +32,8 @@ English, Russian, Ukrainian, Polish, Romanian and Turkish.
 
 - Python 3.12, Django 5
 - Django templates, HTMX 2, Tailwind CSS 4 + daisyUI 5 (built with the standalone Tailwind CLI)
+  — daisyUI and HTMX are kept in the repo as downloaded files (`tailwind/daisyui.mjs`,
+  `static/js/htmx.min.js`), so no Node.js and no CDN are needed
 - PostgreSQL
 - Claude API for translation
 - Leaflet + OpenStreetMap
