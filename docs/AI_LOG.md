@@ -461,3 +461,44 @@ and the Supabase project myself.
 - What happens in one deploy: CI → build → start → health check, and why the old version
   stays online if a step fails.
 - Why `DEBUG=False` needs WhiteNoise for static files and `ALLOWED_HOSTS` for the host name.
+
+## 2026-10-04 · #6 README: project idea, stack, how to run locally, live link
+
+**Task given to AI:** expand the README (problem and solution, step-by-step local setup, links
+to the live app, plan and board), list the new issues #73–#75 in `docs/PLAN.md`, and prove that
+each remaining CI gate blocks the merge — #4 only proved it for a failing test (#69).
+
+**AI helped:**
+- Calculated how big each deliberate problem must be: coverage was 99 % (127 statements), so
+  more than 31 uncovered lines are needed to fall below 80 %; docstrings were 23/23, so more
+  than 5 undocumented functions.
+- Built the throwaway PR #76: four pushes, one problem each (unused import, `ANSWER=42`, an
+  untested function, 8 functions without docstrings plus a test that calls them, so test
+  coverage stays green). Ran every check locally first; each CI run failed at exactly the
+  expected step and the PR stayed `BLOCKED`. Closed it without merging.
+- Wrote the README sections and the PLAN changes (62 issues now).
+- Explained why the project uses uv instead of pip (one tool for Python, venv and packages;
+  `uv.lock` pins every package on every machine), why login is by email, and that the site and
+  the admin use the same account with two login pages.
+
+**AI failed:**
+- Did not expect the local pre-commit hook: ruff fixed the unused import itself and stopped
+  the commit. The ruff pushes needed `git commit --no-verify`.
+- The first README setup was written only from Linux. I ran it on Windows: it did not say
+  that Docker Desktop is needed, how to install uv, or what `createsuperuser` asks for.
+- Guessed that the slow `manage.py` commands on Windows come from `localhost` resolving to
+  IPv6 first. I tested `127.0.0.1` — no change.
+
+**I overruled:**
+- Each CI gate in its own push, and a separate "yes" for every push (AI suggested one "yes"
+  for all four): I needed a screenshot for every gate.
+- Linked PR #76 to #4 as well, with a comment, and added my own terminal screenshots for every
+  push as evidence.
+- Removed the extended install block (Docker Desktop, uv commands per OS, "tested on Windows")
+  from the README and kept only the `createsuperuser` note: I think the teachers know this.
+- Stopped investigating the slow Windows commands: the teachers mostly use Macs, and the app
+  is already deployed.
+
+**Learned:**
+- Why a project has two lines of defence: the pre-commit hook locally and CI on GitHub.
+- What `uv.lock` guarantees that `requirements.txt` does not.
