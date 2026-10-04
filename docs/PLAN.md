@@ -20,14 +20,14 @@ written issue by issue.
 |---|---|---|
 | Backend | **Python 3.12 + Django 5** | Built-in auth, form validation, ORM, migrations, admin and i18n — everything BauHelfer needs. Fastest path to a working result |
 | Frontend | **Django templates + HTMX + Tailwind CSS** | The whole project stays in Python with minimal JavaScript. HTMX adds interactivity (filters, applications, chat). Tailwind gives a mobile-first layout |
-| Database | **PostgreSQL** (Docker locally) | Django standard, same engine in production |
+| Database | **PostgreSQL**: Docker locally, **Supabase** (Frankfurt, free plan) in production | Django standard, same engine everywhere. Supabase instead of a Render database: Render's free database expires after 30 days, Supabase's does not (it pauses after 7 days without activity). Only plain PostgreSQL is used, via the Session pooler; Data API off, RLS on |
 | Text translation | **Claude API** (`claude-haiku-4-5`) | Handles construction slang and context; translations are cached in the DB |
 | Map | **Leaflet + OpenStreetMap**, Nominatim geocoding | Free, no API keys |
 | Job photos | **Cloudflare R2** (EU jurisdiction) via `django-storages` + `boto3`; **Pillow** for validation, resizing and EXIF stripping | The Render disk is wiped on every deploy. R2 is S3-compatible, free up to 10 GB with free egress, data stays in the EU, and the app stays stateless (can run several instances) |
 | Chat | HTMX polling every 3–5 s | Simpler than WebSockets, enough for the MVP |
 | Tests / quality | **pytest-django**, **ruff** | |
 | CI | **GitHub Actions**: ruff, pytest, coverage on every PR; required to merge into `main` | |
-| Hosting | **Render, Frankfurt region** (web service + PostgreSQL), **gunicorn**, static files via **WhiteNoise** | Auto-deploy from `main`, data stays in the EU (GDPR). Free tier during development, paid tier for the defense |
+| Hosting | **Render, Frankfurt region** (web service), **gunicorn**, static files via **WhiteNoise**; `render.yaml` Blueprint | Auto-deploy from `main` after CI is green, data stays in the EU (GDPR). Free plans only, also for the defense — a learning project. The server sleeps after 15 min without traffic (first request then takes up to a minute) |
 
 **Deploy from week one:** after M1 the project has a live version, and every merge to `main` updates the site.
 
@@ -143,7 +143,7 @@ the status of each issue lives on the board, not here.
 - #45 Admin panel for moderation: block user, remove job (`backend`)
 
 ### M8 · Production & Defense — due 1 Dec
-- #46 Production setup: paid Render plan, persistent DB, backups, optional custom domain (`devops`)
+- #46 Demo readiness on free plans: wake-up, Supabase not paused, manual backup (`devops`)
 - #47 Demo seed data: employers, workers, jobs (`backend`)
 - #48 Mobile and accessibility check, fix issues (`frontend`)
 - #49 End-to-end manual test scenario, fix bugs (`testing`)
