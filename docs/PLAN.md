@@ -19,7 +19,7 @@ written issue by issue.
 | Part | Choice | Why |
 |---|---|---|
 | Backend | **Python 3.12 + Django 5** | Built-in auth, form validation, ORM, migrations, admin and i18n — everything BauHelfer needs. Fastest path to a working result |
-| Frontend | **Django templates + HTMX 2 + Tailwind CSS 4 + daisyUI 5** | The whole project stays in Python with minimal JavaScript. HTMX adds interactivity (filters, applications, chat). Tailwind gives a mobile-first layout. Decided in #3: **daisyUI** on top of Tailwind (short classes like `btn`, no own JS, so no clash with HTMX; Flowbite and plain Tailwind rejected). Tailwind is **built** by the standalone CLI via `pytailwindcss` (no Node.js), not loaded from a CDN: smaller CSS, no flash of unstyled page, and no visitor IPs sent to a CDN (GDPR). **HTMX 2.0.10**, not the new 4.0 (released Aug 2026): far more docs and examples. HTMX and daisyUI are downloaded files in the repo, served by WhiteNoise |
+| Frontend | **Django templates + HTMX 2 + Tailwind CSS 4 + daisyUI 5** | The whole project stays in Python with minimal JavaScript. HTMX adds interactivity (filters, applications, chat). Tailwind gives a mobile-first layout. Decided in #3: **daisyUI** on top of Tailwind (short classes like `btn`, no own JS, so no clash with HTMX; Flowbite and plain Tailwind rejected). Own colour theme with dark mode in #83. Tailwind is **built** by the standalone CLI via `pytailwindcss` (no Node.js), not loaded from a CDN: smaller CSS, no flash of unstyled page, and no visitor IPs sent to a CDN (GDPR). **HTMX 2.0.10**, not the new 4.0 (released Aug 2026): far more docs and examples. HTMX and daisyUI are downloaded files in the repo, served by WhiteNoise |
 | Database | **PostgreSQL**: Docker locally, **Supabase** (Frankfurt, free plan) in production | Django standard, same engine everywhere. Supabase instead of a Render database: Render's free database expires after 30 days, Supabase's does not (it pauses after 7 days without activity). Only plain PostgreSQL is used, via the Session pooler; Data API off, RLS on |
 | Text translation | **Claude API** (`claude-haiku-4-5`) | Handles construction slang and context; translations are cached in the DB |
 | Map | **Leaflet + OpenStreetMap**, Nominatim geocoding | Free, no API keys |
@@ -70,7 +70,7 @@ BauHelfer/
 `backend`, `frontend`, `database`, `i18n`, `ai`, `legal`, `devops`, `testing`, `docs`, `stretch`
 (+ default `bug` and `enhancement`; other default labels are removed).
 
-## Milestones and issues (64)
+## Milestones and issues (68)
 
 Each issue has a **Description** and a **Done when…** checklist. Numbers are GitHub issue numbers;
 the status of each issue lives on the board, not here.
@@ -91,11 +91,14 @@ the status of each issue lives on the board, not here.
 
 ### M2 · Accounts & Profiles — due 18 Oct
 - #3 Base layout template with Tailwind + HTMX, mobile-first (`frontend`)
+- #79 Mark downloaded daisyUI and HTMX files as vendored (`docs`)
 - #9 Registration, login, logout, password reset (`backend`, `frontend`)
 - #10 Role selection and onboarding flow (`frontend`)
 - #11 Worker profile: team size, skills, languages, legal status (`backend`, `frontend`)
 - #12 Employer profile (`backend`, `frontend`)
 - #13 Work-permit confirmation checkbox at signup (`legal`)
+- #83 Brand colors and dark mode: own daisyUI theme, light + dark by device setting (`frontend`)
+- #85 Fix misleading trigger comment in CI workflow (`devops`)
 - #14 E2E tests (Playwright) and coverage review for M2 (`testing`)
 - #74 Staging environment on free plans (`devops`, `stretch`) — optional, before M3
 
@@ -159,6 +162,7 @@ the status of each issue lives on the board, not here.
 - #55 Worker availability calendar (`stretch`)
 - #73 Error monitoring on production with Sentry (`stretch`)
 - #75 Modern admin theme with django-unfold (`frontend`, `stretch`)
+- #84 Logo, icons and images (`frontend`, `stretch`) — after the main features
 - #82 Sign in with Google (`backend`, `legal`, `stretch`) — only if time is left; new dependency
 
 ## Testing approach
@@ -207,7 +211,7 @@ Board: [BauHelfer](https://github.com/users/AndrewKchn/projects/1), columns Todo
 ## Verification
 
 - `gh label list` — 12 labels; `gh api repos/AndrewKchn/BauHelfer/milestones --jq '.[].title'` — 9 milestones.
-- `gh issue list --state all --limit 100 --json number --jq length` → 64; every issue has a
+- `gh issue list --state all --limit 100 --json number --jq length` → 68; every issue has a
   milestone and a label.
 - `gh project item-list 1 --owner AndrewKchn` — all issues are on the board, each non-Stretch
   issue has a Sprint.
