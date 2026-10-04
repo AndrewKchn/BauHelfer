@@ -502,3 +502,74 @@ each remaining CI gate blocks the merge — #4 only proved it for a failing test
 **Learned:**
 - Why a project has two lines of defence: the pre-commit hook locally and CI on GitHub.
 - What `uv.lock` guarantees that `requirements.txt` does not.
+
+## 2026-10-04 · #3 Base layout template with Tailwind + HTMX, mobile-first
+
+**Task given to AI:** create `base.html` (header, navigation, messages, footer) with Tailwind
+and HTMX, mobile-first, and lay out the decisions the ticket asks for: component library and
+how Tailwind is loaded.
+
+**AI helped:**
+- Compared daisyUI / Flowbite / plain Tailwind and CDN / standalone CLI, including the GDPR
+  point: a CDN sends every visitor's IP to a third party.
+- Checked the latest releases before installing: found that HTMX 4.0 had come out five weeks
+  earlier and showed what changed compared to 2.x; verified that pytailwindcss can pin
+  Tailwind v4.3.3 and that daisyUI 5 ships one file for the standalone CLI.
+- Wrote 7 failing tests first (layout used, viewport, CSS/HTMX linked and served, daisyUI in
+  the built CSS, messages, every page template extends `base.html`), then `base.html`,
+  `tailwind/input.css`, and the CSS build step in CI and in `render.yaml`.
+- Ran production `collectstatic` locally and took a 360px screenshot with headless Firefox.
+- Explained template inheritance, why `app.css` is built and not in git, how WhiteNoise
+  serves static files, and what HTMX will be used for.
+
+**AI failed:**
+- Offered pytailwindcss as a dev dependency, but Render installs with `--no-dev` and must
+  build the CSS too. Noticed by AI before installing.
+- Wrote a comment at the end of a `.gitignore` line, which git reads as part of the file
+  name. Noticed by AI before the commit.
+- The first CSS build was 371 KB: Tailwind scanned `daisyui.mjs`, which names every daisyUI
+  class. Limited the scan to templates: 30 KB.
+- Two static-file tests got 404: pytest always runs with `DEBUG=False`, and WhiteNoise then
+  does not look in `static/`. Fixed with `WHITENOISE_USE_FINDERS = True` in `local.py`.
+- Said that "allow pasting" in DevTools only applies to one tab; it is remembered for the
+  browser profile. And in Brave it did not work for me, so I typed the commands by hand.
+
+**I overruled:**
+- Nothing overruled. From the options AI laid out I chose daisyUI (ready classes, works well
+  with HTMX), a Tailwind build with pytailwindcss instead of a CDN, and HTMX 2.0.10 instead
+  of 4.0 (4.0 is still raw, 2.x has far more material).
+- No spec file for this ticket: it is a small task and everything is already in the issue.
+- I did the manual checks myself in Brave: 360px, `htmx.version`, a request with
+  `HX-Request: true`.
+
+**Learned:**
+- How `{% extends %}` and `{% block %}` build one page from `base.html` and a page template.
+- Why only the classes used in the templates end up in `app.css`, and why that file is built
+  instead of committed.
+
+## 2026-10-04 · Planning: spec files
+
+**Task given to AI:** explain what spec files are, how they differ from what the project
+already uses, and add a spec step to the next complex ticket.
+
+**AI helped:**
+- Explained spec-driven development: a short file per feature (goal, requirements, out of
+  scope, acceptance criteria, open questions) written before tests and code.
+- Compared it with `CLAUDE.md`, `docs/PLAN.md`, skills and issues, and with the current way
+  of working: decisions made in chat are lost after the session, a spec keeps them in the repo.
+- Added a "Spec first (trial)" section and a "Done when…" item to #10.
+
+**AI failed:**
+- Called #10 "the next open ticket" without checking blockers; its issue list had cut off at
+  50 issues, so #3 and #9 were missing. When I asked what is next, the blockers showed
+  #3 → #9 → #10. The spec trial stays on #10.
+- Said the memory files contain personal data about me; after checking, it is a short
+  profile, the rest is project notes.
+
+**I overruled:**
+- Nothing overruled. I decided to try a spec on one complex ticket first and compare it with
+  a normal ticket, instead of adding specs everywhere.
+
+**Learned:**
+- The difference between a spec, an issue, `CLAUDE.md` and `docs/PLAN.md`, and when a
+  separate spec is worth it.
