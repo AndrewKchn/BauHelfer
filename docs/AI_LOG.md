@@ -573,3 +573,38 @@ already uses, and add a spec step to the next complex ticket.
 **Learned:**
 - The difference between a spec, an issue, `CLAUDE.md` and `docs/PLAN.md`, and when a
   separate spec is worth it.
+
+## 2026-10-04 · #79 Mark downloaded daisyUI and HTMX files as vendored
+
+**Task given to AI:** I noticed that GitHub showed the repo as 91 % JavaScript and asked why,
+what `tailwind/daisyui.mjs` is and where it came from, how to leave it out of the statistics,
+and that the repo docs should say the file is there.
+
+**AI helped:**
+- Found the cause with the GitHub languages API: the JavaScript total (350 541 bytes) was
+  exactly the size of `daisyui.mjs`; `htmx.min.js` was already skipped because of `.min.js`.
+- Explained what the file is: the official daisyUI 5.7.47 plugin from its GitHub releases,
+  used only while building `app.css`, never sent to the browser; and why it is kept in the
+  repo instead of downloaded on every build.
+- Added `.gitattributes` with `linguist-vendored`, and a note in `CLAUDE.md` and `README.md`:
+  which files are downloaded, not edited by hand, and how to update them.
+- Created #79 with milestone, Sprint and board status, and checked the live site after #78:
+  hashed `app.css` (30 KB) and `htmx.min.js` are served, same hash as the local build.
+
+**AI failed:**
+- Added a 350 KB third-party file in #3 without thinking about the language statistics;
+  I found it on GitHub.
+- Copied "(#3)" into the PR #78 title from #77, although most earlier PRs do not have it;
+  GitHub adds the PR number itself, so the merge commit on `main` has two numbers
+  ("(#3) (#78)"). I asked why it was there.
+- Proposed adding the fix as one more commit to PR #78 without checking that it was already
+  merged.
+
+**I overruled:**
+- AI suggested adding the fix to PR #78. I asked to update `main` first and do it as a new
+  ticket with its own branch, following the process.
+- I removed "(#3)" from the PR #78 title on GitHub; the merge commit on `main` still has it.
+
+**Learned:**
+- How GitHub counts languages (by file size) and what `linguist-vendored` changes.
+- Why a downloaded library can live in the repo instead of being fetched on every build.
