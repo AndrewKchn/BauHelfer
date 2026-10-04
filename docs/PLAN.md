@@ -70,7 +70,7 @@ BauHelfer/
 `backend`, `frontend`, `database`, `i18n`, `ai`, `legal`, `devops`, `testing`, `docs`, `stretch`
 (+ default `bug` and `enhancement`; other default labels are removed).
 
-## Milestones and issues (62)
+## Milestones and issues (64)
 
 Each issue has a **Description** and a **Done when…** checklist. Numbers are GitHub issue numbers;
 the status of each issue lives on the board, not here.
@@ -117,6 +117,7 @@ the status of each issue lives on the board, not here.
 - #25 Reveal contacts to both sides after acceptance (`backend`, `legal`)
 - #26 Worker dashboard "My applications" (`frontend`)
 - #27 Email notifications: new application, accepted / rejected (`backend`)
+- #81 Email verification at signup (`backend`) — after #27, needs real email sending
 - #28 E2E tests (Playwright) and coverage review for M4 (`testing`)
 
 ### M5 · Multilingual & AI Translation — due 8 Nov
@@ -158,6 +159,7 @@ the status of each issue lives on the board, not here.
 - #55 Worker availability calendar (`stretch`)
 - #73 Error monitoring on production with Sentry (`stretch`)
 - #75 Modern admin theme with django-unfold (`frontend`, `stretch`)
+- #82 Sign in with Google (`backend`, `legal`, `stretch`) — only if time is left; new dependency
 
 ## Testing approach
 
@@ -205,7 +207,7 @@ Board: [BauHelfer](https://github.com/users/AndrewKchn/projects/1), columns Todo
 ## Verification
 
 - `gh label list` — 12 labels; `gh api repos/AndrewKchn/BauHelfer/milestones --jq '.[].title'` — 9 milestones.
-- `gh issue list --state all --limit 100 --json number --jq length` → 62; every issue has a
+- `gh issue list --state all --limit 100 --json number --jq length` → 64; every issue has a
   milestone and a label.
 - `gh project item-list 1 --owner AndrewKchn` — all issues are on the board, each non-Stretch
   issue has a Sprint.
