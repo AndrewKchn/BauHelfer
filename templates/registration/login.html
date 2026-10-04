@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Log in" %} · BauHelfer{% endblock %}
+
+{% block content %}
+  <div class="card mx-auto max-w-md bg-base-100 shadow-sm">
+    <div class="card-body">
+      <h1 class="card-title text-2xl">{% translate "Log in" %}</h1>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% include "_form_fields.html" %}
+        {# After login, go back to the page that asked for it (?next=...). #}
+        <input type="hidden" name="next" value="{{ next }}">
+        <button type="submit" class="btn btn-primary mt-4 w-full">{% translate "Log in" %}</button>
+      </form>
+      <p class="text-sm">
+        <a href="{% url 'password_reset' %}" class="link">{% translate "Forgot your password?" %}</a>
+      </p>
+      <p class="text-sm">
+        {% translate "No account yet?" %}
+        <a href="{% url 'register' %}" class="link">{% translate "Register" %}</a>
+      </p>
+    </div>
+  </div>
+{% endblock %}

@@ -63,6 +63,11 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Custom user with email login (accounts/models.py). Must be set before the first migrate.
 AUTH_USER_MODEL = "accounts.User"
 
+# URL names (accounts/urls.py, config/urls.py) for login and where to go after it.
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "home"
+LOGOUT_REDIRECT_URL = "home"
+
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -99,6 +104,13 @@ TIME_ZONE = "Europe/Berlin"
 USE_I18N = True
 
 USE_TZ = True
+
+
+# Email
+# Printed to the terminal (and the Render logs) instead of sent. Real sending via SMTP comes
+# with email notifications (#27). Tests replace this with Django's in-memory backend.
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "BauHelfer <noreply@bauhelfer.local>"
 
 
 # Static files (CSS, JavaScript, Images)

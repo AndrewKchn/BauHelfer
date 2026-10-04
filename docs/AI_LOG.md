@@ -608,3 +608,51 @@ and that the repo docs should say the file is there.
 **Learned:**
 - How GitHub counts languages (by file size) and what `linguist-vendored` changes.
 - Why a downloaded library can live in the repo instead of being fetched on every build.
+
+## 2026-10-04 · #9 Registration, login, logout, password reset
+
+**Task given to AI:** build the account pages with Django's built-in auth views, styled with
+daisyUI: register, log in, log out, password reset by email (console backend locally); unit
+tests first, then integration tests.
+
+**AI helped:**
+- Explained what Django already gives (login, logout, 4-step password reset) and what we write
+  ourselves (only registration), and why logout is POST-only and password reset never says
+  whether an email is registered.
+- Offered choices with a recommendation; I picked: email + password twice only (role in #10,
+  work permit in #13), log in right after signup, console email until SMTP in #27, URLs listed
+  one by one instead of `include("django.contrib.auth.urls")`.
+- Wrote `SignupForm`, `RegisterView`, `accounts/urls.py`, one shared form template
+  `_form_fields.html` (field errors under the field, form errors in a red alert) and 6 pages +
+  the reset email; tests: 20 unit, 19 integration, 100 % coverage of views and forms.
+- After the integration tests passed at once, broke the code twice on purpose (no `login()`,
+  email without link) to show that the tests catch it.
+
+**AI failed:**
+- Kept Django's default login error "both fields may be case-sensitive". With email login only
+  the password is; I found it while testing by hand.
+- In #3 it built the CSS with the light theme only and did not ask me, so dark mode works in
+  the admin but not on the site; I noticed it.
+- Said pushing the branch would run CI; I pointed out that CI runs only on PRs and on `main`.
+- Suggested putting the plan lines for #83/#84 into the #9 PR, although they are not about #9.
+- A stash conflict when moving the plan change to another branch; fixed.
+
+**I overruled:**
+- Asked whether email format is really checked; AI added 6 invalid addresses to the tests
+  (no @, no domain, no dot, two @, space).
+- After signup I wanted email verification, so that nobody creates fake accounts, and Google
+  login, because it is faster and easier: created #81 (email verification, M4, after SMTP in
+  #27) and #82 (Google sign-in, Stretch, only if time is left).
+- Dark mode and colours: split into #83 (colours + dark mode, M2) and #84 (logo, icons,
+  images, Stretch — after the main features).
+- The plan lines for #83/#84 do not belong to this ticket: instead of AI's separate branch
+  from `main`, I chose a branch on top of #9, rebased after the merge.
+- The email is hidden in the header on phones: I decided to leave it until the menu in #10.
+- Shortened AI's new login error to "Wrong email or password." — that the password is
+  case-sensitive is obvious.
+- Commit order: integration tests first, then the fix with its tests as a separate commit,
+  because it is a bug fix (AI suggested the other way round).
+
+**Learned:**
+- Which auth views Django gives and why logout must be POST.
+- Why password reset gives the same answer for unknown emails.

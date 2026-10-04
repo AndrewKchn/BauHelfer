@@ -14,9 +14,25 @@
     <div class="flex-1">
       <a href="{% url 'home' %}" class="btn btn-ghost text-xl">BauHelfer</a>
     </div>
-    {# Filled later: login/register (#9), menu by role (#10), language switcher (M5). #}
+    {# Filled later: menu by role (#10, also show the user on phones), language switcher (M5). #}
     <nav class="flex-none" aria-label="{% translate 'Main navigation' %}">
-      {% block nav %}{% endblock %}
+      {% block nav %}
+        {% if user.is_authenticated %}
+          <div class="flex items-center gap-2">
+            <span class="hidden text-sm sm:inline">{{ user.email }}</span>
+            {# Logout must be a POST form: a plain link could be triggered by another site. #}
+            <form method="post" action="{% url 'logout' %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-ghost btn-sm">{% translate "Log out" %}</button>
+            </form>
+          </div>
+        {% else %}
+          <div class="flex items-center gap-2">
+            <a href="{% url 'login' %}" class="btn btn-ghost btn-sm">{% translate "Log in" %}</a>
+            <a href="{% url 'register' %}" class="btn btn-primary btn-sm">{% translate "Register" %}</a>
+          </div>
+        {% endif %}
+      {% endblock %}
     </nav>
   </header>
 

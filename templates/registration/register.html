@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Register" %} · BauHelfer{% endblock %}
+
+{% block content %}
+  <div class="card mx-auto max-w-md bg-base-100 shadow-sm">
+    <div class="card-body">
+      <h1 class="card-title text-2xl">{% translate "Create an account" %}</h1>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% include "_form_fields.html" %}
+        <button type="submit" class="btn btn-primary mt-4 w-full">{% translate "Register" %}</button>
+      </form>
+      <p class="text-sm">
+        {% translate "Already have an account?" %}
+        <a href="{% url 'login' %}" class="link">{% translate "Log in" %}</a>
+      </p>
+    </div>
+  </div>
+{% endblock %}
