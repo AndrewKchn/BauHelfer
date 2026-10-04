@@ -1,6 +1,10 @@
-"""Forms for the user admin pages."""
+"""Forms for signing up and for the user admin pages."""
 
-from django.contrib.auth.forms import AdminUserCreationForm, UserChangeForm
+from django.contrib.auth.forms import (
+    AdminUserCreationForm,
+    UserChangeForm,
+    UserCreationForm,
+)
 
 from .models import User
 
@@ -20,3 +24,15 @@ class UserAdminChangeForm(UserChangeForm):
 
     class Meta(UserChangeForm.Meta):
         model = User
+
+
+class SignupForm(UserCreationForm):
+    """The public registration form: email and the password twice.
+
+    UserCreationForm checks that both passwords match, runs the password validators from
+    settings and saves the password as a hash. Role, name and phone come later (#10-#12).
+    """
+
+    class Meta(UserCreationForm.Meta):
+        model = User
+        fields = ("email",)
