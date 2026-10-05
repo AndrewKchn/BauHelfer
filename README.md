@@ -37,7 +37,7 @@ English, Russian, Ukrainian, Polish, Romanian and Turkish.
 - PostgreSQL
 - Claude API for translation
 - Leaflet + OpenStreetMap
-- pytest-django, ruff, GitHub Actions
+- pytest-django, ruff, GitHub Actions, Allure Report (tests grouped by level and story)
 - Hosting: Render (Frankfurt), database on Supabase (Frankfurt), both on free plans
 
 ## Run locally
@@ -94,6 +94,21 @@ uv run pre-commit install                  # once per clone: ruff runs before ev
 
 Every pull request runs the same checks in CI (plus docstring coverage); a red check blocks the
 merge into `main`.
+
+**Test report:** https://andrewkchn.github.io/BauHelfer/ (Allure, rebuilt on every merge to
+`main`; each CI run also keeps it as the `allure-report` artifact). Tests are grouped by level
+(Unit / Integration / E2E) and by story, the GitHub issue they belong to. To build it locally
+(needs Node.js; report settings are in `allurerc.json`):
+
+```bash
+gh issue list --state all --limit 300 --json number,title,milestone > stories.json  # optional: issue titles
+uv run pytest --alluredir=allure-results
+npx allure@3.20.0 generate allure-results && npx allure@3.20.0 open allure-report
+```
+
+Every test file starts with `"""Unit tests: …"""`, `"""Integration tests: …"""` or
+`"""E2E tests: …"""` and has `pytest.mark.story(N)` in `pytestmark`; every test has a docstring
+(a short line, then the steps). A test without them stops the run.
 
 ## Project links
 

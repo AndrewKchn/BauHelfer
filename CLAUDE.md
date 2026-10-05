@@ -47,6 +47,11 @@ Copy `.env.example` to `.env` before the first run.
 3. Integration tests with the Django test client.
 4. E2E (Playwright) only in the per-milestone test tickets.
 
+Every test file: docstring starting `Unit tests:` / `Integration tests:` / `E2E tests:` and
+`pytest.mark.story(N)` in `pytestmark` (a test from another ticket gets its own marker). Every
+test: docstring = short line (the title in the Allure report) + numbered steps ending with
+`Expect: …`. Missing ones stop the run (`tests/story_labels.py`).
+
 ## Working with the student
 
 - The student is new to Django: explain each part as it is written.
