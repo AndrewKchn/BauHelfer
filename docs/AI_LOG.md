@@ -656,3 +656,62 @@ tests first, then integration tests.
 **Learned:**
 - Which auth views Django gives and why logout must be POST.
 - Why password reset gives the same answer for unknown emails.
+
+## 2026-10-05 · #89 Allure test report: tests grouped by story
+
+**Task given to AI:** after #9 I asked whether the project needs test documentation: at work
+we had Jira, where every test case was easy to read. I wanted a document that explains in
+plain language what each test does, grouped by story. This became #89: an Allure report built
+in CI and published on GitHub Pages.
+
+**AI helped:**
+- Explained why test cases written by hand go stale and the tests themselves do not; built a
+  quick prototype catalog from the 80 existing tests to show what is possible.
+- Checked allure-pytest's source (2.16.2) in a throwaway environment instead of guessing: labels
+  can be added as pytest marks at collection time, the title comes from
+  `__allure_display_name__`, the docstring is the default description.
+- Wrote `tests/story_labels.py`, a pytest plugin: story = "#N" + issue title, epic =
+  milestone, a link to the issue, the first docstring line as the title, the steps as the
+  description, Suites = level → story; a test without story, docstring or file level stops the
+  run. Tests first: 16 unit + 8 integration (pytester runs a real pytest with Allure).
+- Added docstrings (short line + steps) and `story(N)` to all 80 existing tests, and checked in
+  git history that no test file mixes tests from different stories.
+- CI: `stories.json` from `gh issue list` with the built-in token, the report built also when
+  tests fail, kept as an artifact, published from `main` to Pages without blocking the Render
+  deploy; a result line on the run's Summary page. Verified the action versions from their
+  releases before using them.
+
+**AI failed:**
+- Its first idea, steps generated from the code, gave lines like "Check 5 results" — useless
+  for a reader. AI showed it honestly and proposed docstrings instead.
+- The report showed 103 tests instead of 95; I noticed it. The pytester runs inside the same
+  process wrote their sample tests into our report. Fixed by running them in a separate process.
+- The first in-process pytester run also set up Django twice; found by the test run.
+- The script that added the docstrings put them under existing comments, with an extra blank
+  line; AI saw it in the diff, reverted and redid it.
+- Said four test files needed a level in their docstring; the strict check found five.
+- Allure 3 groups the tree by files by default; AI found it while checking the report and set
+  the grouping explicitly.
+- The issue link was drawn as a bug icon (Allure's "issue" type); I noticed it.
+
+**I overruled:**
+- The Jira-like catalog was my idea; I chose Allure instead of AI's self-written catalog
+  script, because I know it from work and it also shows the result of every run.
+- AI proposed a `Story: #N` line in every docstring; I said that is too much for every test and
+  suggested tags: one `story(N)` per file, a test from another ticket gets its own.
+- I asked to take the story title from GitHub by its number, and to use the docstring as the
+  test name in the report. I wrote "#9" only as a link idea; since the link is there anyway, the
+  marker takes just the number.
+- After looking at the report: removed the features (issue labels) I had chosen first, grouped
+  Suites and the tree by level (Unit / Integration) instead of milestone, hid the technical
+  labels, kept only the new Allure 3 view instead of the classic one: it has fewer tabs, so
+  there is less noise, and everything is visible on the first page.
+- I installed Node.js myself to build the report locally; I chose the strict check.
+- I wanted to see that everything works on GitHub before writing this log: AI opened the PR as a
+  draft first. I added screenshots of the report, the artifact upload log and the Summary page as
+  evidence: https://github.com/AndrewKchn/BauHelfer/pull/90#issuecomment-5994763477
+- Kept the plugin in `tests/`, although that folder is not counted for coverage.
+
+**Learned:**
+- How a pytest hook adds labels to the tests at collection time.
+- Why tests must not call the network.
