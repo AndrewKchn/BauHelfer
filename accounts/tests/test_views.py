@@ -5,6 +5,7 @@ import re
 import pytest
 from django.contrib.auth import get_user_model
 from django.core import mail
+from django.test import Client
 from django.urls import reverse
 from pytest_django.asserts import assertContains, assertRedirects, assertTemplateUsed
 
@@ -116,6 +117,32 @@ def test_logged_in_user_is_sent_away_from_register(client, user):
     assertRedirects(response, reverse("home"))
 
 
+@pytest.mark.story(88)
+def test_register_needs_the_csrf_token_from_the_page():
+    """A form sent without the page's CSRF token is rejected.
+
+    1. Send the signup form without a CSRF token, as another site would
+    2. Expect: 403, no user saved
+    3. Open the signup page and send the form with its token
+    4. Expect: the user is saved
+    """
+    # The test client skips CSRF checks unless asked to make them.
+    client = Client(enforce_csrf_checks=True)
+    data = {"email": "ben@example.com", "password1": PASSWORD, "password2": PASSWORD}
+
+    response = client.post(reverse("register"), data)
+
+    assert response.status_code == 403
+    assert not User.objects.exists()
+
+    # A real browser gets the token with the page, as a cookie and in the form.
+    client.get(reverse("register"))
+    token = client.cookies["csrftoken"].value
+    client.post(reverse("register"), {**data, "csrfmiddlewaretoken": token})
+
+    assert User.objects.filter(email="ben@example.com").exists()
+
+
 # Login and logout
 
 
@@ -169,6 +196,30 @@ def test_login_with_wrong_password_shows_an_error(client, user):
     assertContains(response, 'role="alert"')
 
 
+@pytest.mark.story(88)
+def test_login_with_unknown_email_shows_the_same_error_as_a_wrong_password(
+    client, user
+):
+    """Unknown email and wrong password get the same error.
+
+    1. anna@example.com exists
+    2. Log in as anna@example.com with a wrong password
+    3. Log in as nobody@example.com
+    4. Expect: exactly the same error both times, so nobody learns who is registered
+    5. Expect: nobody is logged in
+    """
+    wrong_password = client.post(
+        reverse("login"), {"username": "anna@example.com", "password": "wrong"}
+    )
+    unknown_email = client.post(
+        reverse("login"), {"username": "nobody@example.com", "password": "wrong"}
+    )
+
+    assert unknown_email.context["form"].errors == wrong_password.context["form"].errors
+    assertContains(unknown_email, "Wrong email or password.")
+    assert not is_logged_in(client)
+
+
 def test_login_goes_back_to_the_page_that_asked_for_it(client, user):
     """After login the user returns to the page that asked for it.
 
@@ -182,6 +233,42 @@ def test_login_goes_back_to_the_page_that_asked_for_it(client, user):
 
     assert response.status_code == 302
     assert response.url == "/admin/"
+
+
+@pytest.mark.story(88)
+def test_login_ignores_a_next_link_to_another_site(client, user):
+    """After login the user is never sent to another site.
+
+    1. Log in from /accounts/login/?next=https://evil.example.com/
+    2. Expect: redirect to home, not to evil.example.com
+    """
+    evil = "https://evil.example.com/"
+
+    response = client.post(
+        f"{reverse('login')}?next={evil}",
+        {"username": "anna@example.com", "password": PASSWORD, "next": evil},
+    )
+
+    assertRedirects(response, reverse("home"))
+
+
+@pytest.mark.story(88)
+def test_login_gives_a_new_session_id(client, user):
+    """Login replaces the session id, so an id known before login is useless.
+
+    1. Start a guest session and note its id
+    2. Log in
+    3. Expect: logged in with a different session id
+    """
+    # Session fixation: an attacker who planted the guest id must not share the login.
+    guest_id = client.session.session_key
+
+    client.post(
+        reverse("login"), {"username": "anna@example.com", "password": PASSWORD}
+    )
+
+    assert is_logged_in(client)
+    assert client.session.session_key != guest_id
 
 
 def test_logged_in_user_is_sent_away_from_login(client, user):

@@ -116,6 +116,8 @@ Every test file starts with `"""Unit tests: …"""`, `"""Integration tests: …"
 - [Project board](https://github.com/users/AndrewKchn/projects/1): what is in progress now
 - [Issues](https://github.com/AndrewKchn/BauHelfer/issues)
 - [AI log](docs/AI_LOG.md): how AI was used and which suggestions were changed or rejected
+- [Security](docs/SECURITY.md): what is protected and how, known limitations, how to report a
+  vulnerability
 
 ## Status
 

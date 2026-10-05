@@ -60,7 +60,7 @@ BauHelfer/
 ├── reviews/           # Review
 ├── translations/      # Claude API service + cache
 ├── templates/  static/  locale/
-├── docs/PLAN.md  docs/AI_LOG.md
+├── docs/PLAN.md  docs/AI_LOG.md  docs/SECURITY.md
 ├── CLAUDE.md  .claude/skills/ai-log/   # instructions and /ai-log skill for Claude Code
 ├── docker-compose.yml  pyproject.toml  render.yaml  .github/workflows/ci.yml
 ```
@@ -70,7 +70,7 @@ BauHelfer/
 `backend`, `frontend`, `database`, `i18n`, `ai`, `legal`, `devops`, `testing`, `docs`, `stretch`
 (+ default `bug` and `enhancement`; other default labels are removed).
 
-## Milestones and issues (70)
+## Milestones and issues (71)
 
 Each issue has a **Description** and a **Done when…** checklist. Numbers are GitHub issue numbers;
 the status of each issue lives on the board, not here.
@@ -148,6 +148,7 @@ the status of each issue lives on the board, not here.
 - #43 Impressum, privacy policy, platform disclaimer pages (`legal`, `docs`)
 - #44 Account deletion and personal-data export (GDPR) (`legal`, `backend`)
 - #45 Admin panel for moderation: block user, remove job (`backend`)
+- #91 Login rate limiting: slow down password guessing (`backend`, `legal`, `stretch`)
 
 ### M8 · Production & Defense — due 1 Dec
 - #46 Demo readiness on free plans: wake-up, Supabase not paused, manual backup (`devops`)
@@ -204,7 +205,7 @@ Board: [BauHelfer](https://github.com/users/AndrewKchn/projects/1), columns Todo
   be started now.
 - **Ticket workflow** (details in `CLAUDE.md`): branch linked to the issue → In Progress →
   failing tests, code, integration tests as separate commits → AI_LOG entry drafted with
-  `/ai-log` as the last commit → PR with `Closes #N` and an "AI usage" section → the student
+  `/ai-log` as the last commit → PR with `Closes #N` → the student
   merges. Board automation closes the issue and moves it to Done.
 - **`main` is protected** (ruleset "Protect main"): changes only through PRs, no force push, no
   deletion, no bypass. Squash merge is disabled — PRs are merged with a merge commit, so the

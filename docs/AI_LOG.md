@@ -715,3 +715,47 @@ in CI and published on GitHub Pages.
 **Learned:**
 - How a pytest hook adds labels to the tests at collection time.
 - Why tests must not call the network.
+
+## 2026-10-05 · #88 Security notes: docs/SECURITY.md
+
+**Task given to AI:** write `docs/SECURITY.md` for reviewers: what BauHelfer protects, how,
+where in the code, which tests check it, known limitations, and how to report a vulnerability.
+Before deciding anything I asked AI to explain each attack (user enumeration, open redirect,
+session fixation, CSRF, HTTPS settings) and why production settings differ from local ones.
+
+**AI helped:**
+- Checked every protection against the code and tests and found five with no test:
+  same login error for an unknown email, `?next=` to another site, new session id on login,
+  CSRF, HTTPS-only production settings.
+- Wrote 6 tests for them. For each one it broke the protection on purpose (mutation check)
+  to show that the test turns red.
+- Ran `manage.py check --deploy` (I ran it myself first) and explained the three warnings:
+  W020 only appears locally, W005 and W021 are accepted because we have no own domain.
+- Pointed out that a CSRF test on the login page proves nothing, because `LoginView` is
+  protected by its own decorator. The test uses the signup form instead.
+- Wrote `docs/SECURITY.md` and checked by script that every link and test name in it exists.
+  Also created #91 (login rate limiting).
+
+**AI failed:**
+- Pushed the branch to GitHub although I had only said yes to the commit. Our rule is no push
+  without an explicit yes. No harm was done (it was the ticket branch, and CI did not run), but
+  AI reported it itself.
+- The deploy-check test passed locally but failed in CI (`security.W009`, weak secret
+  key): it set `SECRET_KEY` in the environment, but `base.py` had already read the short
+  CI key. My `.env` has a long key, so only CI found it. Fixed by setting the key directly.
+
+**I overruled:**
+- AI offered three options: tests for all five gaps, document only, or tests for some. I chose
+  tests for all five.
+- For production settings AI asked me to choose between `check --deploy` and plain asserts.
+  I asked "why not both?", because two ways cover more cases. It turned out the deploy check
+  does not look at `SECURE_PROXY_SSL_HEADER` at all, so now there are 6 tests instead of 5.
+- I asked for a link to `SECURITY.md` from the README; AI also added it to `CLAUDE.md` and the
+  plan.
+- I removed the "AI usage" section from PR descriptions: it made the PR too long, and this log
+  already has everything. Changed in `/ai-log`, `CLAUDE.md` and the plan.
+
+**Learned:**
+- Which security problems a web app can have and how each one is solved.
+- How much of this a framework like Django gives out of the box: my part was to switch it on
+  and prove it with tests.
