@@ -207,6 +207,12 @@ Board: [BauHelfer](https://github.com/users/AndrewKchn/projects/1), columns Todo
   failing tests, code, integration tests as separate commits → AI_LOG entry drafted with
   `/ai-log` as the last commit → PR with `Closes #N` → the student
   merges. Board automation closes the issue and moves it to Done.
+- **Docs sync per sprint:** docs are updated once per sprint, not in every ticket. During a
+  ticket, ideas, open questions, needed doc changes and security / personal-data changes are
+  posted as comments in the sprint's "Docs sync — Mx" issue (#94–#100). That issue is the
+  sprint's last ticket: `/sprint-docs` drafts the changes to `docs/PLAN.md`,
+  `docs/SECURITY.md` and `README.md`. `CLAUDE.md` is the exception — Claude follows it, so it
+  is fixed in the ticket that makes it wrong.
 - **`main` is protected** (ruleset "Protect main"): changes only through PRs, no force push, no
   deletion, no bypass. Squash merge is disabled — PRs are merged with a merge commit, so the
   separate commits stay in the history. Merged branches are deleted automatically.

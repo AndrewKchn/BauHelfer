@@ -65,15 +65,24 @@ test: docstring = short line (the title in the Allure report) + numbered steps e
 1. `gh issue view N`; check it is not blocked (`gh api repos/AndrewKchn/BauHelfer/issues/N/dependencies/blocked_by`).
 2. `gh issue develop N --checkout`; move the card on the "BauHelfer" board to In Progress.
 3. Tests → code → tests, as above. Separate commits: failing tests, then implementation, then
-   any fixes or integration tests. If the ticket touches security or personal data, update
-   `docs/SECURITY.md` (each point linked to its code and tests) in the same branch.
-4. Go through the ticket's "Done when…" list: show each item with its evidence (test, commit,
+   any fixes or integration tests. Docs are not edited in the ticket, except `CLAUDE.md`:
+   if the ticket makes it wrong (commands, structure, conventions), fix it in the same branch.
+4. Draft one comment per item for the sprint's "Docs sync — Mx" issue: a new idea, an open
+   question, a doc change needed, or a security / personal-data change (linked to its code and
+   tests, for `docs/SECURITY.md`). Show them; after "yes", post them with `gh issue comment`.
+5. Go through the ticket's "Done when…" list: show each item with its evidence (test, commit,
    CI run). After "yes", tick them in the issue (`- [ ]` → `- [x]` via `gh issue edit`);
    closing the issue does not tick them.
-5. Run `/ai-log`: drafts the AI_LOG entry; the student edits. The PR has no "AI usage" section:
+6. Run `/ai-log`: drafts the AI_LOG entry; the student edits. The PR has no "AI usage" section:
    the AI_LOG entry is the record.
-6. After "yes": the AI_LOG entry goes in its own last commit ("Add AI_LOG entry for #N"),
+7. After "yes": the AI_LOG entry goes in its own last commit ("Add AI_LOG entry for #N"),
    then `gh pr create` with `Closes #N` in the body.
-7. The student merges on GitHub with "Create a merge commit" (squash is disabled to keep the
+8. The student merges on GitHub with "Create a merge commit" (squash is disabled to keep the
    separate commits); the branch is deleted and the card moves to Done automatically.
    `main` is protected: no direct pushes, every change goes through a PR.
+
+## Sprint end
+
+The last ticket of every milestone is "Docs sync — Mx" (#94–#100). It follows the ticket
+workflow above; instead of tests → code, run `/sprint-docs`: it turns the issue's comments and
+the sprint's work into a draft of doc changes, and the student decides.
