@@ -4,6 +4,9 @@ import importlib
 
 import pytest
 from django.conf import settings
+from django.core.checks import Tags, run_checks
+from django.core.management.utils import get_random_secret_key
+from django.test import override_settings
 
 pytestmark = pytest.mark.story(5)
 
@@ -76,3 +79,53 @@ def test_production_without_render_adds_no_empty_host(monkeypatch):
     production = load_production_settings()
 
     assert "" not in production.ALLOWED_HOSTS
+
+
+@pytest.mark.story(88)
+def test_production_uses_https_only():
+    """Production sends everything over HTTPS and keeps DEBUG off.
+
+    1. Load the production settings
+    2. Expect: Render's HTTPS header is trusted, http redirects to https, HSTS is on
+    3. Expect: session and CSRF cookies only travel over HTTPS; DEBUG is off
+    """
+    production = load_production_settings()
+
+    # Not covered by Django's deploy check: without it Render's http -> https loops.
+    assert production.SECURE_PROXY_SSL_HEADER == ("HTTP_X_FORWARDED_PROTO", "https")
+    assert production.SECURE_SSL_REDIRECT is True
+    assert production.SECURE_HSTS_SECONDS >= 3600  # may grow, never shrink
+    assert production.SESSION_COOKIE_SECURE is True
+    assert production.CSRF_COOKIE_SECURE is True
+    assert production.DEBUG is False
+
+
+# Warnings we accept on purpose; docs/SECURITY.md explains them.
+ACCEPTED_DEPLOY_WARNINGS = {
+    "security.W005",  # HSTS for subdomains: bauhelfer.onrender.com has none
+    "security.W021",  # HSTS preload list: needs our own domain, not onrender.com
+}
+
+
+@pytest.mark.story(88)
+def test_production_passes_the_django_deploy_check(monkeypatch):
+    """Django's own deployment checklist finds nothing new in the production settings.
+
+    1. Load the production settings as on Render (host name, random secret key)
+    2. Run Django's security checks (manage.py check --deploy)
+    3. Expect: no warnings except the two we accept on purpose
+    """
+    monkeypatch.setenv("RENDER_EXTERNAL_HOSTNAME", "bauhelfer.onrender.com")
+    # Render generates the key (render.yaml); the keys in .env and CI are not checked.
+    monkeypatch.setenv("SECRET_KEY", get_random_secret_key())
+    production = load_production_settings()
+    changed = {
+        name: getattr(production, name)
+        for name in dir(production)
+        if name.isupper() and getattr(production, name) != getattr(settings, name, None)
+    }
+
+    with override_settings(**changed):
+        found = run_checks(include_deployment_checks=True, tags=[Tags.security])
+
+    assert {message.id for message in found} - ACCEPTED_DEPLOY_WARNINGS == set()
