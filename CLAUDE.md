@@ -70,7 +70,8 @@ test: docstring = short line (the title in the Allure report) + numbered steps e
 4. Go through the ticket's "Done when…" list: show each item with its evidence (test, commit,
    CI run). After "yes", tick them in the issue (`- [ ]` → `- [x]` via `gh issue edit`);
    closing the issue does not tick them.
-5. Run `/ai-log`: drafts the AI_LOG entry and the PR "AI usage" section; the student edits.
+5. Run `/ai-log`: drafts the AI_LOG entry; the student edits. The PR has no "AI usage" section:
+   the AI_LOG entry is the record.
 6. After "yes": the AI_LOG entry goes in its own last commit ("Add AI_LOG entry for #N"),
    then `gh pr create` with `Closes #N` in the body.
 7. The student merges on GitHub with "Create a merge commit" (squash is disabled to keep the

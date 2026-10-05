@@ -205,7 +205,7 @@ Board: [BauHelfer](https://github.com/users/AndrewKchn/projects/1), columns Todo
   be started now.
 - **Ticket workflow** (details in `CLAUDE.md`): branch linked to the issue → In Progress →
   failing tests, code, integration tests as separate commits → AI_LOG entry drafted with
-  `/ai-log` as the last commit → PR with `Closes #N` and an "AI usage" section → the student
+  `/ai-log` as the last commit → PR with `Closes #N` → the student
   merges. Board automation closes the issue and moves it to Done.
 - **`main` is protected** (ruleset "Protect main"): changes only through PRs, no force push, no
   deletion, no bypass. Squash merge is disabled — PRs are merged with a merge commit, so the
