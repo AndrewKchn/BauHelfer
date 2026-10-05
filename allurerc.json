@@ -1,0 +1,13 @@
+{
+  "name": "BauHelfer tests",
+  "output": "./allure-report",
+  "hideLabels": ["host", "thread", "framework", "language", "tag"],
+  "plugins": {
+    "awesome": {
+      "options": {
+        "reportLanguage": "en",
+        "groupBy": ["parentSuite", "suite"]
+      }
+    }
+  }
+}

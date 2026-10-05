@@ -7,6 +7,11 @@ on:
     branches: [main]
   pull_request:
 
+# The built-in token may only read the code and the issues (issue titles for the report).
+permissions:
+  contents: read
+  issues: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -53,8 +58,59 @@ jobs:
       - name: Build CSS  # app.css is not in git; the layout tests need it
         run: uv run tailwindcss -i tailwind/input.css -o static/css/app.css --minify
 
+      - name: Save issue titles for the Allure report  # tests are grouped by story (#89)
+        # Written to a temporary file first, so a failed call leaves no broken stories.json.
+        # Without the file the report shows "#9" instead of "#9 <title>"; tests still run.
+        run: >-
+          gh issue list --repo "$GITHUB_REPOSITORY" --state all --limit 300
+          --json number,title,milestone > stories.tmp && mv stories.tmp stories.json
+        env:
+          GH_TOKEN: ${{ github.token }}
+        continue-on-error: true
+
       - name: Tests with coverage (fails below 80%)
-        run: uv run pytest --cov
+        run: uv run pytest --cov --alluredir=allure-results
 
       - name: Docstring coverage (fails below 80%)
         run: uv run interrogate .
+
+      # The report is built also when tests fail: that is when it is needed most.
+      - uses: actions/setup-node@v7
+        if: ${{ !cancelled() }}
+        with:
+          node-version: 22
+
+      - name: Build the Allure report  # settings in allurerc.json
+        if: ${{ !cancelled() }}
+        run: npx --yes allure@3.20.0 generate allure-results
+
+      - name: Keep the report with this run  # download it from the run's Summary page
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: allure-report
+          path: allure-report
+
+      - name: Prepare the report for GitHub Pages
+        if: ${{ !cancelled() && github.event_name == 'push' }}
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: allure-report
+
+  # Publishes the report of main to GitHub Pages. Never fails: Render deploys only when
+  # all checks are green (autoDeployTrigger: checksPass), and a broken report upload must
+  # not stop the site from deploying.
+  publish-report:
+    if: ${{ !cancelled() && github.event_name == 'push' }}
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v5
+        continue-on-error: true
