@@ -116,14 +116,15 @@ def test_production_passes_the_django_deploy_check(monkeypatch):
     3. Expect: no warnings except the two we accept on purpose
     """
     monkeypatch.setenv("RENDER_EXTERNAL_HOSTNAME", "bauhelfer.onrender.com")
-    # Render generates the key (render.yaml); the keys in .env and CI are not checked.
-    monkeypatch.setenv("SECRET_KEY", get_random_secret_key())
     production = load_production_settings()
     changed = {
         name: getattr(production, name)
         for name in dir(production)
         if name.isupper() and getattr(production, name) != getattr(settings, name, None)
     }
+    # Render generates the key (render.yaml); the keys in .env and CI are not checked.
+    # Set here, not via the environment: base.py has read SECRET_KEY once already.
+    changed["SECRET_KEY"] = get_random_secret_key()
 
     with override_settings(**changed):
         found = run_checks(include_deployment_checks=True, tags=[Tags.security])
