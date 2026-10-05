@@ -759,3 +759,33 @@ session fixation, CSRF, HTTPS settings) and why production settings differ from 
 - Which security problems a web app can have and how each one is solved.
 - How much of this a framework like Django gives out of the box: my part was to switch it on
   and prove it with tests.
+
+## 2026-10-05 · #93 Docs sync at the end of each sprint + /sprint-docs skill
+
+**Task given to AI:** new questions and ideas keep coming up during tickets, and I was updating
+the docs a little in every ticket. I asked for ideas on doing this once, at the end of each
+sprint.
+
+**AI helped:** suggested three parts that work together: a "Docs sync — Mx" issue per sprint
+that collects ideas as comments (not a file in the repo, which would cause merge conflicts
+between branches); a Docs sync ticket as the last ticket of each milestone; and a `/sprint-docs`
+skill that drafts the doc changes from the comments, the sprint's issues, commits and AI_LOG
+entries. It created the eight issues (#93–#100) with "blocked by" links to the E2E tickets,
+updated `CLAUDE.md` and `docs/PLAN.md`, and applied the new rule to this ticket: the missing
+`PLAN.md` entries for #93–#100 became a comment in #94 instead of an edit here.
+
+**AI failed:** its script for setting the Sprint field on the board had two bugs (an empty item
+id, then an iteration set by name, which `gh` does not support); the third try was blocked by
+Claude Code's permission check, so I set the Sprints by hand on the board.
+
+**I overruled:**
+- `docs/SECURITY.md` updates move to the end of the sprint, although the rule "update it in the
+  same branch" had only just been added in #88 (AI presented this as a trade-off). I want a
+  ticket's branch to contain only what belongs to its story's functionality, without small doc
+  edits; at the end of the sprint the whole security picture is seen at once.
+- AI recommended one exception and I agreed: `CLAUDE.md` is still fixed in the ticket that makes
+  it wrong, because Claude must be up to date — it works from that file.
+
+**Learned:** a per-sprint issue collects ideas without merge conflicts that a shared file would
+cause; updating docs once a week means they can be behind for a few days, and the comments make
+sure nothing is forgotten in the meantime.
