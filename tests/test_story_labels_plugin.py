@@ -7,6 +7,7 @@ the result files that Allure writes, the same way the report is built in CI.
 import json
 
 import pytest
+from django.conf import settings
 
 pytestmark = pytest.mark.story(89)
 
@@ -49,9 +50,15 @@ def run_with_allure(pytester, monkeypatch):
         stories_path = pytester.path / "stories.json"
         stories_path.write_text(json.dumps(stories))
         monkeypatch.setenv("STORIES_FILE", str(stories_path))
+        monkeypatch.setenv("PYTHONPATH", str(settings.BASE_DIR))  # to find PLUGIN
         pytester.makepyfile(test_file)
         results_dir = pytester.path / "allure-results"
-        outcome = pytester.runpytest("-p", PLUGIN, f"--alluredir={results_dir}")
+        # A separate process: Allure keeps one result writer per process, so an inner run
+        # in this process would also write its tests into our own report.
+        # no:django: the small test files need no Django.
+        outcome = pytester.runpytest_subprocess(
+            "-p", PLUGIN, "-p", "no:django", f"--alluredir={results_dir}"
+        )
         results = {}
         for path in results_dir.glob("*-result.json"):
             data = json.loads(path.read_text())
