@@ -26,3 +26,8 @@ static/css/app.css
 .vscode/
 .idea/
 .DS_Store
+
+# Allure (#89): issue data for the report labels, raw results, built report
+stories.json
+allure-results/
+allure-report/

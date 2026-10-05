@@ -4,7 +4,7 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 
-pytestmark = pytest.mark.django_db
+pytestmark = [pytest.mark.django_db, pytest.mark.story(8)]
 
 User = get_user_model()
 PASSWORD = "s3cret-pass-123"
@@ -22,6 +22,12 @@ def logged_in_client(client, admin_user):
 
 
 def test_admin_login_with_email_in_any_case(client, admin_user):
+    """An admin logs in to /admin/ with the email in any capitals.
+
+    1. An admin admin@example.com exists
+    2. Log in on the admin login page as Admin@Example.com
+    3. Expect: redirect to /admin/, logged in as that admin
+    """
     response = client.post(
         reverse("admin:login"),
         # The admin login form calls its field "username", whatever USERNAME_FIELD is.
@@ -34,6 +40,12 @@ def test_admin_login_with_email_in_any_case(client, admin_user):
 
 
 def test_admin_login_with_wrong_password_fails(client, admin_user):
+    """A wrong password on the admin login page does not log in.
+
+    1. An admin exists
+    2. Log in on the admin login page with a wrong password
+    3. Expect: the form again, not logged in
+    """
     response = client.post(
         reverse("admin:login"),
         {"username": "admin@example.com", "password": "wrong", "next": "/admin/"},
@@ -44,6 +56,12 @@ def test_admin_login_with_wrong_password_fails(client, admin_user):
 
 
 def test_non_staff_user_cannot_open_admin(client):
+    """A normal user (worker or employer) cannot open the admin.
+
+    1. A worker without staff rights is logged in
+    2. Open the admin user list
+    3. Expect: redirect to the admin login page
+    """
     worker = User.objects.create_user(email="worker@example.com", password=PASSWORD)
     client.force_login(worker)
 
@@ -54,6 +72,14 @@ def test_non_staff_user_cannot_open_admin(client):
 
 
 def test_user_list_shows_users_and_searches_by_email(logged_in_client):
+    """The admin user list shows all users and finds them by email.
+
+    1. Users anna@ and boris@ exist; an admin is logged in
+    2. Open the user list
+    3. Expect: both emails
+    4. Search for "anna"
+    5. Expect: only anna@
+    """
     User.objects.create_user(email="anna@example.com", password=PASSWORD)
     User.objects.create_user(email="boris@example.com", password=PASSWORD)
     url = reverse("admin:accounts_user_changelist")
@@ -69,6 +95,12 @@ def test_user_list_shows_users_and_searches_by_email(logged_in_client):
 
 
 def test_add_user_with_email_and_password(logged_in_client):
+    """An admin can add a user with an email and a password.
+
+    1. An admin is logged in
+    2. Add New.Worker@Example.com with a password
+    3. Expect: saved in lowercase, the password works, no staff rights
+    """
     response = logged_in_client.post(
         reverse("admin:accounts_user_add"),
         {
@@ -86,6 +118,12 @@ def test_add_user_with_email_and_password(logged_in_client):
 
 
 def test_add_user_rejects_email_that_differs_only_in_case(logged_in_client):
+    """The admin cannot add the same email again in other capitals.
+
+    1. anna@example.com exists; an admin is logged in
+    2. Add ANNA@example.com
+    3. Expect: an error on the email field, still one account
+    """
     User.objects.create_user(email="anna@example.com", password=PASSWORD)
 
     response = logged_in_client.post(
@@ -104,6 +142,12 @@ def test_add_user_rejects_email_that_differs_only_in_case(logged_in_client):
 
 
 def test_edit_user_profile_fields(logged_in_client):
+    """An admin can edit name, phone, role, language and work permit.
+
+    1. A user exists; an admin is logged in
+    2. Save new values on the user's admin page
+    3. Expect: all new values are saved
+    """
     user = User.objects.create_user(email="anna@example.com", password=PASSWORD)
     url = reverse("admin:accounts_user_change", args=[user.pk])
 
