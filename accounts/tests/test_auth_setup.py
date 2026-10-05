@@ -1,4 +1,4 @@
-"""Unit tests for the account pages setup: URLs, redirects, email, form template (#9)."""
+"""Unit tests: account pages setup — URLs, redirects, email, form template (#9)."""
 
 import pytest
 from django.conf import settings

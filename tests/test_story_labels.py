@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from tests.story_labels import labels_for, load_stories, split_docstring
+from tests.story_labels import labels_for, level_of, load_stories, split_docstring
 
 pytestmark = pytest.mark.story(89)
 
@@ -12,7 +12,6 @@ STORIES = {
     9: {
         "title": "Registration, login, logout, password reset",
         "milestone": "M2 · Accounts & Profiles",
-        "labels": ["backend", "frontend"],
     }
 }
 
@@ -58,10 +57,10 @@ def test_split_docstring_without_text(doc):
 
 
 def test_load_stories_from_gh_issue_list_output(tmp_path):
-    """Reads the file that `gh issue list --json number,title,milestone,labels` writes.
+    """Reads the file that `gh issue list --json number,title,milestone` writes.
 
     1. Write a file in the format of the gh command
-    2. Expect: a dict by issue number with title, milestone and label names
+    2. Expect: a dict by issue number with title and milestone
     """
     path = tmp_path / "stories.json"
     path.write_text(
@@ -71,9 +70,8 @@ def test_load_stories_from_gh_issue_list_output(tmp_path):
                     "number": 9,
                     "title": "Registration, login, logout, password reset",
                     "milestone": {"title": "M2 · Accounts & Profiles"},
-                    "labels": [{"name": "backend"}, {"name": "frontend"}],
                 },
-                {"number": 52, "title": "Real crews", "milestone": None, "labels": []},
+                {"number": 52, "title": "Real crews", "milestone": None},
             ]
         )
     )
@@ -81,7 +79,7 @@ def test_load_stories_from_gh_issue_list_output(tmp_path):
     stories = load_stories(path)
 
     assert stories[9] == STORIES[9]
-    assert stories[52] == {"title": "Real crews", "milestone": "", "labels": []}
+    assert stories[52] == {"title": "Real crews", "milestone": ""}
 
 
 def test_load_stories_without_the_file_gives_nothing(tmp_path):
@@ -94,17 +92,16 @@ def test_load_stories_without_the_file_gives_nothing(tmp_path):
 
 
 def test_labels_for_a_known_story():
-    """A known story gets its title, milestone as epic and labels as features.
+    """A known story gets its title and its milestone as the epic.
 
     1. Ask for the labels of story 9
-    2. Expect: story "#9 <title>", epic = milestone, features = issue labels
+    2. Expect: story "#9 <title>", epic = milestone
     3. Expect: a link to the GitHub issue named "#9"
     """
     labels = labels_for(9, STORIES)
 
     assert labels["story"] == "#9 Registration, login, logout, password reset"
     assert labels["epic"] == "M2 · Accounts & Profiles"
-    assert labels["features"] == ["backend", "frontend"]
     assert labels["issue_url"] == "https://github.com/AndrewKchn/BauHelfer/issues/9"
     assert labels["issue_name"] == "#9"
 
@@ -113,11 +110,42 @@ def test_labels_for_an_unknown_story_fall_back_to_the_number():
     """Without data from GitHub the report still groups by "#N".
 
     1. Ask for the labels of a story that is not in the data
-    2. Expect: story "#77", no epic, no features, the issue link still works
+    2. Expect: story "#77", no epic, the issue link still works
     """
     labels = labels_for(77, STORIES)
 
     assert labels["story"] == "#77"
     assert labels["epic"] == ""
-    assert labels["features"] == []
     assert labels["issue_url"] == "https://github.com/AndrewKchn/BauHelfer/issues/77"
+
+
+@pytest.mark.parametrize(
+    ("module_doc", "level"),
+    [
+        ("Unit tests: the registration form (#9).", "Unit"),
+        (
+            "Integration tests: account pages through the test client (#9).",
+            "Integration",
+        ),
+        ("E2E tests: signup in a real browser (#14).", "E2E"),
+    ],
+)
+def test_level_comes_from_the_file_docstring(module_doc, level):
+    """The test level (Unit, Integration, E2E) is the first word of the file docstring.
+
+    1. Take a file docstring that starts with "Unit tests:", "E2E tests:" and so on
+    2. Expect: the level Unit, Integration or E2E
+    """
+    assert level_of(module_doc) == level
+
+
+@pytest.mark.parametrize(
+    "module_doc", [None, "", "Checks the settings (#5).", "Unit tests for the form."]
+)
+def test_file_docstring_without_a_level(module_doc):
+    """A file docstring that does not start with "<Level> tests:" gives no level.
+
+    1. Take a missing docstring, one without a level, or one without the colon
+    2. Expect: an empty level, which the hook reports as a problem
+    """
+    assert level_of(module_doc) == ""

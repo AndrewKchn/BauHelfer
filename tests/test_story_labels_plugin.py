@@ -18,11 +18,12 @@ STORIES_JSON = [
         "number": 9,
         "title": "Registration, login, logout, password reset",
         "milestone": {"title": "M2 · Accounts & Profiles"},
-        "labels": [{"name": "backend"}, {"name": "frontend"}],
     }
 ]
 
 TAGGED_TEST_FILE = '''
+"""Integration tests: a sample file for the plugin."""
+
 import pytest
 
 pytestmark = pytest.mark.story(9)
@@ -69,16 +70,16 @@ def run_with_allure(pytester, monkeypatch):
 
 
 def labels(result, name):
-    """All values of one Allure label type, e.g. every "feature" of a test."""
+    """All values of one Allure label type, e.g. the "story" of a test."""
     return [label["value"] for label in result["labels"] if label["name"] == name]
 
 
-def test_story_epic_and_features_come_from_github_data(run_with_allure):
-    """A test tagged story(9) is grouped under #9 with its milestone and labels.
+def test_story_and_epic_come_from_github_data(run_with_allure):
+    """A test tagged story(9) is grouped under #9 and its milestone.
 
     1. A test file tagged story(9) for all its tests
     2. Run pytest with Allure
-    3. Expect: story "#9 <title>", epic = milestone, features = issue labels
+    3. Expect: story "#9 <title>", epic = milestone, no feature labels
     """
     outcome, results = run_with_allure(TAGGED_TEST_FILE)
 
@@ -86,7 +87,7 @@ def test_story_epic_and_features_come_from_github_data(run_with_allure):
     result = results["test_wrong_password"]
     assert labels(result, "story") == ["#9 Registration, login, logout, password reset"]
     assert labels(result, "epic") == ["M2 · Accounts & Profiles"]
-    assert labels(result, "feature") == ["backend", "frontend"]
+    assert labels(result, "feature") == []
 
 
 def test_docstring_gives_the_title_and_the_steps(run_with_allure):
@@ -110,13 +111,13 @@ def test_issue_link_points_to_github(run_with_allure):
 
     1. A test tagged story(9)
     2. Run pytest with Allure
-    3. Expect: an issue link "#9" to the GitHub issue page
+    3. Expect: a plain link "#9" to the issue page (type "issue" shows a bug icon)
     """
     _, results = run_with_allure(TAGGED_TEST_FILE)
 
     links = results["test_wrong_password"]["links"]
     assert {
-        "type": "issue",
+        "type": "link",
         "name": "#9",
         "url": "https://github.com/AndrewKchn/BauHelfer/issues/9",
     } in links
@@ -164,3 +165,38 @@ def test_test_without_story_stops_the_run(run_with_allure):
     outcome.assert_outcomes()
     assert "test_lonely" in outcome.stdout.str() + outcome.stderr.str()
     assert "story" in outcome.stdout.str() + outcome.stderr.str()
+
+
+def test_suites_tab_groups_by_level_then_story(run_with_allure):
+    """The Suites tab shows the test level first, then the story.
+
+    1. A file whose docstring starts with "Integration tests:", tagged story(9)
+    2. Run pytest with Allure
+    3. Expect: parentSuite = "Integration", suite = "#9 <title>", no file-based suites
+    """
+    _, results = run_with_allure(TAGGED_TEST_FILE)
+
+    result = results["test_wrong_password"]
+    assert labels(result, "parentSuite") == ["Integration"]
+    assert labels(result, "suite") == ["#9 Registration, login, logout, password reset"]
+    assert labels(result, "subSuite") == []
+
+
+def test_file_without_a_level_stops_the_run(run_with_allure):
+    """A test file must say its level, so every test lands in Unit, Integration or E2E.
+
+    1. A tagged test with a docstring in a file whose docstring has no level
+    2. Run pytest
+    3. Expect: the run stops before any test, the error names the file and the levels
+    """
+    outcome, _ = run_with_allure(
+        '"""Checks something."""\n\nimport pytest\n\n'
+        "pytestmark = pytest.mark.story(9)\n\n"
+        'def test_x():\n    """Has a docstring."""\n'
+    )
+
+    output = outcome.stdout.str() + outcome.stderr.str()
+    assert outcome.ret != 0
+    outcome.assert_outcomes()
+    assert "test_file_without_a_level_stops_the_run.py" in output
+    assert "Unit tests:" in output

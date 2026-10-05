@@ -1,4 +1,4 @@
-"""Unit tests for the custom User model and its manager (#8)."""
+"""Unit tests: the custom User model and its manager (#8)."""
 
 import pytest
 from django.conf import settings

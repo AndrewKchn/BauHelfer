@@ -1,4 +1,4 @@
-"""Unit tests for the registration and login forms (#9)."""
+"""Unit tests: the registration and login forms (#9)."""
 
 import pytest
 from django.contrib.auth import get_user_model

@@ -1,4 +1,4 @@
-"""Checks that development and tests run on the same database as production (#2)."""
+"""Integration tests: development and tests use the same database as production (#2)."""
 
 import pytest
 from django.db import connection

@@ -1,4 +1,4 @@
-"""Checks the settings the live server on Render depends on (#5)."""
+"""Unit tests: the settings the live server on Render depends on (#5)."""
 
 import importlib
 
