@@ -740,6 +740,9 @@ session fixation, CSRF, HTTPS settings) and why production settings differ from 
 - Pushed the branch to GitHub although I had only said yes to the commit. Our rule is no push
   without an explicit yes. No harm was done (it was the ticket branch, and CI did not run), but
   AI reported it itself.
+- The deploy-check test passed locally but failed in CI (`security.W009`, weak secret
+  key): it set `SECRET_KEY` in the environment, but `base.py` had already read the short
+  CI key. My `.env` has a long key, so only CI found it. Fixed by setting the key directly.
 
 **I overruled:**
 - AI offered three options: tests for all five gaps, document only, or tests for some. I chose
