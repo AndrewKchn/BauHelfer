@@ -84,6 +84,14 @@ jobs:
         if: ${{ !cancelled() }}
         run: npx --yes allure@3.20.0 generate allure-results
 
+      - name: Show the test result on the run's Summary page
+        if: ${{ !cancelled() }}
+        run: >-
+          jq -r '.stats | "**Allure report:** \(.total) tests, \(.passed // 0) passed,
+          \(.failed // 0) failed, \(.broken // 0) broken. Download the `allure-report`
+          artifact below; the report of `main` is at https://andrewkchn.github.io/BauHelfer/"'
+          allure-report/summary.json >> "$GITHUB_STEP_SUMMARY"
+
       - name: Keep the report with this run  # download it from the run's Summary page
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
