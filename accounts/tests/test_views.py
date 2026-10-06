@@ -19,8 +19,10 @@ NEW_PASSWORD = "Neues-Passwort-2027"
 
 @pytest.fixture
 def user():
-    """An existing account to log in with."""
-    return User.objects.create_user(email="anna@example.com", password=PASSWORD)
+    """An existing account to log in with, past onboarding (has a role, #10)."""
+    return User.objects.create_user(
+        email="anna@example.com", password=PASSWORD, role=User.Role.WORKER
+    )
 
 
 def is_logged_in(client):
@@ -47,10 +49,10 @@ def test_account_pages_open_and_use_the_base_layout(client, name):
 
 
 def test_register_creates_user_logs_in_and_welcomes(client):
-    """After signup the user is logged in and welcomed on the home page.
+    """After signup the user is logged in and welcomed on the role choice page.
 
     1. Sign up as Ben@Example.com
-    2. Expect: redirect to home; ben@example.com is saved and logged in
+    2. Expect: redirect to the role choice (#10); ben@example.com is saved and logged in
     3. Expect: "Welcome to BauHelfer!" and the email in the header
     """
     response = client.post(
@@ -59,7 +61,7 @@ def test_register_creates_user_logs_in_and_welcomes(client):
         follow=True,
     )
 
-    assertRedirects(response, reverse("home"))
+    assertRedirects(response, reverse("role_select"))
     assert User.objects.filter(email="ben@example.com").exists()
     assert is_logged_in(client)
     assertContains(response, "Welcome to BauHelfer!")

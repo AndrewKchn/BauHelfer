@@ -2,12 +2,13 @@
 
 from django.contrib import messages
 from django.contrib.auth import login
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import CreateView
+from django.views.generic import CreateView, TemplateView, UpdateView
 
-from .forms import SignupForm
+from .forms import RoleForm, SignupForm
 
 
 class RegisterView(CreateView):
@@ -15,12 +16,12 @@ class RegisterView(CreateView):
 
     form_class = SignupForm
     template_name = "registration/register.html"
-    success_url = reverse_lazy("home")  # becomes the onboarding page in #10
+    success_url = reverse_lazy("role_select")  # onboarding: choose a role first (#10)
 
     def dispatch(self, request, *args, **kwargs):
         """A logged-in user has an account already: send them to the home page."""
         if request.user.is_authenticated:
-            return redirect(self.success_url)
+            return redirect("home")
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
@@ -31,3 +32,33 @@ class RegisterView(CreateView):
             self.request, _("Welcome to BauHelfer! Your account is ready.")
         )
         return response
+
+
+class RoleSelectView(LoginRequiredMixin, UpdateView):
+    """Onboarding: choose "I need workers" or "I am looking for work", once (#10).
+
+    OnboardingMiddleware sends every user without a role here.
+    """
+
+    form_class = RoleForm
+    template_name = "accounts/role_select.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        """The role is chosen once: with a role, GET and POST both go to the profile."""
+        if request.user.is_authenticated and request.user.role:
+            return redirect(request.user.get_profile_url())
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        """The form always edits the logged-in user, never a user from the URL."""
+        return self.request.user
+
+    def get_success_url(self):
+        """After choosing, go on to the profile form of the new role."""
+        return self.object.get_profile_url()
+
+
+class ProfilePlaceholderView(LoginRequiredMixin, TemplateView):
+    """Stands in for the profile forms until #11 (worker) and #12 (employer) replace it."""
+
+    template_name = "accounts/profile_placeholder.html"

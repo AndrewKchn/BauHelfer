@@ -31,6 +31,8 @@ Copy `.env.example` to `.env` before the first run.
   old one, change the version here and in `docs/PLAN.md`, rebuild CSS, run the tests.
 - `docs/PLAN.md` — plan; `docs/AI_LOG.md` — log of AI-assisted work; `docs/SECURITY.md` —
   what is protected, where, which tests check it, known limitations
+- `docs/specs/` — specs for complex tickets, written and decided before the failing tests
+  (first: `onboarding.md`, #10)
 - Django apps (`accounts/`, `jobs/`, `chat/`, …) are added ticket by ticket, see the plan
 
 ## Conventions

@@ -2,6 +2,7 @@
 
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 
@@ -88,3 +89,11 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+
+    def get_profile_url(self):
+        """The profile form for this user's role; the role choice while there is no role."""
+        url_names = {
+            self.Role.WORKER: "worker_profile_edit",
+            self.Role.EMPLOYER: "employer_profile_edit",
+        }
+        return reverse(url_names.get(self.role, "role_select"))

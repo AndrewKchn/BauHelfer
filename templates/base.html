@@ -14,17 +14,31 @@
     <div class="flex-1">
       <a href="{% url 'home' %}" class="btn btn-ghost text-xl">BauHelfer</a>
     </div>
-    {# Filled later: menu by role (#10, also show the user on phones), language switcher (M5). #}
+    {# Language switcher comes in M5. #}
     <nav class="flex-none" aria-label="{% translate 'Main navigation' %}">
       {% block nav %}
         {% if user.is_authenticated %}
-          <div class="flex items-center gap-2">
-            <span class="hidden text-sm sm:inline">{{ user.email }}</span>
-            {# Logout must be a POST form: a plain link could be triggered by another site. #}
-            <form method="post" action="{% url 'logout' %}">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-ghost btn-sm">{% translate "Log out" %}</button>
-            </form>
+          {# Logout must be a POST form: a plain link could be triggered by another site. #}
+          {# The "Log out" buttons in _nav_links.html submit it through form="logout-form". #}
+          <form id="logout-form" method="post" action="{% url 'logout' %}" class="hidden">
+            {% csrf_token %}
+          </form>
+          <div class="flex items-center gap-1">
+            {# Shown on phones too, shortened if it does not fit. #}
+            <span class="max-w-36 truncate text-sm sm:max-w-none">{{ user.email }}</span>
+            {# Phones: the links fold into a menu button, so the header fits in 360px. #}
+            <details class="dropdown dropdown-end sm:hidden">
+              <summary class="btn btn-ghost btn-sm" aria-label="{% translate 'Menu' %}">
+                <span aria-hidden="true" class="text-xl">☰</span>
+              </summary>
+              <ul class="menu dropdown-content z-10 mt-2 w-48 rounded-box bg-base-100 p-2 shadow">
+                {% include "_nav_links.html" %}
+              </ul>
+            </details>
+            {# From sm (640px) up: the same links in one row. #}
+            <ul class="menu menu-horizontal hidden p-0 sm:flex">
+              {% include "_nav_links.html" %}
+            </ul>
           </div>
         {% else %}
           <div class="flex items-center gap-2">

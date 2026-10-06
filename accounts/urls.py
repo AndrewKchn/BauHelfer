@@ -20,6 +20,18 @@ urlpatterns = [
         name="login",
     ),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),  # POST only
+    path("onboarding/", views.RoleSelectView.as_view(), name="role_select"),
+    # Placeholders: #11 and #12 put the real profile forms under these names.
+    path(
+        "profile/worker/",
+        views.ProfilePlaceholderView.as_view(),
+        name="worker_profile_edit",
+    ),
+    path(
+        "profile/employer/",
+        views.ProfilePlaceholderView.as_view(),
+        name="employer_profile_edit",
+    ),
     # Password reset in four steps: ask for the email -> "email sent" -> new password -> done.
     path(
         "password-reset/",
