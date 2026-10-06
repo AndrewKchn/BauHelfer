@@ -832,3 +832,38 @@ could click through the flow myself.
 - Spec trial: writing the spec first was worth it — the decisions were mine and written down
   before any code, and the tests came straight from the acceptance criteria. We keep specs for
   complex tickets.
+
+## 2026-10-06 · #83 Brand colors and dark mode
+
+**Task given to AI:** replace daisyUI's default black-and-white light theme with our own
+construction-coloured theme, in a light and a dark variant; dark must follow the phone's
+setting, text and buttons must pass WCAG AA contrast. I asked to see the colour proposals
+running, not only as hex codes.
+
+**AI helped:** proposed three palettes with computed WCAG contrast for every pair, then ran
+three dev servers side by side (ports 8001–8003, one CSS build each, nothing changed in the
+repo) so I could compare them in both themes. Explained the difference between hand-written
+CSS variables and daisyUI's theme plugin when I could not choose. Before writing tests it
+built a probe theme to see the real CSS daisyUI generates, and found that the plugin does not
+fill in missing variables (no `--radius-box` at all), so every theme sets all 28. Wrote 30
+tests: unit tests that compute the WCAG formula from `input.css` (after checking the formula
+itself against known values) and integration tests on the built `app.css`.
+
+**AI failed:**
+- It first recommended hand-written CSS variables because they matched the ticket's wording
+  ("no new dependency"). When I asked what is better for the whole app, it changed its
+  recommendation to the theme plugin.
+- The desktop header from #10 (plain-text menu row when logged in, real buttons when logged
+  out) looked inconsistent; AI had not noticed it. I found it while checking the pages.
+
+**I overruled:**
+- AI recommended palette B (yellow + charcoal, highest contrast). I chose C (navy + safety
+  orange): I liked it more and it looks more solid.
+- For the header AI suggested turning the desktop links into buttons. I decided to use the
+  phone's dropdown menu on every screen width instead, so it is the same everywhere. It is a
+  separate ticket (#103), not part of #83.
+
+**Learned:**
+- How `prefers-color-scheme` switches the theme in the browser, without JavaScript or server
+  code.
+- What WCAG contrast 4.5:1 means and how it is computed.
