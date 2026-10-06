@@ -789,3 +789,46 @@ Claude Code's permission check, so I set the Sprints by hand on the board.
 **Learned:** a per-sprint issue collects ideas without merge conflicts that a shared file would
 cause; updating docs once a week means they can be behind for a few days, and the comments make
 sure nothing is forgotten in the meantime.
+
+## 2026-10-06 · #10 Role selection and onboarding flow
+
+**Task given to AI:** after signup a new user must choose "I need workers" or "I am looking
+for work" and must not be able to skip it; then go to the profile form of that role, with a
+menu that differs by role. This ticket was a trial of spec-driven development: a spec with the
+decisions first, then failing tests, then code. Before the spec I asked AI to answer the
+likely defense questions and to explain middleware, the `auth` context processor and how the
+role form is sent, so I could decide with understanding.
+
+**AI helped:** drafted `docs/specs/onboarding.md` with requirements, acceptance criteria
+AC1–AC10 and five open questions, each with options and a recommendation. Wrote 18 unit tests
+(form, middleware with `RequestFactory`, `get_profile_url`) and 22 integration tests,
+including a CSRF test and "a worker cannot become an employer by posting the form again".
+Implemented `OnboardingMiddleware`, `RoleForm`, `RoleSelectView`, placeholder profile pages
+and the role menu. It checked that the tests really guard the code: with the middleware
+turned off, or the "role already chosen" check removed, 3 tests failed each time. It
+predicted that 5 tests from #9 would break (their user had no role) and fixed them with a
+minimal change. It also created three local test users (worker, employer, no role) so I
+could click through the flow myself.
+
+**AI failed:**
+- The header overflowed on phones: at 360px the logo, role link, email and "Log out" did not
+  fit (about 460px). AI had not counted the width, and the test client cannot see layout.
+  I found it in the browser.
+- AI pushed the branch expecting CI to run, but CI runs only on pull requests and on `main`.
+
+**I overruled:**
+- For the phone header AI offered a ☰ menu button, hiding the email again, or a two-line
+  header. I chose the menu button but asked to keep the user's email next to it, so it is
+  always visible who is logged in.
+- I asked to open the PR before the AI_LOG entry (CLAUDE.md says the other way round) so CI
+  would run earlier and serve as evidence for "Done when…".
+
+**Learned:**
+- How a request passes through middleware, and why deny-by-default is safer than a check in
+  each view.
+- Hiding a button is not security: the server must check, and tests prove it.
+- When a page looks wrong after a CSS change, reload without the cache first: the menu seemed
+  to stretch the header, but it was my browser's cached old CSS, not the code.
+- Spec trial: writing the spec first was worth it — the decisions were mine and written down
+  before any code, and the tests came straight from the acceptance criteria. We keep specs for
+  complex tickets.
