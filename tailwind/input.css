@@ -9,9 +9,88 @@
 @source "../templates";  /* project templates */
 @source "../*/templates";  /* app templates, e.g. accounts/templates/ */
 
-/* daisyUI 5.7.47 (downloaded file): ready classes like btn, navbar, alert. Light theme only. */
+/* daisyUI 5.7.47 (downloaded file): ready classes like btn, navbar, alert.
+ * themes: false: none of daisyUI's built-in themes, only our two below. */
 @plugin "./daisyui.mjs" {
-  themes: light --default;
+  themes: false;
+}
+
+/*
+ * Our themes, made with daisyUI's theme plugin (daisyui-theme.mjs, same release).
+ * Templates use the colour names (bg-base-100, btn-primary, ...), so they change with the theme.
+ * The plugin does not fill in missing variables: every theme sets all of them (a test checks it).
+ * Colours are #RRGGBB, so tests/test_theme_contrast.py can check WCAG AA contrast.
+ * Sizes and radii are the values of daisyUI's own light theme.
+ */
+
+/* Light: warm white, navy buttons, safety orange as accent. Default for every page. */
+@plugin "./daisyui-theme.mjs" {
+  name: "bauhelfer-light";
+  default: true;
+  color-scheme: light;
+  --color-base-100: #FFFBF5;
+  --color-base-200: #FDF1E2;
+  --color-base-300: #F8E3C8;
+  --color-base-content: #1E293B;
+  --color-primary: #1E3A5F;
+  --color-primary-content: #FFFFFF;
+  --color-secondary: #475569;
+  --color-secondary-content: #FFFFFF;
+  --color-accent: #F97316;
+  --color-accent-content: #1E293B;
+  --color-neutral: #1E293B;
+  --color-neutral-content: #F8FAFC;
+  --color-info: #0369A1;
+  --color-info-content: #FFFFFF;
+  --color-success: #15803D;
+  --color-success-content: #FFFFFF;
+  --color-warning: #F59E0B;
+  --color-warning-content: #1E293B;
+  --color-error: #B91C1C;
+  --color-error-content: #FFFFFF;
+  --radius-selector: 0.5rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+
+/* Dark: navy background, orange buttons. Used when the device is in dark mode. */
+@plugin "./daisyui-theme.mjs" {
+  name: "bauhelfer-dark";
+  prefersdark: true;
+  color-scheme: dark;
+  --color-base-100: #0F172A;
+  --color-base-200: #0B1120;
+  --color-base-300: #020617;
+  --color-base-content: #E2E8F0;
+  --color-primary: #F97316;
+  --color-primary-content: #0F172A;
+  --color-secondary: #94A3B8;
+  --color-secondary-content: #0F172A;
+  --color-accent: #FDBA74;
+  --color-accent-content: #0F172A;
+  --color-neutral: #1E293B;
+  --color-neutral-content: #E2E8F0;
+  --color-info: #38BDF8;
+  --color-info-content: #0F172A;
+  --color-success: #4ADE80;
+  --color-success-content: #0F172A;
+  --color-warning: #FBBF24;
+  --color-warning-content: #0F172A;
+  --color-error: #F87171;
+  --color-error-content: #0F172A;
+  --radius-selector: 0.5rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
 }
 
 /* Built in templates as alert-{{ message.level_tag }}, so the scanner cannot see them. */

@@ -23,10 +23,12 @@ Copy `.env.example` to `.env` before the first run.
 
 - `config/settings/` — `base.py` (shared), `local.py` (dev), `production.py` (Render)
 - `templates/` — Django templates; every page extends `base.html` (a test checks it)
-- `tailwind/` — `input.css` + `daisyui.mjs`, built into `static/css/app.css` (not in git)
+- `tailwind/` — `input.css` (with our light/dark themes) + `daisyui.mjs` + `daisyui-theme.mjs`,
+  built into `static/css/app.css` (not in git)
 - `static/` — `js/htmx.min.js` (downloaded, served by WhiteNoise, no CDN)
-- Downloaded third-party files, never edited by hand: `tailwind/daisyui.mjs` (daisyUI 5.7.47,
-  used only while building CSS) and `static/js/htmx.min.js` (HTMX 2.0.10). Marked
+- Downloaded third-party files, never edited by hand: `tailwind/daisyui.mjs` and
+  `tailwind/daisyui-theme.mjs` (daisyUI 5.7.47, both from the same release, used only while
+  building CSS) and `static/js/htmx.min.js` (HTMX 2.0.10). Marked
   `linguist-vendored` in `.gitattributes`. To update: download the new release file over the
   old one, change the version here and in `docs/PLAN.md`, rebuild CSS, run the tests.
 - `docs/PLAN.md` — plan; `docs/AI_LOG.md` — log of AI-assisted work; `docs/SECURITY.md` —
