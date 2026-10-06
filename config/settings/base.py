@@ -38,6 +38,8 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    # Needs request.user, so it comes after AuthenticationMiddleware.
+    "accounts.middleware.OnboardingMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 

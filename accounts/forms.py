@@ -1,5 +1,6 @@
-"""Forms for signing up, logging in and for the user admin pages."""
+"""Forms for signing up, logging in, choosing a role and for the user admin pages."""
 
+from django import forms
 from django.contrib.auth.forms import (
     AdminUserCreationForm,
     AuthenticationForm,
@@ -54,3 +55,20 @@ class LoginForm(AuthenticationForm):
             **self.error_messages,
             "invalid_login": _("Wrong email or password."),
         }
+
+
+class RoleForm(forms.ModelForm):
+    """Onboarding: the user picks "employer" or "worker" (#10).
+
+    Only the role field is listed, so other fields sent with the form (like is_staff)
+    are ignored. Django checks the value against User.Role, so "admin" is rejected.
+    """
+
+    class Meta:
+        model = User
+        fields = ("role",)
+
+    def __init__(self, *args, **kwargs):
+        """Make the role required: the model allows an empty role only for admins."""
+        super().__init__(*args, **kwargs)
+        self.fields["role"].required = True
