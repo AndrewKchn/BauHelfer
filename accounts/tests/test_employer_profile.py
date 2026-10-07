@@ -144,7 +144,7 @@ def test_trade_names_are_readable():
     """Stored codes are shown as names, in the order they were chosen.
 
     1. Take a profile with trades window_fitting, plumbing_heating, private_person
-    2. Expect: "Window fitting", "Plumbing & heating", "Private person / own renovation"
+    2. Expect: "Window fitting", "Plumbing & heating", "Private person"
     """
     profile = EmployerProfile(
         trades=["window_fitting", "plumbing_heating", "private_person"]
@@ -153,7 +153,7 @@ def test_trade_names_are_readable():
     assert profile.trade_names() == [
         "Window fitting",
         "Plumbing & heating",
-        "Private person / own renovation",
+        "Private person",
     ]
 
 

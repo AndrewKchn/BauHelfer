@@ -17,7 +17,7 @@ R2. Fields:
     - `trades`: one or more values from a fixed list, `Trade` (see D1), stored as a PostgreSQL
       `ArrayField` like `WorkerProfile.skills`: window fitting, drywall, plastering, painting,
       tiling, roofing, bricklaying, carpentry, electrical, plumbing & heating, landscaping,
-      demolition, general contractor, private person / own renovation, other.
+      demolition, general contractor, private person, other.
 R3. The profile form also edits `User.name` (required, the contact person) and `User.phone`
     (optional), with the same `NameAndPhoneForm` as the worker profile (#11, D5).
 R4. Two pages, only for the logged-in employer's own profile (no id in the URL), see D3:
@@ -31,8 +31,10 @@ R5. Both pages require login (anonymous → login page) and the employer role. A
     the worker in #11 (D7). This closes the employer half of the gap from #10.
 R6. After the role choice (#10) an employer still goes to `employer_profile_edit`. The menu
     item "My company" now links to `employer_profile`.
-R7. The profile page shows the company name if it is set, otherwise the person's name, and
-    the trade names. Trades are checkboxes in the form. Everything is usable on a phone.
+R7. The profile page is titled "My company", like "My profile" for workers. It shows the
+    company name (if set), the contact person and the trade names. `display_name()` (the
+    company, or the person's name without one) is ready for the job page (#19). Trades are
+    checkboxes in the form. Everything is usable on a phone.
 R8. The read-only block (name, company, trades, no contact details) is a separate template, so
     the job page (#19) can reuse it.
 R9. Admin: the user page in /admin/ shows the employer profile inline and can edit it.
@@ -74,14 +76,18 @@ Each question was offered with options and a recommendation.
 
 D1. **Trades: a fixed list in code (`TextChoices`), several can be chosen, stored as an
     `ArrayField`.** Workers read the site in their own language, and only a fixed list can be
-    translated by `.po` files. The list includes "private person / own renovation" for people
-    who are not a business, and "other" without a text field: the trade is information only,
+    translated by `.po` files. The list includes "private person" for people who are not a
+    business, and "other" without a text field: the trade is information only,
     no logic depends on it, so combinations are not checked. Rejected: free text (cannot be
     translated, typos); a list plus a free-text field for "other"; a single trade (many firms
     do two things, e.g. drywall and painting — the student chose several). The student wants
     users to be able to extend the list later (through support or another way): recorded as
-    an idea for #94, not built here.
+    an idea for #94, not built here. While trying the profile page on a phone, the student
+    shortened "private person / own renovation" to "private person": the long name did not
+    fit its badge. Long names in other languages are revisited with the translations (M5).
 D2. **Company name optional, contact name required.** A private person renovating a flat has
     no company. Rejected: company required; one combined name field.
 D3. **Two pages: a read-only profile page and an edit form**, the same pattern as the worker
-    profile. Rejected: a single page with only the form.
+    profile. Rejected: a single page with only the form. After comparing both profiles, the
+    student also made the page title fixed ("My company") instead of the company name, as on
+    the worker page: the name was shown twice, and a long name broke the title on a phone.

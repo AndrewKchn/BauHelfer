@@ -218,7 +218,7 @@ class Trade(models.TextChoices):
     LANDSCAPING = "landscaping", _("Landscaping")
     DEMOLITION = "demolition", _("Demolition")
     GENERAL_CONTRACTOR = "general_contractor", _("General contractor")
-    PRIVATE_PERSON = "private_person", _("Private person / own renovation")
+    PRIVATE_PERSON = "private_person", _("Private person")
     OTHER = "other", _("Other")
 
 
