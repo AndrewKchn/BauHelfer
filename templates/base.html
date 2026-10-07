@@ -18,27 +18,32 @@
     <nav class="flex-none" aria-label="{% translate 'Main navigation' %}">
       {% block nav %}
         {% if user.is_authenticated %}
-          {# Logout must be a POST form: a plain link could be triggered by another site. #}
-          {# The "Log out" buttons in _nav_links.html submit it through form="logout-form". #}
-          <form id="logout-form" method="post" action="{% url 'logout' %}" class="hidden">
-            {% csrf_token %}
-          </form>
           <div class="flex items-center gap-1">
             {# Shown on phones too, shortened if it does not fit. #}
             <span class="max-w-36 truncate text-sm sm:max-w-none">{{ user.email }}</span>
-            {# Phones: the links fold into a menu button, so the header fits in 360px. #}
-            <details class="dropdown dropdown-end sm:hidden">
+            {# One menu button on every screen width, so the header fits in 360px and looks the same everywhere. #}
+            <details class="dropdown dropdown-end">
               <summary class="btn btn-ghost btn-sm" aria-label="{% translate 'Menu' %}">
                 <span aria-hidden="true" class="text-xl">☰</span>
               </summary>
               <ul class="menu dropdown-content z-10 mt-2 w-48 rounded-box bg-base-100 p-2 shadow">
-                {% include "_nav_links.html" %}
+                {# Only pages that exist; #16, #18 and #20 add their own links (spec decision D4). #}
+                {% if user.role == "worker" %}
+                  <li><a href="{% url 'worker_profile' %}">{% translate "My profile" %}</a></li>
+                {% elif user.role == "employer" %}
+                  <li><a href="{% url 'employer_profile' %}">{% translate "My company" %}</a></li>
+                {% endif %}
+                <li>
+                  {# Logout must be a POST form: a plain link could be triggered by another site. #}
+                  {# daisyUI styles the form as the menu item; block + p-0 hand the padding to the #}
+                  {# button, so the whole row is clickable, not only the text. #}
+                  <form method="post" action="{% url 'logout' %}" class="block p-0">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full cursor-pointer px-3 py-1.5 text-start">{% translate "Log out" %}</button>
+                  </form>
+                </li>
               </ul>
             </details>
-            {# From sm (640px) up: the same links in one row. #}
-            <ul class="menu menu-horizontal hidden p-0 sm:flex">
-              {% include "_nav_links.html" %}
-            </ul>
           </div>
         {% else %}
           <div class="flex items-center gap-2">

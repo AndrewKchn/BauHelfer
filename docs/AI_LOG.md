@@ -950,3 +950,28 @@ Drafted six comments for the M2 docs sync (#94) and the PR.
 **Learned:**
 - Why a flex title does not wrap a long word, while a grid cell with `min-w-0` does.
 - Why changing a choice label needs no new migration when the migration is not shared yet.
+
+## 2026-10-07 · #103 Header: same dropdown menu on desktop as on phone
+
+**Task given to AI:** pick a small next ticket after #12, then build #103: show the logged-in
+links in the phone's dropdown menu on every screen width (my decision from #83).
+
+**AI helped:** compared three small M2 tickets (#85, #103, #13) and recommended #103. Showed
+how the header worked (two copies of the links through `_nav_links.html`, a hidden logout form
+submitted by two buttons) and offered three options for the partial and the form. When I asked,
+explained in detail why the partial and the hidden form existed and why both stop being needed
+with one menu. Wrote two failing tests (each link appears once, the dropdown has no `*hidden`
+class, the "Log out" button sits inside the POST form), the new header, and three comments
+for #94.
+
+**AI failed:** after moving "Log out" into a form, daisyUI styled the form as the menu item:
+the whole row lit up on hover, but only the text was clickable. AI found it by reading
+daisyUI's CSS rule before I tried it, and fixed it with `block p-0` on the form and padding on
+the button.
+
+**I overruled:** nothing this time — I asked for a fuller explanation of the options, then
+chose the recommended one (no partial, logout form inside the menu item).
+
+**Learned:**
+- Why logout must be a POST form with a CSRF token, not a link.
+- Why a daisyUI rule inside `:where()` loses to a Tailwind utility class.
