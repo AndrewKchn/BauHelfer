@@ -114,7 +114,8 @@ class WorkerProfileEditView(WorkerRequiredMixin, View):
     def post(self, request):
         """Save both forms if both are valid; otherwise show them again with errors."""
         user_form, profile_form = self.get_forms(request.POST)
-        # A list, not "and": both forms are checked, so all errors show at once.
+        # A list, not "and": both forms are validated here, in one place. (With "and" the
+        # second form would still show its errors: form.errors validates on first use.)
         if all([user_form.is_valid(), profile_form.is_valid()]):
             with transaction.atomic():  # both saves, or none
                 user_form.save()
