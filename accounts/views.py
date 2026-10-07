@@ -2,13 +2,15 @@
 
 from django.contrib import messages
 from django.contrib.auth import login
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import redirect
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db import transaction
+from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import CreateView, TemplateView, UpdateView
+from django.views.generic import CreateView, TemplateView, UpdateView, View
 
-from .forms import RoleForm, SignupForm
+from .forms import NameAndPhoneForm, RoleForm, SignupForm, WorkerProfileForm
+from .models import User
 
 
 class RegisterView(CreateView):
@@ -58,7 +60,81 @@ class RoleSelectView(LoginRequiredMixin, UpdateView):
         return self.object.get_profile_url()
 
 
+class WorkerRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
+    """Worker pages only: guests go to login, other logged-in users get 403 (spec D7)."""
+
+    def test_func(self):
+        """Runs after the login check, so request.user is a real user here."""
+        return self.request.user.role == User.Role.WORKER
+
+
+class WorkerProfileView(WorkerRequiredMixin, TemplateView):
+    """The worker's own profile, read-only, with an "Edit" button (#11).
+
+    Always the logged-in worker's profile: there is no id in the URL to change.
+    """
+
+    template_name = "accounts/worker_profile.html"
+
+    def get(self, request, *args, **kwargs):
+        """No profile yet: there is nothing to show, so go straight to the form."""
+        if not hasattr(request.user, "worker_profile"):
+            return redirect("worker_profile_edit")
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        """Give the template the profile as `profile`."""
+        context = super().get_context_data(**kwargs)
+        context["profile"] = self.request.user.worker_profile
+        return context
+
+
+class WorkerProfileEditView(WorkerRequiredMixin, View):
+    """Create or edit the worker profile: two forms in one <form> (#11).
+
+    NameAndPhoneForm changes the User, WorkerProfileForm the WorkerProfile.
+    """
+
+    template_name = "accounts/worker_profile_form.html"
+
+    def get_forms(self, data=None):
+        """Both forms for the logged-in user; without data they show the saved values."""
+        user = self.request.user
+        profile = getattr(user, "worker_profile", None)  # None until the first save
+        return (
+            NameAndPhoneForm(data, instance=user),
+            WorkerProfileForm(data, instance=profile),
+        )
+
+    def get(self, request):
+        """Show the forms."""
+        user_form, profile_form = self.get_forms()
+        return self.show(user_form, profile_form)
+
+    def post(self, request):
+        """Save both forms if both are valid; otherwise show them again with errors."""
+        user_form, profile_form = self.get_forms(request.POST)
+        # A list, not "and": both forms are checked, so all errors show at once.
+        if all([user_form.is_valid(), profile_form.is_valid()]):
+            with transaction.atomic():  # both saves, or none
+                user_form.save()
+                profile = profile_form.save(commit=False)
+                profile.user = request.user
+                profile.save()
+            messages.success(request, _("Profile saved."))
+            return redirect("worker_profile")
+        return self.show(user_form, profile_form)
+
+    def show(self, user_form, profile_form):
+        """Render the page with both forms."""
+        return render(
+            self.request,
+            self.template_name,
+            {"user_form": user_form, "profile_form": profile_form},
+        )
+
+
 class ProfilePlaceholderView(LoginRequiredMixin, TemplateView):
-    """Stands in for the profile forms until #11 (worker) and #12 (employer) replace it."""
+    """Stands in for the employer profile form until #12 replaces it."""
 
     template_name = "accounts/profile_placeholder.html"

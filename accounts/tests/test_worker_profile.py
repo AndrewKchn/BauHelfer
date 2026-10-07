@@ -51,10 +51,10 @@ def valid_form_data(**fields):
 
 
 def test_skill_list():
-    """The skills are the eight helper jobs agreed in the spec.
+    """The skills are the ten helper jobs agreed in the spec.
 
     1. Read the values of Skill
-    2. Expect: exactly the eight skills from the spec, in that order
+    2. Expect: exactly the ten skills from the spec, in that order
     """
     assert Skill.values == [
         "demolition",
@@ -63,7 +63,9 @@ def test_skill_list():
         "earthworks",
         "site_cleaning",
         "scaffolding",
+        "masonry",
         "drywall",
+        "plastering",
         "painting",
     ]
 

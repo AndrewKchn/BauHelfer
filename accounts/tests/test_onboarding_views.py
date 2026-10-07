@@ -252,23 +252,26 @@ def test_role_cannot_be_changed_by_posting_the_form_again(client):
 
 
 @pytest.mark.parametrize(
-    ("role", "shown", "hidden"),
-    [("worker", "My profile", "My company"), ("employer", "My company", "My profile")],
+    ("role", "shown", "hidden", "url_name"),
+    [
+        # Since #11 the worker's link opens the profile page, not the form.
+        ("worker", "My profile", "My company", "worker_profile"),
+        ("employer", "My company", "My profile", "employer_profile_edit"),
+    ],
 )
-def test_menu_shows_the_profile_link_of_the_role(client, role, shown, hidden):
+def test_menu_shows_the_profile_link_of_the_role(client, role, shown, hidden, url_name):
     """The menu links to the profile of the user's own role only.
 
     1. Log in as a worker / employer
     2. Open the home page
     3. Expect: "My profile" / "My company" linking to that profile, not the other one
     """
-    user = user_with_role(role)
-    client.force_login(user)
+    client.force_login(user_with_role(role))
 
     response = client.get(reverse("home"))
 
     assertContains(response, shown)
-    assertContains(response, f'href="{user.get_profile_url()}"')
+    assertContains(response, f'href="{reverse(url_name)}"')
     assertNotContains(response, hidden)
 
 

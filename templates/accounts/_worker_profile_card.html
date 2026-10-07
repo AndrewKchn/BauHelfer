@@ -1,0 +1,26 @@
+{% load i18n %}
+{% comment %}
+  What a worker offers, read-only. Used on the worker's own profile page; #23 will show it to
+  employers, so no contact details here (phone and email are revealed only after acceptance, #25).
+  Needs `profile` (a WorkerProfile).
+{% endcomment %}
+<dl class="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-4 sm:gap-x-6">
+  <dt class="font-semibold">{% translate "Name" %}</dt>
+  <dd class="min-w-0 break-words">{{ profile.user.name }}</dd>
+
+  <dt class="font-semibold">{% translate "Team" %}</dt>
+  <dd class="min-w-0 break-words">{{ profile.team_label }}</dd>
+
+  <dt class="font-semibold">{% translate "Skills" %}</dt>
+  <dd class="flex min-w-0 flex-wrap gap-2">
+    {% for name in profile.skill_names %}<span class="badge badge-outline">{{ name }}</span>{% endfor %}
+  </dd>
+
+  <dt class="font-semibold">{% translate "Languages" %}</dt>
+  <dd class="flex min-w-0 flex-wrap gap-2">
+    {% for name in profile.language_names %}<span class="badge badge-outline">{{ name }}</span>{% endfor %}
+  </dd>
+
+  <dt class="font-semibold">{% translate "Legal status" %}</dt>
+  <dd class="min-w-0 break-words">{{ profile.get_legal_status_display }}</dd>
+</dl>

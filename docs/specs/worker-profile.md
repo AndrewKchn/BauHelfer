@@ -18,7 +18,8 @@ R2. Fields:
       check this for forms, and a database `CheckConstraint` rejects it even without a form.
     - `skills`: one or more values from a fixed list, `Skill` (see D1):
       demolition, debris clearing, carrying materials, earthworks / digging, site cleaning,
-      scaffolding helper, drywall / plastering helper, painting helper.
+      scaffolding helper, bricklayer's helper, drywall helper, plastering helper, painting
+      helper.
     - `languages`: one or more spoken languages from a fixed list, `SpokenLanguage` (see D2):
       German, English, Russian, Ukrainian, Polish, Romanian, Turkish, Bulgarian, Croatian,
       Serbian, Bosnian, Hungarian, Albanian, Arabic, Italian. These are separate from
@@ -80,7 +81,9 @@ Each question was offered with options and a recommendation.
 
 D1. **Skills: a fixed list in code (`TextChoices`), stored as a PostgreSQL `ArrayField`.**
     The names are translated by `.po` files like the rest of the UI, and the same list can
-    become the job types in #15. Rejected: `Skill` / `Language` tables with ManyToMany. An admin
+    become the job types in #15. While trying the form, the student split "drywall /
+    plastering helper" in two (the long name did not fit one line on a phone) and added
+    "bricklayer's helper" (Maurerhelfer), so the list has ten skills. Rejected: `Skill` / `Language` tables with ManyToMany. An admin
     could add skills without a deploy, but the names would sit in the database where `.po`
     files cannot translate them.
 D2. **Spoken languages: the 7 UI languages plus 8 common among Munich construction workers**

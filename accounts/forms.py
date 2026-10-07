@@ -1,4 +1,4 @@
-"""Forms for signing up, logging in, choosing a role and for the user admin pages."""
+"""Forms for signing up, logging in, choosing a role, the profiles and the user admin."""
 
 from django import forms
 from django.contrib.auth.forms import (
@@ -9,7 +9,7 @@ from django.contrib.auth.forms import (
 )
 from django.utils.translation import gettext_lazy as _
 
-from .models import User
+from .models import Skill, SpokenLanguage, User, WorkerProfile
 
 
 # Django's admin forms are tied to the default User with a username field;
@@ -72,3 +72,53 @@ class RoleForm(forms.ModelForm):
         """Make the role required: the model allows an empty role only for admins."""
         super().__init__(*args, **kwargs)
         self.fields["role"].required = True
+
+
+class NameAndPhoneForm(forms.ModelForm):
+    """The user's own name and phone, shown on the profile forms (#11).
+
+    These live on User, not on the profile, so the profile page uses two forms at once.
+    """
+
+    class Meta:
+        model = User
+        fields = ("name", "phone")
+
+    def __init__(self, *args, **kwargs):
+        """Make the name required: employers need to know who applied (spec D5)."""
+        super().__init__(*args, **kwargs)
+        self.fields["name"].required = True
+
+
+class WorkerProfileForm(forms.ModelForm):
+    """The worker profile: team size, skills, languages and legal status (#11).
+
+    No user field: the view always saves the profile for the logged-in user.
+    """
+
+    # An ArrayField gets a comma-separated text box by default; checkboxes are easier.
+    skills = forms.MultipleChoiceField(
+        label=_("Skills"),
+        choices=Skill.choices,
+        widget=forms.CheckboxSelectMultiple(attrs={"class": "checkbox"}),
+    )
+    languages = forms.MultipleChoiceField(
+        label=_("Languages you speak"),
+        choices=SpokenLanguage.choices,
+        widget=forms.CheckboxSelectMultiple(attrs={"class": "checkbox"}),
+    )
+    # Declared here, so the radio buttons have no empty "---------" choice.
+    legal_status = forms.ChoiceField(
+        label=_("Legal status"),
+        choices=WorkerProfile.LegalStatus.choices,
+        widget=forms.RadioSelect(attrs={"class": "radio"}),
+    )
+
+    class Meta:
+        model = WorkerProfile
+        fields = ("team_size", "skills", "languages", "legal_status")
+
+    def __init__(self, *args, **kwargs):
+        """Let the browser's number field allow only 1-10, like the model."""
+        super().__init__(*args, **kwargs)
+        self.fields["team_size"].widget.attrs.update(min=1, max=10)
