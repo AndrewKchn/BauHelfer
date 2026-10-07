@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "My company" %} · BauHelfer{% endblock %}
+
+{% block content %}
+  <div class="card bg-base-100 shadow-sm">
+    <div class="card-body gap-6">
+      <h1 class="card-title text-2xl">{% translate "My company" %}</h1>
+
+      {% include "accounts/_employer_profile_card.html" %}
+
+      {# Contact details: only on the employer's own page, not in the card workers will see. #}
+      <div>
+        <h2 class="text-lg font-semibold">{% translate "Contact details" %}</h2>
+        <p class="text-sm text-base-content/70">{% translate "Workers see these only after you accept their application." %}</p>
+        <dl class="mt-2 grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 sm:gap-x-6">
+          <dt class="font-semibold">{% translate "Email" %}</dt>
+          <dd class="min-w-0 break-words">{{ profile.user.email }}</dd>
+          <dt class="font-semibold">{% translate "Phone" %}</dt>
+          <dd class="min-w-0 break-words">{{ profile.user.phone|default:_("not given") }}</dd>
+        </dl>
+      </div>
+
+      <div class="card-actions">
+        <a href="{% url 'employer_profile_edit' %}" class="btn btn-primary w-full sm:w-auto">{% translate "Edit profile" %}</a>
+      </div>
+    </div>
+  </div>
+{% endblock %}

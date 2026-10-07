@@ -27,10 +27,14 @@ urlpatterns = [
         views.WorkerProfileEditView.as_view(),
         name="worker_profile_edit",
     ),
-    # Placeholder: #12 puts the real employer profile form under this name.
     path(
         "profile/employer/",
-        views.ProfilePlaceholderView.as_view(),
+        views.EmployerProfileView.as_view(),
+        name="employer_profile",
+    ),
+    path(
+        "profile/employer/edit/",
+        views.EmployerProfileEditView.as_view(),
         name="employer_profile_edit",
     ),
     # Password reset in four steps: ask for the email -> "email sent" -> new password -> done.

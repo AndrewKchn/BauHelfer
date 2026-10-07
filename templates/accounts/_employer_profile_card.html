@@ -1,0 +1,20 @@
+{% load i18n %}
+{% comment %}
+  Who the employer is, read-only. Used on the employer's own profile page; #19 will show it to
+  workers on the job page, so no contact details here (revealed only after acceptance, #25).
+  Needs `profile` (an EmployerProfile).
+{% endcomment %}
+<dl class="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-4 sm:gap-x-6">
+  {% if profile.company_name %}
+    <dt class="font-semibold">{% translate "Company" %}</dt>
+    <dd class="min-w-0 break-words">{{ profile.company_name }}</dd>
+  {% endif %}
+
+  <dt class="font-semibold">{% translate "Contact person" %}</dt>
+  <dd class="min-w-0 break-words">{{ profile.user.name }}</dd>
+
+  <dt class="font-semibold">{% translate "Trades" %}</dt>
+  <dd class="flex min-w-0 flex-wrap gap-2">
+    {% for name in profile.trade_names %}<span class="badge badge-outline">{{ name }}</span>{% endfor %}
+  </dd>
+</dl>

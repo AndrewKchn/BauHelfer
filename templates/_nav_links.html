@@ -7,6 +7,6 @@
 {% if user.role == "worker" %}
   <li><a href="{% url 'worker_profile' %}">{% translate "My profile" %}</a></li>
 {% elif user.role == "employer" %}
-  <li><a href="{{ user.get_profile_url }}">{% translate "My company" %}</a></li>
+  <li><a href="{% url 'employer_profile' %}">{% translate "My company" %}</a></li>
 {% endif %}
 <li><button type="submit" form="logout-form">{% translate "Log out" %}</button></li>

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Edit profile" %} · BauHelfer{% endblock %}
+
+{% block content %}
+  <div class="card bg-base-100 shadow-sm">
+    <div class="card-body">
+      <h1 class="card-title text-2xl">{% translate "My company" %}</h1>
+      <p class="text-sm text-base-content/70">{% translate "Workers read this on your jobs." %}</p>
+      {# Two forms, one <form>: name and phone are saved on the user, the rest on the profile. #}
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% include "_form_fields.html" with form=user_form %}
+        {% include "_form_fields.html" with form=profile_form %}
+        <button type="submit" class="btn btn-primary mt-4 w-full">{% translate "Save profile" %}</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}
