@@ -21,12 +21,13 @@ urlpatterns = [
     ),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),  # POST only
     path("onboarding/", views.RoleSelectView.as_view(), name="role_select"),
-    # Placeholders: #11 and #12 put the real profile forms under these names.
+    path("profile/worker/", views.WorkerProfileView.as_view(), name="worker_profile"),
     path(
-        "profile/worker/",
-        views.ProfilePlaceholderView.as_view(),
+        "profile/worker/edit/",
+        views.WorkerProfileEditView.as_view(),
         name="worker_profile_edit",
     ),
+    # Placeholder: #12 puts the real employer profile form under this name.
     path(
         "profile/employer/",
         views.ProfilePlaceholderView.as_view(),

@@ -62,7 +62,8 @@ test: docstring = short line (the title in the Allure report) + numbered steps e
 - The student is new to Django: explain each part as it is written.
 - Offer real choices with a recommendation; the student decides. Record when they reject or
   change a suggestion — it goes into `docs/AI_LOG.md`.
-- Never commit, push or open a PR without an explicit "yes". Never merge.
+- Never commit, push or open a PR without an explicit "yes". Never merge. Exception, agreed
+  in #11: the draft PR of step 5 below is opened without asking (its commits were approved).
 
 ## Ticket workflow
 
@@ -74,14 +75,17 @@ test: docstring = short line (the title in the Allure report) + numbered steps e
 4. Draft one comment per item for the sprint's "Docs sync — Mx" issue: a new idea, an open
    question, a doc change needed, or a security / personal-data change (linked to its code and
    tests, for `docs/SECURITY.md`). Show them; after "yes", post them with `gh issue comment`.
-5. Go through the ticket's "Done when…" list: show each item with its evidence (test, commit,
-   CI run). After "yes", tick them in the issue (`- [ ]` → `- [x]` via `gh issue edit`);
-   closing the issue does not tick them.
-6. Run `/ai-log`: drafts the AI_LOG entry; the student edits. The PR has no "AI usage" section:
+5. Push the branch and open a **draft** PR (`gh pr create --draft`, `Closes #N` in the body);
+   wait for CI (`gh pr checks --watch`).
+6. When CI is green, tick every "Done when…" item that has evidence (test, commit, CI run) in
+   the issue (`- [ ]` → `- [x]` via `gh issue edit`) without asking again, then show the list
+   with its evidence. An item without evidence stays unticked and is raised with the student.
+   Closing the issue does not tick them.
+7. Run `/ai-log`: drafts the AI_LOG entry; the student edits. The PR has no "AI usage" section:
    the AI_LOG entry is the record.
-7. After "yes": the AI_LOG entry goes in its own last commit ("Add AI_LOG entry for #N"),
-   then `gh pr create` with `Closes #N` in the body.
-8. The student merges on GitHub with "Create a merge commit" (squash is disabled to keep the
+8. After "yes": the AI_LOG entry goes in its own last commit ("Add AI_LOG entry for #N"),
+   push, then `gh pr ready`.
+9. The student merges on GitHub with "Create a merge commit" (squash is disabled to keep the
    separate commits); the branch is deleted and the card moves to Done automatically.
    `main` is protected: no direct pushes, every change goes through a PR.
 

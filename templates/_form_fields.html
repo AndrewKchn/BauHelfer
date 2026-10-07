@@ -2,6 +2,7 @@
   All fields of a form with daisyUI styles. Use inside <form>: {% include "_form_fields.html" %}
   Errors of the whole form (e.g. wrong password at login) go on top in a red alert box,
   errors of one field go right under that field, and the field gets a red border.
+  Checkbox and radio groups (several choices) get a legend and one row per choice.
 {% endcomment %}
 {% if form.non_field_errors %}
   <div role="alert" class="alert alert-error mb-2">
@@ -11,9 +12,19 @@
 {% for field in form.hidden_fields %}{{ field }}{% endfor %}
 {% for field in form.visible_fields %}
   <fieldset class="fieldset">
-    <label class="fieldset-legend" for="{{ field.id_for_label }}">{{ field.label }}</label>
-    {# daisyUI 5 styles a bare <input> placed inside an element with the "input" class. #}
-    <label class="input w-full{% if field.errors %} input-error{% endif %}">{{ field }}</label>
+    {% if field.widget_type == "checkboxselectmultiple" or field.widget_type == "radioselect" %}
+      {# A group has no single input to point a <label for> at, so it gets a <legend>. #}
+      <legend class="fieldset-legend">{{ field.label }}</legend>
+      <div class="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-3">
+        {% for choice in field %}
+          <label class="flex cursor-pointer items-center gap-2 text-base">{{ choice.tag }} {{ choice.choice_label }}</label>
+        {% endfor %}
+      </div>
+    {% else %}
+      <label class="fieldset-legend" for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {# daisyUI 5 styles a bare <input> placed inside an element with the "input" class. #}
+      <label class="input w-full{% if field.errors %} input-error{% endif %}">{{ field }}</label>
+    {% endif %}
     {% if field.help_text %}
       {# Help text can be an HTML list (password rules from Django), hence |safe. #}
       <div id="{{ field.auto_id }}_helptext" class="text-sm text-base-content/70 [&_ul]:list-disc [&_ul]:pl-5">{{ field.help_text|safe }}</div>

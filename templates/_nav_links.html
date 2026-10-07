@@ -5,7 +5,7 @@
   their own links (spec decision D4).
 {% endcomment %}
 {% if user.role == "worker" %}
-  <li><a href="{{ user.get_profile_url }}">{% translate "My profile" %}</a></li>
+  <li><a href="{% url 'worker_profile' %}">{% translate "My profile" %}</a></li>
 {% elif user.role == "employer" %}
   <li><a href="{{ user.get_profile_url }}">{% translate "My company" %}</a></li>
 {% endif %}

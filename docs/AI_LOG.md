@@ -867,3 +867,46 @@ itself against known values) and integration tests on the built `app.css`.
 - How `prefers-color-scheme` switches the theme in the browser, without JavaScript or server
   code.
 - What WCAG contrast 4.5:1 means and how it is computed.
+
+## 2026-10-07 · #11 Worker profile: team size, skills, languages, legal status
+
+**Task given to AI:** build the worker profile from the plan (team size, skills, languages,
+legal status, district) with a spec first, like #10. I asked to discuss the skill storage and
+the district in more detail before deciding.
+
+**AI helped:** offered every open question with options and a recommendation, and explained the
+trade-offs: skills in code (`TextChoices` + PostgreSQL `ArrayField`, translated by `.po` files)
+vs. a database table; how a district list would work with the future map (#41, #42). Wrote the
+spec `docs/specs/worker-profile.md` (R1–R9, AC1–AC13, my decisions D1–D8), 29 failing unit
+tests, the model with a database `CheckConstraint` for team size 1–10, two forms on one page
+saved in one transaction, a read-only profile card without contact details (for employers in
+#23), 403 for other roles, the admin inline and 25 integration tests. It checked one of its own
+tests by breaking the code on purpose.
+
+**AI failed:**
+- A comment in the edit view said `all([...])` was needed so both forms show their errors. The
+  mutation check (replacing it with `and`) showed the test still passed: `form.errors`
+  validates by itself on first use. The comment was corrected.
+- Its skill name "Drywall / plastering helper" did not fit one line on a phone, and the profile
+  page did not handle a long name without spaces (the page scrolled sideways). I found both
+  while trying the form in the browser.
+- It rebuilt the CSS without `--minify`, and two theme tests from #83 failed. It found the
+  cause: those tests only match minified CSS, while the dev command (`--watch`) is not
+  minified. Posted as an open question in #94.
+
+**I overruled:**
+- AI planned a district for workers (from the plan) and recommended "one home district". I
+  asked what it is for: "if a person applied for a job, they already know how far it is and
+  they agree". No feature needed it, so we dropped it (GDPR data minimisation). The district
+  list moves to the job (#15).
+- I split "drywall / plastering helper" into two skills and added "bricklayer's helper": "if
+  someone lays bricks, I think they may need a helper".
+- On a phone the profile showed each label above its value; I asked for one line, label and
+  value side by side.
+- I changed the ticket workflow: draft PR and CI first, then the "Done when…" items are ticked
+  without asking again, then `/ai-log`. I want to see CI first: if it fails on GitHub for some
+  reason, I can still fix it, and the AI_LOG commit stays the last one.
+
+**Learned:**
+- Why team size is checked in the form *and* in the database.
+- Why the card employers will see has no phone or email.
