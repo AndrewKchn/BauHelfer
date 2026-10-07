@@ -200,3 +200,61 @@ class WorkerProfile(models.Model):
     def language_names(self):
         """The spoken languages as names in the user's language, in the chosen order."""
         return [str(SpokenLanguage(code).label) for code in self.languages]
+
+
+class Trade(models.TextChoices):
+    """What an employer does (#12). A fixed list, so .po files translate the names."""
+
+    WINDOW_FITTING = "window_fitting", _("Window fitting")
+    DRYWALL = "drywall", _("Drywall")
+    PLASTERING = "plastering", _("Plastering")
+    PAINTING = "painting", _("Painting")
+    TILING = "tiling", _("Tiling")
+    ROOFING = "roofing", _("Roofing")
+    BRICKLAYING = "bricklaying", _("Bricklaying")
+    CARPENTRY = "carpentry", _("Carpentry")
+    ELECTRICAL = "electrical", _("Electrical")
+    PLUMBING_HEATING = "plumbing_heating", _("Plumbing & heating")
+    LANDSCAPING = "landscaping", _("Landscaping")
+    DEMOLITION = "demolition", _("Demolition")
+    GENERAL_CONTRACTOR = "general_contractor", _("General contractor")
+    PRIVATE_PERSON = "private_person", _("Private person / own renovation")
+    OTHER = "other", _("Other")
+
+
+class EmployerProfile(models.Model):
+    """Who posts the jobs: a company or a private person (#12). One per employer."""
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,  # deleting the account deletes the profile
+        related_name="employer_profile",
+        verbose_name=_("user"),
+    )
+    # Optional: a private person renovating a flat has no company (spec D2).
+    company_name = models.CharField(
+        _("company name"),
+        max_length=150,
+        blank=True,
+        help_text=_("Leave empty if you hire as a private person."),
+    )
+    # Several trades, e.g. {drywall,painting}, stored like WorkerProfile.skills (spec D1).
+    trades = ArrayField(
+        models.CharField(max_length=20, choices=Trade.choices),
+        verbose_name=_("trades"),
+    )
+
+    class Meta:
+        verbose_name = _("employer profile")
+        verbose_name_plural = _("employer profiles")
+
+    def __str__(self):
+        return str(self.user)
+
+    def display_name(self):
+        """The company name, or the person's name when there is no company."""
+        return self.company_name or self.user.name
+
+    def trade_names(self):
+        """The trades as names in the user's language, in the chosen order."""
+        return [str(Trade(code).label) for code in self.trades]

@@ -9,7 +9,7 @@ from django.contrib.auth.forms import (
 )
 from django.utils.translation import gettext_lazy as _
 
-from .models import Skill, SpokenLanguage, User, WorkerProfile
+from .models import EmployerProfile, Skill, SpokenLanguage, Trade, User, WorkerProfile
 
 
 # Django's admin forms are tied to the default User with a username field;
@@ -122,3 +122,21 @@ class WorkerProfileForm(forms.ModelForm):
         """Let the browser's number field allow only 1-10, like the model."""
         super().__init__(*args, **kwargs)
         self.fields["team_size"].widget.attrs.update(min=1, max=10)
+
+
+class EmployerProfileForm(forms.ModelForm):
+    """The employer profile: company name and trades (#12).
+
+    No user field: the view always saves the profile for the logged-in user.
+    """
+
+    # Checkboxes instead of the ArrayField's comma-separated text box, as for skills.
+    trades = forms.MultipleChoiceField(
+        label=_("Trades"),
+        choices=Trade.choices,
+        widget=forms.CheckboxSelectMultiple(attrs={"class": "checkbox"}),
+    )
+
+    class Meta:
+        model = EmployerProfile
+        fields = ("company_name", "trades")

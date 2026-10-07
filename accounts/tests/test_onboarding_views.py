@@ -254,9 +254,9 @@ def test_role_cannot_be_changed_by_posting_the_form_again(client):
 @pytest.mark.parametrize(
     ("role", "shown", "hidden", "url_name"),
     [
-        # Since #11 the worker's link opens the profile page, not the form.
+        # Since #11 / #12 the links open the profile page, not the form.
         ("worker", "My profile", "My company", "worker_profile"),
-        ("employer", "My company", "My profile", "employer_profile_edit"),
+        ("employer", "My company", "My profile", "employer_profile"),
     ],
 )
 def test_menu_shows_the_profile_link_of_the_role(client, role, shown, hidden, url_name):

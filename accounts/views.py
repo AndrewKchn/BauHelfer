@@ -9,7 +9,13 @@ from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView, TemplateView, UpdateView, View
 
-from .forms import NameAndPhoneForm, RoleForm, SignupForm, WorkerProfileForm
+from .forms import (
+    EmployerProfileForm,
+    NameAndPhoneForm,
+    RoleForm,
+    SignupForm,
+    WorkerProfileForm,
+)
 from .models import User
 
 
@@ -60,50 +66,63 @@ class RoleSelectView(LoginRequiredMixin, UpdateView):
         return self.object.get_profile_url()
 
 
-class WorkerRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
-    """Worker pages only: guests go to login, other logged-in users get 403 (spec D7)."""
+class RoleRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
+    """Pages of one role: guests go to login, other logged-in users get 403 (#11 spec D7).
+
+    Subclasses set `role`.
+    """
+
+    role = None
 
     def test_func(self):
         """Runs after the login check, so request.user is a real user here."""
-        return self.request.user.role == User.Role.WORKER
+        return self.request.user.role == self.role
 
 
-class WorkerProfileView(WorkerRequiredMixin, TemplateView):
-    """The worker's own profile, read-only, with an "Edit" button (#11).
+class ProfileView(RoleRequiredMixin, TemplateView):
+    """The user's own profile, read-only, with an "Edit" button.
 
-    Always the logged-in worker's profile: there is no id in the URL to change.
+    Always the logged-in user's profile: there is no id in the URL to change.
+    Subclasses set `role`, `template_name`, `profile_name` (the related_name on User)
+    and `edit_url_name`.
     """
 
-    template_name = "accounts/worker_profile.html"
+    profile_name = None
+    edit_url_name = None
 
     def get(self, request, *args, **kwargs):
         """No profile yet: there is nothing to show, so go straight to the form."""
-        if not hasattr(request.user, "worker_profile"):
-            return redirect("worker_profile_edit")
+        if not hasattr(request.user, self.profile_name):
+            return redirect(self.edit_url_name)
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         """Give the template the profile as `profile`."""
         context = super().get_context_data(**kwargs)
-        context["profile"] = self.request.user.worker_profile
+        context["profile"] = getattr(self.request.user, self.profile_name)
         return context
 
 
-class WorkerProfileEditView(WorkerRequiredMixin, View):
-    """Create or edit the worker profile: two forms in one <form> (#11).
+class ProfileEditView(RoleRequiredMixin, View):
+    """Create or edit the user's own profile: two forms in one <form>.
 
-    NameAndPhoneForm changes the User, WorkerProfileForm the WorkerProfile.
+    NameAndPhoneForm changes the User, `profile_form_class` the profile.
+    Subclasses set `role`, `template_name`, `profile_form_class`, `profile_name`
+    and `success_url_name`.
     """
 
-    template_name = "accounts/worker_profile_form.html"
+    template_name = None
+    profile_form_class = None
+    profile_name = None
+    success_url_name = None
 
     def get_forms(self, data=None):
         """Both forms for the logged-in user; without data they show the saved values."""
         user = self.request.user
-        profile = getattr(user, "worker_profile", None)  # None until the first save
+        profile = getattr(user, self.profile_name, None)  # None until the first save
         return (
             NameAndPhoneForm(data, instance=user),
-            WorkerProfileForm(data, instance=profile),
+            self.profile_form_class(data, instance=profile),
         )
 
     def get(self, request):
@@ -123,7 +142,7 @@ class WorkerProfileEditView(WorkerRequiredMixin, View):
                 profile.user = request.user
                 profile.save()
             messages.success(request, _("Profile saved."))
-            return redirect("worker_profile")
+            return redirect(self.success_url_name)
         return self.show(user_form, profile_form)
 
     def show(self, user_form, profile_form):
@@ -135,7 +154,39 @@ class WorkerProfileEditView(WorkerRequiredMixin, View):
         )
 
 
-class ProfilePlaceholderView(LoginRequiredMixin, TemplateView):
-    """Stands in for the employer profile form until #12 replaces it."""
+class WorkerProfileView(ProfileView):
+    """The worker's own profile page (#11)."""
 
-    template_name = "accounts/profile_placeholder.html"
+    role = User.Role.WORKER
+    template_name = "accounts/worker_profile.html"
+    profile_name = "worker_profile"
+    edit_url_name = "worker_profile_edit"
+
+
+class WorkerProfileEditView(ProfileEditView):
+    """Create or edit the worker profile: team size, skills, languages, status (#11)."""
+
+    role = User.Role.WORKER
+    template_name = "accounts/worker_profile_form.html"
+    profile_form_class = WorkerProfileForm
+    profile_name = "worker_profile"
+    success_url_name = "worker_profile"
+
+
+class EmployerProfileView(ProfileView):
+    """The employer's own profile page (#12)."""
+
+    role = User.Role.EMPLOYER
+    template_name = "accounts/employer_profile.html"
+    profile_name = "employer_profile"
+    edit_url_name = "employer_profile_edit"
+
+
+class EmployerProfileEditView(ProfileEditView):
+    """Create or edit the employer profile: company name and trades (#12)."""
+
+    role = User.Role.EMPLOYER
+    template_name = "accounts/employer_profile_form.html"
+    profile_form_class = EmployerProfileForm
+    profile_name = "employer_profile"
+    success_url_name = "employer_profile"
