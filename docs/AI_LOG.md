@@ -910,3 +910,43 @@ tests by breaking the code on purpose.
 **Learned:**
 - Why team size is checked in the form *and* in the database.
 - Why the card employers will see has no phone or email.
+
+## 2026-10-07 · #12 Employer profile
+
+**Task given to AI:** build the employer profile (company or personal name, trade) with a short
+spec first, in the same pattern as the worker profile (#11). I asked to discuss how to store
+the trade before deciding.
+
+**AI helped:** compared a fixed trade list with free text (translation by `.po` files, typos,
+where the trade is used) and proposed 15 trades, including "private person" and "other". Wrote
+the spec `docs/specs/employer-profile.md` (R1–R11, AC1–AC11, my decisions D1–D3), 16 failing
+unit tests, the `EmployerProfile` model and form, the two pages, the admin inline and 23
+integration tests. Instead of copying the worker views it moved the shared parts into
+`RoleRequiredMixin`, `ProfileView` and `ProfileEditView`; the #11 tests passed unchanged.
+Drafted six comments for the M2 docs sync (#94) and the PR.
+
+**AI failed:**
+- The employer page used the company name as its title. daisyUI's `card-title` is a flex box,
+  so a long name without spaces ran out of the page on a phone. I found it in the browser; the
+  first fix (`wrap-anywhere`) was replaced when I compared the two profile pages (see below).
+- "Private person / own renovation" did not fit its badge on a phone. I found it in the browser.
+- It rebuilt the CSS without `--minify` again, and the two theme tests failed again — the same
+  open question as in #11 (already in #94).
+
+**I overruled:**
+- AI recommended one trade per employer; I chose several: one firm can work in related trades.
+- I added an idea: users should be able to get missing trades added (through support or
+  another way). Recorded in #94, not built.
+- I found that `/accounts/` and `/accounts/profile/` give 404. AI recommended fixing it in this
+  branch and started; I rolled it back and moved it to #94: it is not part of this ticket.
+- I asked AI to compare the worker and employer models and forms. They matched, but the pages
+  did not: the employer title showed the company name (twice on the page). I made the title
+  "My company", like "My profile" for workers, and dropped the `wrap-anywhere` fix.
+- I shortened "private person / own renovation" to "private person"; long names in other
+  languages are revisited in M5.
+- AI wrote "the student" in the #94 comments and the PR. I asked for the first person instead
+  ("I chose…"): they are posted from my account.
+
+**Learned:**
+- Why a flex title does not wrap a long word, while a grid cell with `min-w-0` does.
+- Why changing a choice label needs no new migration when the migration is not shared yet.
