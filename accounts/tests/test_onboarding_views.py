@@ -4,6 +4,8 @@ Each test goes through the whole stack: middleware, URL, view, form, template an
 Acceptance criteria AC1-AC9 from docs/specs/onboarding.md.
 """
 
+import re
+
 import pytest
 from django.contrib.auth import get_user_model
 from django.test import Client
@@ -291,21 +293,51 @@ def test_menu_has_no_role_links_before_the_role_is_chosen(client, newbie):
     assertNotContains(response, "My company")
 
 
-def test_menu_logout_buttons_send_the_post_form(client):
-    """Both "Log out" buttons (phone menu and desktop row) send the logout POST form.
+@pytest.mark.story(103)
+@pytest.mark.parametrize(
+    ("role", "url_name"),
+    [("worker", "worker_profile"), ("employer", "employer_profile")],
+)
+def test_menu_links_are_only_in_the_dropdown(client, role, url_name):
+    """The menu links are shown once, in a dropdown that every screen width shows.
+
+    1. Log in as a worker / employer
+    2. Open the home page
+    3. Expect: the profile link and "Log out" appear once each
+    4. Expect: the dropdown has no class that hides it on some screen widths
+    """
+    client.force_login(user_with_role(role))
+
+    response = client.get(reverse("home"))
+
+    assertContains(response, f'href="{reverse(url_name)}"', count=1)
+    assertContains(response, "Log out", count=1)
+    # The test client does not apply CSS; the classes decide where the menu is
+    # visible. "hidden", "sm:hidden" and the like would hide it somewhere.
+    dropdown = re.search(r'<details class="([^"]*)"', response.text)
+    assert dropdown is not None
+    classes = dropdown[1].split()
+    assert "dropdown" in classes
+    assert not [c for c in classes if c.endswith("hidden")]
+
+
+@pytest.mark.story(103)
+def test_menu_logout_button_is_inside_the_post_form(client):
+    """The "Log out" button sits inside a POST form to the logout URL.
 
     1. Log in as a worker and open the home page
-    2. Expect: one POST form to the logout URL with a CSRF token
-    3. Expect: two "Log out" buttons that submit that form
+    2. Expect: a POST form to the logout URL
+    3. Expect: inside it a CSRF token and the "Log out" submit button
     """
     client.force_login(user_with_role("worker"))
 
     response = client.get(reverse("home"))
 
-    assertContains(
-        response,
-        f'<form id="logout-form" method="post" action="{reverse("logout")}"',
-        count=1,
+    form = re.search(
+        rf'<form method="post" action="{reverse("logout")}">(.*?)</form>',
+        response.text,
+        re.DOTALL,
     )
-    assertContains(response, 'name="csrfmiddlewaretoken"')
-    assertContains(response, 'type="submit" form="logout-form"', count=2)
+    assert form is not None
+    assert 'name="csrfmiddlewaretoken"' in form[1]
+    assert re.search(r'<button type="submit">\s*Log out\s*</button>', form[1])
