@@ -334,10 +334,10 @@ def test_menu_logout_button_is_inside_the_post_form(client):
     response = client.get(reverse("home"))
 
     form = re.search(
-        rf'<form method="post" action="{reverse("logout")}">(.*?)</form>',
+        rf'<form method="post" action="{reverse("logout")}"[^>]*>(.*?)</form>',
         response.text,
         re.DOTALL,
     )
     assert form is not None
     assert 'name="csrfmiddlewaretoken"' in form[1]
-    assert re.search(r'<button type="submit">\s*Log out\s*</button>', form[1])
+    assert re.search(r'<button type="submit"[^>]*>\s*Log out\s*</button>', form[1])
