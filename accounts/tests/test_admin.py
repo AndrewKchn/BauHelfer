@@ -142,7 +142,7 @@ def test_add_user_rejects_email_that_differs_only_in_case(logged_in_client):
 
 
 def test_edit_user_profile_fields(logged_in_client):
-    """An admin can edit name, phone, role, language and work permit.
+    """An admin can edit name, phone, role and language.
 
     1. A user exists; an admin is logged in
     2. Save new values on the user's admin page
@@ -160,7 +160,6 @@ def test_edit_user_profile_fields(logged_in_client):
             "phone": "+49 151 1234567",
             "role": "worker",
             "preferred_language": "pl",
-            "work_permit_confirmed": "on",
             "is_active": "on",
             # date_joined is shown as two inputs: date and time.
             "date_joined_0": user.date_joined.strftime("%Y-%m-%d"),
@@ -174,4 +173,3 @@ def test_edit_user_profile_fields(logged_in_client):
     assert user.phone == "+49 151 1234567"
     assert user.role == User.Role.WORKER
     assert user.preferred_language == "pl"
-    assert user.work_permit_confirmed is True

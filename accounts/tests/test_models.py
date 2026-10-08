@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model
 from django.core.exceptions import FieldDoesNotExist, ValidationError
 from django.db import IntegrityError
+from django.utils import timezone
 
 pytestmark = [pytest.mark.django_db, pytest.mark.story(8)]
 
@@ -87,7 +88,7 @@ def test_new_user_defaults():
 
     1. Create a user with only email and password
     2. Expect: empty name, phone and role (the role comes in onboarding, #10)
-    3. Expect: language English, work permit not confirmed
+    3. Expect: language English, no work-permit confirmation date
     """
     user = User.objects.create_user(email="anna@example.com", password="s3cret-pass")
 
@@ -95,7 +96,9 @@ def test_new_user_defaults():
     assert user.phone == ""
     assert user.role == ""  # chosen later, in onboarding (#10)
     assert user.preferred_language == "en"
-    assert user.work_permit_confirmed is False
+    assert (
+        user.work_permit_confirmed_at is None
+    )  # confirmed in the worker profile (#13)
 
 
 def test_extra_fields_are_saved():
@@ -105,6 +108,7 @@ def test_extra_fields_are_saved():
     2. Read the user again from the database
     3. Expect: every field has the saved value
     """
+    confirmed_at = timezone.now()
     user = User.objects.create_user(
         email="anna@example.com",
         password="s3cret-pass",
@@ -112,7 +116,7 @@ def test_extra_fields_are_saved():
         phone="+49 151 1234567",
         role=User.Role.WORKER,
         preferred_language="pl",
-        work_permit_confirmed=True,
+        work_permit_confirmed_at=confirmed_at,
     )
     user.refresh_from_db()
 
@@ -120,7 +124,7 @@ def test_extra_fields_are_saved():
     assert user.phone == "+49 151 1234567"
     assert user.role == "worker"
     assert user.preferred_language == "pl"
-    assert user.work_permit_confirmed is True
+    assert user.work_permit_confirmed_at == confirmed_at
 
 
 def test_role_choices():

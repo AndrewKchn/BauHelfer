@@ -56,6 +56,7 @@ def form_data(**fields):
     return {
         "name": "Ivan Petrov",
         "phone": "+49 170 1234567",
+        "work_permit": "on",  # required since #13
         "team_size": "3",
         "skills": ["demolition", "carrying"],
         "languages": ["ru", "de"],
