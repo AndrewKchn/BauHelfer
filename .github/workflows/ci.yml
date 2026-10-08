@@ -1,4 +1,7 @@
-# Runs linting and tests on every push and pull request.
+# Runs linting and tests on every pull request and on every push to main (a merged PR is
+# a push to main). Pushing a feature branch without a PR runs nothing.
+# The push-to-main run stays on purpose: it checks the merged result, and Render deploys
+# only after the checks on that main commit are green (autoDeployTrigger: checksPass).
 # If any step fails, the check turns red and the PR cannot be merged.
 name: CI
 

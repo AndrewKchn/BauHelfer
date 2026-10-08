@@ -11,6 +11,24 @@ services:
     branch: main
     autoDeployTrigger: checksPass  # deploy only after CI (ruff + pytest) is green
 
+    # Skip the deploy when a merge changes only these files: they are not part of the site.
+    # A merge that also touches any other file deploys as before.
+    buildFilter:
+      ignoredPaths:
+        - docs/**
+        - "**/*.md"  # README, CLAUDE.md, specs, skills
+        - .claude/**
+        - .github/**
+        - tests/**
+        - "**/tests/**"  # accounts/tests/ and future app tests
+        - conftest.py
+        - allurerc.json
+        - docker-compose.yml
+        - .pre-commit-config.yaml
+        - .env.example
+        - .gitignore
+        - .gitattributes
+
     # Runs once per deploy: install packages (no dev tools), build app.css from templates,
     # collect CSS/JS into staticfiles/.
     buildCommand: >-
