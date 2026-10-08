@@ -89,6 +89,8 @@ class NameAndPhoneForm(forms.ModelForm):
         """Make the name required: employers need to know who applied (spec D5)."""
         super().__init__(*args, **kwargs)
         self.fields["name"].required = True
+        # type="tel" opens the number keyboard on phones; the check itself is on the model.
+        self.fields["phone"].widget.input_type = "tel"
 
 
 class WorkerUserForm(NameAndPhoneForm):

@@ -8,6 +8,8 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext
 
+from .validators import validate_phone
+
 
 class UserManager(BaseUserManager):
     """Creates users with email as the login instead of a username."""
@@ -72,7 +74,13 @@ class User(AbstractUser):
 
     email = models.EmailField(_("email"), unique=True)
     name = models.CharField(_("name"), max_length=150, blank=True)
-    phone = models.CharField(_("phone"), max_length=30, blank=True)
+    phone = models.CharField(
+        _("phone"),
+        max_length=30,
+        blank=True,
+        validators=[validate_phone],
+        help_text=_("For example +49 151 12345678 or 0151 12345678."),
+    )
     # Empty until the user picks a role in onboarding (#10); admins have none.
     role = models.CharField(_("role"), max_length=10, choices=Role.choices, blank=True)
     preferred_language = models.CharField(

@@ -125,7 +125,8 @@ def test_saving_again_keeps_the_first_date(worker):
     worker.work_permit_confirmed_at = FIRST_CONFIRMATION
     worker.save()
     form = WorkerUserForm(
-        {"name": "Ivan", "phone": "+49 170 1", "work_permit": "on"}, instance=worker
+        {"name": "Ivan", "phone": "+49 170 1234567", "work_permit": "on"},
+        instance=worker,
     )
 
     assert form.is_valid(), form.errors
@@ -133,7 +134,7 @@ def test_saving_again_keeps_the_first_date(worker):
 
     worker.refresh_from_db()
     assert worker.work_permit_confirmed_at == FIRST_CONFIRMATION
-    assert worker.phone == "+49 170 1"
+    assert worker.phone == "+49 170 1234567"
 
 
 def test_box_is_ticked_only_for_a_confirmed_worker(worker):

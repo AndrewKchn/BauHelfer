@@ -137,13 +137,25 @@ def test_phone_stays_optional():
     assert form.is_valid(), form.errors
 
 
-def test_phone_field_is_a_tel_input_with_an_example():
-    """The phone field opens the number keyboard on phones and shows an example.
+def test_phone_field_is_a_tel_input():
+    """The phone field opens the number keyboard on phones.
 
     1. Render the phone field of an empty name and phone form
-    2. Expect: type="tel" and the placeholder "+49 151 12345678"
+    2. Expect: type="tel"
     """
     html = str(NameAndPhoneForm()["phone"])
 
     assert 'type="tel"' in html
-    assert 'placeholder="+49 151 12345678"' in html
+
+
+def test_phone_field_shows_both_formats_as_examples():
+    """A hint under the field shows an example of each format.
+
+    1. Open an empty name and phone form
+    2. Expect: the phone help text says "For example" and shows both formats
+    """
+    help_text = str(NameAndPhoneForm().fields["phone"].help_text)
+
+    assert help_text.startswith("For example")
+    assert "+49 151 12345678" in help_text
+    assert "0151 12345678" in help_text

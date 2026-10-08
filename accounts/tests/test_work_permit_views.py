@@ -154,10 +154,12 @@ def test_saving_again_keeps_the_first_date(worker_client, worker):
     make_profile(worker)
     confirm(worker)
 
-    worker_client.post(reverse("worker_profile_edit"), form_data(phone="+49 170 1"))
+    worker_client.post(
+        reverse("worker_profile_edit"), form_data(phone="+49 170 1234567")
+    )
 
     saved = User.objects.get(pk=worker.pk)  # a fresh copy, only what is in the database
-    assert saved.phone == "+49 170 1"
+    assert saved.phone == "+49 170 1234567"
     assert saved.work_permit_confirmed_at == FIRST_CONFIRMATION
 
 
