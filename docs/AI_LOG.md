@@ -1032,3 +1032,41 @@ docs-only merge.
 **Learned:**
 - Why CI runs again on `main` after the PR was green.
 - How `ignoredPaths` decides: a deploy is skipped only if every changed file matches.
+
+## 2026-10-08 · #109 Phone number accepts any text
+
+**Task given to AI:** do #109, which I opened while testing #13: the phone field accepted any
+text, but employers will call this number after accepting an application (#25). The rule
+was already in the issue: a number callable from a mobile phone, `+` and a country code or
+`0` and a German area code, 10–15 digits, no new dependency.
+
+**AI helped:** wrote `validate_phone` (a short regex for the start and the allowed characters,
+plus a separate digit count) and put it on the `User.phone` model field, so both profile forms
+and the admin use it; the migration only changes the field description, no SQL. Explained why
+`[0-9]` and not `\d` (Python's `\d` also matches Arabic digits) and why `type="tel"` is only
+convenience, not validation. Wrote 27 unit tests first, then 7 integration tests that run for
+both roles and check the admin. Found two old tests from #13 that saved "+49 170 1" (5 digits)
+and fixed them. When I asked what happens to wrong numbers already in the database, it
+explained that a validator only runs when a form is saved, so old rows stay, and how to handle
+this with real users: count first, fix only unambiguous numbers in a data migration, ask users
+to correct the rest, never delete silently, add a database constraint last.
+
+**AI failed:** it first put the `type="tel"` widget in `Meta.widgets`; ruff rejected it (RUF012,
+a mutable dict on the class), so it moved it to `__init__`, like `team_size`.
+
+**My part:**
+- AI recommended rejecting "+49 (0) 151 …". I did not add a rule for it: I have not seen
+  numbers written like that in Germany, people write either +49… or 0…. Such a number
+  passes; it is noted as a known limitation in #94.
+- I first agreed to a placeholder "+49 151 12345678", then changed it to a hint under the field
+  ("For example +49 151 12345678 or 0151 12345678."): a bare number in the field does not
+  say that it is an example.
+- I checked the result by hand locally, on a laptop and on a phone, as a worker and as an
+  employer: a wrong number shows the error, a valid one is saved as typed, the phone opens
+  the number keyboard.
+
+**Learned:**
+- Why a validator on the model also protects the admin, but not the rows already in the
+  database.
+- Why a migration appears even though the database does not change.
+- How I would clean up wrong numbers if real users already had them.
