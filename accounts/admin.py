@@ -49,7 +49,7 @@ class UserAdmin(BaseUserAdmin):
                     "phone",
                     "role",
                     "preferred_language",
-                    "work_permit_confirmed",
+                    "work_permit_confirmed_at",
                 )
             },
         ),

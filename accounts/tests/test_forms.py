@@ -29,7 +29,7 @@ def test_signup_form_asks_only_email_and_password():
     1. Open an empty signup form
     2. Expect: fields email, password1, password2 and nothing else
     """
-    # Role comes in onboarding (#10), work permit in #13, name and phone in the profile.
+    # Role comes in onboarding (#10); name, phone and work permit (#13) in the profile.
     assert list(SignupForm().fields) == ["email", "password1", "password2"]
 
 

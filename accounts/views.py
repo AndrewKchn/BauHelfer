@@ -15,6 +15,7 @@ from .forms import (
     RoleForm,
     SignupForm,
     WorkerProfileForm,
+    WorkerUserForm,
 )
 from .models import User
 
@@ -106,12 +107,13 @@ class ProfileView(RoleRequiredMixin, TemplateView):
 class ProfileEditView(RoleRequiredMixin, View):
     """Create or edit the user's own profile: two forms in one <form>.
 
-    NameAndPhoneForm changes the User, `profile_form_class` the profile.
+    `user_form_class` changes the User, `profile_form_class` the profile.
     Subclasses set `role`, `template_name`, `profile_form_class`, `profile_name`
-    and `success_url_name`.
+    and `success_url_name`, and may change `user_form_class`.
     """
 
     template_name = None
+    user_form_class = NameAndPhoneForm
     profile_form_class = None
     profile_name = None
     success_url_name = None
@@ -121,7 +123,7 @@ class ProfileEditView(RoleRequiredMixin, View):
         user = self.request.user
         profile = getattr(user, self.profile_name, None)  # None until the first save
         return (
-            NameAndPhoneForm(data, instance=user),
+            self.user_form_class(data, instance=user),
             self.profile_form_class(data, instance=profile),
         )
 
@@ -168,6 +170,7 @@ class WorkerProfileEditView(ProfileEditView):
 
     role = User.Role.WORKER
     template_name = "accounts/worker_profile_form.html"
+    user_form_class = WorkerUserForm  # adds the work-permit checkbox (#13)
     profile_form_class = WorkerProfileForm
     profile_name = "worker_profile"
     success_url_name = "worker_profile"

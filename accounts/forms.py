@@ -7,6 +7,7 @@ from django.contrib.auth.forms import (
     UserChangeForm,
     UserCreationForm,
 )
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from .models import EmployerProfile, Skill, SpokenLanguage, Trade, User, WorkerProfile
@@ -88,6 +89,38 @@ class NameAndPhoneForm(forms.ModelForm):
         """Make the name required: employers need to know who applied (spec D5)."""
         super().__init__(*args, **kwargs)
         self.fields["name"].required = True
+
+
+class WorkerUserForm(NameAndPhoneForm):
+    """Name and phone plus the work-permit checkbox, for workers only (#13, spec D4).
+
+    The box is required, so a worker profile cannot be saved without it. The model stores a
+    date, not a yes/no: save() fills it in the first time (spec D2, D5).
+    """
+
+    work_permit = forms.BooleanField(
+        label=_("I am allowed to work in Germany"),
+        help_text=_(
+            "For example as an EU citizen, or with a residence permit that allows work."
+        ),
+        widget=forms.CheckboxInput(attrs={"class": "checkbox"}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        """Tick the box for a worker who has already confirmed."""
+        super().__init__(*args, **kwargs)
+        self.fields["work_permit"].initial = (
+            self.instance.work_permit_confirmed_at is not None
+        )
+
+    def save(self, commit=True):
+        """Save name and phone; store the date of the first confirmation only."""
+        user = super().save(commit=False)
+        if user.work_permit_confirmed_at is None:
+            user.work_permit_confirmed_at = timezone.now()
+        if commit:
+            user.save()
+        return user
 
 
 class WorkerProfileForm(forms.ModelForm):

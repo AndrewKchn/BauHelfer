@@ -81,8 +81,10 @@ class User(AbstractUser):
         choices=Language.choices,
         default=Language.ENGLISH,
     )
-    work_permit_confirmed = models.BooleanField(
-        _("allowed to work in Germany"), default=False
+    # When the worker ticked "I am allowed to work in Germany" (#13); empty = not yet.
+    # Their own statement, not a document check (docs/specs/work-permit.md).
+    work_permit_confirmed_at = models.DateTimeField(
+        _("work permit confirmed at"), null=True, blank=True
     )
 
     USERNAME_FIELD = "email"
@@ -92,6 +94,14 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+
+    def can_apply(self):
+        """Whether this user may apply to jobs (#22): a worker with profile and work permit."""
+        return (
+            self.role == self.Role.WORKER
+            and hasattr(self, "worker_profile")  # False while there is no profile
+            and self.work_permit_confirmed_at is not None
+        )
 
     def get_profile_url(self):
         """The profile form for this user's role; the role choice while there is no role."""

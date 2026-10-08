@@ -23,4 +23,10 @@
 
   <dt class="font-semibold">{% translate "Legal status" %}</dt>
   <dd class="min-w-0 break-words">{{ profile.get_legal_status_display }}</dd>
+
+  {# Only that the worker said so, not when: the date is on the worker's own page (spec D6). #}
+  <dt class="font-semibold">{% translate "Work permit" %}</dt>
+  <dd class="min-w-0 break-words">
+    {% if profile.user.work_permit_confirmed_at %}{% translate "Confirmed by the worker" %}{% else %}{% translate "Not confirmed" %}{% endif %}
+  </dd>
 </dl>
