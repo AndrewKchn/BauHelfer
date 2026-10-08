@@ -10,6 +10,14 @@
 
       {% include "accounts/_worker_profile_card.html" %}
 
+      {% if profile.user.work_permit_confirmed_at %}
+        <p class="text-sm">
+          {% blocktranslate with date=profile.user.work_permit_confirmed_at|date:"SHORT_DATE_FORMAT" trimmed %}
+            Allowed to work in Germany — confirmed on {{ date }}.
+          {% endblocktranslate %}
+        </p>
+      {% endif %}
+
       {# Contact details: only on the worker's own page, not in the card employers will see. #}
       <div>
         <h2 class="text-lg font-semibold">{% translate "Contact details" %}</h2>
