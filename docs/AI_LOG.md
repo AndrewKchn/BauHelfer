@@ -975,3 +975,34 @@ chose the recommended one (no partial, logout form inside the menu item).
 **Learned:**
 - Why logout must be a POST form with a CSRF token, not a link.
 - Why a daisyUI rule inside `:where()` loses to a Tailwind utility class.
+
+## 2026-10-08 · #13 Work-permit confirmation checkbox at signup
+
+**Task given to AI:** update `main` and explain the catch in #13, then build it with a spec
+first.
+
+**AI helped:** found three catches before any code. (1) At signup there is no role yet (#10),
+so a checkbox "for workers" cannot be there. (2) The model had only a boolean, no date.
+(3) There is no apply view until #22. For each it offered options with a recommendation.
+Wrote the spec `docs/specs/work-permit.md` (decisions D1–D7) and failing tests, including the
+first migration test in the project: Django's `MigrationExecutor` moves the database back,
+creates old data, migrates forward and checks it. Then wrote the code: one date field instead
+of the boolean, a hand-written migration (add the field → copy the data with `RunPython`
+→ remove the old field, reversible), `WorkerUserForm`, `User.can_apply()` for #22, the
+display on the profile page and card, and the admin field. Also drafted Docs sync comments
+and suggested moving the "cannot apply" check into #22's "Done when…".
+
+**AI failed:** one failing test passed by mistake (`test_saving_again_keeps_the_first_date`):
+`refresh_from_db()` does not reset an attribute that is not a model field yet. AI noticed it
+in the failing-tests run and changed the test to read the user from the database again.
+
+**I overruled:** nothing this time. I chose the recommended option for every question:
+checkbox in the worker profile, not at signup; one date field; `can_apply()` now and the view
+check in #22; the checkbox in a `WorkerUserForm`; keep the first date; employers see only
+"confirmed"; a data migration that keeps existing confirmations. Why not at signup: I wrote
+the issue early, when it was not clear yet where the checkbox belongs. While building it, it
+became clear that it concerns only workers, so it belongs in the worker profile form.
+
+**Learned:**
+- Why one date field is better than a boolean + a date.
+- What a data migration with `RunPython` and the historical model `apps.get_model` does.
