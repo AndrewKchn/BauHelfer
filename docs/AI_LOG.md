@@ -1006,3 +1006,29 @@ became clear that it concerns only workers, so it belongs in the worker profile 
 **Learned:**
 - Why one date field is better than a boolean + a date.
 - What a data migration with `RunPython` and the historical model `apps.get_model` does.
+
+## 2026-10-08 · #85 CI and deploy triggers: fix comment, skip Render deploys for docs-only changes
+
+**Task given to AI:** update `main`, delete the old local branch, then do #85.
+
+**AI helped:** deleted the merged branch of #103 (PR #107). Rewrote the first comment in
+`ci.yml`: CI runs on pull requests and on pushes to `main`, not on every push, and the
+`push: main` run stays because it checks the merged result and Render deploys only after the
+checks on that `main` commit pass (`autoDeployTrigger: checksPass`). Added a `buildFilter`
+with `ignoredPaths` to `render.yaml`. Before I chose, it listed the extra files that do not
+change the site and explained the one risk of the filter: a wrongly ignored file means the
+site does not update. It checked that no site code imports from `tests/`.
+
+**AI failed:** nothing notable.
+
+**I overruled:** nothing this time. I chose the recommended option for every question:
+seven extra dev-only files in the filter (`conftest.py`, `allurerc.json`,
+`docker-compose.yml`, `.pre-commit-config.yaml`, `.env.example`, `.gitignore`,
+`.gitattributes`); no unit test for `render.yaml`; the `docs/PLAN.md` title change goes to
+Docs sync M2 (#94), not this ticket. No test because I did not want to add a dependency
+(`pyyaml`) for one check; I will check it by hand: Render should show "skipped" on the next
+docs-only merge.
+
+**Learned:**
+- Why CI runs again on `main` after the PR was green.
+- How `ignoredPaths` decides: a deploy is skipped only if every changed file matches.
