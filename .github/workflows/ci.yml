@@ -61,6 +61,9 @@ jobs:
       - name: Build CSS  # app.css is not in git; the layout tests need it
         run: uv run tailwindcss -i tailwind/input.css -o static/css/app.css --minify
 
+      - name: Install Chromium for the E2E tests  # tests/e2e/, Playwright (#14)
+        run: uv run playwright install --with-deps chromium  # --with-deps: system libraries
+
       - name: Save issue titles for the Allure report  # tests are grouped by story (#89)
         # Written to a temporary file first, so a failed call leaves no broken stories.json.
         # Without the file the report shows "#9" instead of "#9 <title>"; tests still run.
