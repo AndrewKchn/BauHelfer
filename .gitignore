@@ -31,3 +31,6 @@ static/css/app.css
 stories.json
 allure-results/
 allure-report/
+
+# Playwright (#14): traces and screenshots of E2E runs; they hold what the tests typed
+test-results/

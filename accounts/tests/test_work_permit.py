@@ -115,6 +115,24 @@ def test_ticking_the_box_saves_the_date(worker):
     assert before <= worker.work_permit_confirmed_at <= timezone.now()
 
 
+@pytest.mark.story(14)  # found by the coverage review: this branch had no test
+def test_save_without_commit_does_not_write_to_the_database(worker):
+    """save(commit=False) fills in the date but leaves the database to the caller.
+
+    1. Submit the form with the box ticked, call save(commit=False)
+    2. Expect: the returned user has the date
+    3. Expect: the database still has no date
+    """
+    form = WorkerUserForm({"name": "Ivan", "work_permit": "on"}, instance=worker)
+
+    assert form.is_valid(), form.errors
+    user = form.save(commit=False)
+
+    assert user.work_permit_confirmed_at is not None
+    worker.refresh_from_db()
+    assert worker.work_permit_confirmed_at is None
+
+
 def test_saving_again_keeps_the_first_date(worker):
     """A worker who confirmed earlier keeps the first date (D5).
 

@@ -3,7 +3,7 @@
 import importlib
 
 import pytest
-from django.conf import settings
+from django.conf import global_settings, settings
 from django.core.checks import Tags, run_checks
 from django.core.management.utils import get_random_secret_key
 from django.test import override_settings
@@ -98,6 +98,24 @@ def test_production_uses_https_only():
     assert production.SESSION_COOKIE_SECURE is True
     assert production.CSRF_COOKIE_SECURE is True
     assert production.DEBUG is False
+
+
+@pytest.mark.story(14)
+def test_production_hashes_passwords_with_pbkdf2():
+    """Production uses the slow PBKDF2 hasher; only the tests use the fast one.
+
+    1. Load the production settings
+    2. Expect: PBKDF2 is the first hasher, the one new passwords get
+    3. Expect: the running tests use MD5 (conftest.py), so the switch works
+    """
+    production = load_production_settings()
+    # Our settings do not set PASSWORD_HASHERS: Django's default list applies.
+    hashers = getattr(production, "PASSWORD_HASHERS", global_settings.PASSWORD_HASHERS)
+
+    assert hashers[0] == "django.contrib.auth.hashers.PBKDF2PasswordHasher"
+    assert settings.PASSWORD_HASHERS == [
+        "django.contrib.auth.hashers.MD5PasswordHasher"
+    ]
 
 
 # Warnings we accept on purpose; docs/SECURITY.md explains them.

@@ -197,6 +197,19 @@ def test_create_superuser_must_be_staff():
         )
 
 
+@pytest.mark.story(14)  # found by the coverage review: this branch had no test
+def test_create_superuser_must_be_superuser():
+    """An admin without superuser rights cannot be created.
+
+    1. Create a superuser with is_superuser=False
+    2. Expect: an error
+    """
+    with pytest.raises(ValueError):
+        User.objects.create_superuser(
+            email="admin@example.com", password="s3cret-pass", is_superuser=False
+        )
+
+
 def test_str_is_email():
     """A user is shown by their email, e.g. in the admin.
 

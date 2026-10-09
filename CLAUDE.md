@@ -9,11 +9,12 @@ code, the student reviews it, decides and defends it. Plan, data model and miles
 ```bash
 uv sync                                  # install dependencies
 uv run pre-commit install                # once per clone: ruff runs before every commit
+uv run playwright install chromium       # once per clone: browser for the E2E tests
 docker compose up -d                     # start PostgreSQL (needed for runserver and tests)
 uv run tailwindcss -i tailwind/input.css -o static/css/app.css --watch   # rebuild CSS on change
 uv run python manage.py runserver        # dev server (settings: config.settings.local)
 uv run python manage.py makemigrations   # after model changes
-uv run pytest                            # tests
+uv run pytest                            # all tests, E2E included
 uv run ruff check . && uv run ruff format .
 ```
 
@@ -33,6 +34,9 @@ Copy `.env.example` to `.env` before the first run.
   old one, change the version here and in `docs/PLAN.md`, rebuild CSS, run the tests.
 - `docs/PLAN.md` — plan; `docs/AI_LOG.md` — log of AI-assisted work; `docs/SECURITY.md` —
   what is protected, where, which tests check it, known limitations
+- Tests: `<app>/tests/` for one app's unit and integration tests; root `tests/` for checks
+  that belong to no app (settings, layout, deploy) and `tests/e2e/` for Playwright
+  (see `docs/TESTING.md`)
 - `docs/specs/` — specs for complex tickets, written and decided before the failing tests
   (first: `onboarding.md`, #10)
 - Django apps (`accounts/`, `jobs/`, `chat/`, …) are added ticket by ticket, see the plan
@@ -50,7 +54,7 @@ Copy `.env.example` to `.env` before the first run.
 1. Unit tests first (TDD). The student reads them; commit them failing: "Add failing tests for …".
 2. Implementation until the tests pass.
 3. Integration tests with the Django test client.
-4. E2E (Playwright) only in the per-milestone test tickets.
+4. E2E (Playwright, `tests/e2e/`) only in the per-milestone test tickets.
 
 Every test file: docstring starting `Unit tests:` / `Integration tests:` / `E2E tests:` and
 `pytest.mark.story(N)` in `pytestmark` (a test from another ticket gets its own marker). Every
