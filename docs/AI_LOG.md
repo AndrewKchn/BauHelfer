@@ -1070,3 +1070,40 @@ a mutable dict on the class), so it moved it to `__init__`, like `team_size`.
   database.
 - Why a migration appears even though the database does not change.
 - How I would clean up wrong numbers if real users already had them.
+
+## 2026-10-09 · #14 E2E tests (Playwright) and coverage review for M2
+
+**Task given to AI:** do #14, the first E2E ticket: set up Playwright with Django's
+`live_server`, add a CI step for the browser, cover the M2 flows (register → role → profile,
+login / logout, password reset), review coverage, decide the test folder layout and write
+`docs/TESTING.md`.
+
+**AI helped:** set up `pytest-playwright` and found that Django refuses database calls next
+to Playwright's event loop (`SynchronousOnlyOperation`); the fix, `DJANGO_ALLOW_ASYNC_UNSAFE`,
+is set only in `tests/e2e/conftest.py`. Wrote 4 E2E tests and checked them by breaking the code
+on purpose: without `{% csrf_token %}` in the logout form the test fails with "CSRF verification
+failed", a 500 px block makes the phone test fail with "180px wider than the screen". Turned
+on branch coverage; it found two untested branches, now tested (100 % lines and branches).
+When I said the tests got too slow, it measured and found the cause: PBKDF2 takes 0.7 s per
+password, so it switched tests to an MD5 hasher (full run ~2 min → ~30 s). Compared CI logs
+before and after `--only-shell`.
+
+**AI failed:**
+- An E2E test matched "Name" and "Company name" at once (`exact=True` was missing).
+- It first credited `--only-shell` for the faster CI; the logs showed most of the 3.5 minutes
+  was a slow Ubuntu mirror (`apt`), which the flag does not fix.
+
+**My part:**
+- AI suggested a phone-width test for the worker only. I asked why only the worker, then
+  chose one signup flow per device: the worker on a 360 px phone, the employer on a laptop,
+  instead of a separate phone test for both roles. This way similar flows cover both the
+  laptop and the phone view, and a worker is more likely to use a phone. Employers will use
+  phones too; that case will be checked in the ticket where they create jobs.
+- I did not accept the slower tests (E2E 11 s → 27 s) and asked to re-check; that is how the
+  slow password hasher was found. I asked for a unit test that production still uses PBKDF2.
+- I asked to add `test-results/` to `.gitignore` (Playwright traces hold the typed passwords).
+- I watched every E2E flow in the browser with `--slowmo 500`, replayed them in the Trace
+  Viewer and read the CI logs on GitHub.
+
+**Learned:**
+- Nothing new about Playwright itself: I had used it before.
