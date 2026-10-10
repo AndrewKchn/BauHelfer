@@ -19,7 +19,7 @@ written issue by issue.
 | Part | Choice | Why |
 |---|---|---|
 | Backend | **Python 3.12 + Django 5** | Built-in auth, form validation, ORM, migrations, admin and i18n — everything BauHelfer needs. Fastest path to a working result |
-| Frontend | **Django templates + HTMX 2 + Tailwind CSS 4 + daisyUI 5** | The whole project stays in Python with minimal JavaScript. HTMX adds interactivity (filters, applications, chat). Tailwind gives a mobile-first layout. Decided in #3: **daisyUI** on top of Tailwind (short classes like `btn`, no own JS, so no clash with HTMX; Flowbite and plain Tailwind rejected). Own colour theme with dark mode in #83. Tailwind is **built** by the standalone CLI via `pytailwindcss` (no Node.js), not loaded from a CDN: smaller CSS, no flash of unstyled page, and no visitor IPs sent to a CDN (GDPR). **HTMX 2.0.10**, not the new 4.0 (released Aug 2026): far more docs and examples. HTMX and daisyUI are downloaded files in the repo, served by WhiteNoise |
+| Frontend | **Django templates + HTMX 2 + Tailwind CSS 4 + daisyUI 5** | The whole project stays in Python with minimal JavaScript. HTMX adds interactivity (filters, applications, chat). Tailwind gives a mobile-first layout. Decided in #3: **daisyUI** on top of Tailwind (short classes like `btn`, no own JS, so no clash with HTMX; Flowbite and plain Tailwind rejected). Own colour theme with dark mode in #83. Tailwind is **built** by the standalone CLI via `pytailwindcss` (no Node.js), not loaded from a CDN: smaller CSS, no flash of unstyled page, and no visitor IPs sent to a CDN (GDPR). **HTMX 2.0.10**, not the new 4.0 (released Aug 2026): far more docs and examples. HTMX, daisyUI and its theme plugin (`daisyui-theme.mjs`, same 5.7.47 release, #83) are downloaded files in the repo; HTMX is served by WhiteNoise, the daisyUI files are used only to build the CSS |
 | Database | **PostgreSQL**: Docker locally, **Supabase** (Frankfurt, free plan) in production | Django standard, same engine everywhere. Supabase instead of a Render database: Render's free database expires after 30 days, Supabase's does not (it pauses after 7 days without activity). Only plain PostgreSQL is used, via the Session pooler; Data API off, RLS on |
 | Text translation | **Claude API** (`claude-haiku-4-5`) | Handles construction slang and context; translations are cached in the DB |
 | Map | **Leaflet + OpenStreetMap**, Nominatim geocoding | Free, no API keys |
@@ -29,15 +29,21 @@ written issue by issue.
 | CI | **GitHub Actions**: ruff, pytest, coverage on every PR; required to merge into `main` | |
 | Hosting | **Render, Frankfurt region** (web service), **gunicorn**, static files via **WhiteNoise**; `render.yaml` Blueprint | Auto-deploy from `main` after CI is green, data stays in the EU (GDPR). Free plans only, also for the defense — a learning project. The server sleeps after 15 min without traffic (first request then takes up to a minute) |
 
-**Deploy from week one:** after M1 the project has a live version, and every merge to `main` updates the site.
+**Deploy from week one:** after M1 the project has a live version, and every merge to `main` that changes the site updates it
+(merges that change only docs, tests or CI files are skipped, #85).
 
 ## Data model (core)
 
-- **User** (custom): email, name, phone, `role` = employer | worker, `preferred_language`,
-  `work_permit_confirmed` ("I am allowed to work in Germany").
-- **WorkerProfile**: `team_size` (1 = individual, >1 = crew), skills (demolition, cleanup, carrying…),
-  languages, `legal_status` = Gewerbe | Minijob | employed, district.
-- **EmployerProfile**: company / name, trade.
+- **User** (custom): email, name, phone (optional; `+` and a country code or `0` and a German
+  area code, 10–15 digits, stored as entered, #109), `role` = employer | worker,
+  `preferred_language`, `work_permit_confirmed_at` (when the worker confirmed "I am allowed to
+  work in Germany"; empty = not confirmed, #13).
+- **WorkerProfile**: `team_size` 1–10 (1 = individual, >1 = crew), skills (demolition, cleanup,
+  carrying…) and languages from fixed lists, `legal_status` = Gewerbe | Minijob | employed. No
+  district: no feature needs it (GDPR data minimisation, #11).
+- **EmployerProfile**: `company_name` (optional: a private person has none), `trades` — one or
+  more from a fixed list, incl. "private person" and "other" (#12). The contact person is
+  `User.name`.
 - **Job**: employer, job type, description, `original_language`, address / district, coordinates,
   date and hours, number of workers, hourly rate in € (≥ `MINIMUM_WAGE = 13.90`),
   status open | filled | done | cancelled.
@@ -60,8 +66,10 @@ BauHelfer/
 ├── reviews/           # Review
 ├── translations/      # Claude API service + cache
 ├── templates/  static/  locale/
-├── docs/PLAN.md  docs/AI_LOG.md  docs/SECURITY.md
-├── CLAUDE.md  .claude/skills/ai-log/   # instructions and /ai-log skill for Claude Code
+├── tests/  tests/e2e/ # checks that belong to no app; Playwright flows
+├── docs/PLAN.md  docs/AI_LOG.md  docs/SECURITY.md  docs/TESTING.md
+├── docs/specs/        # specs for complex tickets, decided before the failing tests
+├── CLAUDE.md  .claude/skills/   # instructions and the /ai-log, /sprint-docs skills
 ├── docker-compose.yml  pyproject.toml  render.yaml  .github/workflows/ci.yml
 ```
 
@@ -70,7 +78,7 @@ BauHelfer/
 `backend`, `frontend`, `database`, `i18n`, `ai`, `legal`, `devops`, `testing`, `docs`, `stretch`
 (+ default `bug` and `enhancement`; other default labels are removed).
 
-## Milestones and issues (71)
+## Milestones and issues (84)
 
 Each issue has a **Description** and a **Done when…** checklist. Numbers are GitHub issue numbers;
 the status of each issue lives on the board, not here.
@@ -96,15 +104,19 @@ the status of each issue lives on the board, not here.
 - #10 Role selection and onboarding flow (`frontend`)
 - #11 Worker profile: team size, skills, languages, legal status (`backend`, `frontend`)
 - #12 Employer profile (`backend`, `frontend`)
-- #13 Work-permit confirmation checkbox at signup (`legal`)
+- #13 Work-permit confirmation in the worker profile (`legal`)
+- #109 Phone number accepts any text (`backend`, `bug`)
 - #83 Brand colors and dark mode: own daisyUI theme, light + dark by device setting (`frontend`)
-- #85 Fix misleading trigger comment in CI workflow (`devops`)
+- #103 Header: same dropdown menu on desktop as on phone (`frontend`)
+- #85 CI and deploy triggers: fix comment, skip Render deploys for docs-only changes (`devops`)
 - #88 Security notes: `docs/SECURITY.md` (`docs`, `legal`)
 - #89 Allure test report: tests grouped by story (`testing`, `devops`) — before #10
+- #93 Docs sync at the end of each sprint + `/sprint-docs` skill (`devops`, `docs`)
 - #14 E2E tests (Playwright) and coverage review for M2 (`testing`)
-- #74 Staging environment on free plans (`devops`, `stretch`) — optional, before M3
+- #94 Docs sync — M2 (`docs`)
 
 ### M3 · Jobs — due 25 Oct
+- #113 Theme tests pass only with minified CSS (`testing`, `bug`)
 - #15 Job model and migrations (`database`)
 - #16 Create / edit / cancel job (employer) (`backend`, `frontend`)
 - #64 Job photos: up to 5 per job, resize, strip EXIF, Cloudflare R2 storage (`backend`,
@@ -114,6 +126,7 @@ the status of each issue lives on the board, not here.
 - #19 Job detail page (`frontend`)
 - #20 Employer dashboard "My jobs" (`frontend`)
 - #21 E2E tests (Playwright) and coverage review for M3 (`testing`)
+- #95 Docs sync — M3 (`docs`)
 
 ### M4 · Applications — due 1 Nov
 - #22 Apply to job (worker) with message and number of workers (`backend`, `frontend`)
@@ -124,6 +137,7 @@ the status of each issue lives on the board, not here.
 - #27 Email notifications: new application, accepted / rejected (`backend`)
 - #81 Email verification at signup (`backend`) — after #27, needs real email sending
 - #28 E2E tests (Playwright) and coverage review for M4 (`testing`)
+- #96 Docs sync — M4 (`docs`)
 
 ### M5 · Multilingual & AI Translation — due 8 Nov
 - #29 Django i18n setup + language switcher (DE, EN, RU, UK, PL, RO, TR) (`i18n`)
@@ -133,6 +147,7 @@ the status of each issue lives on the board, not here.
   — done before the features that use the service (#32, #33, #36)
 - #32 Auto-translate job descriptions, "show original" toggle (`ai`, `frontend`)
 - #33 Auto-translate application messages (`ai`)
+- #97 Docs sync — M5 (`docs`)
 
 ### M6 · Chat & Reviews — due 15 Nov
 - #35 Chat per accepted application (HTMX polling) (`backend`, `frontend`)
@@ -141,6 +156,7 @@ the status of each issue lives on the board, not here.
 - #38 Reviews and ratings in both directions (`backend`, `frontend`)
 - #39 Show rating on profiles and applications (`frontend`)
 - #40 E2E tests (Playwright) and coverage review for M6 (`testing`)
+- #98 Docs sync — M6 (`docs`)
 
 ### M7 · Map, Legal & GDPR — due 22 Nov
 - #41 Geocode job address (Nominatim) (`backend`)
@@ -149,6 +165,7 @@ the status of each issue lives on the board, not here.
 - #44 Account deletion and personal-data export (GDPR) (`legal`, `backend`)
 - #45 Admin panel for moderation: block user, remove job (`backend`)
 - #91 Login rate limiting: slow down password guessing (`backend`, `legal`, `stretch`)
+- #99 Docs sync — M7 (`docs`)
 
 ### M8 · Production & Defense — due 1 Dec
 - #46 Demo readiness on free plans: wake-up, Supabase not paused, manual backup (`devops`)
@@ -157,6 +174,7 @@ the status of each issue lives on the board, not here.
 - #49 End-to-end manual test scenario, fix bugs (`testing`)
 - #50 Final docs: architecture diagram, AI_LOG summary (`docs`)
 - #51 Defense presentation and demo script (`docs`)
+- #100 Docs sync — M8 (`docs`)
 
 ### Stretch (no due date)
 - #52 Real crews: crew leader invites members (`stretch`)
@@ -164,9 +182,12 @@ the status of each issue lives on the board, not here.
 - #54 Real-time chat via WebSockets (Django Channels) (`stretch`)
 - #55 Worker availability calendar (`stretch`)
 - #73 Error monitoring on production with Sentry (`stretch`)
+- #74 Staging environment on free plans (`devops`, `stretch`)
 - #75 Modern admin theme with django-unfold (`frontend`, `stretch`)
 - #84 Logo, icons and images (`frontend`, `stretch`) — after the main features
 - #82 Sign in with Google (`backend`, `legal`, `stretch`) — only if time is left; new dependency
+- #114 `/accounts/profile/` redirects to the user's own profile page (`frontend`, `stretch`)
+- #115 Let users suggest a missing trade (`backend`, `stretch`)
 
 ## Testing approach
 
@@ -179,8 +200,15 @@ Tests are part of every feature ticket, not separate tickets.
 4. **E2E tests (Playwright)** once per milestone, in the milestone test tickets #14, #21, #28,
    #40, together with a coverage review.
 
-CI (#4) runs ruff and pytest, fails below 80 % test coverage and 80 % docstring coverage, and is
-required to merge into `main`. #49 is the final manual end-to-end scenario before the defense.
+Where tests live (decided in #14): one app's unit and integration tests in `<app>/tests/`, checks
+that belong to no app (settings, layout, theme, deploy) in root `tests/`, Playwright flows in
+`tests/e2e/`. Rejected: everything in root `tests/` (every new app would add a folder there) and
+`unit/` / `integration/` subfolders (the level is already in the file docstring). Details,
+commands and techniques: [`docs/TESTING.md`](TESTING.md).
+
+CI (#4) runs ruff and pytest, fails below 80 % test coverage (lines **and** branches, since #14)
+and 80 % docstring coverage, and is required to merge into `main`. #49 is the final manual
+end-to-end scenario before the defense.
 
 ## Translation approach
 
@@ -220,7 +248,7 @@ Board: [BauHelfer](https://github.com/users/AndrewKchn/projects/1), columns Todo
 ## Verification
 
 - `gh label list` — 12 labels; `gh api repos/AndrewKchn/BauHelfer/milestones --jq '.[].title'` — 9 milestones.
-- `gh issue list --state all --limit 100 --json number --jq length` → 70; every issue has a
+- `gh issue list --state all --limit 100 --json number --jq length` → 84; every issue has a
   milestone and a label.
 - `gh project item-list 1 --owner AndrewKchn` — all issues are on the board, each non-Stretch
   issue has a Sprint.
