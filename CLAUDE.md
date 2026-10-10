@@ -14,6 +14,7 @@ docker compose up -d                     # start PostgreSQL (needed for runserve
 uv run tailwindcss -i tailwind/input.css -o static/css/app.css --watch   # rebuild CSS on change
 uv run python manage.py runserver        # dev server (settings: config.settings.local)
 uv run python manage.py makemigrations   # after model changes
+uv run python manage.py migrate          # after makemigrations and after pulling main
 uv run pytest                            # all tests, E2E included
 uv run ruff check . && uv run ruff format .
 ```

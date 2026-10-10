@@ -1202,3 +1202,50 @@ spec, seven decisions and a data migration.
 
 **Learned:**
 - Why accepting every recommendation needs a reason in the log, too.
+
+## 2026-10-10 · #15 Job model and migrations
+
+**Task given to AI:** start #15 (after updating `main` and deleting merged local branches):
+the `Job` model, its migration and the admin, following the ticket workflow — spec, failing
+tests, implementation.
+
+**AI helped:**
+- Proposed the field design and wrote a short spec, `docs/specs/job.md` (D1–D8), with the
+  open questions for me before any tests.
+- Wrote the failing unit tests (model, admin, and a new root test `tests/test_migrations.py`
+  that fails when a model changes without a migration), then the `jobs` app: `Job` with
+  validators and two database constraints, the `District` list (25 Stadtbezirke + "outside
+  the city"), `MINIMUM_WAGE`, the admin. 373 tests green, CI green.
+- Explained on request: how the Django admin relates to jobs and where its pages come from
+  without our own views; which "framework steps" we fill in this ticket (mostly declarations,
+  the only hook is `__str__`); and how browser validation relates to the model — checked on
+  the real admin form: the browser gets `min="0"` for hours and workers, not 1–10.
+
+**AI failed:**
+- It ran `migrate jobs` only, so the migration `accounts 0005_phone_validator` from #109 was
+  still unapplied and `runserver` did not start for me. Fixed with a plain `migrate`; this
+  also showed that `CLAUDE.md` did not list `migrate`.
+- It did not raise that one `MINIMUM_WAGE` without a date lets a job posted in 2026 for 2027
+  pass at 13.90 € (14.60 € from 2027). It came out only when I asked why the rate is in code.
+
+**My part:**
+- AI recommended an integration test through the admin "add job" page; I moved integration
+  tests to #16, where the job pages and forms are: I think they do not belong to this ticket.
+  The "Integration tests" item in #15 stays unticked.
+- AI recommended 1–20 workers per job; I chose 1–10, the same as `team_size`. Jobs here are
+  small, short-term side jobs, and a crew of 10 already has a big margin.
+- I asked why the minimum wage is a constant in code; this found the 2027 problem. I decided
+  to check the rate against the job's date in the #16 form and added that item to #16.
+- I asked whether browser validation matches the model; this found the `min="0"` gap. The idea
+  to mirror the limits as HTML attributes is in #16.
+- I asked to add `migrate` to the commands in `CLAUDE.md`.
+- I checked the admin by hand (employer list, rate 13.89, 0 / 11 workers, 11 hours) and posted
+  a screenshot in the PR.
+- I accepted the other recommendations (spec first, job type = `Skill`, date + start time +
+  hours, 1–10 hours by § 3 ArbZG): they matched what I wanted.
+
+**Learned:**
+- Why model validators run in `full_clean()` (forms, the admin) but not in `save()`, and why
+  the browser does not get them — only what Django knows from the field type.
+- How the admin builds its pages from a model without our own views: Django's `ModelAdmin`
+  views, our class only configures them.
