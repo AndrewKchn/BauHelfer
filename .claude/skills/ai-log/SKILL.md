@@ -29,7 +29,9 @@ Fill each section from facts in the session, not from general statements:
 - **My part** — every suggestion the student rejected or changed, the student's own ideas,
   and what they checked by hand. Write *what* happened; for the reason write
   `TODO: your reason` unless the student already said it in the session (then quote or
-  closely paraphrase them).
+  closely paraphrase them). If the student accepted every recommendation, do not write only
+  "I chose the recommended option": write `TODO: why you accepted them` (e.g. a small ticket
+  with little to decide, or the recommendation matched what you wanted, because …) and ask it.
 - **Learned** — leave `TODO: what you can now explain`, with 1–2 suggestions in brackets.
 
 Written in first person from the student ("I chose…"), in English, short.
