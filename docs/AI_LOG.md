@@ -1145,3 +1145,60 @@ green CI run, not by running each one.
 - Why a test that cannot fail is worse than a red one: it looks like protection but checks
   nothing.
 - Why sprint notes go into the issue that needs them.
+
+## 2026-10-10 · Planning: AI_LOG review
+
+**Task given to AI:** after merging #94 I asked AI to go through the closed issues for
+unticked "Done when…" items, then to review the whole AI_LOG: are the steps of the process
+logical, and does it look as if AI did everything and I did not take part? I have not written
+a line of code myself.
+
+**AI helped:** confirmed with the CI and deploy history that the docs-only merge of #94 did
+not deploy (CI green on `main`, no new Render deploy; #14 had deployed 2 minutes after its
+CI). Found unticked items in six closed issues, ticked those with evidence (#7, #58, #59, #88)
+and raised two without it (#13, #58). The review listed what is clearly mine in the log
+(product decisions, overruled recommendations, bugs I found by hand) and its weak spots:
+repeated AI mistakes that were only logged, not fixed (the theme tests and `--minify` came up
+three times before #113); a lot of process work compared to features; sprint dates on the
+board that do not match the real pace; and entries where I accepted every recommendation
+without saying why.
+
+**AI failed:**
+- In #85 it promised that Render would show "skipped" for a docs-only merge. Render shows
+  nothing; the only evidence is that no deploy appeared. I found it on Render after the merge.
+- It added a "Done when…" line to #22 without reading the list first. The same item was
+  already there, so I had to remove the duplicate.
+
+**My part:**
+- I asked for the review and the question "does it look like I did nothing?" myself.
+- Instead of waiting for an AI_LOG entry as proof for #85, I posted a comment with a
+  screenshot of the GitHub deployments.
+- For #58 (strike through the dropped "AI usage" part) and #13 (leave "cannot apply"
+  unticked, the check moves to #22) I accepted the recommendations: the options were small
+  and the recommendation matched what I wanted.
+- AI suggested that I write #113 myself. I postponed it to the end of the sprint: the review
+  showed that the process now outweighs development, so I need to work on features.
+
+**Learned:**
+- The process now takes more time than the product; M3 should focus on features.
+
+## 2026-10-10 · #117 /ai-log: ask why when every recommendation was accepted
+
+**Task given to AI:** make `/ai-log` ask for the reason when I accepted every recommendation.
+This came out of the AI_LOG review (see the previous entry).
+
+**AI helped:** created #117 and wrote one rule in `.claude/skills/ai-log/SKILL.md`: if I
+accepted every recommendation, the draft does not say only "I chose the recommended option"
+but leaves `TODO: why you accepted them` and asks me. The first run was this entry's draft.
+
+**AI failed:** in the review it first counted #13 among the "small" tickets. In fact #13 had a
+spec, seven decisions and a data migration.
+
+**My part:**
+- I pointed out that the tickets where I accepted everything were small, but that this is
+  not obvious from the log. This ticket came out of it.
+- I accepted the wording of the rule: the options were small and the recommendation matched
+  what I wanted.
+
+**Learned:**
+- Why accepting every recommendation needs a reason in the log, too.
