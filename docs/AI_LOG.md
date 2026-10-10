@@ -1109,3 +1109,39 @@ before and after `--only-shell`.
 
 **Learned:**
 - Nothing new about Playwright itself: I had used it before.
+
+## 2026-10-10 · #94 Docs sync — M2
+
+**Task given to AI:** do the first "Docs sync" ticket with `/sprint-docs`: handle the 38
+comments collected in #94 during M2, check `docs/PLAN.md`, `CLAUDE.md`, `docs/SECURITY.md` and
+`README.md` against the board and the code, and propose for each comment: into a doc, a new
+issue, or rejected.
+
+**AI helped:** checked every test, class and file named in the comments with grep before
+proposing them for `SECURITY.md` (all exist). Counted the issues: the board had 81, PLAN.md
+listed 71. Found what #14 had already done (the 360 px check) and which comments the later
+ones had made out of date (`_nav_links.html`, removed in #103). Drafted the changes as a table
+plus before → after per doc. When I asked about the theme tests, it built `app.css` with and
+without `--minify` and showed the difference. That is how it found that
+`test_built_css_has_no_builtin_daisyui_themes` always passes on unminified CSS: the test could
+not fail. After my "yes" it edited 5 docs, created #113–#115, added notes and "Done when…"
+lines to 11 future issues and answered all 38 comments with the commit or issue.
+
+**AI failed:** nothing notable. It checked the `CLAUDE.md` commands by reading them and by the
+green CI run, not by running each one.
+
+**My part:**
+- I accepted the recommendations for renaming #13 (the checkbox is in the worker profile, not
+  at signup), for turning two ideas into Stretch issues (#114, #115) and for putting notes for
+  later tickets into those issues instead of PLAN.md: whoever starts #22 opens #22 and sees
+  the note there; in PLAN.md it would have to be looked for.
+- On the theme tests I asked for a fuller explanation before deciding. I chose to fix the test
+  (#113, M3), not to add `--minify` to the watch command: the cause of the bug is in the
+  test, so it has to be fixed, not hidden.
+- "My part" instead of "I overruled" was my idea from #109; now it is the entry format and
+  the `/ai-log` skill uses it.
+
+**Learned:**
+- Why a test that cannot fail is worse than a red one: it looks like protection but checks
+  nothing.
+- Why sprint notes go into the issue that needs them.
