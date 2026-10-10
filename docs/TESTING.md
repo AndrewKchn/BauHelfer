@@ -86,9 +86,19 @@ check blocks the merge:
   `tests/test_deploy.py` checks that production still uses PBKDF2.
 - **Screen sizes in E2E.** The worker flow runs on a 360 px phone and checks that no page
   scrolls sideways; the employer flow runs on a laptop screen.
+- **Testing a data migration** (`test_migration_keeps_existing_confirmations` in
+  [test_work_permit.py](../accounts/tests/test_work_permit.py), #13): Django's
+  `MigrationExecutor` moves the test database back to the migration before, the test creates
+  data the old way, migrates forward and checks the data survived. No extra library.
 - **Coverage is a map, not a goal.** 100 % means every line ran in some test, not that
   every result was checked. The coverage review in each milestone test ticket looks for
   branches nobody tested.
+
+## What the tests do not check
+
+- **Non-text contrast.** `tests/test_theme_contrast.py` checks text colours on their
+  backgrounds (WCAG AA, 4.5:1), not input borders or the focus outline (WCAG 1.4.11, 3:1).
+  Pages were checked by hand; an automatic check is a candidate for #48.
 
 ## Manual testing
 

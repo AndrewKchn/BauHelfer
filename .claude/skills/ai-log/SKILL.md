@@ -26,9 +26,10 @@ Fill each section from facts in the session, not from general statements:
 - **AI helped** — concrete things generated or explained.
 - **AI failed** — wrong code, outdated instructions, failing tests, missed edge cases, and how
   they were found. If nothing failed, write "nothing notable" — do not invent failures.
-- **I overruled** — every suggestion the student rejected or changed. Write *what* happened;
-  for the reason write `TODO: your reason` unless the student already said it in the session
-  (then quote or closely paraphrase them).
+- **My part** — every suggestion the student rejected or changed, the student's own ideas,
+  and what they checked by hand. Write *what* happened; for the reason write
+  `TODO: your reason` unless the student already said it in the session (then quote or
+  closely paraphrase them).
 - **Learned** — leave `TODO: what you can now explain`, with 1–2 suggestions in brackets.
 
 Written in first person from the student ("I chose…"), in English, short.
