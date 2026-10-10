@@ -15,12 +15,14 @@ several). Entries are drafted with the `/ai-log` skill from the session and then
 
 **AI failed:** wrong code, bad suggestions, failing tests, missed edge cases — and how they were found.
 
-**I overruled:** suggestions I rejected or changed, and why.
+**My part:** suggestions I rejected or changed and why, my own ideas, and how I checked the
+result by hand.
 
 **Learned:** what I now understand and can explain.
 ```
 
-Sessions without a ticket (planning, process) use `Planning:` instead of `#N`.
+Sessions without a ticket (planning, process) use `Planning:` instead of `#N`. Entries before
+#109 use **I overruled:** instead of **My part:**; they stay as they are.
 
 ---
 
