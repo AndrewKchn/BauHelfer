@@ -33,7 +33,7 @@ English, Russian, Ukrainian, Polish, Romanian and Turkish.
 - Python 3.12, Django 5
 - Django templates, HTMX 2, Tailwind CSS 4 + daisyUI 5 (built with the standalone Tailwind CLI)
   — daisyUI and HTMX are kept in the repo as downloaded files (`tailwind/daisyui.mjs`,
-  `static/js/htmx.min.js`), so no Node.js and no CDN are needed
+  `tailwind/daisyui-theme.mjs`, `static/js/htmx.min.js`), so no Node.js and no CDN are needed
 - PostgreSQL
 - Claude API for translation
 - Leaflet + OpenStreetMap
@@ -87,7 +87,8 @@ for you) and [Docker](https://docs.docker.com/get-docker/).
 ### Tests and code style
 
 ```bash
-uv run pytest --cov                        # tests; fails below 80 % coverage
+uv run playwright install chromium         # once per clone: browser for the E2E tests
+uv run pytest --cov                        # all tests, E2E included; fails below 80 % coverage
 uv run ruff check . && uv run ruff format .
 uv run pre-commit install                  # once per clone: ruff runs before every commit
 ```
@@ -106,13 +107,13 @@ uv run pytest --alluredir=allure-results
 npx allure@3.20.0 generate allure-results && npx allure@3.20.0 open allure-report
 ```
 
-Every test file starts with `"""Unit tests: …"""`, `"""Integration tests: …"""` or
-`"""E2E tests: …"""` and has `pytest.mark.story(N)` in `pytestmark`; every test has a docstring
-(a short line, then the steps). A test without them stops the run.
+Test levels, where tests live, more commands and how tests are named:
+[docs/TESTING.md](docs/TESTING.md).
 
 ## Project links
 
 - [Plan](docs/PLAN.md): stack decisions, data model, milestones
+- [Testing](docs/TESTING.md): test levels, how to run them, what CI checks
 - [Project board](https://github.com/users/AndrewKchn/projects/1): what is in progress now
 - [Issues](https://github.com/AndrewKchn/BauHelfer/issues)
 - [AI log](docs/AI_LOG.md): how AI was used and which suggestions were changed or rejected
@@ -121,4 +122,5 @@ Every test file starts with `"""Unit tests: …"""`, `"""Integration tests: …"
 
 ## Status
 
-In development. M1 (foundation and first deploy) is done; next is M2, accounts and profiles.
+In development. M1 (foundation and first deploy) and M2 (accounts and profiles) are done; next
+is M3, jobs.
