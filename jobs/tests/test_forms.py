@@ -27,7 +27,6 @@ def form_data(**fields):
     return {
         "job_type": "demolition",
         "description": "Tear down a garden shed.",
-        "original_language": "de",
         "address": "Lindwurmstraße 1",
         "district": "sendling",
         "date": days_from_today(7).isoformat(),
@@ -63,16 +62,17 @@ def test_valid_form():
 
 
 def test_form_fields():
-    """The form asks for the job details only, not for owner, status or coordinates.
+    """The form asks for the job details only, not for owner, status, language or coordinates.
 
     1. Open an empty job form
-    2. Expect: the ten job fields in order; no employer, status, latitude, longitude
+    2. Expect: the nine job fields in the order of the UI mockup; no employer, status,
+       original language, latitude, longitude
     """
-    # The view sets the employer, the model the status; geocoding (#41) the coordinates.
+    # The view sets the employer and the language, the model the status; geocoding (#41)
+    # the coordinates.
     assert list(JobForm().fields) == [
         "job_type",
         "description",
-        "original_language",
         "address",
         "district",
         "date",
@@ -105,13 +105,15 @@ def test_rate_one_cent_below_minimum_wage_of_the_date_is_rejected():
 
     1. Minimum wage rises from 13.90 € to 15.00 € in 30 days
     2. Post a job in 40 days at 14.99 €
-    3. Expect: an error on the hourly rate that names 15.00
+    3. Expect: an error on the hourly rate: "At least 15.00 €", the German minimum wage
     """
     form = JobForm(data=form_data(date=days_from_today(40), hourly_rate="14.99"))
 
     assert not form.is_valid()
     assert list(form.errors) == ["hourly_rate"]
-    assert "15.00" in form.errors["hourly_rate"][0]
+    error = form.errors["hourly_rate"][0]
+    assert "At least 15.00 €" in error  # wording of the UI mockup
+    assert "German minimum wage" in error
 
 
 @pytest.mark.usefixtures("wage_rises_in_30_days")
@@ -204,3 +206,26 @@ def test_rate_input_has_cents_and_the_lowest_minimum_wage():
 
     assert 'step="0.01"' in html
     assert 'min="13.90"' in html
+
+
+# Wording of the UI mockup (R9, R14a)
+
+
+def test_description_says_workers_read_it_in_their_language():
+    """The description tells the employer to write in their own language.
+
+    1. Open an empty job form
+    2. Expect: the help text of the UI mockup under the description
+    """
+    assert JobForm()["description"].help_text == (
+        "Write in your language. Workers read it in theirs."
+    )
+
+
+def test_rate_label_matches_the_mockup():
+    """The rate field is labelled "Hourly rate, €" as in the UI mockup.
+
+    1. Open an empty job form
+    2. Expect: the label "Hourly rate, €"
+    """
+    assert JobForm()["hourly_rate"].label == "Hourly rate, €"

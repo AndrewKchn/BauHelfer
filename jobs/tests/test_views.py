@@ -11,7 +11,7 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.test import Client
 from django.urls import reverse
-from django.utils import timezone
+from django.utils import dateformat, timezone
 from pytest_django.asserts import assertContains, assertNotContains, assertRedirects
 
 from accounts.models import EmployerProfile
@@ -58,7 +58,6 @@ def form_data(**fields):
     return {
         "job_type": "carrying",
         "description": "Carry tiles to the third floor.",
-        "original_language": "de",
         "address": "Leopoldstraße 50",
         "district": "schwabing_west",
         "date": NEXT_WEEK.isoformat(),
@@ -157,17 +156,21 @@ def test_employer_without_profile_is_sent_to_the_profile_form(client):
     assertContains(response, "company profile")
 
 
-def test_create_form_starts_with_the_preferred_language(employer_client):
-    """The description language starts as the employer's own language.
+def test_job_gets_the_employers_language(employer_client):
+    """A posted job is written in the employer's own language; the form does not ask.
 
     1. Log in as an employer whose preferred language is Russian
-    2. Open "Post a job"
-    3. Expect: the form shows "Русский" as the language of the description
+    2. Open "Post a job": no language field
+    3. Send a correctly filled job form
+    4. Expect: the job's original language is Russian
     """
+    # Translation (#32) starts from this language and corrects it if Claude finds another.
     response = employer_client.get(reverse("job_create"))
+    assertNotContains(response, 'name="original_language"')
 
-    assert response.status_code == 200
-    assert response.context["form"]["original_language"].value() == "ru"
+    employer_client.post(reverse("job_create"), form_data())
+
+    assert Job.objects.get().original_language == "ru"
 
 
 def test_employer_posts_a_job(employer_client, employer):
@@ -232,7 +235,7 @@ def test_owner_edits_an_open_job(employer_client, employer, job):
     1. Log in as the employer who posted the job
     2. Open "Edit": the form shows the saved address
     3. Send the form with a new address
-    4. Expect: the job has the new address, the same owner, and is still open
+    4. Expect: the job has the new address, the same owner and language, and is still open
     """
     url = reverse("job_edit", args=[job.pk])
     assertContains(employer_client.get(url), "Lindwurmstraße 1")
@@ -244,6 +247,7 @@ def test_owner_edits_an_open_job(employer_client, employer, job):
     assert job.address == "Marienplatz 8"
     assert job.employer == employer
     assert job.status == Job.Status.OPEN
+    assert job.original_language == "de"  # kept, not replaced by the employer's "ru"
 
 
 @pytest.mark.parametrize("name", ["job_edit", "job_cancel"])
@@ -351,6 +355,43 @@ def test_my_jobs_offers_edit_and_cancel_for_open_jobs_only(employer_client, empl
     assertContains(response, f'href="{reverse("job_cancel", args=[open_job.pk])}"')
     assertNotContains(response, reverse("job_edit", args=[cancelled_job.pk]))
     assertNotContains(response, reverse("job_cancel", args=[cancelled_job.pk]))
+
+
+def test_my_jobs_card_follows_the_mockup(employer_client, employer):
+    """A job card in "My jobs" looks like the UI mockup.
+
+    1. Save an open demolition job next week, 08:00, 6 hours, 2 workers, 20.00 €
+    2. Open "My jobs"
+    3. Expect: the title "Demolition · <weekday> <day> <month>"; time, hours, workers and
+       rate in one line that wraps only between its parts; the district in a line of its
+       own; the links "Edit" and "Cancel job"
+    """
+    make_job(employer)
+
+    response = employer_client.get(reverse("my_jobs"))
+
+    assertContains(response, f"Demolition · {dateformat.format(NEXT_WEEK, 'D j M')}")
+    # The short parts share one line; on a phone it may wrap only between them, never
+    # inside one ("2 / workers"), so each is a no-wrap span.
+    for part in ["08:00", "6 h", "2 workers", "20.00 €/h"]:
+        assertContains(response, f'<span class="whitespace-nowrap">{part}')
+    # The district has a line of its own and may wrap: the longest one has 52 characters
+    # and would run out of the card if it could not.
+    assertContains(response, ">Sendling</p>")
+    assertNotContains(response, 'whitespace-nowrap">Sendling')
+    assertContains(response, "Cancel job")
+
+
+def test_post_form_follows_the_mockup(employer_client):
+    """The "Post a job" form is sent with the "Publish job" button of the UI mockup.
+
+    1. Log in as an employer
+    2. Open "Post a job"
+    3. Expect: a "Publish job" button
+    """
+    response = employer_client.get(reverse("job_create"))
+
+    assertContains(response, "Publish job")
 
 
 def test_empty_my_jobs_invites_to_post(employer_client):
