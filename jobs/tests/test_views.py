@@ -9,6 +9,7 @@ from decimal import Decimal
 
 import pytest
 from django.contrib.auth import get_user_model
+from django.test import Client
 from django.urls import reverse
 from django.utils import timezone
 from pytest_django.asserts import assertContains, assertNotContains, assertRedirects
@@ -362,6 +363,49 @@ def test_empty_my_jobs_invites_to_post(employer_client):
     response = employer_client.get(reverse("my_jobs"))
 
     assertContains(response, f'href="{reverse("job_create")}"')
+
+
+# CSRF (spec R13: changes only through POST forms of our own pages)
+
+
+@pytest.mark.parametrize("name", ["job_create", "job_edit", "job_cancel"])
+def test_job_forms_need_the_csrf_token(employer, job, name):
+    """Posting, editing and cancelling a job only work with the CSRF token of our page.
+
+    1. Log in with a client that checks CSRF like a real browser
+    2. Send the post / edit / cancel form without the token
+    3. Expect: 403 Forbidden; no new job, the job is unchanged and still open
+    """
+    # The default test client skips the CSRF check, so the other tests cannot see it.
+    # Without it, another site could post, change or cancel jobs of a logged-in visitor.
+    client = Client(enforce_csrf_checks=True)
+    client.force_login(employer)
+    url = reverse(name) if name == "job_create" else reverse(name, args=[job.pk])
+
+    response = client.post(url, form_data(address="Marienplatz 8"))
+
+    assert response.status_code == 403
+    job.refresh_from_db()
+    assert Job.objects.count() == 1
+    assert job.address == "Lindwurmstraße 1"
+    assert job.status == Job.Status.OPEN
+
+
+@pytest.mark.parametrize("name", ["job_create", "job_edit", "job_cancel"])
+def test_job_form_pages_carry_the_csrf_token(employer_client, job, name):
+    """Every job page with a form puts the CSRF token into it.
+
+    1. Log in as the employer
+    2. Open the post / edit / cancel page
+    3. Expect: the hidden csrfmiddlewaretoken field in the page
+    """
+    # Catches a forgotten {% csrf_token %}: real browsers would then get 403 on submit.
+    url = reverse(name) if name == "job_create" else reverse(name, args=[job.pk])
+
+    response = employer_client.get(url)
+
+    # Two tokens: one in the logout form of the header menu, one in this page's form.
+    assertContains(response, 'name="csrfmiddlewaretoken"', count=2)
 
 
 # Menu (R15, AC18)
