@@ -1249,3 +1249,86 @@ tests, implementation.
   the browser does not get them — only what Django knows from the field type.
 - How the admin builds its pages from a model without our own views: Django's `ModelAdmin`
   views, our class only configures them.
+
+## 2026-10-11 · #16 Create / edit / cancel job (employer)
+
+**Task given to AI:** start #16 following the ticket workflow — the first ticket through the
+whole Django pipeline (URL → view → form → model → template). The plan from #15 was that AI
+draws the request path and writes the spec and failing tests, and I write the implementation
+step by step under its guidance.
+
+**AI helped:**
+- Drew the request path (Mermaid) marking what Django gives and what we write, gave 4 defense
+  questions, and asked 8 open questions with recommendations; wrote the spec
+  `docs/specs/job-form.md` (R1–R16, AC1–AC18, D1–D8).
+- Wrote the failing unit tests (minimum wage by date, form, `Job.objects.open()`), dates
+  counted from today so they don't expire in 2027.
+- Wrote the implementation: `MINIMUM_WAGES` in settings with `minimum_wage_on()`,
+  `JobForm` (date not in the past, rate ≥ minimum wage of the job's date, date/time pickers
+  and 1–10 limits as HTML attributes), four views with shared mixins (employers only, profile
+  required, own open jobs only → 404), templates, menu links.
+- Explained on request how the files fill Django's gaps (startup vs one request, hooks,
+  class diagram), and how `request.user.jobs.open()` turns into one SQL query and a 404 —
+  checked against Django's `get_object()` source and the real SQL. Both went into my defense
+  notes.
+- While drafting the security comment, found that the job forms had no CSRF test; added two
+  (POST without token → 403, token on every form page) and mutation-checked them.
+- Compared the pages with the UI mockup and changed them to match: the form without a card,
+  short fields side by side, the mockup's labels and error text; "My jobs" cards with
+  "Type · day" and a status badge. 423 tests + 4 E2E green.
+
+**AI failed:**
+- In #15 it put `MINIMUM_WAGE` in `jobs/models.py` without checking #17, which asked for
+  settings. Found when I asked why the rate is in the model.
+- It called the rates dict a "table", which made me think of a database table.
+- It wrote the integration tests together with the failing unit tests, against the order in
+  `CLAUDE.md`. Found when I asked why.
+- Its first CSRF test expected one token per page and failed: the logout form in the header
+  has one too.
+- In the spec it named the wrong ticket for translation (#38 is reviews, translation is #32),
+  and its D8 advice (a visible language drop-down) missed that the translator itself can
+  detect the language.
+- Its first draft of this entry left out my mockup idea, although it had a note to add it.
+- The mockup layout broke at phone width, found by me in the browser: a detail line wrapped
+  inside "1 worker", the status badge width changed the wrapping, the longest district
+  (52 characters) could not wrap at all, and the browser's calendar icon covered the date.
+
+**My part:**
+- My idea (during #15, logged here because #119 was already merged): UI mockups of the
+  finished app right after the plan. AI drew 8 phone screens as a Design canvas. Seeing the
+  UI shows missing or unwanted features much earlier than a text plan — this should have been
+  done at the start. The canvas stays frozen as "UI as planned in M3"; in M8 I put
+  screenshots of the real app next to it for the defense.
+- I asked to make the #16 pages look like the mockup before merging. Two conflicts I decided:
+  date · start · hours instead of the mockup's "From · To" (the model keeps start + hours,
+  #15 D2); and no language drop-down. My reason: the language was chosen only for the
+  description — if there is a choice, the whole job should be in that language. It turned
+  out the description is the only free text, so the drop-down went, and #32 will detect the
+  language (D8 revised).
+- I moved the minimum wages to `config/settings/base.py` and checked that the #15 decision
+  "the rate is code, a new rate needs a redeploy" still holds. #17 is covered by this ticket.
+- I kept the test order from `CLAUDE.md`: only unit tests went into the failing-tests commit;
+  the integration tests were an uncommitted checklist, committed after the code. I rejected
+  recording this as a process change — the process stays as it is.
+- I wrote the first step myself (settings dict + `minimum_wage_on`); the reverse-sorted start
+  dates are my idea and stayed in the code. I fixed the imports, but my changes were never
+  saved: VS Code has no auto-save by default (PyCharm saves by itself), so the tests kept
+  showing the old error. Then I said "not today" and went back to the usual practice: AI
+  wrote the rest.
+- I accepted all 8 spec recommendations: they matched what I wanted. We spent a lot of time
+  on preparation, so most of the suggestions already matched my expectations.
+- I asked for the walkthrough of the files and the Django flow, and for the `get_queryset`
+  explanation in my defense notes.
+- I checked every step by hand in the browser: the menu links, the empty "My jobs", form
+  errors (13.00 €, yesterday, 14.00 € in 2027), posting, editing, cancelling, another
+  employer's job → 404, an employer without a profile → the profile form, and the phone view.
+  After the mockup changes I checked both pages at phone and laptop width; the layout fixes
+  above came from that.
+- I noticed that an employer finds their own jobs by address, not district; I left it for
+  #20 (idea posted there).
+
+**Learned:**
+- How a request goes through middleware → URL → view → form → template, and where our hooks
+  are.
+- Why `get_queryset()` gives a 404 for another employer's job instead of an `if`.
+- How Tailwind's `sm:` classes give one layout on a phone and another from 640 px.

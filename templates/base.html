@@ -32,6 +32,8 @@
                   <li><a href="{% url 'worker_profile' %}">{% translate "My profile" %}</a></li>
                 {% elif user.role == "employer" %}
                   <li><a href="{% url 'employer_profile' %}">{% translate "My company" %}</a></li>
+                  <li><a href="{% url 'job_create' %}">{% translate "Post a job" %}</a></li>
+                  <li><a href="{% url 'my_jobs' %}">{% translate "My jobs" %}</a></li>
                 {% endif %}
                 <li>
                   {# Logout must be a POST form: a plain link could be triggered by another site. #}

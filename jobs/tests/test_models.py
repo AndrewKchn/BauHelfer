@@ -297,3 +297,23 @@ def test_str_shows_job_type_and_date(employer):
     job = make_job(employer, job_type="demolition", date=datetime.date(2026, 11, 3))
 
     assert str(job) == "Demolition – 2026-11-03"
+
+
+# Open jobs only (#16 spec R4, AC3)
+
+
+@pytest.mark.story(16)
+def test_open_returns_only_open_jobs(employer):
+    """Job.objects.open() leaves out filled, done and cancelled jobs.
+
+    1. Save one job in each status
+    2. Ask for Job.objects.open()
+    3. Expect: only the open job; the job list (#18) builds on this
+    """
+    jobs = {}
+    for status in Job.Status.values:
+        job = make_job(employer, status=status)
+        job.save()
+        jobs[status] = job
+
+    assert list(Job.objects.open()) == [jobs["open"]]

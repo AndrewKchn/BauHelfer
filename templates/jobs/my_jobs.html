@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "My jobs" %} · BauHelfer{% endblock %}
+
+{% block content %}
+  <div class="flex items-center justify-between gap-4">
+    <h1 class="text-2xl font-bold">{% translate "My jobs" %}</h1>
+    <a href="{% url 'job_create' %}" class="btn btn-primary">+ {% translate "Post a job" %}</a>
+  </div>
+  {% if jobs %}
+    <ul class="mt-4 flex flex-col gap-3">
+      {% for job in jobs %}
+        <li class="card bg-base-100 shadow-sm">
+          <div class="card-body gap-1 p-3">
+            {% include "jobs/_job_summary.html" with with_status=True %}
+            {# Only open jobs can change (spec D7); the views answer 404 for the others anyway. #}
+            {% if job.status == "open" %}
+              <div class="mt-1 flex gap-2 text-sm font-semibold">
+                <a href="{% url 'job_edit' job.pk %}" class="link">{% translate "Edit" %}</a>
+                <span aria-hidden="true" class="text-base-content/50">·</span>
+                <a href="{% url 'job_cancel' job.pk %}" class="link text-error">{% translate "Cancel job" %}</a>
+              </div>
+            {% endif %}
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="mt-4">{% translate "You have not posted any jobs yet." %}</p>
+  {% endif %}
+{% endblock %}

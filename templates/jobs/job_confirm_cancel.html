@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Cancel job" %} · BauHelfer{% endblock %}
+
+{% block content %}
+  <div class="card bg-base-100 shadow-sm">
+    <div class="card-body">
+      <h1 class="card-title text-2xl">{% translate "Cancel this job?" %}</h1>
+      {% include "jobs/_job_summary.html" %}
+      <p class="mt-2">{% translate "Workers will no longer see it. This cannot be undone." %}</p>
+      {# Cancelling changes data, so it is a POST with a CSRF token; opening this page changes nothing. #}
+      <form method="post" class="mt-4">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-error w-full">{% translate "Yes, cancel the job" %}</button>
+      </form>
+      <a href="{% url 'my_jobs' %}" class="btn btn-ghost w-full">{% translate "No, keep it" %}</a>
+    </div>
+  </div>
+{% endblock %}

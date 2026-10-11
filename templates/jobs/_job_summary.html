@@ -1,0 +1,25 @@
+{% load i18n %}
+{# One job as in the UI mockup "My jobs": "Type · Thu 22 Oct", then one line of details. #}
+{# with_status=True puts the status badge at the end of the title row only, so the details #}
+{# below get the full width and wrap the same way in every card ("Open" is narrower than #}
+{# "Cancelled"). #}
+<div class="flex items-start justify-between gap-2">
+  <p class="text-base font-semibold">{{ job.get_job_type_display }} · {{ job.date|date:"D j M" }}</p>
+  {% if with_status %}
+    <span class="badge shrink-0 {% if job.status == 'open' %}badge-success{% else %}badge-ghost{% endif %}">{{ job.get_status_display }}</span>
+  {% endif %}
+</div>
+{# The short parts share one line: each is a no-wrap span with its "·" glued on by &nbsp;, #}
+{# so on a phone the line breaks only between parts ("1 worker" stays whole) and never #}
+{# starts with a "·". Even "10:00 · 10 h · 10 workers · 999.99 €/h" fits a phone. #}
+{# The district may wrap (the longest name has 52 characters): on a phone it gets a line of #}
+{# its own; from sm (640 px) it joins the same line, or moves down whole if it does not fit. #}
+<div class="text-sm text-base-content/70 sm:flex sm:flex-wrap sm:gap-x-1">
+  <p>
+    <span class="whitespace-nowrap">{{ job.start_time|time:"H:i" }}&nbsp;·</span>
+    <span class="whitespace-nowrap">{% blocktranslate with hours=job.hours %}{{ hours }} h{% endblocktranslate %}&nbsp;·</span>
+    <span class="whitespace-nowrap">{% blocktranslate count workers=job.workers_needed %}{{ workers }} worker{% plural %}{{ workers }} workers{% endblocktranslate %}&nbsp;·</span>
+    <span class="whitespace-nowrap">{{ job.hourly_rate }} €/h<span class="hidden sm:inline">&nbsp;·</span></span>
+  </p>
+  <p>{{ job.get_district_display }}</p>
+</div>
