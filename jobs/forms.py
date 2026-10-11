@@ -16,10 +16,11 @@ class JobForm(forms.ModelForm):
 
     class Meta:
         model = Job
+        # The order of the UI mockup "Post a job". No original_language: the view takes the
+        # employer's language, translation (#32) corrects it (spec D8).
         fields = (
             "job_type",
             "description",
-            "original_language",
             "address",
             "district",
             "date",
@@ -28,7 +29,13 @@ class JobForm(forms.ModelForm):
             "workers_needed",
             "hourly_rate",
         )
-        # RUF012 is wrong here: Django only reads this dict when it builds the form class.
+        # RUF012 is wrong here: Django only reads these dicts when it builds the form class.
+        labels = {"hourly_rate": _("Hourly rate, €")}  # noqa: RUF012
+        help_texts = {  # noqa: RUF012
+            # The only free text of a job: everything else is a key or a number, shown in
+            # the reader's language anyway.
+            "description": _("Write in your language. Workers read it in theirs."),
+        }
         widgets = {  # noqa: RUF012
             # The class is set here, because daisyUI styles the <textarea> itself.
             "description": forms.Textarea(
@@ -70,7 +77,7 @@ class JobForm(forms.ModelForm):
             if rate < wage:
                 self.add_error(
                     "hourly_rate",
-                    _("The minimum wage on this date is %(wage)s € per hour.")
+                    _("At least %(wage)s € on this date (German minimum wage).")
                     % {"wage": wage},
                 )
         return cleaned_data

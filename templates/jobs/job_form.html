@@ -5,15 +5,27 @@
 {% block title %}{% if object %}{% translate "Edit job" %}{% else %}{% translate "Post a job" %}{% endif %} · BauHelfer{% endblock %}
 
 {% block content %}
-  <div class="card bg-base-100 shadow-sm">
-    <div class="card-body">
-      <h1 class="card-title text-2xl">{% if object %}{% translate "Edit job" %}{% else %}{% translate "Post a job" %}{% endif %}</h1>
-      <form method="post" novalidate>
-        {% csrf_token %}
-        {% include "_form_fields.html" %}
-        <button type="submit" class="btn btn-primary mt-4 w-full">{% if object %}{% translate "Save job" %}{% else %}{% translate "Post job" %}{% endif %}</button>
-      </form>
-      <a href="{% url 'my_jobs' %}" class="btn btn-ghost w-full">{% translate "Back to my jobs" %}</a>
+  {# Laid out like the UI mockup "Post a job": no card, short fields side by side. #}
+  <h1 class="text-2xl font-bold">{% if object %}{% translate "Edit job" %}{% else %}{% translate "Post a job" %}{% endif %}</h1>
+  <form method="post" novalidate class="mt-2">
+    {% csrf_token %}
+    {% include "_form_errors.html" %}
+    {% include "_form_field.html" with field=form.job_type %}
+    {% include "_form_field.html" with field=form.description %}
+    {% include "_form_field.html" with field=form.address %}
+    {% include "_form_field.html" with field=form.district %}
+    {# On a phone a third of the width is too narrow for a date and the browser's calendar #}
+    {# icon, so the date takes the whole row there; from sm (640 px) all three share one. #}
+    <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+      <div class="col-span-2 sm:col-span-1">{% include "_form_field.html" with field=form.date %}</div>
+      {% include "_form_field.html" with field=form.start_time %}
+      {% include "_form_field.html" with field=form.hours %}
     </div>
-  </div>
+    <div class="grid grid-cols-2 gap-2">
+      {% include "_form_field.html" with field=form.workers_needed %}
+      {% include "_form_field.html" with field=form.hourly_rate %}
+    </div>
+    <button type="submit" class="btn btn-primary mt-4 w-full">{% if object %}{% translate "Save job" %}{% else %}{% translate "Publish job" %}{% endif %}</button>
+  </form>
+  <a href="{% url 'my_jobs' %}" class="btn btn-ghost mt-2 w-full">{% translate "Back to my jobs" %}</a>
 {% endblock %}

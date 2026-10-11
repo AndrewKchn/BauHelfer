@@ -56,13 +56,11 @@ class JobCreateView(EmployerRequiredMixin, EmployerProfileRequiredMixin, CreateV
     template_name = "jobs/job_form.html"
     success_url = reverse_lazy("my_jobs")
 
-    def get_initial(self):
-        """Start the description language at the employer's own language (spec D8)."""
-        return {"original_language": self.request.user.preferred_language}
-
     def form_valid(self, form):
-        """The owner comes from the login, never from the form (spec R6)."""
+        """Owner and language come from the login, never from the form (spec R6, D8)."""
         form.instance.employer = self.request.user
+        # Translation (#32) starts from it and corrects it if the text is in another one.
+        form.instance.original_language = self.request.user.preferred_language
         messages.success(self.request, _("Job posted."))
         return super().form_valid(form)  # saves the job and redirects
 
