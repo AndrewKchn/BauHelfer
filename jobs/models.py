@@ -1,16 +1,29 @@
 """Jobs: what an employer posts and workers apply to (#15)."""
 
-from decimal import Decimal
-
+from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from accounts.models import Skill, User
 
-# German minimum wage per hour from 1 January 2026. Only a validator uses it, not a database
-# constraint: when it rises, old jobs at the old rate must still be valid (docs/specs/job.md D5).
-MINIMUM_WAGE = Decimal("13.90")
+# The lowest minimum wage in settings: the floor for every job, checked by the model
+# validator. The form checks the rate of the job's own date (minimum_wage_on, #16).
+# Only a validator, not a database constraint: when the wage rises, old jobs at the old
+# rate must still be valid (docs/specs/job.md D5).
+MINIMUM_WAGE = min(settings.MINIMUM_WAGES.values())
+
+
+def minimum_wage_on(day):
+    """The minimum wage on `day`: the rate with the latest start date on or before it."""
+    # Read settings on every call, not once at import: tests and future rates change it.
+    wages = settings.MINIMUM_WAGES
+    # Latest start date first, so the first one on or before the day is the right one.
+    for start_date in sorted(wages, reverse=True):
+        if start_date <= day:
+            return wages[start_date]
+    # A day before the first start date gets the earliest rate.
+    return wages[min(wages)]
 
 
 class District(models.TextChoices):
@@ -52,6 +65,14 @@ class District(models.TextChoices):
     FELDMOCHING_HASENBERGL = "feldmoching_hasenbergl", "Feldmoching-Hasenbergl"
     LAIM = "laim", "Laim"
     OUTSIDE_MUNICH = "outside_munich", _("Munich area (outside the city)")
+
+
+class JobQuerySet(models.QuerySet):
+    """Ready-made filters for jobs, used as Job.objects.<name>()."""
+
+    def open(self):
+        """Jobs workers can still apply to; the job list (#18) shows only these."""
+        return self.filter(status=Job.Status.OPEN)
 
 
 class Job(models.Model):
@@ -108,6 +129,8 @@ class Job(models.Model):
         _("status"), max_length=10, choices=Status.choices, default=Status.OPEN
     )
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+
+    objects = JobQuerySet.as_manager()  # adds Job.objects.open()
 
     class Meta:
         verbose_name = _("job")

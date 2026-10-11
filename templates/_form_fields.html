@@ -3,7 +3,8 @@
   Errors of the whole form (e.g. wrong password at login) go on top in a red alert box,
   errors of one field go right under that field, and the field gets a red border.
   Checkbox and radio groups (several choices) get a legend and one row per choice;
-  a single checkbox sits in front of its label.
+  a single checkbox sits in front of its label. Drop-downs and text areas have their own
+  daisyUI classes (select, textarea).
 {% endcomment %}
 {% if form.non_field_errors %}
   <div role="alert" class="alert alert-error mb-2">
@@ -23,6 +24,13 @@
       </div>
     {% elif field.widget_type == "checkbox" %}
       <label class="flex cursor-pointer items-center gap-2 text-base" for="{{ field.id_for_label }}">{{ field }} {{ field.label }}</label>
+    {% elif field.widget_type == "select" %}
+      <label class="fieldset-legend" for="{{ field.id_for_label }}">{{ field.label }}</label>
+      <label class="select w-full{% if field.errors %} select-error{% endif %}">{{ field }}</label>
+    {% elif field.widget_type == "textarea" %}
+      {# daisyUI styles the <textarea> itself: the form gives it class="textarea w-full". #}
+      <label class="fieldset-legend" for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
     {% else %}
       <label class="fieldset-legend" for="{{ field.id_for_label }}">{{ field.label }}</label>
       {# daisyUI 5 styles a bare <input> placed inside an element with the "input" class. #}

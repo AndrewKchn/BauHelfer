@@ -1,5 +1,7 @@
 """Settings shared by all environments. See local.py and production.py for the rest."""
 
+from datetime import date
+from decimal import Decimal
 from pathlib import Path
 
 import environ
@@ -107,6 +109,15 @@ TIME_ZONE = "Europe/Berlin"
 USE_I18N = True
 
 USE_TZ = True
+
+
+# German statutory minimum wage in euros per hour, by the date it starts (#16).
+# A job is checked against the rate of its own date (jobs.models.minimum_wage_on).
+# Code, not the database: a new rate needs a commit and a redeploy (decided in #15).
+MINIMUM_WAGES = {
+    date(2026, 1, 1): Decimal("13.90"),
+    date(2027, 1, 1): Decimal("14.60"),
+}
 
 
 # Email

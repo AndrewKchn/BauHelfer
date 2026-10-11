@@ -1,0 +1,6 @@
+{% load i18n %}
+{# The key facts of one job, used in "My jobs" and on the cancel page. #}
+<p class="font-semibold">{{ job.get_job_type_display }}</p>
+<p class="text-sm">{{ job.date|date:"SHORT_DATE_FORMAT" }}, {{ job.start_time|time:"H:i" }} · {% blocktranslate count hours=job.hours %}{{ hours }} hour{% plural %}{{ hours }} hours{% endblocktranslate %}</p>
+<p class="text-sm">{{ job.get_district_display }}</p>
+<p class="text-sm">{% blocktranslate count workers=job.workers_needed %}{{ workers }} worker{% plural %}{{ workers }} workers{% endblocktranslate %} · {{ job.hourly_rate }} €/h</p>

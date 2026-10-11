@@ -1,0 +1,110 @@
+"""Employer pages for jobs: post, list own, edit, cancel (#16, docs/specs/job-form.md)."""
+
+from django.contrib import messages
+from django.shortcuts import redirect
+from django.urls import reverse_lazy
+from django.utils.translation import gettext_lazy as _
+from django.views.generic import CreateView, DetailView, ListView, UpdateView
+
+from accounts.models import User
+from accounts.views import RoleRequiredMixin
+
+from .forms import JobForm
+from .models import Job
+
+
+class EmployerRequiredMixin(RoleRequiredMixin):
+    """Employers only: guests go to login, workers get 403 (spec R10)."""
+
+    role = User.Role.EMPLOYER
+
+
+class OwnOpenJobMixin(EmployerRequiredMixin):
+    """The page works on one of the logged-in employer's own open jobs (spec R12, D2, D7).
+
+    get_object() looks the id from the URL up in this queryset only. Another employer's job,
+    or a job that is not open, is not in it, so the answer is 404: the page does not even
+    tell that such a job exists.
+    """
+
+    def get_queryset(self):
+        """Only the logged-in employer's open jobs."""
+        return self.request.user.jobs.open()
+
+
+class EmployerProfileRequiredMixin:
+    """No company profile yet: send the employer to the profile form first (spec D1).
+
+    Listed after EmployerRequiredMixin, so its dispatch() runs after the login and role
+    checks: a guest is sent to login, not to a profile form.
+    """
+
+    def dispatch(self, request, *args, **kwargs):
+        """Redirect to the profile form if the employer has no profile; else go on."""
+        if not hasattr(request.user, "employer_profile"):
+            messages.info(
+                request, _("Please fill in your company profile before posting a job.")
+            )
+            return redirect("employer_profile_edit")
+        return super().dispatch(request, *args, **kwargs)
+
+
+class JobCreateView(EmployerRequiredMixin, EmployerProfileRequiredMixin, CreateView):
+    """Post a new job (spec R11)."""
+
+    form_class = JobForm
+    template_name = "jobs/job_form.html"
+    success_url = reverse_lazy("my_jobs")
+
+    def get_initial(self):
+        """Start the description language at the employer's own language (spec D8)."""
+        return {"original_language": self.request.user.preferred_language}
+
+    def form_valid(self, form):
+        """The owner comes from the login, never from the form (spec R6)."""
+        form.instance.employer = self.request.user
+        messages.success(self.request, _("Job posted."))
+        return super().form_valid(form)  # saves the job and redirects
+
+
+class MyJobsView(EmployerRequiredMixin, ListView):
+    """The employer's own jobs in every status, soonest first (spec R14, D5)."""
+
+    template_name = "jobs/my_jobs.html"
+    context_object_name = "jobs"
+
+    def get_queryset(self):
+        """Only the logged-in employer's jobs."""
+        return self.request.user.jobs.order_by("date", "start_time")
+
+
+class JobEditView(OwnOpenJobMixin, UpdateView):
+    """Change one of the employer's own open jobs (spec R12)."""
+
+    form_class = JobForm
+    template_name = "jobs/job_form.html"
+    success_url = reverse_lazy("my_jobs")
+
+    def form_valid(self, form):
+        """Save the changes and say so."""
+        messages.success(self.request, _("Job saved."))
+        return super().form_valid(form)
+
+
+class JobCancelView(OwnOpenJobMixin, DetailView):
+    """GET asks "cancel this job?", POST cancels it (spec R13, D6).
+
+    Cancelling changes the status and keeps the row: the job stays in "My jobs", and the
+    applications to it (#22) keep their job.
+    """
+
+    template_name = "jobs/job_confirm_cancel.html"
+    context_object_name = "job"
+
+    def post(self, request, *args, **kwargs):
+        """Mark the job cancelled and go back to "My jobs"."""
+        job = self.get_object()  # 404 unless it is the employer's own open job
+        job.status = Job.Status.CANCELLED
+        job.save(update_fields=["status"])
+        messages.success(request, _("Job cancelled."))
+        return redirect("my_jobs")

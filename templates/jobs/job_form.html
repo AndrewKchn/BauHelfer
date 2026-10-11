@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{# One template for both pages: CreateView has no object yet, UpdateView has the job. #}
+{% block title %}{% if object %}{% translate "Edit job" %}{% else %}{% translate "Post a job" %}{% endif %} · BauHelfer{% endblock %}
+
+{% block content %}
+  <div class="card bg-base-100 shadow-sm">
+    <div class="card-body">
+      <h1 class="card-title text-2xl">{% if object %}{% translate "Edit job" %}{% else %}{% translate "Post a job" %}{% endif %}</h1>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% include "_form_fields.html" %}
+        <button type="submit" class="btn btn-primary mt-4 w-full">{% if object %}{% translate "Save job" %}{% else %}{% translate "Post job" %}{% endif %}</button>
+      </form>
+      <a href="{% url 'my_jobs' %}" class="btn btn-ghost w-full">{% translate "Back to my jobs" %}</a>
+    </div>
+  </div>
+{% endblock %}
