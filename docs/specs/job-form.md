@@ -7,8 +7,8 @@ Status: **agreed**. The student decided the open questions on 2026-10-11, before
 An employer posts a job through a form, sees their jobs on a "My jobs" page, edits a job while
 it is open and cancels it. This is the first ticket that goes through the whole request path:
 URL → view → form → model → template. It also replaces the single minimum wage of #15 by a
-list of rates with start dates in settings, so a job is checked against the minimum wage of its own day
-(this covers #17, see D3).
+list of rates with start dates in settings, so a job is checked against the minimum wage of
+its own day (this covers #17, see D3).
 
 ## Requirements
 
@@ -28,20 +28,23 @@ R5. URLs under `/jobs/` (new `jobs/urls.py`, included in `config/urls.py`):
     - `jobs/mine/` → `my_jobs`
     - `jobs/<pk>/edit/` → `job_edit`
     - `jobs/<pk>/cancel/` → `job_cancel`
-R6. `JobForm` (`ModelForm`) with the fields job type, description, original language, address,
-    district, date, start time, hours, workers needed, hourly rate. Not in the form: employer,
-    status, latitude, longitude, created at (set by the view, the model or later tickets).
+R6. `JobForm` (`ModelForm`) with the fields job type, description, address, district, date,
+    start time, hours, workers needed, hourly rate. Not in the form: employer, status,
+    original language, latitude, longitude, created at (set by the view, the model or later
+    tickets).
 R7. `JobForm` checks, besides the model validators:
     - the date is today or later (Munich time, `timezone.localdate()`);
     - the hourly rate is at least `minimum_wage_on(date)`. The error names the rate and says
-      it is the minimum wage on that date.
+      it is the German minimum wage on that date (UI mockup: "At least 13,90 € (German
+      minimum wage)").
 R8. The form fields carry browser limits (idea from #15 in #16's comments): `type="date"` with
     `min` = today, `type="time"`, `hours` and `workers_needed` with `min="1" max="10"`,
     `hourly_rate` with `min` = the lowest rate and `step="0.01"`. The server checks stay the
     real protection; the template keeps `novalidate` like the other forms, so the browser
     still shows the right keyboard or picker.
-R9. `original_language` is a visible drop-down; on the create form it starts with the
-    employer's `preferred_language` (see D8).
+R9. `original_language` is not in the form: a new job gets the employer's
+    `preferred_language`, an edit keeps it. The description has the help text "Write in your
+    language. Workers read it in theirs." (see D8).
 R10. All four pages are for employers only: a guest is sent to login, a worker gets 403
      (`RoleRequiredMixin` from `accounts`, as on the profile pages).
 R11. Create: an employer without an employer profile is redirected to the profile form with a
@@ -53,9 +56,16 @@ R12. Edit and cancel find the job only among the logged-in employer's own **open
 R13. Cancel: GET shows a confirmation page with the job; POST sets status `cancelled` (the row
      stays in the database) and redirects to "My jobs" with a message. There is no link that
      cancels on GET (see D6).
-R14. "My jobs" lists only the employer's own jobs, all statuses, by date (soonest first), each
-     with type, date, start time, district, workers, rate and status. Open jobs have "Edit" and
-     "Cancel" links. An empty list shows a short text and a "Post a job" button.
+R14. "My jobs" lists only the employer's own jobs, all statuses, by date (soonest first). Each
+     card, as in the UI mockup: "Type · Thu 22 Oct" with the status badge, then start time,
+     hours, workers and rate in one line that wraps only between its parts, and the district
+     (on a phone in a line of its own, from 640 px in the same line). Open jobs have "Edit"
+     and "Cancel job" links. An empty list shows a short text; the "Post a job" button is
+     always on top.
+R14a. The job form follows the UI mockup "Post a job": no card around it; date, start time and
+     hours in one row (on a phone the date gets a row of its own: the calendar icon needs the
+     room); workers needed and hourly rate in one row; the submit button says
+     "Publish job" (edit: "Save job").
 R15. Header menu, employer branch in `templates/base.html`: "Post a job" and "My jobs".
 R16. Every UI string is wrapped in `gettext` / `gettext_lazy` / `{% translate %}`; every page
      extends `base.html`.
@@ -66,7 +76,7 @@ R16. Every UI string is wrapped in `gettext` / `gettext_lazy` / `{% translate %}
 - The job detail page and who sees the full address: #19.
 - The employer dashboard with applications: #20 turns "My jobs" into it.
 - Cancelling a filled job (accepted workers would have to be told): M4, with #24 (see D7).
-- Photos: #64. Geocoding the address: #41. Translating the description: #38.
+- Photos: #64. Geocoding the address: #41. Translating the description: #32.
 - Checking that the work ends before midnight (start time + hours).
 
 ## Acceptance criteria (→ tests)
@@ -81,7 +91,7 @@ AC4. The form accepts a rate equal to the minimum wage of the job's date and rej
      less, with an error on `hourly_rate` that names the rate. The same rate is accepted on a
      date before a rise and rejected on a date after it.
 AC5. The form rejects yesterday and accepts today.
-AC6. The form has no employer, status or coordinate fields.
+AC6. The form has no employer, status, original language or coordinate fields.
 AC7. The rendered form has `type="date"`, `type="time"`, `min="1" max="10"` on hours and
      workers, and `step="0.01"` on the rate.
 
@@ -92,7 +102,8 @@ AC9. An employer without a profile who opens "Post a job" is redirected to the p
 AC10. An employer with a profile posts a valid form: one job is saved with them as employer
       and status `open`, and they land on "My jobs", which shows it.
 AC11. An invalid post (rate below the minimum wage) saves nothing and shows the error.
-AC12. The create form starts with the employer's preferred language selected.
+AC12. A posted job gets the employer's preferred language as `original_language`; editing
+      does not change it.
 AC13. The owner edits an open job: the change is saved, the employer stays the same.
 AC14. Another employer gets 404 on edit and cancel (GET and POST), and the job is unchanged.
 AC15. Edit and cancel of a job that is not open give 404.
@@ -132,6 +143,10 @@ D6. **Cancel with a confirmation page** (GET asks, POST cancels), the usual Djan
 D7. **Only open jobs can be edited or cancelled.** The ticket says "edit while it is open";
     cancelling a filled job is decided in M4 when there are accepted workers to tell.
     Rejected: cancelling open and filled jobs.
-D8. **`original_language` visible, preset to `preferred_language`.** An employer with the
-    Russian interface may write the description in German; a hidden field would send a wrong
-    source language to the translation (#38). Rejected: a hidden field set automatically.
+D8. **`original_language` not in the form, taken from `preferred_language`** (revised on
+    2026-10-12 after comparing the pages with the UI mockup; first decided: a visible
+    drop-down). The description is the only free text in a job: everything else is a key
+    from a list (job type, district) or a number, shown in the reader's language anyway, so a
+    language drop-down looked like "the language of the whole job". Nothing reads the field
+    before the translation (#32), and Claude sees the language of a text when it translates
+    it: #32 detects it and corrects the field. Rejected: the visible drop-down.
