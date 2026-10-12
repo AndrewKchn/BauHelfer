@@ -1332,3 +1332,40 @@ step by step under its guidance.
   are.
 - Why `get_queryset()` gives a 404 for another employer's job instead of an `if`.
 - How Tailwind's `sm:` classes give one layout on a phone and another from 640 px.
+
+## 2026-10-12 · #122 Save the UI mockups in the repo and check them before each spec
+
+**Task given to AI:** keep the UI mockup from #15 in the project, so that tickets this sprint
+can be compared with it before the implementation — better, before the spec.
+
+**AI helped:**
+- Offered the options (PNG + index page, PNG + HTML, only a link in the plan; a new ticket
+  now or Docs sync #95) and created #122 in M3 after I chose.
+- Wrote the failing tests (every screen in the README exists, every PNG is listed, phone
+  proportions), took the 8 screens out of the private canvas and rendered them with Playwright
+  as PNG, wrote `docs/mockups/README.md` (screen → tickets, "Decided differently" table; laid
+  out as two tables of 4 screens, 180 px wide) and added the "compare before the spec" step to
+  the ticket workflow in `CLAUDE.md`.
+- Searched the history when I asked about the screen width: the project's phone width is
+  360 px (`docs/TESTING.md`, the E2E tests, the header in #103).
+
+**AI failed:**
+- It used 390 px — the design tool's default — for the phone checks in #16 and in a comment on
+  #30, although the project already checks phones at 360 px. Found when I asked why 390 × 844.
+  Fixed: a line in the mockup README, the #30 comment edited.
+- The same search showed a promise from #14 that #16 missed: the employer flow on a phone was
+  to be checked "in the ticket where employers create jobs". Moved to the E2E ticket #21.
+
+**My part:**
+- My idea: keep the mockup in the repo and compare a ticket's screens with it before the spec.
+  In #16 the differences were found only after the merge and had to be fixed afterwards.
+- I chose PNG with an index page and a separate ticket now, so #18–#20 can use it this sprint.
+- I asked why the screens are 390 × 844 and remembered that earlier tickets used a smaller
+  phone; that is how the 360 px mismatch and the #14 promise came out.
+- I opened `docs/mockups/README.md` on GitHub: the screens were shown full size, one under
+  another. AI put them into two tables of 4 screens, 180 px wide.
+
+**Learned:**
+- CSS pixels vs physical pixels: why an iPhone with 1170 px reports 390 to a web page.
+- Why a mockup and a test check can use different widths: the mockup shows the plan, the
+  checks use the narrowest phone we support (360 px).
