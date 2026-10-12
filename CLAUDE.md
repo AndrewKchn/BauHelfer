@@ -40,6 +40,8 @@ Copy `.env.example` to `.env` before the first run.
   (see `docs/TESTING.md`)
 - `docs/specs/` — specs for complex tickets, written and decided before the failing tests
   (first: `onboarding.md`, #10)
+- `docs/mockups/` — frozen phone mockups of the planned UI (PNG + `README.md`: screen → tickets),
+  saved in #122
 - Django apps (`accounts/`, `jobs/`, `chat/`, …) are added ticket by ticket, see the plan
 
 ## Conventions
@@ -74,7 +76,9 @@ test: docstring = short line (the title in the Allure report) + numbered steps e
 
 1. `gh issue view N`; check it is not blocked (`gh api repos/AndrewKchn/BauHelfer/issues/N/dependencies/blocked_by`).
 2. `gh issue develop N --checkout`; move the card on the "BauHelfer" board to In Progress.
-3. Tests → code → tests, as above. Separate commits: failing tests, then implementation, then
+3. A ticket with screens: compare them with `docs/mockups/` before the spec; every difference
+   becomes a spec decision. Then tests → code → tests, as above. Separate commits: failing
+   tests, then implementation, then
    any fixes or integration tests. Docs are not edited in the ticket, except `CLAUDE.md`:
    if the ticket makes it wrong (commands, structure, conventions), fix it in the same branch.
 4. Draft one comment per item for the sprint's "Docs sync — Mx" issue: a new idea, an open
