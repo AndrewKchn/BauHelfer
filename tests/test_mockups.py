@@ -18,8 +18,11 @@ README = MOCKUPS / "README.md"
 
 
 def linked_images():
-    """The image file names the README links to, like ![…](post-a-job.png)."""
-    return re.findall(r"!\[[^\]]*\]\(([^)]+\.png)\)", README.read_text())
+    """The image file names the README shows: ![…](post-a-job.png) or <img src="…png">.
+
+    The README uses <img width="…">, because GitHub shows Markdown images at full size.
+    """
+    return re.findall(r'(?:!\[[^\]]*\]\(|<img src=")([^)"]+\.png)', README.read_text())
 
 
 def png_size(path):

@@ -14,33 +14,21 @@ Before writing the spec of a ticket, find its screens below and compare: every d
 Details on a screen that are in no ticket yet (for example the distance on job cards or the
 "2 / 3 workers found" bar) are proposals: the ticket decides whether they become features.
 
+Each screen is shown 180 px wide; click it to see it full size.
+
 ## Worker: find a job, apply, get accepted
 
-| Screen | Tickets |
-| --- | --- |
-| Jobs list + filters | #18 |
-| Job detail + apply | #19, #22, #32, #64 |
-| Map, near me | #41, #42 |
-| My applications | #25, #26 |
-
-![Jobs list + filters](jobs-list.png)
-![Job detail + apply](job-detail.png)
-![Map, near me](map.png)
-![My applications](my-applications.png)
+| Jobs list + filters | Job detail + apply | Map, near me | My applications |
+| --- | --- | --- | --- |
+| <img src="jobs-list.png" width="180" alt="Jobs list + filters"> | <img src="job-detail.png" width="180" alt="Job detail + apply"> | <img src="map.png" width="180" alt="Map, near me"> | <img src="my-applications.png" width="180" alt="My applications"> |
+| #18 | #19, #22, #32, #64 | #41, #42 | #25, #26 |
 
 ## Employer: post a job, pick workers, chat, review
 
-| Screen | Tickets |
-| --- | --- |
-| Post a job | #16, #17, #64 |
-| My jobs + applications | #20, #23, #24 |
-| Chat, dark mode | #35, #36 |
-| Worker profile + review | #38, #39 |
-
-![Post a job](post-a-job.png)
-![My jobs + applications](my-jobs.png)
-![Chat, dark mode](chat.png)
-![Worker profile + review](worker-profile.png)
+| Post a job | My jobs + applications | Chat, dark mode | Worker profile + review |
+| --- | --- | --- | --- |
+| <img src="post-a-job.png" width="180" alt="Post a job"> | <img src="my-jobs.png" width="180" alt="My jobs + applications"> | <img src="chat.png" width="180" alt="Chat, dark mode"> | <img src="worker-profile.png" width="180" alt="Worker profile + review"> |
+| #16, #17, #64 | #20, #23, #24 | #35, #36 | #38, #39 |
 
 ## Decided differently
 
