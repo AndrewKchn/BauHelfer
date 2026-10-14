@@ -5,12 +5,14 @@ Spec: docs/specs/job.md (requirements R1-R6, decisions D1-D8).
 
 import datetime
 from decimal import Decimal
+from zoneinfo import ZoneInfo
 
 import pytest
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.forms import modelform_factory
+from django.utils import timezone
 
 from accounts.models import Skill
 from jobs.models import MINIMUM_WAGE, District, Job
@@ -317,3 +319,68 @@ def test_open_returns_only_open_jobs(employer):
         jobs[status] = job
 
     assert list(Job.objects.open()) == [jobs["open"]]
+
+
+# Upcoming jobs and end time (#18 spec R3, R8, AC1, AC2)
+
+# A fixed "now" for the upcoming tests: 3 November 2026, 10:00 in Munich (09:00 UTC).
+MUNICH_NOW = datetime.datetime(2026, 11, 3, 10, 0, tzinfo=ZoneInfo("Europe/Berlin"))
+
+
+@pytest.fixture
+def frozen_now(monkeypatch):
+    """Fix the clock at MUNICH_NOW, so the test does not depend on when it runs.
+
+    timezone.localtime() and localdate() call timezone.now(), so they see this time too.
+    """
+    monkeypatch.setattr(timezone, "now", lambda: MUNICH_NOW)
+    return MUNICH_NOW
+
+
+@pytest.mark.story(18)
+def test_upcoming_keeps_only_jobs_that_have_not_started(employer, frozen_now):
+    """Job.objects.upcoming() keeps jobs that start later, Munich time.
+
+    1. Fix the clock at 3 November 2026, 10:00 in Munich
+    2. Save jobs yesterday, today at 09:00, 09:30, 10:00 and 11:00, and tomorrow at 06:00
+    3. Ask for Job.objects.upcoming()
+    4. Expect: only today 11:00 and tomorrow 06:00; 09:30 is gone although it is still
+       ahead in UTC (09:00 there), and 10:00 is gone because it starts right now
+    """
+    today = datetime.date(2026, 11, 3)
+    starts = {
+        "yesterday": (today - datetime.timedelta(days=1), datetime.time(12, 0)),
+        "today 09:00": (today, datetime.time(9, 0)),
+        "today 09:30": (today, datetime.time(9, 30)),
+        "today 10:00": (today, datetime.time(10, 0)),
+        "today 11:00": (today, datetime.time(11, 0)),
+        "tomorrow 06:00": (today + datetime.timedelta(days=1), datetime.time(6, 0)),
+    }
+    jobs = {}
+    for name, (date, start_time) in starts.items():
+        job = make_job(employer, date=date, start_time=start_time)
+        job.save()
+        jobs[name] = job
+
+    assert set(Job.objects.upcoming()) == {jobs["today 11:00"], jobs["tomorrow 06:00"]}
+
+
+@pytest.mark.story(18)
+@pytest.mark.parametrize(
+    ("start", "hours", "end"),
+    [
+        (datetime.time(8, 0), 6, datetime.time(14, 0)),
+        (datetime.time(20, 0), 10, datetime.time(6, 0)),
+    ],
+    ids=["same day", "after midnight"],
+)
+def test_end_time_is_start_plus_hours(employer, start, hours, end):
+    """Job.end_time is the start time plus the hours, also past midnight.
+
+    1. Make a job starting at 08:00 for 6 hours, or at 20:00 for 10 hours
+    2. Read job.end_time
+    3. Expect: 14:00, or 06:00 (the next morning)
+    """
+    job = make_job(employer, start_time=start, hours=hours)
+
+    assert job.end_time == end
