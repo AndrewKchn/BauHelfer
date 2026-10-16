@@ -118,6 +118,9 @@ class JobListView(ListView):
 
     template_name = "jobs/job_list.html"
     context_object_name = "jobs"
+    # ListView reads ?page= and puts only that page's jobs into "jobs"; a page number that
+    # does not exist gives 404 (spec R5, D3).
+    paginate_by = 20
 
     def get_queryset(self):
         """Open jobs that have not started yet, soonest first."""

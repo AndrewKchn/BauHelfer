@@ -6,9 +6,9 @@
 {% block content %}
   <div class="flex items-baseline justify-between gap-4">
     <h1 class="text-2xl font-bold">{% translate "Jobs in Munich" %}</h1>
-    {# |length runs the query once; the loop below reuses its result. #}
+    {# All jobs found, on every page: "jobs" holds only this page's 20. #}
     <p class="shrink-0 text-sm text-base-content/70">
-      {% blocktranslate count counter=jobs|length %}{{ counter }} open{% plural %}{{ counter }} open{% endblocktranslate %}
+      {% blocktranslate count counter=page_obj.paginator.count %}{{ counter }} open{% plural %}{{ counter }} open{% endblocktranslate %}
     </p>
   </div>
   {# Employers find the site through the same page (spec D4). #}
@@ -29,4 +29,21 @@
       <li>{% translate "No open jobs right now." %}</li>
     {% endfor %}
   </ul>
+  {# Only with more than one page. The filters (iteration 2) will have to keep their values #}
+  {# in these links, next to ?page=. #}
+  {% if is_paginated %}
+    <nav class="mt-4 flex items-center justify-between gap-2 text-sm" aria-label="{% translate 'Pages' %}">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-sm">← {% translate "Previous" %}</a>
+      {% else %}
+        <span></span>
+      {% endif %}
+      <span>{% blocktranslate with number=page_obj.number total=page_obj.paginator.num_pages %}Page {{ number }} of {{ total }}{% endblocktranslate %}</span>
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="btn btn-sm">{% translate "Next" %} →</a>
+      {% else %}
+        <span></span>
+      {% endif %}
+    </nav>
+  {% endif %}
 {% endblock %}
