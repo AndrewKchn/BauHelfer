@@ -1,4 +1,6 @@
-"""Employer pages for jobs: post, list own, edit, cancel (#16, docs/specs/job-form.md)."""
+"""Job pages: the public job list (#18) and the employer pages: post, list own, edit,
+cancel (#16, docs/specs/job-form.md).
+"""
 
 from django.contrib import messages
 from django.shortcuts import redirect
@@ -9,7 +11,7 @@ from django.views.generic import CreateView, DetailView, ListView, UpdateView
 from accounts.models import User
 from accounts.views import RoleRequiredMixin
 
-from .forms import JobForm
+from .forms import JobFilterForm, JobForm
 from .models import Job
 
 
@@ -106,3 +108,30 @@ class JobCancelView(OwnOpenJobMixin, DetailView):
         job.save(update_fields=["status"])
         messages.success(request, _("Job cancelled."))
         return redirect("my_jobs")
+
+
+class JobListView(ListView):
+    """The home page: open jobs that have not started yet, for everyone (#18, spec R1-R4).
+
+    No login mixin: guests see the list too (spec D1).
+    """
+
+    template_name = "jobs/job_list.html"
+    context_object_name = "jobs"
+    # ListView reads ?page= and puts only that page's jobs into "jobs"; a page number that
+    # does not exist gives 404 (spec R5, D3).
+    paginate_by = 20
+
+    def get_queryset(self):
+        """Open jobs that have not started yet, soonest first, narrowed by the filters."""
+        # Kept on the view for get_context_data(), which ListView calls after this method.
+        # A new view object is made for every request, so one visitor's filters stay theirs.
+        self.filter_form = JobFilterForm(self.request.GET)
+        jobs = Job.objects.open().upcoming().order_by("date", "start_time")
+        return self.filter_form.filter(jobs)
+
+    def get_context_data(self, **kwargs):
+        """Add the filter form to what ListView gives the template (jobs, page_obj, ...)."""
+        context = super().get_context_data(**kwargs)
+        context["filter_form"] = self.filter_form
+        return context

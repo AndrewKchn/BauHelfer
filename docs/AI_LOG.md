@@ -1369,3 +1369,63 @@ can be compared with it before the implementation — better, before the spec.
 - CSS pixels vs physical pixels: why an iPhone with 1170 px reports 390 to a web page.
 - Why a mockup and a test check can use different widths: the mockup shows the plan, the
   checks use the narrowest phone we support (360 px).
+
+## 2026-10-16 · #18 Job list with filters: date, job type, district
+
+**Task given to AI:** do #18 in two iterations — first the list, then the filters — and use it
+for the Week 6 worksheet (feature iteration, trade-offs with AI). At each fork AI names the
+question, I say first what matters to me, then AI gives options. I write the logic from a task
+and hints; AI writes the spec and the tests and tidies docstrings and formatting.
+
+**AI helped:**
+- Spec `docs/specs/job-list.md` (R1–R21, D1–D13) and failing unit tests, then integration tests;
+  every test file mutation-checked (removing `.open()`, `.upcoming()`, `{% querystring %}` or
+  going back to `_form_field.html` turns its test red).
+- Prototypes rendered with Playwright: two filter layouts at 360 px, the laptop layout at
+  1280 px, the longest district name; measured that the "Needs N workers" badge (146–199 px
+  across languages) does not fit next to the date (about 130 px free).
+- An HTMX experiment for the filters (not committed) that showed its real cost and a bug.
+- Explained how `ListView` builds the context (`get_queryset()` before `get_context_data()`,
+  `context_object_name`, `paginate_by`), with links into Django's source; a VS Code debug
+  config; 50 seed jobs in my local database to check paging.
+- A review of the spec against the code, the Docs sync comments for #95, and issue #125.
+
+**AI failed:**
+- Step 1 came with the finished `upcoming()` code, so "I write the logic" became copying. I
+  pointed it out; from then on only tasks, hints and fill-in-the-blanks.
+- It assumed workers look for jobs on the building site with a slow connection; I corrected
+  it ("people work there, they don't look for side jobs").
+- Small wrong claims, each corrected: `badge-primary` is orange (it is navy, orange is
+  `badge-accent`); the home page change would mean rewriting many tests (it did not);
+  `--noreload` in the debug config also stopped templates from reloading.
+- During the mutation checks its revert command (`git checkout jobs/`) also wiped the new,
+  uncommitted integration tests; it noticed, restored them and redid the checks.
+- Two page-link tests checked for the word "Next" anywhere and broke when the "Next 7 days"
+  filter came; narrowed to the link itself.
+
+**My part:**
+- I chose #18 instead of #91 for the worksheet: I wanted to build features this sprint.
+- My idea: the job list is the home page (AI first suggested a landing page with a button).
+- After looking in the browser: the district on its own line, cut with "…" (D8); I rejected
+  the badge next to the time — "the template still has spacing, there is nowhere to put it".
+- Filters: I chose a plain GET form over HTMX (D9). My criteria: simple code, the map coming
+  in #42, the "Back" button; the experiment showed the cost. My condition: the filter lives in
+  one place, a form (D10). Layout A with the button next to the district (D11), "next 7 / 30
+  days from today" (D12), on laptops the filters in a left column from `lg`, sticky — "workers
+  will hardly use tablets" (D13); two cards per row not taken.
+- I wrote the logic: `upcoming()`, `end_time`, `JobListView`, `JobFilterForm`; found with the
+  debugger why a guest breaks `request.user.jobs`. I asked AI to finish the templates after my
+  draft: templates are UI, and I did not want to spend long on it. I almost finished the first
+  one myself to see how it works; what was left was spacing and layout.
+- After AI's spec review I decided not to change the spec: a change for the sake of a change
+  is not needed.
+- My ideas for later: section comments in tests name the ticket and the spec (done for #18,
+  Docs sync for the rest); `@override` on overridden methods (#125, not for `__init__` /
+  `__str__`, no new tool).
+- Checked by hand at 360 px and on my laptop: paging with the seed jobs, filters, "Back".
+
+**Learned:**
+- I wrote the feature myself, and my goal was to understand how the Django framework is built.
+  Now I understand how the view, the form, the model and the template depend on each other.
+- Why an invalid form still has `cleaned_data` for its valid fields.
+- How `jobs` gets from `get_queryset()` through `get_context_data()` into the template.
