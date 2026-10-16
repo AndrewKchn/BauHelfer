@@ -150,7 +150,8 @@ def test_21_jobs_make_two_pages(client, employer):
     assertContains(first, 'href="?page=2"')
     assertNotContains(first, "Previous")
     assertContains(second, 'href="?page=1"')
-    assertNotContains(second, "Next")
+    # "Next →", not "Next": the date filter has "Next 7 days" (#18 iteration 2).
+    assertNotContains(second, "Next →")
 
 
 def test_one_page_has_no_page_links(client, employer):
@@ -158,7 +159,7 @@ def test_one_page_has_no_page_links(client, employer):
 
     1. Save one open job
     2. Open the home page
-    3. Expect: "1 open", no "Page 1 of 1", no "Next"
+    3. Expect: "1 open", no "Page 1 of 1", no page navigation
     """
     make_job(employer)
 
@@ -166,7 +167,7 @@ def test_one_page_has_no_page_links(client, employer):
 
     assertContains(response, "1 open")
     assertNotContains(response, "Page 1 of")
-    assertNotContains(response, "Next")
+    assertNotContains(response, 'aria-label="Pages"')
 
 
 def test_a_page_that_does_not_exist_gives_404(client, employer):

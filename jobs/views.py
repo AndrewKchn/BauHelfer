@@ -11,7 +11,7 @@ from django.views.generic import CreateView, DetailView, ListView, UpdateView
 from accounts.models import User
 from accounts.views import RoleRequiredMixin
 
-from .forms import JobForm
+from .forms import JobFilterForm, JobForm
 from .models import Job
 
 
@@ -123,5 +123,15 @@ class JobListView(ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        """Open jobs that have not started yet, soonest first."""
-        return Job.objects.open().upcoming().order_by("date", "start_time")
+        """Open jobs that have not started yet, soonest first, narrowed by the filters."""
+        # Kept on the view for get_context_data(), which ListView calls after this method.
+        # A new view object is made for every request, so one visitor's filters stay theirs.
+        self.filter_form = JobFilterForm(self.request.GET)
+        jobs = Job.objects.open().upcoming().order_by("date", "start_time")
+        return self.filter_form.filter(jobs)
+
+    def get_context_data(self, **kwargs):
+        """Add the filter form to what ListView gives the template (jobs, page_obj, ...)."""
+        context = super().get_context_data(**kwargs)
+        context["filter_form"] = self.filter_form
+        return context
