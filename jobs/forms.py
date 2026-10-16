@@ -1,4 +1,6 @@
-"""Job forms: an employer posts or edits a job (#16); workers filter the job list (#18)."""
+"""Job forms: an employer posts or edits a job (#16); workers filter the job list (#18);
+one job photo (#64).
+"""
 
 from datetime import timedelta
 from typing import override
@@ -9,7 +11,8 @@ from django.utils.translation import gettext_lazy as _
 
 from accounts.models import Skill
 
-from .models import MINIMUM_WAGE, District, Job, minimum_wage_on
+from .models import MINIMUM_WAGE, District, Job, JobPhoto, minimum_wage_on
+from .photos import prepare_photo
 
 
 class JobForm(forms.ModelForm):
@@ -164,3 +167,19 @@ class JobFilterForm(forms.Form):
                 self.cleaned_data.get("district"),
             ]
         )
+
+
+class JobPhotoForm(forms.ModelForm):
+    """One photo; the uploaded file is checked and prepared by prepare_photo() (#64, D3).
+
+    Used by the admin's photo inline now; the job form (iteration 2) prepares its photos with
+    the same function.
+    """
+
+    class Meta:
+        model = JobPhoto
+        fields = ("image",)  # the job comes from the page (inline) or the view
+
+    def clean_image(self):
+        """Replace the upload by the resized JPEG without EXIF, or show why it is refused."""
+        return prepare_photo(self.cleaned_data["image"])
