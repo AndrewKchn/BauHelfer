@@ -42,7 +42,7 @@ def filtered(data):
     return set(JobFilterForm(data).filter(Job.objects.upcoming()))
 
 
-# The form itself (R12, R16; AC12)
+# The form itself (#18, docs/specs/job-list.md R12, R16; AC12)
 
 
 def test_empty_form_is_valid_and_filters_nothing():
@@ -102,7 +102,7 @@ def test_any_one_filter_counts_as_filtered(field):
     assert JobFilterForm({field: value}).has_filters is True
 
 
-# Filtering (R14-R16; AC13, AC14, AC15)
+# Filtering (#18, docs/specs/job-list.md R14-R16; AC13, AC14, AC15)
 
 
 def test_job_type_and_district_keep_only_matching_jobs(employer):

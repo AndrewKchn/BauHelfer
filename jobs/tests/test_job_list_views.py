@@ -1,7 +1,7 @@
 """Integration tests: the job list on the home page through the Django test client (#18).
 
 Each test goes through the whole stack: middleware, URL, view, template and database.
-Spec: docs/specs/job-list.md (R1-R10), acceptance criteria AC3-AC10. AC1 and AC2 are unit
+Spec: docs/specs/job-list.md (R1-R10, R12-R21), acceptance criteria AC3-AC10, AC15-AC19. AC1 and AC2 are unit
 tests in test_models.py; AC11 is test_onboarding.py (a user without a role is still sent to
 the role choice from the home page).
 """
@@ -35,7 +35,7 @@ def jobs_on_page(response):
     return list(response.context["jobs"])
 
 
-# Which jobs are shown (R2, R3, R4; AC3, AC4, AC7)
+# Which jobs are shown (#18, docs/specs/job-list.md R2, R3, R4; AC3, AC4, AC7)
 
 
 def test_home_page_shows_an_open_upcoming_job(client, employer):
@@ -124,7 +124,7 @@ def test_everyone_sees_the_list(client, employer, role):
     assert jobs_on_page(response) == [job]
 
 
-# Pages (R5, R6; AC5, AC6)
+# Pages (#18, docs/specs/job-list.md R5, R6; AC5, AC6)
 
 
 def test_21_jobs_make_two_pages(client, employer):
@@ -184,7 +184,7 @@ def test_a_page_that_does_not_exist_gives_404(client, employer):
     assert response.status_code == 404
 
 
-# The card (R7, R8; AC8)
+# The card (#18, docs/specs/job-list.md R7, R8; AC8)
 
 
 def test_card_shows_what_a_worker_needs_and_no_address(client, employer):
@@ -223,7 +223,7 @@ def test_card_says_one_worker_in_the_singular(client, employer):
     assertContains(response, "Needs 1 worker<")
 
 
-# Guests and the empty list (R9, R10; AC9, AC10)
+# Guests and the empty list (#18, docs/specs/job-list.md R9, R10; AC9, AC10)
 
 
 def test_guest_sees_the_post_a_job_line(client):
@@ -264,3 +264,165 @@ def test_empty_list_says_there_are_no_jobs(client):
 
     assertContains(response, "No open jobs right now.")
     assertContains(response, "0 open")
+
+
+# Filters, iteration 2 (#18, docs/specs/job-list.md R12-R21; AC15-AC19)
+
+
+def test_district_filter_shows_only_that_district(client, employer):
+    """?district=sendling keeps Sendling jobs, the drop-down shows it, the count follows.
+
+    1. Save a job in Sendling and a job in Laim
+    2. Open the home page with ?district=sendling
+    3. Expect: only the Sendling job, "1 open", "Sendling" selected in the drop-down,
+       a "Reset filters" link to the home page
+    """
+    sendling = make_job(employer, district="sendling")
+    make_job(employer, district="laim")
+
+    response = client.get(reverse("home"), {"district": "sendling"})
+
+    assert jobs_on_page(response) == [sendling]
+    assertContains(response, "1 open")
+    assertContains(response, '<option value="sendling" selected>')
+    assertContains(
+        response, f'<a href="{reverse("home")}" class="link">Reset filters</a>'
+    )
+
+
+def test_job_type_and_date_filters_work_together(client, employer):
+    """Job type and "Next 7 days" both apply.
+
+    1. Save a carrying job in 3 days, a demolition job in 3 days, a carrying job in 10 days
+    2. Open the home page with ?job_type=carrying&date=7
+    3. Expect: only the carrying job in 3 days
+    """
+    in_3_days = timezone.localdate() + datetime.timedelta(days=3)
+    carrying_soon = make_job(employer, job_type="carrying", date=in_3_days)
+    make_job(employer, job_type="demolition", date=in_3_days)
+    make_job(
+        employer,
+        job_type="carrying",
+        date=timezone.localdate() + datetime.timedelta(days=10),
+    )
+
+    response = client.get(reverse("home"), {"job_type": "carrying", "date": "7"})
+
+    assert jobs_on_page(response) == [carrying_soon]
+
+
+def test_empty_values_from_the_form_mean_all(client, employer):
+    """What the browser sends with every drop-down on "all" filters nothing.
+
+    1. Save two jobs
+    2. Open the home page with ?date=&job_type=&district= (the form sent unchanged)
+    3. Expect: both jobs, no "Reset filters"
+    """
+    make_job(employer, district="sendling")
+    make_job(employer, district="laim")
+
+    response = client.get(reverse("home"), {"date": "", "job_type": "", "district": ""})
+
+    assert len(jobs_on_page(response)) == 2
+    assertNotContains(response, "Reset filters")
+
+
+def test_a_value_that_is_not_listed_is_ignored_without_an_error(client, employer):
+    """?district=moon shows the whole list and no error (R16).
+
+    1. Save two jobs in different districts
+    2. Open the home page with ?district=moon
+    3. Expect: both jobs, no "Select a valid choice", no red border, no "Reset filters"
+    """
+    make_job(employer, district="sendling")
+    make_job(employer, district="laim")
+
+    response = client.get(reverse("home"), {"district": "moon"})
+
+    assert len(jobs_on_page(response)) == 2
+    assertNotContains(response, "valid choice")
+    assertNotContains(response, "select-error")
+    assertNotContains(response, "Reset filters")
+
+
+def test_page_links_keep_the_filter(client, employer):
+    """With a filter on, "Next" keeps it, so page 2 shows the same district.
+
+    1. Save 21 jobs in Sendling and 1 in Laim
+    2. Open the home page with ?district=sendling, then follow to page 2 with the same filter
+    3. Expect: 20 jobs on page 1, "21 open", the "Next" link has district=sendling and
+       page=2; page 2 has the one remaining Sendling job
+    """
+    for _ in range(21):
+        make_job(employer, district="sendling")
+    make_job(employer, district="laim")
+
+    first = client.get(reverse("home"), {"district": "sendling"})
+    second = client.get(reverse("home"), {"district": "sendling", "page": 2})
+
+    assert len(jobs_on_page(first)) == 20
+    assertContains(first, "21 open")
+    # {% querystring %} keeps the address's order and adds page=; & is escaped in HTML.
+    assertContains(first, 'href="?district=sendling&amp;page=2"')
+    assert len(jobs_on_page(second)) == 1
+    assert jobs_on_page(second)[0].district == "sendling"
+
+
+def test_no_match_says_so_and_offers_a_reset(client, employer):
+    """A filter that finds nothing has its own text and a way back (R18, R19).
+
+    1. Save a job in Sendling
+    2. Open the home page with ?district=laim
+    3. Expect: "No jobs match these filters.", not "No open jobs right now.",
+       and "Reset filters"
+    """
+    make_job(employer, district="sendling")
+
+    response = client.get(reverse("home"), {"district": "laim"})
+
+    assertContains(response, "No jobs match these filters.")
+    assertNotContains(response, "No open jobs right now.")
+    assertContains(response, "Reset filters")
+
+
+def test_no_filter_has_no_reset_link(client, employer):
+    """Without a filter there is nothing to reset.
+
+    1. Save a job
+    2. Open the home page without parameters
+    3. Expect: no "Reset filters"
+    """
+    make_job(employer)
+
+    response = client.get(reverse("home"))
+
+    assertNotContains(response, "Reset filters")
+
+
+def test_filter_form_is_a_get_form_with_a_show_button(client):
+    """The filters are a GET form: no CSRF token, the address can be shared (AC19, D9).
+
+    1. Open the home page as a guest
+    2. Expect: a form with method="get", the three drop-downs, a "Show" button, and no
+       CSRF token on the page (a guest has no logout form either)
+    """
+    response = client.get(reverse("home"))
+
+    assertContains(response, '<form method="get"')
+    for name in ("date", "job_type", "district"):
+        assertContains(response, f'<select name="{name}"')
+    assertContains(response, ">Show</button>")
+    assertNotContains(response, "csrfmiddlewaretoken")
+
+
+def test_home_page_is_wider_than_other_pages(client):
+    """The job list is wider for its left filter column; other pages keep their width (D13).
+
+    1. Open the home page and the login page
+    2. Expect: max-w-6xl on the home page's <main>, max-w-3xl on the login page's
+    """
+    home = client.get(reverse("home"))
+    login = client.get(reverse("login"))
+
+    assertContains(home, '<main class="mx-auto w-full max-w-6xl')
+    assertContains(login, '<main class="mx-auto w-full max-w-3xl')

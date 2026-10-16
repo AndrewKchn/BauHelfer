@@ -321,7 +321,7 @@ def test_open_returns_only_open_jobs(employer):
     assert list(Job.objects.open()) == [jobs["open"]]
 
 
-# Upcoming jobs and end time (#18 spec R3, R8, AC1, AC2)
+# Upcoming jobs and end time (#18, docs/specs/job-list.md R3, R8; AC1, AC2)
 
 # A fixed "now" for the upcoming tests: 3 November 2026, 10:00 in Munich (09:00 UTC).
 MUNICH_NOW = datetime.datetime(2026, 11, 3, 10, 0, tzinfo=ZoneInfo("Europe/Berlin"))
