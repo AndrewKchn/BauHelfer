@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Jobs in Munich" %} · BauHelfer{% endblock %}
+
+{% block content %}
+  <div class="flex items-baseline justify-between gap-4">
+    <h1 class="text-2xl font-bold">{% translate "Jobs in Munich" %}</h1>
+    {# |length runs the query once; the loop below reuses its result. #}
+    <p class="shrink-0 text-sm text-base-content/70">
+      {% blocktranslate count counter=jobs|length %}{{ counter }} open{% plural %}{{ counter }} open{% endblocktranslate %}
+    </p>
+  </div>
+  {# Employers find the site through the same page (spec D4). #}
+  {% if not user.is_authenticated %}
+    <p class="mt-2 text-sm">
+      {% translate "Need workers?" %}
+      <a href="{% url 'register' %}" class="link font-semibold">{% translate "Post a job" %}</a>
+    </p>
+  {% endif %}
+  <ul class="mt-4 flex flex-col gap-3">
+    {% for job in jobs %}
+      <li class="card bg-base-100 shadow-sm">
+        <div class="card-body gap-1 p-3">
+          {% include "jobs/_job_card.html" %}
+        </div>
+      </li>
+    {% empty %}
+      <li>{% translate "No open jobs right now." %}</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

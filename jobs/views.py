@@ -1,4 +1,6 @@
-"""Employer pages for jobs: post, list own, edit, cancel (#16, docs/specs/job-form.md)."""
+"""Job pages: the public job list (#18) and the employer pages: post, list own, edit,
+cancel (#16, docs/specs/job-form.md).
+"""
 
 from django.contrib import messages
 from django.shortcuts import redirect
@@ -106,3 +108,17 @@ class JobCancelView(OwnOpenJobMixin, DetailView):
         job.save(update_fields=["status"])
         messages.success(request, _("Job cancelled."))
         return redirect("my_jobs")
+
+
+class JobListView(ListView):
+    """The home page: open jobs that have not started yet, for everyone (#18, spec R1-R4).
+
+    No login mixin: guests see the list too (spec D1).
+    """
+
+    template_name = "jobs/job_list.html"
+    context_object_name = "jobs"
+
+    def get_queryset(self):
+        """Open jobs that have not started yet, soonest first."""
+        return Job.objects.open().upcoming().order_by("date", "start_time")

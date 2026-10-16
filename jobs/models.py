@@ -1,8 +1,11 @@
 """Jobs: what an employer posts and workers apply to (#15)."""
 
+from datetime import datetime, timedelta
+
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from accounts.models import Skill, User
@@ -73,6 +76,14 @@ class JobQuerySet(models.QuerySet):
     def open(self):
         """Jobs workers can still apply to; the job list (#18) shows only these."""
         return self.filter(status=Job.Status.OPEN)
+
+    def upcoming(self):
+        """Jobs that have not started yet; the job list (#18) shows only these."""
+        # A job's date and start time are Munich time, so compare them with Munich's "now",
+        # not with UTC.
+        now = timezone.localtime()
+        later_today = models.Q(date=now.date(), start_time__gt=now.time())
+        return self.filter(models.Q(date__gt=now.date()) | later_today)
 
 
 class Job(models.Model):
@@ -148,3 +159,11 @@ class Job(models.Model):
 
     def __str__(self):
         return f"{self.get_job_type_display()} – {self.date}"
+
+    @property
+    def end_time(self):
+        """When the job ends: start time plus hours; past midnight gives the next morning."""
+        # A time cannot be added to, a date and time can; only the time is returned.
+        start = datetime.combine(self.date, self.start_time)
+        end = start + timedelta(hours=self.hours)
+        return end.time()
