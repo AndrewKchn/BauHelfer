@@ -1,6 +1,6 @@
 # Spec: job list on the home page (#18)
 
-Status: **iteration 1 agreed** (the student decided D1–D7 on 2026-10-14, before any tests).
+Status: **iteration 1 agreed** (the student decided D1–D7 on 2026-10-14, before any tests; D8 on 2026-10-16).
 Iteration 2 (filters) is decided later in this file.
 
 ## Goal
@@ -27,8 +27,9 @@ R5. 20 jobs per page (D3); links "Previous" / "Next" and "Page 2 of 3" when ther
 R6. Above the list: the title "Jobs in Munich" and the number of jobs found on all pages,
     "14 open" (D5).
 R7. One card per job, as in the mockup (D6): job type and hourly rate on the first line;
-    district · date · start–end time on the second; a badge "Needs 3 workers". No address,
-    no description, no employer name (D1).
+    the district on the second, cut with "…" if it does not fit (D8); date · start–end time
+    on the third; a badge "Needs 3 workers". No address, no description, no employer name
+    (D1).
 R8. `Job.end_time` = start time + hours. A shift that ends after midnight shows the next day's
     time ("20:00–06:00").
 R9. Guests see one line above the list: "Need workers? Post a job", linking to the signup
@@ -89,6 +90,13 @@ D6. **A new card for the list, as in the mockup; "My jobs" keeps its own.** The 
     works. Rejected: one shared card for both pages.
 D7. **The end time is shown ("07:00–15:00"), computed from start time + hours** (`Job.end_time`):
     a worker needs to know when the shift ends. Not stored, so it cannot disagree with hours.
+D8. **The district has a line of its own and is cut with "…" if it is too long; date and time
+    are on the next line** (the student's change after looking at the page in the browser,
+    2026-10-16). With district, date and time on one line, long district names wrapped
+    differently in every card. The full name is on the job page (#19). Rejected: one line that
+    wraps (the first version, as in the mockup); the "Needs 3 workers" badge on the right of
+    the district or the date line (measured at 360 px: about 130 px free, the badge needs
+    146 px in English and up to 199 px in Polish).
 
 ## Differences from the mockup (docs/mockups/jobs-list.png)
 
@@ -99,3 +107,4 @@ D7. **The end time is shown ("07:00–15:00"), computed from start time + hours*
 | "EN" in the header | not shown | #29 |
 | Filters | not in iteration 1 | iteration 2 |
 | "16,50 €/h" | "16.50 €/h" | M5 (decided in #16) |
+| "Schwabing-West · Thu 22 Oct · 07:00–15:00" on one line | district, then date and time on the next line | D8 |
