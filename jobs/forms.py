@@ -1,6 +1,7 @@
 """Job forms: an employer posts or edits a job (#16); workers filter the job list (#18)."""
 
 from datetime import timedelta
+from typing import override
 
 from django import forms
 from django.utils import timezone
@@ -70,6 +71,7 @@ class JobForm(forms.ModelForm):
             raise forms.ValidationError(_("The date cannot be in the past."))
         return day
 
+    @override
     def clean(self):
         """The hourly rate must reach the minimum wage of the job's own date (#95, #17)."""
         cleaned_data = super().clean()
