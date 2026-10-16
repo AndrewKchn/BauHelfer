@@ -80,6 +80,8 @@ def test_file_over_5_mb_is_refused():
     assert "5 MB" in str(error.value.message)
 
 
+# Pillow warns about the picture before prepare_photo() refuses it; expected here.
+@pytest.mark.filterwarnings("ignore::PIL.Image.DecompressionBombWarning")
 def test_picture_over_pixel_limit_is_refused(monkeypatch):
     """A small file that unpacks to too many pixels ("decompression bomb") is refused.
 
