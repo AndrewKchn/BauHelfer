@@ -1429,3 +1429,39 @@ and hints; AI writes the spec and the tests and tidies docstrings and formatting
   Now I understand how the view, the form, the model and the template depend on each other.
 - Why an invalid form still has `cleaned_data` for its valid fields.
 - How `jobs` gets from `get_queryset()` through `get_context_data()` into the template.
+
+## 2026-10-16 · #125 Mark overridden methods with @override
+
+**Task given to AI:** mark every method that overrides a parent method with `@override` from
+`typing` and write the rule into `CLAUDE.md`. The ticket was my idea from #18, where VS Code's
+auto-import picked `django.utils.translation.override` and broke the job list.
+
+**AI helped:**
+- A script that walked every class's MRO and listed the 20 methods that really override a
+  parent one. It showed two groups the rule "overrides a parent" does not cover: mixin methods
+  (they override only in the view they are mixed into) and methods Django finds by name
+  (`get`/`post` on `View`, `clean_<field>`).
+- After I placed the marks, a second script compared them with the MRO: 3 missing, 0 extra.
+- Found why 2 theme tests failed locally: the CSS command in `CLAUDE.md` builds without
+  `--minify`, the tests expect CI's minified CSS (posted to #95).
+- The rule text in `CLAUDE.md`, ruff clean-up, the defense notes with the MRO diagram.
+
+**AI failed:**
+- In my defense notes it wrote that the `typing` docs show `@override` under `@classmethod`;
+  they do not. It noticed and replaced it with what our check actually showed.
+
+**My part:**
+- Following the #18 rule, I named my criterion before seeing options: "I want to see where the
+  framework methods are and where ours are, so the code is easy to read". With it I chose
+  option B (strict overrides + mixin methods), not C (everything Django calls): `@override` on
+  `get` would be untrue, `View` has no such method.
+- I rejected the test from the ticket: "your analysis is enough, we just need a rule for the
+  future: if a method is overridden, it gets the tag".
+- I placed all 20 marks and imports myself from the list; the check found 3 I had missed in
+  `jobs/views.py`, and I added them.
+
+**Learned:**
+- How Python finds a method through the MRO, and why a mixin method is an override only in the
+  combined view.
+- Why `django.utils.translation.override` as a decorator failed with "missing 'func'": it is a
+  class that switches the language, so it replaced my method with an object.

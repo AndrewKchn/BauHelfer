@@ -1,5 +1,7 @@
 """Forms for signing up, logging in, choosing a role, the profiles and the user admin."""
 
+from typing import override
+
 from django import forms
 from django.contrib.auth.forms import (
     AdminUserCreationForm,
@@ -115,6 +117,7 @@ class WorkerUserForm(NameAndPhoneForm):
             self.instance.work_permit_confirmed_at is not None
         )
 
+    @override
     def save(self, commit=True):
         """Save name and phone; store the date of the first confirmation only."""
         user = super().save(commit=False)

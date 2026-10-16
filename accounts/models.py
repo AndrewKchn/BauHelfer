@@ -1,5 +1,7 @@
 """User accounts: one User model for employers and workers, with email login."""
 
+from typing import override
+
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -42,10 +44,12 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, **extra_fields)
 
     @classmethod
+    @override
     def normalize_email(cls, email):
         """Lowercase the whole address, not only the domain: Anna@ and anna@ are one person."""
         return (email or "").strip().lower()
 
+    @override
     def get_by_natural_key(self, email):
         """Find the user for authenticate(): log in with any capitalisation of the email."""
         return self.get(email__iexact=email)

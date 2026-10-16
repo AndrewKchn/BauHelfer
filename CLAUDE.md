@@ -51,6 +51,11 @@ Copy `.env.example` to `.env` before the first run.
   7 languages (DE, EN, RU, UK, PL, RO, TR).
 - No secrets or personal data in the repo — it is public.
 - Keep it simple: Django built-ins first, no new dependency without asking.
+- Every method that overrides a parent method — including a mixin method that overrides one in
+  the class it is mixed into — is marked `@override` (`from typing import override`, never
+  `django.utils.translation.override`), so framework hooks stand apart from our own methods.
+  Not for `__init__` and `__str__`, and not for methods Django finds by name without a parent
+  version (`get`/`post` on `View`, `clean_<field>`).
 
 ## Testing levels
 

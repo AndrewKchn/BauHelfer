@@ -1,5 +1,7 @@
 """Admin pages for user accounts."""
 
+from typing import override
+
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
@@ -78,6 +80,7 @@ class UserAdmin(BaseUserAdmin):
         ),
     )
 
+    @override
     def get_inlines(self, request, obj):
         """Show the profile of the user's role, only on the page of an existing user."""
         inlines = {

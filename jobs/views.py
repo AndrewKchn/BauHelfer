@@ -2,6 +2,8 @@
 cancel (#16, docs/specs/job-form.md).
 """
 
+from typing import override
+
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
@@ -29,6 +31,7 @@ class OwnOpenJobMixin(EmployerRequiredMixin):
     tell that such a job exists.
     """
 
+    @override
     def get_queryset(self):
         """Only the logged-in employer's open jobs."""
         return self.request.user.jobs.open()
@@ -41,6 +44,7 @@ class EmployerProfileRequiredMixin:
     checks: a guest is sent to login, not to a profile form.
     """
 
+    @override
     def dispatch(self, request, *args, **kwargs):
         """Redirect to the profile form if the employer has no profile; else go on."""
         if not hasattr(request.user, "employer_profile"):
@@ -58,6 +62,7 @@ class JobCreateView(EmployerRequiredMixin, EmployerProfileRequiredMixin, CreateV
     template_name = "jobs/job_form.html"
     success_url = reverse_lazy("my_jobs")
 
+    @override
     def form_valid(self, form):
         """Owner and language come from the login, never from the form (spec R6, D8)."""
         form.instance.employer = self.request.user
@@ -73,6 +78,7 @@ class MyJobsView(EmployerRequiredMixin, ListView):
     template_name = "jobs/my_jobs.html"
     context_object_name = "jobs"
 
+    @override
     def get_queryset(self):
         """Only the logged-in employer's jobs."""
         return self.request.user.jobs.order_by("date", "start_time")
@@ -85,6 +91,7 @@ class JobEditView(OwnOpenJobMixin, UpdateView):
     template_name = "jobs/job_form.html"
     success_url = reverse_lazy("my_jobs")
 
+    @override
     def form_valid(self, form):
         """Save the changes and say so."""
         messages.success(self.request, _("Job saved."))
@@ -122,6 +129,7 @@ class JobListView(ListView):
     # does not exist gives 404 (spec R5, D3).
     paginate_by = 20
 
+    @override
     def get_queryset(self):
         """Open jobs that have not started yet, soonest first, narrowed by the filters."""
         # Kept on the view for get_context_data(), which ListView calls after this method.
@@ -130,6 +138,7 @@ class JobListView(ListView):
         jobs = Job.objects.open().upcoming().order_by("date", "start_time")
         return self.filter_form.filter(jobs)
 
+    @override
     def get_context_data(self, **kwargs):
         """Add the filter form to what ListView gives the template (jobs, page_obj, ...)."""
         context = super().get_context_data(**kwargs)
