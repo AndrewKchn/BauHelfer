@@ -1,7 +1,7 @@
 # Spec: job list on the home page (#18)
 
-Status: **iteration 1 agreed** (the student decided D1–D7 on 2026-10-14, before any tests; D8 on 2026-10-16).
-Iteration 2 (filters) is decided later in this file.
+Status: **agreed**. Iteration 1: the student decided D1–D7 on 2026-10-14, before any tests,
+and D8 on 2026-10-16. Iteration 2: D9–D12 on 2026-10-16, before its tests.
 
 ## Goal
 
@@ -10,7 +10,7 @@ see them anywhere. The ticket comes in two iterations:
 
 1. **The list:** everyone sees the open jobs that have not started yet, 20 per page, soonest
    first, on the home page.
-2. **Filters:** date, job type, district (later in this file).
+2. **Filters:** date, job type, district (see "Iteration 2" below).
 
 ## Requirements (iteration 1)
 
@@ -108,3 +108,77 @@ D8. **The district has a line of its own and is cut with "…" if it is too long
 | Filters | not in iteration 1 | iteration 2 |
 | "16,50 €/h" | "16.50 €/h" | M5 (decided in #16) |
 | "Schwabing-West · Thu 22 Oct · 07:00–15:00" on one line | district, then date and time on the next line | D8 |
+
+## Iteration 2: filters
+
+### Requirements
+
+R12. Above the list, a GET form with three drop-downs and a "Show" button (D9, D10): "Date"
+     (Any day / Next 7 days / Next 30 days), "Job type" (All types + the job types),
+     "District" (All districts + the districts). Date and job type share the first row,
+     district and the button the second (D11).
+R13. "Show" reloads the page with the choice in the address, e.g.
+     `/?date=7&job_type=demolition&district=sendling`. Without JavaScript the same happens.
+R14. "Next 7 days" is today and the 6 days after it; "Next 30 days" today and the 29 after it
+     (D12). Together with R3: a job today that has started is still not shown.
+R15. The filters live in one place: `JobFilterForm` in `jobs/forms.py`, with a method that
+     narrows a queryset. `JobListView` only calls it; the map (#42) will call it too (D10).
+R16. A value that is not in a list (`?district=moon`) is ignored: the list is shown without that
+     filter. No error message.
+R17. The drop-downs show what is chosen after the reload. The count ("5 open") counts the
+     filtered jobs. Page links keep the filters (`?page=2&district=sendling`), using Django's
+     `{% querystring %}` tag.
+R18. Nothing found with a filter chosen: "No jobs match these filters." Without filters the
+     text stays "No open jobs right now."
+R19. With at least one filter chosen, a "Reset filters" link to the home page without
+     parameters is shown under the form.
+R20. The "Need workers? Post a job" line for guests moves under the form.
+
+### Out of scope (iteration 2)
+
+- Updating the list without a reload (HTMX): rejected in D9, may come back (see "Revisit").
+- "Near me" and the distance: #42. A date picker for one exact day.
+
+### Acceptance criteria (→ tests)
+
+AC12. The form is valid when empty and with any listed value; a value that is not listed
+      makes only that field invalid.
+AC13. Job type and district filters keep only matching jobs; both together keep jobs that
+      match both.
+AC14. "Next 7 days" keeps jobs today (not started) up to today + 6 and drops today + 7;
+      "Next 30 days" keeps today + 29 and drops today + 30 (the clock is fixed in the test).
+AC15. `?district=moon` shows the same list as no filter.
+AC16. After `?district=sendling` the district drop-down has "Sendling" selected and the count
+      counts only Sendling jobs.
+AC17. With 21 Sendling jobs and `?district=sendling`, the "Next" link keeps
+      `district=sendling`.
+AC18. No match: "No jobs match these filters." and a "Reset filters" link to `/`. No filter:
+      no "Reset filters".
+AC19. The form uses GET (no CSRF token needed, the address can be shared) and has a "Show"
+      button.
+
+### Decisions (student, 2026-10-16)
+
+D9. **A plain GET form with a "Show" button; the whole page reloads (option 1), no HTMX.**
+    Three options were compared: 1) GET form + reload; 2) HTMX swaps only the list, no
+    button; 3) GET form + HTMX on top. The student's criteria: 1) simple code, 2) the map
+    (#42) coming later, 3) the browser's "Back" button. An experiment with option 2 (district
+    only, not committed) showed the cost: the template split into page + part, a second
+    template in the view (`get_template_names`), the count moved into the part, and a bug:
+    after "Back" the list showed Laim but the drop-down "All districts", because HTMX restores
+    a saved copy of the HTML without the chosen `<select>` value. Leaflet (#42) draws the map
+    with JavaScript, which conflicts with swapping parts of the page; with a reload the map
+    is simply drawn again. The student also corrected my assumption that workers search on
+    the building site with a slow connection ("people work there, they do not look for jobs").
+    This changes the ticket's "Filters update the list via HTMX". Rejected: options 2 and 3.
+    **Revisit when** building the map (#42), or if users find the reload annoying: HTMX can
+    be added on top of the GET form without changing the view's filter.
+D10. **The filter lives in one place, `JobFilterForm`** (the student's condition for D9). A
+     Django form checks the values against the lists and draws the drop-downs. Rejected:
+     reading `request.GET` in the view (no check, the map would need a copy).
+D11. **Layout A: the button next to the district** (the student's idea, compared at 360 px with
+     a full-width button under the form). One row shorter; a very long district is cut in the
+     drop-down. Rejected: layout B (full-width button).
+D12. **"Next 7 / 30 days" counted from today**, not "this week / this month" by the calendar:
+     on a Sunday "this week" would be one day. "Any day" is the default. Rejected: calendar
+     week and month; a date picker.
