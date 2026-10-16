@@ -1,7 +1,8 @@
 # Spec: job list on the home page (#18)
 
 Status: **agreed**. Iteration 1: the student decided D1–D7 on 2026-10-14, before any tests,
-and D8 on 2026-10-16. Iteration 2: D9–D12 on 2026-10-16, before its tests.
+and D8 on 2026-10-16. Iteration 2: D9–D12 on 2026-10-16, before its tests, and D13 after
+looking at the page on a laptop.
 
 ## Goal
 
@@ -133,6 +134,11 @@ R18. Nothing found with a filter chosen: "No jobs match these filters." Without 
 R19. With at least one filter chosen, a "Reset filters" link to the home page without
      parameters is shown under the form.
 R20. The "Need workers? Post a job" line for guests moves under the form.
+R21. From `lg` (1024 px) the page is wider (`max-w-6xl` instead of the `max-w-3xl` of other
+     pages, via a `main_width` block in `base.html`): the filters, "Reset filters" and the line
+     for guests are a 16rem column on the left that stays in place while the list scrolls;
+     the fields are one under the other, "Show" as wide as the column (D13). The phone layout
+     does not change.
 
 ### Out of scope (iteration 2)
 
@@ -182,3 +188,10 @@ D11. **Layout A: the button next to the district** (the student's idea, compared
 D12. **"Next 7 / 30 days" counted from today**, not "this week / this month" by the calendar:
      on a Sunday "this week" would be one day. "Any day" is the default. Rejected: calendar
      week and month; a date picker.
+D13. **On laptops the filters are a column on the left that stays in place** (the student's
+     idea, 2026-10-16, after the prototype at 1280 px). From `lg` (1024 px), not `md`: the
+     student does not expect workers to use tablets. Sticky, so a filter can be changed
+     without scrolling back up through 20 cards. The page is made wider only here, through a
+     new `main_width` block in `base.html`; other pages keep 768 px. Rejected: filters above
+     the list on every screen; switching from `md`; two cards per row on laptops (offered,
+     not taken). The mockups are phone-only, so this adds to them rather than differs.

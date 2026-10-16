@@ -3,6 +3,9 @@
 
 {% block title %}{% translate "Jobs in Munich" %} · BauHelfer{% endblock %}
 
+{# Wider than other pages: from lg (1024 px) the filters are a column on the left (D13). #}
+{% block main_width %}max-w-6xl{% endblock %}
+
 {% block content %}
   <div class="flex items-baseline justify-between gap-4">
     <h1 class="text-2xl font-bold">{% translate "Jobs in Munich" %}</h1>
@@ -11,70 +14,78 @@
       {% blocktranslate count counter=page_obj.paginator.count %}{{ counter }} open{% plural %}{{ counter }} open{% endblocktranslate %}
     </p>
   </div>
-  {# Filters (spec R12-R19): a plain GET form, "Show" reloads the page with the choice in #}
-  {# the address (D9); no csrf_token, a GET changes nothing. The fields are drawn here and #}
-  {# not with _form_field.html: that one shows field errors, but a value that is not in a #}
-  {# list is ignored without a message (R16). Layout A: date | job type, then district + #}
-  {# button (D11). #}
-  <form method="get" class="mt-4 flex flex-col gap-3">
-    <div class="grid grid-cols-2 gap-3">
-      <div class="min-w-0">
-        <label class="label text-sm" for="{{ filter_form.date.id_for_label }}">{{ filter_form.date.label }}</label>
-        <label class="select w-full">{{ filter_form.date }}</label>
-      </div>
-      <div class="min-w-0">
-        <label class="label text-sm" for="{{ filter_form.job_type.id_for_label }}">{{ filter_form.job_type.label }}</label>
-        <label class="select w-full">{{ filter_form.job_type }}</label>
-      </div>
-    </div>
-    <div class="flex items-end gap-3">
-      <div class="min-w-0 flex-1">
-        <label class="label text-sm" for="{{ filter_form.district.id_for_label }}">{{ filter_form.district.label }}</label>
-        <label class="select w-full">{{ filter_form.district }}</label>
-      </div>
-      <button type="submit" class="btn btn-primary">{% translate "Show" %}</button>
-    </div>
-  </form>
-  {% if filter_form.has_filters %}
-    <p class="mt-2 text-sm"><a href="{% url 'home' %}" class="link">{% translate "Reset filters" %}</a></p>
-  {% endif %}
-  {# Employers find the site through the same page (spec D4); under the filters (R20). #}
-  {% if not user.is_authenticated %}
-    <p class="mt-2 text-sm">
-      {% translate "Need workers?" %}
-      <a href="{% url 'register' %}" class="link font-semibold">{% translate "Post a job" %}</a>
-    </p>
-  {% endif %}
-  <ul class="mt-4 flex flex-col gap-3">
-    {% for job in jobs %}
-      <li class="card bg-base-100 shadow-sm">
-        <div class="card-body gap-1 p-3">
-          {% include "jobs/_job_card.html" %}
+  {# Phone: filters above the list. From lg: filters in a left column that stays in place #}
+  {# while the list scrolls, the fields one under the other (D13). #}
+  <div class="lg:grid lg:grid-cols-[16rem_minmax(0,1fr)] lg:items-start lg:gap-6">
+    <aside class="lg:sticky lg:top-4">
+      {# Filters (spec R12-R19): a plain GET form, "Show" reloads the page with the choice in #}
+      {# the address (D9); no csrf_token, a GET changes nothing. The fields are drawn here and #}
+      {# not with _form_field.html: that one shows field errors, but a value that is not in a #}
+      {# list is ignored without a message (R16). Phone: layout A, date | job type, then #}
+      {# district + button (D11). #}
+      <form method="get" class="mt-4 flex flex-col gap-3">
+        <div class="grid grid-cols-2 gap-3 lg:grid-cols-1">
+          <div class="min-w-0">
+            <label class="label text-sm" for="{{ filter_form.date.id_for_label }}">{{ filter_form.date.label }}</label>
+            <label class="select w-full">{{ filter_form.date }}</label>
+          </div>
+          <div class="min-w-0">
+            <label class="label text-sm" for="{{ filter_form.job_type.id_for_label }}">{{ filter_form.job_type.label }}</label>
+            <label class="select w-full">{{ filter_form.job_type }}</label>
+          </div>
         </div>
-      </li>
-    {% empty %}
+        <div class="flex items-end gap-3 lg:flex-col lg:items-stretch">
+          <div class="min-w-0 flex-1">
+            <label class="label text-sm" for="{{ filter_form.district.id_for_label }}">{{ filter_form.district.label }}</label>
+            <label class="select w-full">{{ filter_form.district }}</label>
+          </div>
+          <button type="submit" class="btn btn-primary">{% translate "Show" %}</button>
+        </div>
+      </form>
       {% if filter_form.has_filters %}
-        <li>{% translate "No jobs match these filters." %}</li>
-      {% else %}
-        <li>{% translate "No open jobs right now." %}</li>
+        <p class="mt-2 text-sm"><a href="{% url 'home' %}" class="link">{% translate "Reset filters" %}</a></p>
       {% endif %}
-    {% endfor %}
-  </ul>
-  {# Only with more than one page. {% querystring %} keeps the filters of the current #}
-  {# address and changes only page=, so page 2 shows the same district (R17). #}
-  {% if is_paginated %}
-    <nav class="mt-4 flex items-center justify-between gap-2 text-sm" aria-label="{% translate 'Pages' %}">
-      {% if page_obj.has_previous %}
-        <a href="{% querystring page=page_obj.previous_page_number %}" class="btn btn-sm">← {% translate "Previous" %}</a>
-      {% else %}
-        <span></span>
+      {# Employers find the site through the same page (spec D4); under the filters (R20). #}
+      {% if not user.is_authenticated %}
+        <p class="mt-2 text-sm">
+          {% translate "Need workers?" %}
+          <a href="{% url 'register' %}" class="link font-semibold">{% translate "Post a job" %}</a>
+        </p>
       {% endif %}
-      <span>{% blocktranslate with number=page_obj.number total=page_obj.paginator.num_pages %}Page {{ number }} of {{ total }}{% endblocktranslate %}</span>
-      {% if page_obj.has_next %}
-        <a href="{% querystring page=page_obj.next_page_number %}" class="btn btn-sm">{% translate "Next" %} →</a>
-      {% else %}
-        <span></span>
+    </aside>
+    <div>
+      <ul class="mt-4 flex flex-col gap-3">
+        {% for job in jobs %}
+          <li class="card bg-base-100 shadow-sm">
+            <div class="card-body gap-1 p-3">
+              {% include "jobs/_job_card.html" %}
+            </div>
+          </li>
+        {% empty %}
+          {% if filter_form.has_filters %}
+            <li>{% translate "No jobs match these filters." %}</li>
+          {% else %}
+            <li>{% translate "No open jobs right now." %}</li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+      {# Only with more than one page. {% querystring %} keeps the filters of the current #}
+      {# address and changes only page=, so page 2 shows the same district (R17). #}
+      {% if is_paginated %}
+        <nav class="mt-4 flex items-center justify-between gap-2 text-sm" aria-label="{% translate 'Pages' %}">
+          {% if page_obj.has_previous %}
+            <a href="{% querystring page=page_obj.previous_page_number %}" class="btn btn-sm">← {% translate "Previous" %}</a>
+          {% else %}
+            <span></span>
+          {% endif %}
+          <span>{% blocktranslate with number=page_obj.number total=page_obj.paginator.num_pages %}Page {{ number }} of {{ total }}{% endblocktranslate %}</span>
+          {% if page_obj.has_next %}
+            <a href="{% querystring page=page_obj.next_page_number %}" class="btn btn-sm">{% translate "Next" %} →</a>
+          {% else %}
+            <span></span>
+          {% endif %}
+        </nav>
       {% endif %}
-    </nav>
-  {% endif %}
+    </div>
+  </div>
 {% endblock %}

@@ -68,7 +68,8 @@
     </div>
   {% endif %}
 
-  <main class="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
+  {# A page can be wider: the job list puts its filters on the left on laptops (#18, D13). #}
+  <main class="mx-auto w-full {% block main_width %}max-w-3xl{% endblock %} flex-1 px-4 py-6">
     {% block content %}{% endblock %}
   </main>
 
