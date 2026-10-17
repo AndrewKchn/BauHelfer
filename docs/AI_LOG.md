@@ -1465,3 +1465,67 @@ auto-import picked `django.utils.translation.override` and broke the job list.
   combined view.
 - Why `django.utils.translation.override` as a decorator failed with "missing 'func'": it is a
   class that switches the language, so it replaced my method with an object.
+
+## 2026-10-17 · #64 Job photos: upload up to 5, resize, strip EXIF, Cloudflare R2 storage
+
+**Task given to AI:** job photos from the ticket: up to 5 per job, checked, resized, EXIF
+removed, stored outside the Render disk. I asked to do it in iterations in one branch (rule
+from #18).
+
+**AI helped:**
+- Found two blockers before the spec: the job detail page (#19) does not exist yet, and R2
+  needs a payment card; compared Supabase Storage and Backblaze B2 as free S3-compatible
+  options.
+- Offered each fork as a table "option → cost" (look, code, mockup, what breaks) without a
+  recommendation until I named my criteria.
+- Spec in four iterations (`docs/specs/job-photos.md`, D1–D33), failing tests first in each,
+  then the code: `prepare_photo()` (real format, 5 MB, pixel limit, rotate by EXIF, 1600 px,
+  JPEG without EXIF), `JobPhoto` with a 300 px thumbnail, a `post_delete` signal that deletes
+  both files after the commit, the photo block on the edit page, `prefetch_related` on the
+  list, Supabase via `django-storages`.
+- Pointed out a trap I would not have seen: deleting EXIF without rotating first leaves portrait
+  photos sideways.
+- Experiments before deciding: screenshots at 360 px in light and dark theme of the edit page and
+  of three placeholder icons (hard hat, bricks, traffic cone) on the real job list.
+- A script for the manual check against the real Supabase bucket; Docs sync comments, PR,
+  defense notes.
+
+**AI failed:**
+- Its admin inline relied on `max_num = 5`, which only hides rows: a hand-made POST saved 6
+  photos. Its own integration test found it (fixed with `validate_max`).
+- It wrote `"querystring_auth": False`, which has no effect next to `custom_domain`; a surviving
+  mutant showed it, the line was removed.
+- It put the `file-input` class in `forms.py`, which Tailwind does not read, so the field had no
+  style; found while checking why tests failed (`@source "../*/forms.py"` added).
+- Its mutation runs had two false signals: a stale `.pyc` made 5 mutants point at the wrong
+  test, and one mutant changed nothing. It reran them correctly. In the PR it first wrote "51
+  mutants, all caught" and corrected it to 49.
+
+**My part:**
+- My criteria for every fork: simple code, ease of use, the mockups are drafts, a little
+  JavaScript is fine, a job may have no photos.
+- D1: "first the photo support, the page comes later" — photos on the detail page moved to #19.
+- I checked R2 in my Cloudflare account: it asks for a card, so I chose Supabase Storage.
+- Photo upload: from the options I picked "after Publish", and my own idea was that the photo
+  part appears under the form after saving instead of on a new page. My idea: a line on "Post a
+  job" that photos come after publishing.
+- After looking at the built page I found "Save job" confusing and "Add photos" in a third
+  colour; I chose rename + headings + jump to the photos + an inactive save button, the same
+  colour for both buttons, and removed the "Edit job" title myself.
+- Thumbnails: I chose a small copy at upload, not the cheaper `loading="lazy"` the AI leaned to,
+  because of traffic and the limits of the free plans. Placeholder: I asked for "something from
+  construction" instead of the landscape and picked the hard hat from the screenshots.
+- Production: a public bucket, because the job list is public anyway and fixed addresses let the
+  browser cache photos, which saves the free traffic; a missing variable stops the server. The
+  question "a house number or a face on a photo" I postponed to #19: in my view it is not part
+  of this ticket's feature.
+- Process: the spec as its own commit, as in #18, with the iteration in the message.
+- By hand: created the bucket and the keys in Supabase and the six variables in Render. The
+  manual upload ran with the key meant for Render, so I deleted it and made a new one.
+
+**Learned:**
+- How Django's `STORAGES` setting lets the same code write to `media/`, to memory in tests or to
+  Supabase.
+- Why a `post_delete` signal and not a `delete()` method deletes files on a cascade.
+- How to set up S3 access in Supabase (bucket, endpoint, region, access keys) and connect it to
+  Django with `django-storages`.
