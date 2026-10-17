@@ -1,14 +1,20 @@
-"""Jobs: what an employer posts and workers apply to (#15)."""
+"""Jobs: what an employer posts and workers apply to (#15), and their photos (#64)."""
 
+import uuid
 from datetime import datetime, timedelta
+from typing import override
 
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import models
+from django.db import models, transaction
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from accounts.models import Skill, User
+
+from .photos import make_thumbnail
 
 # The lowest minimum wage in settings: the floor for every job, checked by the model
 # validator. The form checks the rate of the job's own date (minimum_wage_on, #16).
@@ -141,6 +147,9 @@ class Job(models.Model):
     )
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
 
+    # At most this many photos per job; the forms check it (docs/specs/job-photos.md D6).
+    MAX_PHOTOS = 5
+
     objects = JobQuerySet.as_manager()  # adds Job.objects.open()
 
     class Meta:
@@ -167,3 +176,84 @@ class Job(models.Model):
         start = datetime.combine(self.date, self.start_time)
         end = start + timedelta(hours=self.hours)
         return end.time()
+
+
+def job_photo_path(instance, filename):
+    """Where a photo is stored: a random name, never the original one (job-photos.md D7).
+
+    Django calls this when the file is saved. The original name can hold a person's name,
+    and two uploads called photo.jpg must not clash. Always .jpg: prepare_photo() turns every
+    photo into a JPEG.
+    """
+    return f"job_photos/{uuid.uuid4().hex}.jpg"
+
+
+def job_thumbnail_path(instance, filename):
+    """Where a photo's small copy is stored: a random name like the photo (R24, D7)."""
+    return f"job_photos/thumbs/{uuid.uuid4().hex}.jpg"
+
+
+class JobPhoto(models.Model):
+    """One photo of a job, already resized and without EXIF (prepare_photo(), #64)."""
+
+    job = models.ForeignKey(
+        Job,
+        on_delete=models.CASCADE,  # the photos go with their job
+        related_name="photos",  # job.photos.all()
+        verbose_name=_("job"),
+    )
+    # The database keeps only the path (job_photos/….jpg); the file is in the storage of
+    # settings.STORAGES["default"]: media/ locally, Supabase in production.
+    image = models.ImageField(_("photo"), upload_to=job_photo_path)
+    # 300 × 300 for the job list (iteration 3). Empty for photos saved before it existed:
+    # thumbnail_url then gives the big photo (D29).
+    thumbnail = models.ImageField(
+        _("thumbnail"), upload_to=job_thumbnail_path, blank=True
+    )
+    uploaded_at = models.DateTimeField(_("uploaded at"), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("job photo")
+        verbose_name_plural = _("job photos")
+        # Oldest first: the first photo is the one the job list shows. The id breaks ties
+        # between photos saved in the same instant.
+        ordering = ("uploaded_at", "id")
+
+    def __str__(self):
+        return self.image.name
+
+    @override
+    def save(self, *args, **kwargs):
+        """Make the small copy the first time the photo is saved (R26).
+
+        Here, not in the forms: the admin, the edit page and tests all save through this.
+        Saving again keeps the copy that is there.
+        """
+        if self.image and not self.thumbnail:
+            self.thumbnail = make_thumbnail(self.image)
+        super().save(*args, **kwargs)
+
+    @property
+    def thumbnail_url(self):
+        """The small copy's address, or the photo's if it has none (R27)."""
+        return (self.thumbnail or self.image).url
+
+
+@receiver(post_delete, sender=JobPhoto)
+def delete_photo_file(sender, instance, **kwargs):
+    """Delete the photo's files when its row is deleted (job-photos.md R7, R28, D8).
+
+    Django never deletes a file by itself. A signal, not a delete() method: delete() is not
+    called when the photo goes with its job or account (cascade) or in a bulk delete, but
+    this signal is sent for every row. on_commit: if the transaction is rolled back, the row
+    comes back, so the file must still be there.
+    """
+    # Both files: the photo and its small copy (R28); an old photo may have no copy.
+    names = [file.name for file in (instance.image, instance.thumbnail) if file]
+    storage = instance.image.storage
+
+    def delete_files():
+        for name in names:
+            storage.delete(name)
+
+    transaction.on_commit(delete_files)

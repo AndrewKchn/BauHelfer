@@ -15,6 +15,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
@@ -26,3 +28,7 @@ urlpatterns = [
     path("jobs/", include("jobs.urls")),
     path("admin/", admin.site.urls),
 ]
+
+# Uploaded photos from media/ on the dev server (#64). static() returns nothing when DEBUG
+# is off, so production never serves them from here: they come from Supabase Storage.
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,15 +1,20 @@
-"""Job forms: an employer posts or edits a job (#16); workers filter the job list (#18)."""
+"""Job forms: an employer posts or edits a job (#16); workers filter the job list (#18);
+job photos, one in the admin and several on the edit page (#64).
+"""
 
 from datetime import timedelta
 from typing import override
 
 from django import forms
+from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext
 
 from accounts.models import Skill
 
-from .models import MINIMUM_WAGE, District, Job, minimum_wage_on
+from .models import MINIMUM_WAGE, District, Job, JobPhoto, minimum_wage_on
+from .photos import prepare_photo
 
 
 class JobForm(forms.ModelForm):
@@ -164,3 +169,106 @@ class JobFilterForm(forms.Form):
                 self.cleaned_data.get("district"),
             ]
         )
+
+
+class JobPhotoForm(forms.ModelForm):
+    """One photo; the uploaded file is checked and prepared by prepare_photo() (#64, D3).
+
+    Used by the admin's photo inline now; the job form (iteration 2) prepares its photos with
+    the same function.
+    """
+
+    class Meta:
+        model = JobPhoto
+        fields = ("image",)  # the job comes from the page (inline) or the view
+
+    def clean_image(self):
+        """Replace the upload by the resized JPEG without EXIF, or show why it is refused."""
+        return prepare_photo(self.cleaned_data["image"])
+
+
+class MultipleFileInput(forms.FileInput):
+    """A file input that lets the browser pick several files (the multiple attribute)."""
+
+    allow_multiple_selected = True
+
+
+class MultipleFileField(forms.FileField):
+    """A file field that cleans a list of files (recipe from the Django docs, #64 D12).
+
+    Django has no field for several files: a FileField cleans one. This one cleans each file
+    of the list the same way and returns the list.
+    """
+
+    def __init__(self, *args, **kwargs):
+        """Use the multiple-file input unless the caller gives another widget."""
+        kwargs.setdefault("widget", MultipleFileInput())
+        super().__init__(*args, **kwargs)
+
+    @override
+    def clean(self, data, initial=None):
+        """Clean every file; no file at all gives the "required" error of a single field."""
+        clean_one = super().clean  # FileField's check of a single file
+        if isinstance(data, list | tuple) and data:
+            return [clean_one(file, initial) for file in data]
+        # Nothing chosen comes as []: the single-file check turns it into "required".
+        return [clean_one(data, initial)]
+
+
+class JobPhotosForm(forms.Form):
+    """Add several photos to one job on its edit page (docs/specs/job-photos.md R16).
+
+    All or nothing (D17): one bad file or one photo too many makes the whole form invalid,
+    and save() stores none of them.
+    """
+
+    photos = MultipleFileField(
+        label=_("Photos"),
+        widget=MultipleFileInput(
+            attrs={
+                # The browser's file picker shows only these; the server still checks.
+                "accept": "image/jpeg,image/png,image/webp",
+                "class": "file-input w-full",
+            }
+        ),
+        error_messages={"required": _("Choose at least one photo.")},
+    )
+
+    def __init__(self, *args, job, **kwargs):
+        """The job the photos are for: its photo count limits how many more fit."""
+        super().__init__(*args, **kwargs)
+        self.job = job
+
+    def clean_photos(self):
+        """Check the count, then prepare every file; the first problem stops the batch."""
+        files = self.cleaned_data["photos"]
+        free = Job.MAX_PHOTOS - self.job.photos.count()
+        if len(files) > free:
+            raise forms.ValidationError(
+                ngettext(
+                    "You can add %(count)d more photo.",
+                    "You can add %(count)d more photos.",
+                    free,
+                )
+                % {"count": free}
+            )
+        prepared = []
+        for file in files:
+            try:
+                prepared.append(prepare_photo(file))
+            except forms.ValidationError as error:
+                # Several files in one go: say which one is wrong.
+                raise forms.ValidationError(
+                    _("%(name)s: %(error)s")
+                    % {"name": file.name, "error": error.messages[0]}
+                ) from None
+        return prepared
+
+    def save(self):
+        """Store the prepared photos for the job; returns the new JobPhoto rows."""
+        # One transaction: if one row fails, no row of the batch stays (D17).
+        with transaction.atomic():
+            return [
+                JobPhoto.objects.create(job=self.job, image=photo)
+                for photo in self.cleaned_data["photos"]
+            ]

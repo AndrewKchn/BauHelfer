@@ -6,9 +6,18 @@
 
 {% block content %}
   {# Laid out like the UI mockup "Post a job": no card, short fields side by side. #}
-  <h1 class="text-2xl font-bold">{% if object %}{% translate "Edit job" %}{% else %}{% translate "Post a job" %}{% endif %}</h1>
-  <form method="post" novalidate class="mt-2">
+  {% if not object %}
+    <h1 class="text-2xl font-bold">{% translate "Post a job" %}</h1>
+  {% endif %}
+  {# data-edit / data-unsaved are read by the script at the bottom (job-photos.md R22). #}
+  <form method="post" novalidate class="mt-2" id="job-form"{% if object %} data-edit="true"{% endif %}{% if form.errors %} data-unsaved="true"{% endif %}>
     {% csrf_token %}
+    {% if object %}
+      {# The edit page has two parts, each with its own button (D20); no "Edit job" title #}
+      {# above them (D24). Still the page's one <h1>, for screen readers, but as small as #}
+      {# the "Photos" heading. #}
+      <h1 class="text-lg font-semibold">{% translate "Job details" %}</h1>
+    {% endif %}
     {% include "_form_errors.html" %}
     {% include "_form_field.html" with field=form.job_type %}
     {% include "_form_field.html" with field=form.description %}
@@ -25,7 +34,35 @@
       {% include "_form_field.html" with field=form.workers_needed %}
       {% include "_form_field.html" with field=form.hourly_rate %}
     </div>
-    <button type="submit" class="btn btn-primary mt-4 w-full">{% if object %}{% translate "Save job" %}{% else %}{% translate "Publish job" %}{% endif %}</button>
+    {% if not object %}
+      {# Photos are added on the edit page that opens after publishing (job-photos.md D10, D13). #}
+      <p class="mt-2 text-sm text-base-content/70">{% translate "You can add photos after you publish the job." %}</p>
+    {% endif %}
+    <button type="submit" class="btn btn-primary mt-4 w-full">{% if object %}{% translate "Save changes" %}{% else %}{% translate "Publish job" %}{% endif %}</button>
   </form>
+  {% if object %}
+    {% include "jobs/_job_photos.html" with job=object %}
+  {% endif %}
   <a href="{% url 'my_jobs' %}" class="btn btn-ghost mt-2 w-full">{% translate "Back to my jobs" %}</a>
+  <script>
+    // Ask before leaving with unsaved changes in the job form (job-photos.md D11): on the
+    // edit page, adding or deleting a photo reloads the page and would lose them silently.
+    // On the edit page "Save changes" is off until a field changes (D22).
+    (() => {
+      const form = document.getElementById("job-form");
+      const save = form.querySelector("button[type=submit]");
+      // A page shown again with errors holds typed values that are not saved yet.
+      let changed = form.dataset.unsaved === "true";
+      // Turned off here, not in the HTML: without JavaScript the button stays usable.
+      if (form.dataset.edit === "true" && !changed) save.disabled = true;
+      form.addEventListener("input", () => {
+        changed = true;
+        save.disabled = false;
+      });
+      form.addEventListener("submit", () => { changed = false; });  // saving is leaving on purpose
+      window.addEventListener("beforeunload", (event) => {
+        if (changed) event.preventDefault();  // the browser shows its own "Leave page?"
+      });
+    })();
+  </script>
 {% endblock %}

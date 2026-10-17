@@ -53,3 +53,18 @@ services:
         generateValue: true  # Render creates a random key once and keeps it
       - key: DATABASE_URL
         sync: false  # secret: Render asks for it when the Blueprint is created
+      # Job photos in Supabase Storage (#64, docs/specs/job-photos.md R33). Only the key pair
+      # is secret; the endpoint, region and public address belong to our Supabase project,
+      # so they are set in the dashboard too instead of being written here.
+      - key: MEDIA_S3_ENDPOINT_URL
+        sync: false
+      - key: MEDIA_S3_REGION
+        sync: false
+      - key: MEDIA_S3_ACCESS_KEY_ID
+        sync: false  # secret: the S3 access key "bauhelfer-render"
+      - key: MEDIA_S3_SECRET_ACCESS_KEY
+        sync: false  # secret
+      - key: MEDIA_S3_BUCKET
+        value: job-photos
+      - key: MEDIA_PUBLIC_URL
+        sync: false

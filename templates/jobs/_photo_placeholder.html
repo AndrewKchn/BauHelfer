@@ -1,0 +1,14 @@
+{% load i18n %}
+{# A job without photos (#64, docs/specs/job-photos.md D26): a hard hat and "No photo", pale on #}
+{# a muted background, so it does not pull more eyes than a real photo. Fills its parent; #}
+{# the job list card gives it 72 px, the detail page (#19) can give it more. #}
+{# The icon is drawn for the project (no icon library); currentColor takes the theme's #}
+{# text colour, so it works in the light and the dark theme. #}
+<div class="flex size-full flex-col items-center justify-center gap-0.5 rounded-box bg-base-200 text-base-content/50">
+  <svg viewBox="0 0 24 24" class="size-8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M4 15a8 8 0 0 1 16 0"/>{# the dome #}
+    <path d="M10 7.3V11M14 7.3V11"/>{# the ridge on top #}
+    <rect x="2" y="15" width="20" height="3" rx="1"/>{# the brim #}
+  </svg>
+  <span class="text-[0.65rem] leading-none">{% translate "No photo" %}</span>
+</div>

@@ -10,10 +10,36 @@ RENDER_EXTERNAL_HOSTNAME = env("RENDER_EXTERNAL_HOSTNAME", default="")
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS = [*ALLOWED_HOSTS, RENDER_EXTERNAL_HOSTNAME]
 
-# Compressed copies and a content hash in each file name (style.3f9a1c.css), so browsers can
-# cache static files for a long time. Needs collectstatic, which only runs on the server.
 STORAGES = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    # Uploaded photos (#64): a Supabase Storage bucket through its S3 protocol, because the
+    # Render disk is wiped on every deploy (docs/specs/job-photos.md D2). Every value is
+    # required: without one the server does not start, instead of writing photos to a disk
+    # that loses them (D31). Values in Supabase: Storage -> Settings -> S3 Connection.
+    "default": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "endpoint_url": env("MEDIA_S3_ENDPOINT_URL"),
+            "region_name": env("MEDIA_S3_REGION"),
+            "access_key": env("MEDIA_S3_ACCESS_KEY_ID"),
+            "secret_key": env("MEDIA_S3_SECRET_ACCESS_KEY"),
+            "bucket_name": env("MEDIA_S3_BUCKET"),
+            # The bucket is public (D30): photos get a fixed address the browser can cache,
+            # on Supabase's public path. With custom_domain django-storages builds plain
+            # URLs, never signed ones that expire. It adds "https://" itself, so one copied
+            # with it (or with a "/" at the end) is trimmed: "https://https://…" would break
+            # every photo without any error.
+            "custom_domain": env("MEDIA_PUBLIC_URL")
+            .removeprefix("https://")
+            .rstrip("/"),
+            # Supabase wants the bucket in the path (…/s3/job-photos/…), not in the host.
+            "addressing_style": "path",
+            # Names are random already; never replace a stored file by accident.
+            "file_overwrite": False,
+        },
+    },
+    # Compressed copies and a content hash in each file name (style.3f9a1c.css), so browsers
+    # can cache static files for a long time. Needs collectstatic, which only runs on the
+    # server.
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
     },

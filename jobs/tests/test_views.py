@@ -179,7 +179,8 @@ def test_employer_posts_a_job(employer_client, employer):
     1. Log in as an employer with a profile
     2. Send a correctly filled job form
     3. Expect: one job, owned by the employer, status open
-    4. Expect: the employer lands on "My jobs" with "Job posted." and sees the job
+    4. Expect: the employer lands on the job's edit page with "Job posted.", where photos
+       can be added (changed in #64, docs/specs/job-photos.md D10; it was "My jobs")
     """
     response = employer_client.post(reverse("job_create"), form_data(), follow=True)
 
@@ -187,9 +188,9 @@ def test_employer_posts_a_job(employer_client, employer):
     assert job.employer == employer
     assert job.status == Job.Status.OPEN
     assert job.address == "Leopoldstraße 50"
-    assertRedirects(response, reverse("my_jobs"))
+    assertRedirects(response, reverse("job_edit", args=[job.pk]) + "#photos")
     assertContains(response, "Job posted.")
-    assertContains(response, "Carrying materials")
+    assertContains(response, "Leopoldstraße 50")
 
 
 def test_posted_fields_for_owner_and_status_are_ignored(
@@ -438,15 +439,17 @@ def test_job_form_pages_carry_the_csrf_token(employer_client, job, name):
 
     1. Log in as the employer
     2. Open the post / edit / cancel page
-    3. Expect: the hidden csrfmiddlewaretoken field in the page
+    3. Expect: the hidden csrfmiddlewaretoken field in every form of the page
     """
     # Catches a forgotten {% csrf_token %}: real browsers would then get 403 on submit.
     url = reverse(name) if name == "job_create" else reverse(name, args=[job.pk])
 
     response = employer_client.get(url)
 
-    # Two tokens: one in the logout form of the header menu, one in this page's form.
-    assertContains(response, 'name="csrfmiddlewaretoken"', count=2)
+    # One token in the logout form of the header menu, one in this page's form; the edit
+    # page also has the photo upload form (#64, job-photos.md R15).
+    tokens = 3 if name == "job_edit" else 2
+    assertContains(response, 'name="csrfmiddlewaretoken"', count=tokens)
 
 
 # Menu (R15, AC18)

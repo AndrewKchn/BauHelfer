@@ -134,6 +134,11 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"  # collectstatic copies all static files here
 STATICFILES_DIRS = [BASE_DIR / "static"]  # project-wide CSS/JS (app.css, htmx.min.js)
 
+# Files users upload (job photos, #64). Locally they go to media/ (not in git) and the dev
+# server serves them (config/urls.py); production keeps them in Supabase Storage.
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 

@@ -18,3 +18,17 @@ def fast_password_hasher(settings):
     tests/test_deploy.py checks that production still uses PBKDF2.
     """
     settings.PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
+
+
+@pytest.fixture(autouse=True)
+def in_memory_file_storage(settings):
+    """Keep uploaded files in memory: no test writes to media/ or reaches the network (#64).
+
+    Only "default" (uploads) is replaced; "staticfiles" stays, so CSS and JS still work.
+    Changing the setting makes Django drop its cached storage, so default_storage and every
+    FileField use the new one; each test starts with an empty store.
+    """
+    settings.STORAGES = {
+        **settings.STORAGES,
+        "default": {"BACKEND": "django.core.files.storage.InMemoryStorage"},
+    }
