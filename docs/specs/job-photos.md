@@ -4,7 +4,8 @@ Status: **iterations 1 and 2 agreed and built**. D1 and D2 decided by the
 student on 2026-10-16; the iteration 1 defaults (D3–D9) accepted by the student the same day,
 before any tests. Iteration 2: D10–D13 decided by the student on 2026-10-17; defaults
 D14–D19 accepted by the student the same day, before any tests; D20–D24 after looking at the
-built edit page the same day.
+built edit page the same day. Iteration 3: D25–D28 decided by the student on 2026-10-17
+after an experiment with three placeholder icons at 360 px; defaults D29 accepted.
 
 ## Goal
 
@@ -304,11 +305,78 @@ D24. **No "Edit job" title on the edit page** (the student's idea): with "Job de
      "Photos" the page explains itself, and the form starts higher on a phone. "Job details"
      takes over the `<h1>` (one per page, for screen readers) in the size of "Photos".
 
-## Iteration 3: thumbnail on the job list (to decide before its tests)
+## Iteration 3: thumbnail on the job list
 
-- The list shows 20 cards: 20 photos of 300 KB is 6 MB on a phone. Store a small copy
-  (about 400 px) next to each photo at upload, or let the browser shrink the big one.
-- The mockup's "3 photos" on the thumbnail and the "No photo" tile.
+Each card on the job list gets a square on the left: the job's first photo with "3 photos",
+or a hard-hat placeholder with "No photo". The list loads small copies, not the big photos.
+
+### Requirements
+
+R24. `JobPhoto.thumbnail`: a second `ImageField`, stored as
+     `job_photos/thumbs/<32 hex characters>.jpg`; may be empty (D29: photos saved before
+     this field existed have none).
+R25. `make_thumbnail(file)` in `jobs/photos.py`: a 300 × 300 square cut from the middle of
+     the picture (like CSS `object-cover`), JPEG quality 85, no EXIF (D25, D29).
+R26. `JobPhoto.save()` makes the thumbnail from `image` when the photo has an image and no
+     thumbnail yet; saving again does not make a new one. Admin, the job form and tests all
+     go through it.
+R27. `JobPhoto.thumbnail_url`: the thumbnail's address, or the big photo's when there is no
+     thumbnail (D29).
+R28. Deleting a photo deletes both files (extends R7).
+R29. Job list card (`_job_card.html`): a 72 px square on the left of the text (D29), rounded.
+     - With photos: the first photo (`thumbnail_url`), cut to fill the square, and a label in
+       its corner "1 photo" / "3 photos" (D27).
+     - Without: `templates/jobs/_photo_placeholder.html`, a hard-hat icon (inline SVG drawn
+       for the project, colours from the theme) and "No photo", pale on a muted background
+       (D26). Kept as its own template for the detail page (#19).
+     The text next to it may wrap ("Earthworks / digging" takes two lines at 360 px).
+R30. `JobListView` loads the photos of all jobs on the page in one extra query
+     (`prefetch_related("photos")`), so the number of database queries does not grow with
+     the number of jobs (D28).
+R31. Every UI string wrapped in `{% translate %}` / `{% blocktranslate count %}`.
+
+### Out of scope (iteration 3)
+
+- Thumbnails for photos stored before this iteration (only local test data): they show the
+  big photo instead (R27).
+- The map (#42) and the detail page (#19) use the same pieces later.
+
+### Acceptance criteria (→ tests)
+
+AC29. `make_thumbnail` turns a 4000 × 3000 and a 3000 × 4000 picture into 300 × 300 JPEGs
+      without EXIF.
+AC30. Saving a new `JobPhoto` stores a thumbnail under `job_photos/thumbs/<32 hex>.jpg`;
+      saving it again keeps the same thumbnail.
+AC31. Deleting a photo removes the photo file and the thumbnail file.
+AC32. `thumbnail_url` is the thumbnail's address; with the thumbnail cleared, the photo's.
+AC33. The list card of a job with 3 photos shows the first photo's thumbnail and "3 photos";
+      with 1 photo "1 photo".
+AC34. The list card of a job without photos shows "No photo" and the placeholder icon.
+AC35. The home page with 2 jobs with photos and with 5 jobs with photos makes the same number
+      of database queries.
+
+### Decisions (student, 2026-10-17)
+
+D25. **A small copy is made at upload** (option B). Options with their cost: A) the browser
+     shrinks the 1600 px photo (up to 6–8 MB for 20 cards on mobile data); B) a 300 px copy
+     at upload (~0.5 MB for 20 cards, most code: second field, migration, both files
+     deleted); C) A with `loading="lazy"` (one attribute, ~1.5 MB at first). Rejected: A, C.
+D26. **The placeholder is a hard hat** (the student asked for "something from construction"
+     instead of my landscape). An experiment, not committed, showed a hard hat, a brick wall
+     and a traffic cone on the real list at 360 px in both themes; the brick wall read like a
+     table, the cone like road works. Rejected: an icon per job type (8+ icons to keep), the
+     BauHelfer initials (say nothing), a plain empty square.
+D27. **"3 photos" on the thumbnail**, as in the mockup: the worker sees at once how many
+     photos there are. Until #19 there is no page that shows them all.
+D28. **The list loads the photos in one query** (`prefetch_related`). Without it Django asks
+     the database once per card: 20 more queries per page (the "N+1" problem). The test
+     compares two page sizes, so it catches the problem itself, not one number.
+
+### Defaults for iteration 3 (accepted)
+
+| | Default | Why | Rejected | Revisit when |
+|---|---|---|---|---|
+| D29 | 300 × 300 cut from the middle; made in `JobPhoto.save()`; old photos fall back to the big photo; pale icon; a 72 px square; long job types may wrap | 72 px on a ×3 screen needs ~216 px; `save()` is the one place every photo passes; a data migration only for local test data is not worth its code; "nothing here" should not shout | A coloured icon; a 64 px square (still wraps); generating copies for old photos | photos exist in production before this iteration (they do not) |
 
 ## Iteration 4: production storage (to decide before its tests)
 
@@ -323,4 +391,4 @@ D24. **No "Edit job" title on the edit page** (the student's idea): with "Job de
 | Job detail | big photo with "1 / 3" | not in this ticket | D1, #19 |
 | Post a job | "Photos (2 of 5)" with tiles and "Add" | no photos here; a line says they come after publishing; the block is on the edit page | D10, D13 |
 | Post a job | "Add" tile with a camera icon | a file field and an "Add photos" button | D14 |
-| Jobs list | thumbnail with "3 photos", "No photo" tile | decided in iteration 3 | — |
+| Jobs list | "No photo" tile | a hard-hat icon with "No photo" | D26 |
