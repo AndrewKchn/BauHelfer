@@ -206,7 +206,14 @@ class JobListView(ListView):
         # Kept on the view for get_context_data(), which ListView calls after this method.
         # A new view object is made for every request, so one visitor's filters stay theirs.
         self.filter_form = JobFilterForm(self.request.GET)
-        jobs = Job.objects.open().upcoming().order_by("date", "start_time")
+        # prefetch_related: the photos of all jobs on the page in one more query, not one
+        # query per card (job-photos.md R30, D28).
+        jobs = (
+            Job.objects.open()
+            .upcoming()
+            .order_by("date", "start_time")
+            .prefetch_related("photos")
+        )
         return self.filter_form.filter(jobs)
 
     @override

@@ -3,16 +3,33 @@
 {# and time, then how many workers are needed. No address or description (spec D1, R7). #}
 {# daisyUI makes every <p> in a card-body grow, so both share the row: text-end puts the #}
 {# rate at the right edge, as in the mockup. #}
-<div class="flex items-start justify-between gap-2">
-  <p class="text-base font-semibold">{{ job.get_job_type_display }}</p>
-  <p class="shrink-0 text-end text-base font-semibold">{{ job.hourly_rate }} €/h</p>
+{# A 72 px square on the left: the first photo with "3 photos", or the hard-hat placeholder #}
+{# (#64, job-photos.md R29). job.photos.all comes from prefetch_related in the view, so it #}
+{# costs no query per card. min-w-0 lets the district be cut with "…" next to the square. #}
+{% with photos=job.photos.all %}
+<div class="flex gap-3">
+  <div class="relative size-18 shrink-0">
+    {% if photos %}
+      <img src="{{ photos.0.thumbnail_url }}" alt="{% translate 'Job photo' %}" class="size-full rounded-box object-cover">
+      <span class="absolute bottom-1 end-1 rounded bg-base-100/85 px-1 text-xs">{% blocktranslate count photos=photos|length %}{{ photos }} photo{% plural %}{{ photos }} photos{% endblocktranslate %}</span>
+    {% else %}
+      {% include "jobs/_photo_placeholder.html" %}
+    {% endif %}
+  </div>
+  <div class="min-w-0 flex-1">
+    <div class="flex items-start justify-between gap-2">
+      <p class="text-base font-semibold">{{ job.get_job_type_display }}</p>
+      <p class="shrink-0 text-end text-base font-semibold">{{ job.hourly_rate }} €/h</p>
+    </div>
+    {# The district has a line of its own and is cut with "…" if it does not fit (the longest #}
+    {# name has 52 characters), so every card has the same two lines; the full name is on the #}
+    {# job page (#19). Spec D8. #}
+    <p class="truncate text-sm text-base-content/70">{{ job.get_district_display }}</p>
+    <p class="text-sm text-base-content/70">{{ job.date|date:"D j M" }} · {{ job.start_time|time:"H:i" }}–{{ job.end_time|time:"H:i" }}</p>
+    <div>
+      {# The whole phrase is translated: word order and form change with the number. #}
+      <span class="badge badge-accent mt-1 font-semibold">{% blocktranslate count workers=job.workers_needed %}Needs {{ workers }} worker{% plural %}Needs {{ workers }} workers{% endblocktranslate %}</span>
+    </div>
+  </div>
 </div>
-{# The district has a line of its own and is cut with "…" if it does not fit (the longest #}
-{# name has 52 characters), so every card has the same two lines; the full name is on the #}
-{# job page (#19). Spec D8. #}
-<p class="truncate text-sm text-base-content/70">{{ job.get_district_display }}</p>
-<p class="text-sm text-base-content/70">{{ job.date|date:"D j M" }} · {{ job.start_time|time:"H:i" }}–{{ job.end_time|time:"H:i" }}</p>
-<div>
-  {# The whole phrase is translated: word order and form change with the number. #}
-  <span class="badge badge-accent mt-1 font-semibold">{% blocktranslate count workers=job.workers_needed %}Needs {{ workers }} worker{% plural %}Needs {{ workers }} workers{% endblocktranslate %}</span>
-</div>
+{% endwith %}

@@ -2,6 +2,7 @@
 
 import uuid
 from datetime import datetime, timedelta
+from typing import override
 
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -12,6 +13,8 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from accounts.models import Skill, User
+
+from .photos import make_thumbnail
 
 # The lowest minimum wage in settings: the floor for every job, checked by the model
 # validator. The form checks the rate of the job's own date (minimum_wage_on, #16).
@@ -185,6 +188,11 @@ def job_photo_path(instance, filename):
     return f"job_photos/{uuid.uuid4().hex}.jpg"
 
 
+def job_thumbnail_path(instance, filename):
+    """Where a photo's small copy is stored: a random name like the photo (R24, D7)."""
+    return f"job_photos/thumbs/{uuid.uuid4().hex}.jpg"
+
+
 class JobPhoto(models.Model):
     """One photo of a job, already resized and without EXIF (prepare_photo(), #64)."""
 
@@ -197,6 +205,11 @@ class JobPhoto(models.Model):
     # The database keeps only the path (job_photos/….jpg); the file is in the storage of
     # settings.STORAGES["default"]: media/ locally, Supabase in production.
     image = models.ImageField(_("photo"), upload_to=job_photo_path)
+    # 300 × 300 for the job list (iteration 3). Empty for photos saved before it existed:
+    # thumbnail_url then gives the big photo (D29).
+    thumbnail = models.ImageField(
+        _("thumbnail"), upload_to=job_thumbnail_path, blank=True
+    )
     uploaded_at = models.DateTimeField(_("uploaded at"), auto_now_add=True)
 
     class Meta:
@@ -209,15 +222,38 @@ class JobPhoto(models.Model):
     def __str__(self):
         return self.image.name
 
+    @override
+    def save(self, *args, **kwargs):
+        """Make the small copy the first time the photo is saved (R26).
+
+        Here, not in the forms: the admin, the edit page and tests all save through this.
+        Saving again keeps the copy that is there.
+        """
+        if self.image and not self.thumbnail:
+            self.thumbnail = make_thumbnail(self.image)
+        super().save(*args, **kwargs)
+
+    @property
+    def thumbnail_url(self):
+        """The small copy's address, or the photo's if it has none (R27)."""
+        return (self.thumbnail or self.image).url
+
 
 @receiver(post_delete, sender=JobPhoto)
 def delete_photo_file(sender, instance, **kwargs):
-    """Delete the photo's file when its row is deleted (job-photos.md R7, D8).
+    """Delete the photo's files when its row is deleted (job-photos.md R7, R28, D8).
 
     Django never deletes a file by itself. A signal, not a delete() method: delete() is not
     called when the photo goes with its job or account (cascade) or in a bulk delete, but
     this signal is sent for every row. on_commit: if the transaction is rolled back, the row
     comes back, so the file must still be there.
     """
-    storage, name = instance.image.storage, instance.image.name
-    transaction.on_commit(lambda: storage.delete(name))
+    # Both files: the photo and its small copy (R28); an old photo may have no copy.
+    names = [file.name for file in (instance.image, instance.thumbnail) if file]
+    storage = instance.image.storage
+
+    def delete_files():
+        for name in names:
+            storage.delete(name)
+
+    transaction.on_commit(delete_files)
