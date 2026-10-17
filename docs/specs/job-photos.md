@@ -6,6 +6,7 @@ before any tests. Iteration 2: D10–D13 decided by the student on 2026-10-17; d
 D14–D19 accepted by the student the same day, before any tests; D20–D24 after looking at the
 built edit page the same day. Iteration 3: D25–D28 decided by the student on 2026-10-17
 after an experiment with three placeholder icons at 360 px; defaults D29 accepted.
+Iteration 4: D30–D32 decided by the student on 2026-10-17; defaults D33 accepted.
 
 ## Goal
 
@@ -378,11 +379,74 @@ D28. **The list loads the photos in one query** (`prefetch_related`). Without it
 |---|---|---|---|---|
 | D29 | 300 × 300 cut from the middle; made in `JobPhoto.save()`; old photos fall back to the big photo; pale icon; a 72 px square; long job types may wrap | 72 px on a ×3 screen needs ~216 px; `save()` is the one place every photo passes; a data migration only for local test data is not worth its code; "nothing here" should not shout | A coloured icon; a 64 px square (still wraps); generating copies for old photos | photos exist in production before this iteration (they do not) |
 
-## Iteration 4: production storage (to decide before its tests)
+## Iteration 4: production storage in Supabase
 
-- Public bucket (a fixed address per photo, cacheable) or private (a link that expires,
-  made by the S3 backend on every page).
-- Env variables for `.env.example` and Render; check the current free limit.
+Production keeps uploaded photos in a Supabase Storage bucket through its S3 protocol (D2);
+locally and in tests nothing changes (`media/`, in-memory). Only settings change: models,
+forms and templates only know `photo.image.url`.
+
+### Requirements
+
+R32. New dependencies `django-storages[s3]` and `boto3` (approved in the ticket).
+R33. `config/settings/production.py`: `STORAGES["default"]` is `storages.backends.s3.S3Storage`
+     with these values from env variables (D33):
+     - `MEDIA_S3_ENDPOINT_URL`: the bucket service's S3 address (Supabase: Storage → Settings
+       → S3 Connection → Endpoint);
+     - `MEDIA_S3_REGION`: its region (same page);
+     - `MEDIA_S3_ACCESS_KEY_ID`, `MEDIA_S3_SECRET_ACCESS_KEY`: an S3 access key (secret);
+     - `MEDIA_S3_BUCKET`: the bucket name, `job-photos`;
+     - `MEDIA_PUBLIC_URL`: the address photos are shown from (Supabase:
+       `<project-ref>.supabase.co/storage/v1/object/public/job-photos`).
+R34. All six are **required** in production: a missing one stops the server at start with
+     Django's "Set the … environment variable" error, like `DATABASE_URL` (D31).
+R35. Photo addresses are plain public URLs on `MEDIA_PUBLIC_URL`, without a signature
+     (`querystring_auth = False`, D30); path-style addressing; files are never overwritten
+     (random names anyway).
+R36. `.env.example` lists the six variables with comments; `render.yaml` lists them, the
+     two secrets with `sync: false`.
+R37. Local settings and tests do not change: `FileSystemStorage` in `media/`,
+     `InMemoryStorage` in tests (R8, R9). No test touches the network.
+R38. Before the PR is made ready: one manual upload with production storage settings and a
+     separate local key against the real bucket (D33); the key is deleted afterwards.
+
+### Out of scope (iteration 4)
+
+- Photos may show a house number or a face, while #19 plans to hide the exact address until
+  an application is accepted (D32): an open question for Docs sync, `docs/SECURITY.md`.
+- Moving existing photos between storages (there are none in production yet).
+
+### Acceptance criteria (→ tests)
+
+AC36. With the six variables set, production's default storage is the S3 backend with the
+      endpoint, region, keys, bucket and public address from them, unsigned URLs.
+AC37. With any one of the six missing, loading the production settings fails with
+      `ImproperlyConfigured` naming that variable.
+AC38. The static files storage in production stays WhiteNoise's (the existing test, unchanged).
+AC39. `.env.example` and `render.yaml` name all six variables; `render.yaml` marks the two
+      secret ones `sync: false`.
+AC40. Local settings still store uploads on disk in `media/` (FileSystemStorage).
+
+### Decisions (student, 2026-10-17)
+
+D30. **Public bucket.** Options with their cost: a public bucket gives every photo a fixed
+     address the browser caches (2 settings); a private one gives a signed link that
+     expires, made anew on every page, so the browser downloads the photo again each time
+     and the free egress (~5 GB/month) goes faster. Photos are public on the job list anyway
+     (#18 D1) and their names are random (128 bits). Rejected: private bucket.
+     **Revisit when** photos should be visible only to some users.
+D31. **Missing storage variables stop the server**, like a missing `DATABASE_URL`. The
+     other option, falling back to the Render disk, would work until the next deploy and
+     then lose every photo silently. Rejected: the fallback.
+D32. **The "house number or face on a photo" question waits** (the student's choice): noted
+     for Docs sync — M3 and `docs/SECURITY.md`. A one-line hint at the upload ("Avoid house
+     numbers and faces.") was offered and not taken now.
+     **Revisit when** #19 hides the address: a photo of the facade would show it anyway.
+
+### Defaults for iteration 4 (accepted)
+
+| | Default | Why | Rejected | Revisit when |
+|---|---|---|---|---|
+| D33 | Variable names `MEDIA_S3_*` / `MEDIA_PUBLIC_URL` (not `SUPABASE_*`); bucket `job-photos`; one manual upload before merge with a separate local key (`bauhelfer-local-check`, deleted afterwards), the production key (`bauhelfer-render`) only on Render | Moving to R2 (D2) changes values, not names; tests never reach the network, and boto3 ≥ 1.36 sends new checksums some S3-compatible services refuse, which only a real upload shows; a leaked laptop `.env` must not hold the production key | `SUPABASE_*` names; no manual check; one shared key | the manual upload fails (then: boto3 client config `request_checksum_calculation="when_required"`) |
 
 ## Differences from the mockups
 
