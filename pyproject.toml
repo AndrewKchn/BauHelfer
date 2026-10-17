@@ -5,6 +5,7 @@ requires-python = ">=3.12"
 dependencies = [
     "django>=5.0,<6",
     "django-environ>=0.14.0",
+    "django-storages[s3]>=1.14.6",
     "gunicorn>=26.2.0",
     "pillow>=12.3.0",
     "psycopg[binary]>=3.3.6",

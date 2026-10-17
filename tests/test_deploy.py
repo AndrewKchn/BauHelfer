@@ -10,6 +10,24 @@ from django.test import override_settings
 
 pytestmark = pytest.mark.story(5)
 
+# The photo storage variables production requires (#64, docs/specs/job-photos.md R34).
+# Made-up values in the shape Supabase shows them; not a real project or key.
+MEDIA_ENV = {
+    "MEDIA_S3_ENDPOINT_URL": "https://abcdref.storage.supabase.co/storage/v1/s3",
+    "MEDIA_S3_REGION": "eu-central-1",
+    "MEDIA_S3_ACCESS_KEY_ID": "test-access-key-id",
+    "MEDIA_S3_SECRET_ACCESS_KEY": "test-secret-access-key",
+    "MEDIA_S3_BUCKET": "job-photos",
+    "MEDIA_PUBLIC_URL": "abcdref.supabase.co/storage/v1/object/public/job-photos",
+}
+
+
+@pytest.fixture(autouse=True)
+def media_env(monkeypatch):
+    """Set the photo storage variables as Render does, so production.py can load (#64)."""
+    for name, value in MEDIA_ENV.items():
+        monkeypatch.setenv(name, value)
+
 
 def load_production_settings():
     """Import production.py fresh, so it sees the environment set by the test."""
