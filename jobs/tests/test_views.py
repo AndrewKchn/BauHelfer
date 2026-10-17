@@ -188,7 +188,7 @@ def test_employer_posts_a_job(employer_client, employer):
     assert job.employer == employer
     assert job.status == Job.Status.OPEN
     assert job.address == "Leopoldstraße 50"
-    assertRedirects(response, reverse("job_edit", args=[job.pk]))
+    assertRedirects(response, reverse("job_edit", args=[job.pk]) + "#photos")
     assertContains(response, "Job posted.")
     assertContains(response, "Leopoldstraße 50")
 

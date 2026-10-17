@@ -82,9 +82,10 @@ class JobCreateView(EmployerRequiredMixin, EmployerProfileRequiredMixin, CreateV
 
     @override
     def get_success_url(self):
-        """The new job's edit page: the photo block is there (job-photos.md R12)."""
-        # Called after the save, so self.object has its id now.
-        return reverse("job_edit", args=[self.object.pk])
+        """The new job's edit page, scrolled to the photo block (job-photos.md R12, R21)."""
+        # Called after the save, so self.object has its id now. The browser jumps to the
+        # element with id="photos"; the server never sees the "#photos" part.
+        return reverse("job_edit", args=[self.object.pk]) + "#photos"
 
 
 class MyJobsView(EmployerRequiredMixin, ListView):

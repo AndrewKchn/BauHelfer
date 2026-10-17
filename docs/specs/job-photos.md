@@ -1,9 +1,10 @@
 # Spec: job photos (#64)
 
-Status: **iteration 1 agreed and built; iteration 2 draft**. D1 and D2 decided by the
+Status: **iterations 1 and 2 agreed and built**. D1 and D2 decided by the
 student on 2026-10-16; the iteration 1 defaults (D3–D9) accepted by the student the same day,
 before any tests. Iteration 2: D10–D13 decided by the student on 2026-10-17; defaults
-D14–D19 accepted by the student the same day, before any tests.
+D14–D19 accepted by the student the same day, before any tests; D20–D24 after looking at the
+built edit page the same day.
 
 ## Goal
 
@@ -257,6 +258,51 @@ D13. **A line on "Post a job" that photos come after publishing** (the student's
 |---|---|---|---|---|
 | D14 | Upload by choosing the files **and pressing "Add photos"**; no auto-upload on choose | Works without JS; the employer sees what was chosen before it goes | `onchange="this.form.submit()"` (one line of JS, one tap less) | employers forget to press the button |
 | D15 | The edit page shows 
+
+### Changes after looking at the edit page (student, 2026-10-17)
+
+On a 360 px phone the photo block starts below the first screen; what the employer sees
+after "Publish job" is the job form ending in a big "Save job" button. The student found it
+confusing (does it save the photos? must I press it?), and the "Add photos" button had a
+third colour. Options offered with their cost: a) rename the button, b) headings for the two
+parts, c) jump to the photos after publishing, d) the save button inactive until something
+changes, e) photos above the form. The student chose a, b, c and d, and then dropped the
+"Edit job" title (D24).
+
+R20. On the edit page the job form has the heading "Job details" and its button says "Save
+     changes" (D20); there is no "Edit job" title above it, "Job details" is the page's
+     `<h1>` (D24). The browser tab still says "Edit job". The create page keeps "Post a job" /
+     "Publish job" without the heading.
+R21. The photo block has `id="photos"`; publishing redirects to `/jobs/<pk>/edit/#photos`, so
+     the browser scrolls to it (D21). Saving changes still goes to "My jobs".
+R22. On the edit page "Save changes" is inactive until a field of the job form is changed;
+     the same script that warns about unsaved changes (R18) turns it on (D22). Without
+     JavaScript it stays active. A page shown again with errors keeps it active and counts as
+     changed (the typed values are not saved yet).
+R23. "Add photos" has the same colour as "Save changes" (`btn-primary`) (D23).
+
+AC25. Publishing redirects to the edit page with `#photos`; the photo block has `id="photos"`.
+AC26. The edit page shows "Job details" and "Save changes" and not "Save job"; the create
+      page shows "Publish job" and not "Job details".
+AC27. The edit page marks the job form as an edit (`data-edit`) for the script; the edit page
+      shown again after an error marks it as having unsaved changes.
+AC28. "Add photos" and "Save changes" both carry `btn-primary`.
+
+D20. **"Save changes" and a "Job details" heading** (options a, b). The button names what it
+     saves; the two headings make the page read as two parts with a button each.
+     Rejected: "Save job" (could mean "save everything, photos too").
+D21. **After publishing, the page opens at the photos** (option c): a `#photos` anchor in the
+     redirect, no JavaScript. The form stays above for whoever wants it. Rejected: photos
+     above the form (e: they would be in the way when only a date changes).
+     **Revisit when** the detail page (#19) exists and "Publish" might rather show the job.
+D22. **"Save changes" is inactive until something changes** (option d). An inactive button is
+     not pressed "to be sure". Two lines added to the existing script; a page without
+     JavaScript keeps the button active, so nothing breaks.
+D23. **"Add photos" in the same colour as "Save changes"** (the student's choice over an
+     outlined button): with D22 only one of the two looks active at a time.
+D24. **No "Edit job" title on the edit page** (the student's idea): with "Job details" and
+     "Photos" the page explains itself, and the form starts higher on a phone. "Job details"
+     takes over the `<h1>` (one per page, for screen readers) in the size of "Photos".
 
 ## Iteration 3: thumbnail on the job list (to decide before its tests)
 

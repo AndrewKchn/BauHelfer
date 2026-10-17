@@ -70,16 +70,16 @@ def delete_url(photo):
 
 
 def test_publish_opens_the_edit_page(employer_client):
-    """Publishing a job opens its edit page with a hint to add photos.
+    """Publishing a job opens its edit page at the photos, with a hint to add photos.
 
     1. As an employer, send a correctly filled "Post a job" form
-    2. Expect: a redirect to the new job's edit page with "Job posted. You can add photos
-       below." and the photo block
+    2. Expect: a redirect to the new job's edit page at #photos (R21) with "Job posted. You
+       can add photos below." and the photo block
     """
     response = employer_client.post(reverse("job_create"), form_data(), follow=True)
 
     job = Job.objects.get()
-    assertRedirects(response, edit_url(job))
+    assertRedirects(response, edit_url(job) + "#photos")
     assertContains(response, "Job posted. You can add photos below.")
     assertContains(response, "Photos (0 of 5)")
 
@@ -157,6 +157,67 @@ def test_full_job_has_no_upload_form(employer_client, job):
 
     assertNotContains(response, f'action="{add_url(job)}"')
     assertContains(response, "That is the maximum of 5 photos.")
+
+
+def test_photo_block_is_the_photos_anchor(employer_client, job):
+    """The photo block is the target of the #photos jump after publishing (R21, AC25).
+
+    1. Open the edit page
+    2. Expect: an element with id="photos"
+    """
+    response = employer_client.get(edit_url(job))
+
+    assertContains(response, 'id="photos"')
+
+
+def test_edit_page_names_its_two_parts(employer_client, job):
+    """The edit page has "Job details" with "Save changes", the create page does not.
+
+    1. Open the edit page, then "Post a job"
+    2. Expect: edit has "Job details" as its heading, "Save changes", no "Edit job" heading
+       and no "Save job"; create has "Publish job", not "Job details" (R20, AC26)
+    """
+    edit = employer_client.get(edit_url(job))
+    create = employer_client.get(reverse("job_create"))
+
+    assertContains(edit, "Job details</h1>")
+    assertNotContains(edit, "Edit job</h1>")
+    assertContains(edit, "Save changes")
+    assertNotContains(edit, "Save job")
+    assertContains(create, "Publish job")
+    assertNotContains(create, "Job details")
+
+
+def test_script_knows_the_edit_page(employer_client, job):
+    """The job form tells the script whether it is the edit page (R22, AC27).
+
+    The script turns "Save changes" off until a field changes; only on the edit page, and
+    not when the page comes back with errors (the typed values are not saved yet).
+
+    1. Open the edit page; post the edit form with an empty address; open "Post a job"
+    2. Expect: data-edit="true" on the edit page; data-unsaved="true" on the page with
+       errors; no data-edit on the create page
+    """
+    edit = employer_client.get(edit_url(job))
+    with_errors = employer_client.post(edit_url(job), form_data(address=""))
+    create = employer_client.get(reverse("job_create"))
+
+    assertContains(edit, 'data-edit="true"')
+    assertNotContains(edit, 'data-unsaved="true"')
+    assertContains(with_errors, 'data-unsaved="true"')
+    assertNotContains(create, 'data-edit="true"')
+
+
+def test_both_buttons_have_the_same_colour(employer_client, job):
+    """ "Save changes" and "Add photos" are both primary buttons (R23, AC28).
+
+    1. Open the edit page of a job without photos
+    2. Expect: two buttons with btn-primary (save and add), none with btn-secondary
+    """
+    response = employer_client.get(edit_url(job))
+
+    assertContains(response, "btn btn-primary", count=2)
+    assertNotContains(response, "btn-secondary")
 
 
 def test_edit_page_warns_about_unsaved_changes(employer_client, job):

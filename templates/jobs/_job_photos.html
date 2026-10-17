@@ -2,7 +2,8 @@
 {# The photo block under the job form on the edit page (#64, docs/specs/job-photos.md R14, R15). #}
 {# Its forms are separate <form>s after the job form, never inside it: HTML does not allow a #}
 {# form in a form, and the photo forms must not send the job's fields. #}
-<section class="mt-6">
+{# id="photos": publishing jumps here with /jobs/<pk>/edit/#photos (R21, D21). #}
+<section class="mt-6 scroll-mt-4" id="photos">
   <h2 class="text-lg font-semibold">{% blocktranslate with count=photos|length max=max_photos %}Photos ({{ count }} of {{ max }}){% endblocktranslate %}</h2>
   {% if photos %}
     <div class="mt-2 grid grid-cols-3 gap-2">
@@ -27,7 +28,7 @@
       <label class="sr-only" for="{{ photo_form.photos.id_for_label }}">{{ photo_form.photos.label }}</label>
       {{ photo_form.photos }}
       <p class="mt-1 text-sm text-base-content/70">{% translate "Location data is removed from photos." %}</p>
-      <button type="submit" class="btn btn-secondary mt-2 w-full">{% translate "Add photos" %}</button>
+      <button type="submit" class="btn btn-primary mt-2 w-full">{% translate "Add photos" %}</button>
     </form>
   {% else %}
     {# Full: the upload form is not shown, so it is clear why nothing can be added (D16). #}
