@@ -400,14 +400,19 @@ R33. `config/settings/production.py`: `STORAGES["default"]` is `storages.backend
 R34. All six are **required** in production: a missing one stops the server at start with
      Django's "Set the … environment variable" error, like `DATABASE_URL` (D31).
 R35. Photo addresses are plain public URLs on `MEDIA_PUBLIC_URL`, without a signature
-     (`querystring_auth = False`, D30); path-style addressing; files are never overwritten
-     (random names anyway).
+     (`custom_domain`, D30: django-storages never signs those, so no `querystring_auth`
+     setting is needed; the mutation check found that line had no effect); path-style
+     addressing; files are never overwritten (random names anyway). `MEDIA_PUBLIC_URL` may be
+     written with `https://` in front or `/` at the end (found in the manual check: the
+     copied address brought `https://` along, which would break every photo silently).
 R36. `.env.example` lists the six variables with comments; `render.yaml` lists them, the
      two secrets with `sync: false`.
 R37. Local settings and tests do not change: `FileSystemStorage` in `media/`,
      `InMemoryStorage` in tests (R8, R9). No test touches the network.
-R38. Before the PR is made ready: one manual upload with production storage settings and a
-     separate local key against the real bucket (D33); the key is deleted afterwards.
+R38. Before the PR is made ready: one manual upload with production storage settings against
+     the real bucket (D33); the key used for it is deleted afterwards and Render gets a new
+     one. Done 2026-10-17: photo and thumbnail uploaded, both public URLs answered
+     `200 image/jpeg`, deleting the employer removed both files from the bucket.
 
 ### Out of scope (iteration 4)
 
@@ -446,7 +451,7 @@ D32. **The "house number or face on a photo" question waits** (the student's cho
 
 | | Default | Why | Rejected | Revisit when |
 |---|---|---|---|---|
-| D33 | Variable names `MEDIA_S3_*` / `MEDIA_PUBLIC_URL` (not `SUPABASE_*`); bucket `job-photos`; one manual upload before merge with a separate local key (`bauhelfer-local-check`, deleted afterwards), the production key (`bauhelfer-render`) only on Render | Moving to R2 (D2) changes values, not names; tests never reach the network, and boto3 ≥ 1.36 sends new checksums some S3-compatible services refuse, which only a real upload shows; a leaked laptop `.env` must not hold the production key | `SUPABASE_*` names; no manual check; one shared key | the manual upload fails (then: boto3 client config `request_checksum_calculation="when_required"`) |
+| D33 | Variable names `MEDIA_S3_*` / `MEDIA_PUBLIC_URL` (not `SUPABASE_*`); bucket `job-photos`; one manual upload before merge, then the key used for it is deleted and Render gets a new one (planned as two keys; the check ran with the first `bauhelfer-render` key, so that one was deleted and recreated for Render), the production key only on Render | Moving to R2 (D2) changes values, not names; tests never reach the network, and boto3 ≥ 1.36 sends new checksums some S3-compatible services refuse, which only a real upload shows; a leaked laptop `.env` must not hold the production key | `SUPABASE_*` names; no manual check; one shared key | the manual upload fails (then: boto3 client config `request_checksum_calculation="when_required"`) |
 
 ## Differences from the mockups
 

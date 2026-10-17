@@ -60,6 +60,30 @@ def test_photo_address_is_public_and_unsigned():
     assert "Signature" not in url
 
 
+@pytest.mark.parametrize(
+    "written",
+    [
+        "https://abcdref.supabase.co/storage/v1/object/public/job-photos",
+        "abcdref.supabase.co/storage/v1/object/public/job-photos/",
+    ],
+)
+def test_public_url_may_be_written_with_https_or_a_slash(monkeypatch, written):
+    """MEDIA_PUBLIC_URL works with "https://" in front or "/" at the end (R35).
+
+    Found in the manual check: copying the address from the browser brings "https://" with
+    it, and the photos would get "https://https://…" addresses: broken, with no error.
+
+    1. Set MEDIA_PUBLIC_URL with https:// in front, or with a slash at the end
+    2. Ask production's storage for the address of job_photos/ab.jpg
+    3. Expect: the same address as without them
+    """
+    monkeypatch.setenv("MEDIA_PUBLIC_URL", written)
+
+    url = production_photo_storage().url("job_photos/ab.jpg")
+
+    assert url == f"https://{MEDIA_ENV['MEDIA_PUBLIC_URL']}/job_photos/ab.jpg"
+
+
 def test_photos_are_never_overwritten():
     """Two uploads never replace each other in the bucket (R35).
 
