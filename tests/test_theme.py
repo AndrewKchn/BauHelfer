@@ -12,11 +12,21 @@ from tests.test_base_layout import get_static_file
 pytestmark = [pytest.mark.django_db, pytest.mark.story(83)]
 
 
+def normalise_css(css):
+    """CSS text without whitespace, quotes and the last ";" of a rule.
+
+    --minify writes [data-theme=x]{a:b}, the dev build [data-theme="x"] {\\n  a: b;\\n}.
+    For the browser both are the same; after this the tests see them the same too (#113).
+    """
+    css = re.sub(r"\s+", "", css).replace('"', "")
+    return css.replace(";}", "}")
+
+
 def built_css(client):
-    """app.css as the browser gets it, as text."""
+    """app.css as the browser gets it, as normalised text."""
     response, content = get_static_file(client, "css/app.css")
     assert response.status_code == 200
-    return content.decode()
+    return normalise_css(content.decode())
 
 
 def rule_body(css, selector_pattern):
@@ -45,11 +55,11 @@ def test_dark_theme_is_used_when_device_is_in_dark_mode(client):
     """
     css = built_css(client)
 
-    dark_mode = rule_body(css, r"@media \(prefers-color-scheme:\s*dark\)\s*\{\s*:root")
+    dark_mode = rule_body(css, r"@media\(prefers-color-scheme:dark\)\{:root")
     dark_theme = rule_body(css, r"\[data-theme=bauhelfer-dark\]")
 
     assert dark_theme is not None
-    assert "color-scheme:dark" in dark_theme.replace(" ", "")
+    assert "color-scheme:dark" in dark_theme
     assert dark_mode == dark_theme
 
 
