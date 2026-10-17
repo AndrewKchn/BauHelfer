@@ -1529,3 +1529,35 @@ from #18).
 - Why a `post_delete` signal and not a `delete()` method deletes files on a cascade.
 - How to set up S3 access in Supabase (bucket, endpoint, region, access keys) and connect it to
   Django with `django-storages`.
+
+## 2026-10-17 · #113 Theme tests pass only with minified CSS
+
+**Task given to AI:** fix the theme tests so they give the same result for `app.css` built
+with and without `--minify`. The decision to fix the test, not the build command, was already
+mine (#94, written in the issue).
+
+**AI helped:**
+- Reproduced the bug first: on the dev build two theme tests failed, and the third
+  (`"[data-theme=light]" not in css`) passed whatever the CSS contained.
+- Compared three ways as a table with their cost: normalise the CSS once, make every regex
+  tolerant, build the CSS twice inside the test.
+- Wrote `normalise_css()` (no whitespace, no quotes, no `;` before `}`) and unit tests for it
+  in `tests/test_theme_css_format.py`, with the CSS samples checked against the real
+  `--minify` and `--watch` output; that check found the dropped `;`, which the issue did not
+  mention.
+- Mutation-checked every test with both builds: switching off the light default, the dark
+  preference or `themes: false` fails exactly its own test; removing a step of the helper
+  fails the unit tests.
+
+**AI failed:**
+- In one mutation run it forgot to rebuild `app.css` after restoring `input.css`, so an
+  unrelated test failed; it explained the cause and reran after a rebuild.
+
+**My part:**
+- I named my criterion for the fork, "simplicity", and chose option A (normalise once): these
+  are tests that test tests, there is no reason to make them complicated.
+- By hand: ran the theme tests on my own dev build and with `--minify`, and checked the PR.
+
+**Learned:**
+- Why a `not in` check needs a mutation check: with a wrong pattern it passes forever.
+- Why a test should check what the browser gets, not how a file is formatted.
