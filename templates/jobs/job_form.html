@@ -7,7 +7,7 @@
 {% block content %}
   {# Laid out like the UI mockup "Post a job": no card, short fields side by side. #}
   <h1 class="text-2xl font-bold">{% if object %}{% translate "Edit job" %}{% else %}{% translate "Post a job" %}{% endif %}</h1>
-  <form method="post" novalidate class="mt-2">
+  <form method="post" novalidate class="mt-2" id="job-form">
     {% csrf_token %}
     {% include "_form_errors.html" %}
     {% include "_form_field.html" with field=form.job_type %}
@@ -25,7 +25,27 @@
       {% include "_form_field.html" with field=form.workers_needed %}
       {% include "_form_field.html" with field=form.hourly_rate %}
     </div>
+    {% if not object %}
+      {# Photos are added on the edit page that opens after publishing (job-photos.md D10, D13). #}
+      <p class="mt-2 text-sm text-base-content/70">{% translate "You can add photos after you publish the job." %}</p>
+    {% endif %}
     <button type="submit" class="btn btn-primary mt-4 w-full">{% if object %}{% translate "Save job" %}{% else %}{% translate "Publish job" %}{% endif %}</button>
   </form>
+  {% if object %}
+    {% include "jobs/_job_photos.html" with job=object %}
+  {% endif %}
   <a href="{% url 'my_jobs' %}" class="btn btn-ghost mt-2 w-full">{% translate "Back to my jobs" %}</a>
+  <script>
+    // Ask before leaving with unsaved changes in the job form (job-photos.md D11): on the
+    // edit page, adding or deleting a photo reloads the page and would lose them silently.
+    (() => {
+      const form = document.getElementById("job-form");
+      let changed = false;
+      form.addEventListener("input", () => { changed = true; });
+      form.addEventListener("submit", () => { changed = false; });  // saving is leaving on purpose
+      window.addEventListener("beforeunload", (event) => {
+        if (changed) event.preventDefault();  // the browser shows its own "Leave page?"
+      });
+    })();
+  </script>
 {% endblock %}

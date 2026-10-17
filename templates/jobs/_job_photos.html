@@ -1,0 +1,36 @@
+{% load i18n %}
+{# The photo block under the job form on the edit page (#64, docs/specs/job-photos.md R14, R15). #}
+{# Its forms are separate <form>s after the job form, never inside it: HTML does not allow a #}
+{# form in a form, and the photo forms must not send the job's fields. #}
+<section class="mt-6">
+  <h2 class="text-lg font-semibold">{% blocktranslate with count=photos|length max=max_photos %}Photos ({{ count }} of {{ max }}){% endblocktranslate %}</h2>
+  {% if photos %}
+    <div class="mt-2 grid grid-cols-3 gap-2">
+      {% for photo in photos %}
+        <div class="relative">
+          {# The stored 1600 px photo, shrunk by the browser: at most 5 on this page (D15). #}
+          <img src="{{ photo.image.url }}" alt="{% translate 'Job photo' %}" class="aspect-square w-full rounded-box object-cover">
+          {# Deletes at once, no "Are you sure?" (D19). #}
+          <form method="post" action="{% url 'job_photo_delete' photo.pk %}" class="absolute end-1 top-1">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-circle btn-sm" aria-label="{% translate 'Delete photo' %}">×</button>
+          </form>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="mt-2 text-sm text-base-content/70">{% translate "No photos yet." %}</p>
+  {% endif %}
+  {% if photos|length < max_photos %}
+    <form method="post" action="{% url 'job_photo_add' job.pk %}" enctype="multipart/form-data" class="mt-3">
+      {% csrf_token %}
+      <label class="sr-only" for="{{ photo_form.photos.id_for_label }}">{{ photo_form.photos.label }}</label>
+      {{ photo_form.photos }}
+      <p class="mt-1 text-sm text-base-content/70">{% translate "Location data is removed from photos." %}</p>
+      <button type="submit" class="btn btn-secondary mt-2 w-full">{% translate "Add photos" %}</button>
+    </form>
+  {% else %}
+    {# Full: the upload form is not shown, so it is clear why nothing can be added (D16). #}
+    <p class="mt-3 text-sm text-base-content/70">{% blocktranslate with max=max_photos %}That is the maximum of {{ max }} photos.{% endblocktranslate %}</p>
+  {% endif %}
+</section>
