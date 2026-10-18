@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{# One job for everyone (#19, docs/specs/job-detail.md), laid out as the UI mockup #}
+{# "Job detail": title and rate, place and time, badges, description, who hires, the button. #}
+
+{% block title %}{{ job.get_job_type_display }} · BauHelfer{% endblock %}
+
+{% block content %}
+  <a href="{% url 'home' %}" class="link link-hover text-sm">← {% translate "Jobs" %}</a>
+
+  {# Photos (spec R14-R18, D7, D8): a swipe carousel, one big 4:3 photo at a time. The #}
+  {# browser does the swiping (CSS scroll-snap, daisyUI "carousel"); each slide has its own #}
+  {# "2 / 3", so no JS keeps a counter in sync. The stored 1600 px photo, not the thumbnail. #}
+  {# One query for all photos: {% with %} runs job.photos.all once, and the if, the length #}
+  {# and the loop below reuse its result (R19). #}
+  {# 4:3 on a phone as in the mockup, 16:9 from sm, so on a laptop the text is not pushed #}
+  {# below the screen. Without photos a low strip with a soft fill, the same as the badges #}
+  {# of closed jobs: a 4:3 placeholder hid the description (D11). #}
+  {% with photos=job.photos.all %}
+    <div class="relative mt-2 w-full {% if photos %}aspect-[4/3] sm:aspect-video{% else %}h-24{% endif %}">
+      {% if photos %}
+        <div class="carousel size-full rounded-box" id="job-photos">
+          {% for photo in photos %}
+            <div class="carousel-item relative w-full">
+              <img src="{{ photo.image.url }}" alt="{% translate 'Job photo' %}" class="size-full object-cover">
+              <span class="absolute bottom-2 end-2 rounded-full bg-base-100/85 px-2 text-sm">{{ forloop.counter }} / {{ photos|length }}</span>
+            </div>
+          {% endfor %}
+        </div>
+        {# Buttons for a mouse on a laptop, where a scroll-snap carousel cannot be moved #}
+        {# otherwise (D7); none for a single photo (R16). #}
+        {% if photos|length > 1 %}
+          <button type="button" class="btn btn-circle btn-sm absolute start-2 top-1/2 -translate-y-1/2 bg-base-100/85" data-step="-1" aria-label="{% translate 'Previous photo' %}">‹</button>
+          <button type="button" class="btn btn-circle btn-sm absolute end-2 top-1/2 -translate-y-1/2 bg-base-100/85" data-step="1" aria-label="{% translate 'Next photo' %}">›</button>
+          <script>
+            // Scroll the carousel by one photo; scroll-snap stops it exactly on the next one.
+            // Tested in the E2E tests only (D9): the Django test client runs no JavaScript.
+            (() => {
+              const carousel = document.getElementById("job-photos");
+              document.querySelectorAll("[data-step]").forEach((button) => {
+                button.addEventListener("click", () => {
+                  const step = Number(button.dataset.step) * carousel.clientWidth;
+                  carousel.scrollBy({ left: step, behavior: "smooth" });
+                });
+              });
+            })();
+          </script>
+        {% endif %}
+      {% else %}
+        {% include "jobs/_photo_placeholder.html" with bg="bg-base-content/10" %}
+      {% endif %}
+    </div>
+  {% endwith %}
+
+  <div class="mt-4 flex items-start justify-between gap-4">
+    <h1 class="text-2xl font-bold">{{ job.get_job_type_display }}</h1>
+    <p class="shrink-0 text-2xl font-bold">{{ job.hourly_rate }} €/h</p>
+  </div>
+  {# The district may wrap: the longest name has 52 characters. The time and the hours #}
+  {# stay together, so "(8 h)" never starts a line of its own. #}
+  <p class="mt-1 text-base-content/70">
+    {{ job.get_district_display }} · {{ job.date|date:"D j M" }} ·
+    <span class="whitespace-nowrap">{{ job.start_time|time:"H:i" }}–{{ job.end_time|time:"H:i" }} {% blocktranslate with hours=job.hours %}({{ hours }} h){% endblocktranslate %}</span>
+  </p>
+
+  <div class="mt-2 flex flex-wrap gap-2">
+    {# "Past": open, but started; computed, the status itself is not changed (spec D2). #}
+    {# The others get a soft fill of the text colour: one class that works in both themes #}
+    {# (badge-ghost was invisible on the grey page, base-300 almost; chosen on screenshots). #}
+    {# "Needs 3 workers" only while workers can apply (spec D10). #}
+    {% if job.accepts_applications %}
+      <span class="badge badge-success font-semibold">{{ job.get_status_display }}</span>
+      <span class="badge badge-accent font-semibold">{% blocktranslate count workers=job.workers_needed %}Needs {{ workers }} worker{% plural %}Needs {{ workers }} workers{% endblocktranslate %}</span>
+    {% elif job.status == "open" %}
+      <span class="badge border-transparent bg-base-content/10">{% translate "Past" %}</span>
+    {% else %}
+      <span class="badge border-transparent bg-base-content/10">{{ job.get_status_display }}</span>
+    {% endif %}
+  </div>
+
+  {# The address only for the job's own employer, decided by the view (spec R5, D4). #}
+  <p class="mt-3 text-sm">
+    {% if show_address %}
+      <span class="font-semibold">{% translate "Address" %}:</span> {{ job.address }}
+    {% else %}
+      <span class="text-base-content/70">{% translate "The exact address is shown after the employer accepts you." %}</span>
+    {% endif %}
+  </p>
+
+  <section class="card mt-4 bg-base-100 shadow-sm">
+    {# linebreaksbr keeps the employer's line breaks; the text is escaped first. #}
+    <div class="card-body break-words p-4">{{ job.description|linebreaksbr }}</div>
+  </section>
+
+  {# Who hires: the profile card has no phone or email (spec R6). A job made in the admin #}
+  {# by an employer without a profile shows the account's name. The profile comes with the #}
+  {# job (select_related), so the missing one costs no query either. #}
+  <section class="card mt-4 bg-base-100 shadow-sm">
+    <div class="card-body p-4">
+      {% with profile=job.employer.employer_profile %}
+        {# A section title, not the name: the card itself shows the company and the person. #}
+        <h2 class="text-lg font-semibold">{% translate "Employer" %}</h2>
+        {% if profile %}
+          {% include "accounts/_employer_profile_card.html" %}
+        {% else %}
+          <p>{{ job.employer.name }}</p>
+        {% endif %}
+      {% endwith %}
+    </div>
+  </section>
+
+  {# One button by who looks (spec R8). #}
+  <div class="mt-4">
+    {% if is_owner %}
+      {% if job.status == "open" %}
+        <a href="{% url 'job_edit' job.pk %}" class="btn w-full">{% translate "Edit" %}</a>
+      {% endif %}
+    {% elif job.accepts_applications %}
+      {% if user.role == "worker" %}
+        {# A stub until #22: it answers "not available yet" and comes back here (D3). #}
+        <form method="post" action="{% url 'job_apply' job.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary w-full">{% translate "Apply" %}</button>
+        </form>
+      {% elif not user.is_authenticated %}
+        {# next= brings the guest back to this job after login. #}
+        <a href="{% url 'login' %}?next={{ request.path|urlencode }}" class="btn btn-primary w-full">{% translate "Log in to apply" %}</a>
+      {% endif %}
+    {% endif %}
+  </div>
+{% endblock %}

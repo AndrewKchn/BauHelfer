@@ -1561,3 +1561,61 @@ mine (#94, written in the issue).
 **Learned:**
 - Why a `not in` check needs a mutation check: with a wrong pattern it passes forever.
 - Why a test should check what the browser gets, not how a file is formatted.
+
+## 2026-10-18 · #19 Job detail page
+
+**Task given to AI:** build the job detail page: full job information, the exact address hidden
+until an application is accepted, an "Apply" button for workers, and the job photos with the
+hard-hat placeholder (moved here from #64). The ticket was blocked only by #15, which is done;
+the application itself (#22) and revealing contacts (#25) do not exist yet.
+
+**AI helped:**
+- Compared the mockup `job-detail.png` with what exists and turned every difference into a spec
+  decision (`docs/specs/job-detail.md`, D1–D11, two iterations), with 4 defense questions at the
+  start.
+- For three forks (closed jobs, carousel, "Apply" before #22) asked my criteria first, then gave
+  option tables with their cost: four carousel options, three "Apply" options.
+- Wrote 35 integration tests and 6 unit tests first and committed them failing, then the code:
+  `JobDetailView` with `select_related`, `show_address` decided in the view,
+  `Job.accepts_applications`, a POST-only stub `JobApplyView` with a role check, a scroll-snap
+  carousel with ~8 lines of JS.
+- Mutation-checked every new test (12 mutations) and took screenshots at 360 px in both themes
+  after each iteration; ran small uncommitted experiments for every look I had to choose
+  (badge fills, placeholder size and colour) and showed them side by side.
+- Checked in a real browser that the "‹ ›" buttons scroll by exactly one photo.
+
+**AI failed:**
+- Put `prefetch_related("photos")` into the spec and the view without need: on a one-job page
+  `{% with %}` already reads the photos once. Its own mutation check found it (removing it
+  changed nothing); it removed the line and corrected R19.
+- Changed two acceptance criteria in the spec while writing tests but named only one; I noticed
+  the second in the diff.
+- Its first job-card link split the text "Demolition · Sun 25 Oct", which an old #16 test checks;
+  the full test run found it and the whole title became the link.
+- The first layout had problems only visible on screenshots: the company name twice, an
+  invisible grey "Cancelled" badge, "Needs 3 workers" on a cancelled job, "(8 h)" alone on a line.
+
+**My part:**
+- My criteria for the forks: a closed job keeps its page with a status ("if it disappears it
+  would be strange"); I wanted a carousel if it is not too complex; "Apply" should keep me on the
+  page with a message, and only if that is cheap to remove later. The other defaults (address
+  only for the owner, can_apply in #22, the card title as the link) were what I had planned from
+  the start.
+- Asked how "Filled" and "Done" look; I first wanted different colours, then agreed they mean
+  the same to a worker, and asked for a neutral fill. From the experiments I chose the soft fill
+  `bg-base-content/10`: in the light theme like `bg-base-300`, in the dark like `badge-neutral`.
+- Found by looking at the screenshots that the no-photo placeholder took the whole first screen,
+  so the description was not visible and it was not clear the page scrolls; then that it blended
+  with the background. Chose the low strip over a small square, and the same soft fill.
+- Process: the spec fix went into the spec commit and the tests into their own; the badge fill
+  as a separate commit because "it is not a fix but a change"; the note for #22 posted on #22,
+  not in the Docs sync.
+- By hand: I kept the dev server running and watched every change live on a laptop and a phone
+  width — the screenshots help, but live is clearer. I read every commit; small commits made the
+  changes easy to review.
+
+**Learned:**
+- Why the address rule lives in the view and not the template: one place to test, and #25
+  changes one line.
+- The difference between `select_related` (a JOIN, one query) and `prefetch_related` (a second
+  query matched in Python), and why the second pays off on a list but not on a one-job page.
