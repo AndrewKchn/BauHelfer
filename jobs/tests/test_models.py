@@ -384,3 +384,42 @@ def test_end_time_is_start_plus_hours(employer, start, hours, end):
     job = make_job(employer, start_time=start, hours=hours)
 
     assert job.end_time == end
+
+
+# Whether a job still takes applications (#19, docs/specs/job-detail.md R7; AC1)
+
+
+@pytest.mark.story(19)
+@pytest.mark.parametrize(
+    ("status", "days", "start", "expected"),
+    [
+        ("open", 1, datetime.time(6, 0), True),
+        ("open", 0, datetime.time(11, 0), True),
+        ("open", 0, datetime.time(10, 0), False),
+        ("open", -1, datetime.time(12, 0), False),
+        ("cancelled", 1, datetime.time(6, 0), False),
+        ("filled", 1, datetime.time(6, 0), False),
+    ],
+    ids=[
+        "open tomorrow",
+        "open later today",
+        "open, starts now",
+        "open yesterday",
+        "cancelled tomorrow",
+        "filled tomorrow",
+    ],
+)
+def test_accepts_applications_only_while_open_and_not_started(
+    employer, frozen_now, status, days, start, expected
+):
+    """Job.accepts_applications: open and not started yet, Munich time (spec R7, D2).
+
+    1. Fix the clock at 3 November 2026, 10:00 in Munich
+    2. Make a job with the given status, `days` after today, starting at `start`
+    3. Read job.accepts_applications
+    4. Expect: true only for an open job that starts later than now
+    """
+    date = datetime.date(2026, 11, 3) + datetime.timedelta(days=days)
+    job = make_job(employer, status=status, date=date, start_time=start)
+
+    assert job.accepts_applications is expected
