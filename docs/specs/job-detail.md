@@ -129,12 +129,14 @@ D10. **"Needs 3 workers" only while the job takes applications** (found on the s
 ### Requirements
 
 R14. A job with photos shows them at the top of the page in a carousel (D7): one photo at a
-     time, full width, 4 : 3, swiped on a phone (CSS scroll-snap, daisyUI `carousel`).
+     time, full width, 4 : 3 on a phone and 16 : 9 from 640 px (D11), swiped on a phone
+     (CSS scroll-snap, daisyUI `carousel`).
 R15. Each photo carries its own "2 / 3" counter, written by the template, not by JS.
 R16. With more than one photo, "‹" and "›" buttons scroll the carousel by one photo
      (a few lines of inline JS, `scrollBy`). With one photo there are no buttons.
 R17. The carousel shows the stored photo (`image.url`, 1600 px), not the 300 px thumbnail.
-R18. A job without photos shows `jobs/_photo_placeholder.html` in the same 4 : 3 box.
+R18. A job without photos shows `jobs/_photo_placeholder.html` in a low strip (96 px) with
+     the soft fill of the closed-job badges, `bg-base-content/10` (D11).
 R19. The photos come in one more query, whatever their number: the template reads
      `job.photos.all` once (`{% with %}`). `prefetch_related` is not needed for one job
      (found by the mutation check: removing it changed nothing).
@@ -158,3 +160,14 @@ D7. **A swipe carousel with "‹ ›" buttons** (the student wanted a carousel; 
 D8. **The counter is in each slide, not updated by JS** (default): no code to keep in sync.
 D9. **The JS is tested in E2E only (#21)** (default): the Django test client does not run
     JS; the integration tests check that the buttons are there.
+D11. **Without photos a low strip, not a 4 : 3 box; 16 : 9 from 640 px** (found on the
+     screenshots, 2026-10-18). The student: with no photo the placeholder took the whole
+     first screen, the description was not visible and it was not clear that the page
+     scrolls. Compared on screenshots: a 96 px strip with a border (chosen) and a 72 px
+     square next to the title (pushed the rate out, needed a second photo place in the
+     template). The strip has the soft fill of the closed-job badges (D10): the
+     placeholder's own `bg-base-200` is the page colour, and the card colour `bg-base-100`
+     was almost invisible in the dark theme (both compared on screenshots); the
+     placeholder takes a `bg` parameter, the job list keeps its colour. On a laptop a
+     4 : 3 photo was ~550 px high and hid the text. The mockup is a phone, which keeps
+     4 : 3. **Revisit when** the page gets a photo-free design.

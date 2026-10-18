@@ -14,8 +14,11 @@
   {# "2 / 3", so no JS keeps a counter in sync. The stored 1600 px photo, not the thumbnail. #}
   {# One query for all photos: {% with %} runs job.photos.all once, and the if, the length #}
   {# and the loop below reuse its result (R19). #}
+  {# 4:3 on a phone as in the mockup, 16:9 from sm, so on a laptop the text is not pushed #}
+  {# below the screen. Without photos a low strip with a soft fill, the same as the badges #}
+  {# of closed jobs: a 4:3 placeholder hid the description (D11). #}
   {% with photos=job.photos.all %}
-    <div class="relative mt-2 aspect-[4/3] w-full">
+    <div class="relative mt-2 w-full {% if photos %}aspect-[4/3] sm:aspect-video{% else %}h-24{% endif %}">
       {% if photos %}
         <div class="carousel size-full rounded-box" id="job-photos">
           {% for photo in photos %}
@@ -45,7 +48,7 @@
           </script>
         {% endif %}
       {% else %}
-        {% include "jobs/_photo_placeholder.html" %}
+        {% include "jobs/_photo_placeholder.html" with bg="bg-base-content/10" %}
       {% endif %}
     </div>
   {% endwith %}
