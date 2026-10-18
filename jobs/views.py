@@ -1,5 +1,6 @@
-"""Job pages: the public job list (#18) and the employer pages: post, list own, edit,
-cancel (#16, docs/specs/job-form.md), add and delete photos (#64, docs/specs/job-photos.md).
+"""Job pages: the public job list (#18) and job page (#19, docs/specs/job-detail.md), and the
+employer pages: post, list own, edit, cancel (#16, docs/specs/job-form.md), add and delete
+photos (#64, docs/specs/job-photos.md).
 """
 
 from typing import override
@@ -31,6 +32,12 @@ class EmployerRequiredMixin(RoleRequiredMixin):
     """Employers only: guests go to login, workers get 403 (spec R10)."""
 
     role = User.Role.EMPLOYER
+
+
+class WorkerRequiredMixin(RoleRequiredMixin):
+    """Workers only: guests go to login, employers get 403."""
+
+    role = User.Role.WORKER
 
 
 class OwnOpenJobMixin(EmployerRequiredMixin):
@@ -222,3 +229,44 @@ class JobListView(ListView):
         context = super().get_context_data(**kwargs)
         context["filter_form"] = self.filter_form
         return context
+
+
+class JobDetailView(DetailView):
+    """One job with everything about it, for everyone, in any status (#19, spec R1-R8, D1).
+
+    No login mixin: guests see the page too. The address is shown only to the job's own
+    employer (D4).
+    """
+
+    template_name = "jobs/job_detail.html"
+    context_object_name = "job"
+    # The employer and their profile come in the same query as the job (spec R12): the page
+    # shows both, and without this each would cost a query of its own.
+    queryset = Job.objects.select_related("employer__employer_profile")
+
+    @override
+    def get_context_data(self, **kwargs):
+        """Add who looks: the owner sees the address and "Edit"."""
+        context = super().get_context_data(**kwargs)
+        is_owner = self.request.user == self.object.employer
+        context["is_owner"] = is_owner
+        # Decided here, not in the template: #25 adds the worker whose application was
+        # accepted, and the template stays as it is.
+        context["show_address"] = is_owner
+        return context
+
+
+class JobApplyView(WorkerRequiredMixin, SingleObjectMixin, View):
+    """POST: the "Apply" button. A stub until #22 builds the application (spec R9, D3).
+
+    Only POST (a GET gives 405). The URL, the button and who may post stay; #22 replaces the
+    body of post().
+    """
+
+    model = Job
+
+    def post(self, request, *args, **kwargs):
+        """Say that applying does not work yet and go back to the job's page."""
+        job = self.get_object()  # 404 for a job id that does not exist
+        messages.info(request, _("Applying is not available yet."))
+        return redirect("job_detail", pk=job.pk)

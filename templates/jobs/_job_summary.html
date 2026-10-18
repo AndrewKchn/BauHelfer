@@ -1,10 +1,11 @@
 {% load i18n %}
 {# One job as in the UI mockup "My jobs": "Type · Thu 22 Oct", then one line of details. #}
+{# The title links to the job page (#19, job-detail.md D6). #}
 {# with_status=True puts the status badge at the end of the title row only, so the details #}
 {# below get the full width and wrap the same way in every card ("Open" is narrower than #}
 {# "Cancelled"). #}
 <div class="flex items-start justify-between gap-2">
-  <p class="text-base font-semibold">{{ job.get_job_type_display }} · {{ job.date|date:"D j M" }}</p>
+  <p class="text-base font-semibold"><a href="{% url 'job_detail' job.pk %}" class="link link-hover">{{ job.get_job_type_display }} · {{ job.date|date:"D j M" }}</a></p>
   {% if with_status %}
     <span class="badge shrink-0 {% if job.status == 'open' %}badge-success{% else %}badge-ghost{% endif %}">{{ job.get_status_display }}</span>
   {% endif %}

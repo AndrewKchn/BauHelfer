@@ -177,6 +177,17 @@ class Job(models.Model):
         end = start + timedelta(hours=self.hours)
         return end.time()
 
+    @property
+    def accepts_applications(self):
+        """Whether workers can still apply: open and not started yet (#19 spec R7, D2).
+
+        The same rule as JobQuerySet.open().upcoming(), for one job already loaded: the job
+        page uses it for the "Past" badge and the "Apply" button.
+        """
+        now = timezone.localtime()  # Munich time, as the job's date and start time
+        has_started = (self.date, self.start_time) <= (now.date(), now.time())
+        return self.status == self.Status.OPEN and not has_started
+
 
 def job_photo_path(instance, filename):
     """Where a photo is stored: a random name, never the original one (job-photos.md D7).
