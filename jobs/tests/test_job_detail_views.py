@@ -234,6 +234,20 @@ def test_open_job_that_has_started_shows_past_and_no_apply(client, employer, wor
     assertNotContains(response, apply_url(job))
 
 
+def test_job_that_takes_no_applications_does_not_ask_for_workers(client, employer):
+    """A cancelled job does not say "Needs 2 workers" (spec D10, found on the screenshots).
+
+    1. Save a cancelled job next week for 2 workers
+    2. Open its page as a guest
+    3. Expect: "Needs 2 workers" is not on the page
+    """
+    job = make_job(employer, status="cancelled")
+
+    response = client.get(detail_url(job))
+
+    assertNotContains(response, "Needs 2 workers")
+
+
 # Buttons by who looks (spec R8, D3, D5; AC6)
 
 

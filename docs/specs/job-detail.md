@@ -25,13 +25,13 @@ R3. Every job is shown, whatever its status (D1). The status is a badge next to 
     "Open" (green), "Filled", "Done", "Cancelled". An open job that has already started gets
     "Past" instead of "Open".
 R4. The page shows: job type (title) and hourly rate; district · date · start–end time
-    (hours); "Needs 3 workers"; the description with its line breaks; the employer card (R6).
+    (hours); "Needs 3 workers" (only while it takes applications, D10); the description
+    with its line breaks; the employer card (R6).
 R5. The exact address is shown only to the job's own employer (D4). Everyone else sees the
     district and the line "The exact address is shown after the employer accepts you."
-R6. Who hires: `EmployerProfile.display_name()` as the heading and
-    `accounts/_employer_profile_card.html` (company, contact person, trades) — no phone or
-    email (#94 note, `docs/SECURITY.md`). An employer without a profile (possible only via
-    the admin) shows the account's name.
+R6. Who hires: the title "Employer" (D10) and `accounts/_employer_profile_card.html`
+    (company, contact person, trades) — no phone or email (#94 note, `docs/SECURITY.md`).
+    An employer without a profile (possible only via the admin) shows the account's name.
 R7. `Job.accepts_applications`: the job is open and has not started yet (the same rule as
     `JobQuerySet.upcoming()`, Munich time).
 R8. Below the employer card, by who looks (D3, D5):
@@ -103,6 +103,13 @@ D5. **The "Apply" button is shown to every worker; `can_apply()` is checked by #
 D6. **The job type on the cards becomes the link** (default); the card stays as it is.
     Rejected: the whole card as a link (a link around a block of text reads badly in a screen
     reader).
+
+D10. **"Needs 3 workers" only while the job takes applications** (found on the screenshots
+     at 360 px, 2026-10-18, default accepted): on a cancelled job it read as if people were
+     still wanted. Also from the screenshots, layout only: the employer card has the title
+     "Employer" (its name was shown twice), the badges of jobs that are not open have an
+     outline (a grey badge was invisible on the grey page), and "07:00–15:00 (8 h)" wraps
+     as a whole. **Revisit when** #24 shows "1 of 3 workers found".
 
 ### Differences from the mockup (docs/mockups/job-detail.png)
 
