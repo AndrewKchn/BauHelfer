@@ -22,15 +22,16 @@
 
   <div class="mt-2 flex flex-wrap gap-2">
     {# "Past": open, but started; computed, the status itself is not changed (spec D2). #}
-    {# The others have an outline: a grey badge on the grey page could not be seen. #}
+    {# The others get a soft fill of the text colour: one class that works in both themes #}
+    {# (badge-ghost was invisible on the grey page, base-300 almost; chosen on screenshots). #}
     {# "Needs 3 workers" only while workers can apply (spec D10). #}
     {% if job.accepts_applications %}
       <span class="badge badge-success font-semibold">{{ job.get_status_display }}</span>
       <span class="badge badge-accent font-semibold">{% blocktranslate count workers=job.workers_needed %}Needs {{ workers }} worker{% plural %}Needs {{ workers }} workers{% endblocktranslate %}</span>
     {% elif job.status == "open" %}
-      <span class="badge badge-outline">{% translate "Past" %}</span>
+      <span class="badge border-transparent bg-base-content/10">{% translate "Past" %}</span>
     {% else %}
-      <span class="badge badge-outline">{{ job.get_status_display }}</span>
+      <span class="badge border-transparent bg-base-content/10">{{ job.get_status_display }}</span>
     {% endif %}
   </div>
 

@@ -107,9 +107,11 @@ D6. **The job type on the cards becomes the link** (default); the card stays as 
 D10. **"Needs 3 workers" only while the job takes applications** (found on the screenshots
      at 360 px, 2026-10-18, default accepted): on a cancelled job it read as if people were
      still wanted. Also from the screenshots, layout only: the employer card has the title
-     "Employer" (its name was shown twice), the badges of jobs that are not open have an
-     outline (a grey badge was invisible on the grey page), and "07:00–15:00 (8 h)" wraps
-     as a whole. **Revisit when** #24 shows "1 of 3 workers found".
+     "Employer" (its name was shown twice), the badges of jobs that are not open have a
+     soft fill of the text colour, `bg-base-content/10` (a grey badge was invisible on the
+     grey page; the student chose this fill over an outline, `badge-neutral` and
+     `bg-base-300` on screenshots of both themes), and "07:00–15:00 (8 h)" wraps as a
+     whole. **Revisit when** #24 shows "1 of 3 workers found".
 
 ### Differences from the mockup (docs/mockups/job-detail.png)
 
