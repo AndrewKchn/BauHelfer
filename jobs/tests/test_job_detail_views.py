@@ -1,17 +1,27 @@
 """Integration tests: the job page and the "Apply" stub through the Django test client.
 
 Each test goes through the whole stack: middleware, URL, view, template and database.
-Ticket #19. Spec: docs/specs/job-detail.md (R1-R13), acceptance criteria AC2-AC10. AC1 is a unit test
-in test_models.py.
+Ticket #19. Spec: docs/specs/job-detail.md (R1-R19), acceptance criteria AC2-AC14. AC1 is a
+unit test in test_models.py. Photo files are in the in-memory storage (conftest.py).
 """
 
 import datetime
 
 import pytest
 from django.contrib.auth import get_user_model
+from django.core.files.base import ContentFile
 from django.urls import reverse
 from django.utils import dateformat, timezone
-from pytest_django.asserts import assertContains, assertNotContains, assertRedirects
+from pytest_django.asserts import (
+    assertContains,
+    assertNotContains,
+    assertRedirects,
+    assertTemplateUsed,
+)
+
+from jobs.models import JobPhoto
+
+from .images import make_upload
 
 # The same helpers as the other job pages: an employer with a profile, a job next week.
 from .test_views import NEXT_WEEK, make_employer, make_job
@@ -442,14 +452,85 @@ def test_job_page_links_back_to_the_list(client, job):
     assertContains(response, "← Jobs")
 
 
-# Database queries (spec R12; AC9)
+# Database queries (spec R12, R19; AC9, AC14)
 
 
-def test_page_needs_one_query(client, job, django_assert_num_queries):
-    """The job, its employer and the profile come in one query (select_related).
+@pytest.mark.parametrize("photos", [0, 1, 3])
+def test_page_needs_two_queries(client, job, django_assert_num_queries, photos):
+    """The job with its employer and profile in one query, all photos in a second one.
 
-    1. Open the job's page as a guest (no session, so no session query)
-    2. Expect: exactly 1 database query
+    1. Give the job 0, 1 or 3 photos
+    2. Open the job's page as a guest (no session, so no session query)
+    3. Expect: exactly 2 database queries, whatever the number of photos
     """
-    with django_assert_num_queries(1):
+    add_photos(job, photos)
+
+    with django_assert_num_queries(2):
         client.get(detail_url(job))
+
+
+# Photos (spec R14-R18, D7-D9; AC11-AC13)
+
+
+def add_photos(job, count):
+    """Give `job` `count` stored photos; returns them, oldest first."""
+    return [
+        JobPhoto.objects.create(
+            job=job, image=ContentFile(make_upload().read(), name="photo.jpg")
+        )
+        for _ in range(count)
+    ]
+
+
+def test_carousel_shows_all_photos_in_order_with_counters(client, job):
+    """A job with 3 photos shows all of them, big, in upload order, each with its counter.
+
+    1. Give the job 3 photos
+    2. Open its page as a guest
+    3. Expect: the 3 stored photos (not the thumbnails) in upload order; "1 / 3", "2 / 3",
+       "3 / 3"; the "Previous photo" and "Next photo" buttons; no placeholder
+    """
+    photos = add_photos(job, 3)
+
+    response = client.get(detail_url(job))
+
+    html = response.content.decode()
+    positions = [html.index(photo.image.url) for photo in photos]
+    assert positions == sorted(positions)
+    assertNotContains(response, photos[0].thumbnail.url)
+    for number in (1, 2, 3):
+        assertContains(response, f"{number} / 3")
+    assertContains(response, 'aria-label="Previous photo"')
+    assertContains(response, 'aria-label="Next photo"')
+    assertNotContains(response, "No photo")
+
+
+def test_one_photo_has_no_buttons(client, job):
+    """A single photo gets "1 / 1" and no buttons: there is nothing to scroll to.
+
+    1. Give the job 1 photo
+    2. Open its page as a guest
+    3. Expect: the photo and "1 / 1"; no "Previous photo" or "Next photo" button
+    """
+    (photo,) = add_photos(job, 1)
+
+    response = client.get(detail_url(job))
+
+    assertContains(response, photo.image.url)
+    assertContains(response, "1 / 1")
+    assertNotContains(response, "Previous photo")
+    assertNotContains(response, "Next photo")
+
+
+def test_job_without_photos_shows_the_placeholder(client, job):
+    """A job without photos shows the hard-hat placeholder instead of a carousel.
+
+    1. Open the page of a job without photos as a guest
+    2. Expect: the placeholder template with "No photo"; no counter, no buttons
+    """
+    response = client.get(detail_url(job))
+
+    assertTemplateUsed(response, "jobs/_photo_placeholder.html")
+    assertContains(response, "No photo")
+    assertNotContains(response, " / ")
+    assertNotContains(response, "Next photo")
