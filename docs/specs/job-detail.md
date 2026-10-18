@@ -135,7 +135,9 @@ R16. With more than one photo, "‹" and "›" buttons scroll the carousel by on
      (a few lines of inline JS, `scrollBy`). With one photo there are no buttons.
 R17. The carousel shows the stored photo (`image.url`, 1600 px), not the 300 px thumbnail.
 R18. A job without photos shows `jobs/_photo_placeholder.html` in the same 4 : 3 box.
-R19. The photos come in one more query, whatever their number (`prefetch_related`).
+R19. The photos come in one more query, whatever their number: the template reads
+     `job.photos.all` once (`{% with %}`). `prefetch_related` is not needed for one job
+     (found by the mutation check: removing it changed nothing).
 
 ### Acceptance criteria (→ tests)
 

@@ -241,7 +241,8 @@ class JobDetailView(DetailView):
     template_name = "jobs/job_detail.html"
     context_object_name = "job"
     # The employer and their profile come in the same query as the job (spec R12): the page
-    # shows both, and without this each would cost a query of its own.
+    # shows both, and without this each would cost a query of its own. The photos are one
+    # more query, made by the template (R19).
     queryset = Job.objects.select_related("employer__employer_profile")
 
     @override

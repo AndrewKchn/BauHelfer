@@ -9,7 +9,48 @@
 {% block content %}
   <a href="{% url 'home' %}" class="link link-hover text-sm">← {% translate "Jobs" %}</a>
 
-  <div class="mt-2 flex items-start justify-between gap-4">
+  {# Photos (spec R14-R18, D7, D8): a swipe carousel, one big 4:3 photo at a time. The #}
+  {# browser does the swiping (CSS scroll-snap, daisyUI "carousel"); each slide has its own #}
+  {# "2 / 3", so no JS keeps a counter in sync. The stored 1600 px photo, not the thumbnail. #}
+  {# One query for all photos: {% with %} runs job.photos.all once, and the if, the length #}
+  {# and the loop below reuse its result (R19). #}
+  {% with photos=job.photos.all %}
+    <div class="relative mt-2 aspect-[4/3] w-full">
+      {% if photos %}
+        <div class="carousel size-full rounded-box" id="job-photos">
+          {% for photo in photos %}
+            <div class="carousel-item relative w-full">
+              <img src="{{ photo.image.url }}" alt="{% translate 'Job photo' %}" class="size-full object-cover">
+              <span class="absolute bottom-2 end-2 rounded-full bg-base-100/85 px-2 text-sm">{{ forloop.counter }} / {{ photos|length }}</span>
+            </div>
+          {% endfor %}
+        </div>
+        {# Buttons for a mouse on a laptop, where a scroll-snap carousel cannot be moved #}
+        {# otherwise (D7); none for a single photo (R16). #}
+        {% if photos|length > 1 %}
+          <button type="button" class="btn btn-circle btn-sm absolute start-2 top-1/2 -translate-y-1/2 bg-base-100/85" data-step="-1" aria-label="{% translate 'Previous photo' %}">‹</button>
+          <button type="button" class="btn btn-circle btn-sm absolute end-2 top-1/2 -translate-y-1/2 bg-base-100/85" data-step="1" aria-label="{% translate 'Next photo' %}">›</button>
+          <script>
+            // Scroll the carousel by one photo; scroll-snap stops it exactly on the next one.
+            // Tested in the E2E tests only (D9): the Django test client runs no JavaScript.
+            (() => {
+              const carousel = document.getElementById("job-photos");
+              document.querySelectorAll("[data-step]").forEach((button) => {
+                button.addEventListener("click", () => {
+                  const step = Number(button.dataset.step) * carousel.clientWidth;
+                  carousel.scrollBy({ left: step, behavior: "smooth" });
+                });
+              });
+            })();
+          </script>
+        {% endif %}
+      {% else %}
+        {% include "jobs/_photo_placeholder.html" %}
+      {% endif %}
+    </div>
+  {% endwith %}
+
+  <div class="mt-4 flex items-start justify-between gap-4">
     <h1 class="text-2xl font-bold">{{ job.get_job_type_display }}</h1>
     <p class="shrink-0 text-2xl font-bold">{{ job.hourly_rate }} €/h</p>
   </div>
