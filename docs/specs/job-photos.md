@@ -31,7 +31,8 @@ D1. **The job detail page is not built here; showing photos on it moves to #19.*
     student's criterion: "first the photo support, the page comes later". #19 gets a
     "Done when" line for the photos (drafted at the end of this ticket, posted after "yes").
     Rejected: building a small detail page here (it is #19's work, and #19 decides who sees
-    the address). **Revisit when** #19 starts: the photos go on its page.
+    the address). **Revisit when** #19 starts: the photos go on its page. Done in #19: the
+    photos are on the job page as a carousel (`docs/specs/job-detail.md`).
 D2. **Production photos go to Supabase Storage, not Cloudflare R2.** The student checked R2:
     it needs a payment card even for the free tier, and the project runs on free tiers with
     no card. Supabase is free without a card, the project already has a Supabase account
