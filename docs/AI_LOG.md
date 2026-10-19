@@ -1619,3 +1619,59 @@ the application itself (#22) and revealing contacts (#25) do not exist yet.
   changes one line.
 - The difference between `select_related` (a JOIN, one query) and `prefetch_related` (a second
   query matched in Python), and why the second pays off on a list but not on a one-job page.
+
+## 2026-10-19 · #21 E2E tests (Playwright) and coverage review for M3
+
+**Task given to AI:** E2E tests for the main M3 flows (post a job with the minimum-wage error,
+list with filters, detail page, edit, cancel), a coverage review of `jobs/`, the long-name check
+on a 360 px phone from #11/#12, and Playwright traces of failed E2E tests in CI. The comment on
+the issue from #14 asked for the employer flow on a phone, not a laptop.
+
+**AI helped:**
+- Read the coverage report and sorted the gaps: an RGBA / palette PNG never reached the RGB
+  conversion (a real 500 on upload), two untested refusals (picture over twice Pillow's limit,
+  cut-off JPEG) and a dead `else` in `JobFilterForm.filter()`; 4 defense questions at the start.
+- Planned the ticket as 5 iterations in the issue and wrote 2 E2E flows on a 360 px phone
+  (employer: wage error, photo upload through `<input type=file>`, "Save changes" off until a
+  change, "Leave page?" dialog, cancel; worker: filters, hidden address, carousel buttons,
+  "Log in to apply" back to the same job), 2 long-name E2E tests and 3 photo unit tests.
+- Mutation-checked every new test: 19 mutations, all caught, among them three that only a
+  browser sees (no `preventDefault`, Save never disabled, no `enctype`).
+- Added `--tracing retain-on-failure` and the `playwright-traces` artifact to CI, and proved it
+  with a deliberately broken commit and its revert in the draft PR.
+- Showed me how to open the Allure report of a PR (an artifact that needs a local HTTP server)
+  and opened the failed test's trace in the Playwright trace viewer.
+
+**AI failed:**
+- Its first worker E2E test used jobs "today + 7", outside "Next 7 days" (today + 6, #18 D12);
+  the test failed with "0 open", the data was fixed, the filter was right.
+- While mutation-checking `jobs/forms.py` it restored the file with `git checkout`, which also
+  threw away its own uncommitted simplification there; `git diff --stat` showed one file instead
+  of two and it redid the edit.
+- Its revert of the broken CI commit failed silently (the output was cut by `| tail`), then
+  `git commit --amend` renamed the broken commit to "Revert …". The push was rejected
+  (non-fast-forward), so nothing wrong reached GitHub; it reset to the remote and reverted again.
+- Its #19 note in #95 said the carousel E2E would need `page.route()` for the photos; it did
+  not. It posted a correction.
+- The first palette PNG test kept transparency and caused a Pillow warning; the test picture
+  was simplified.
+
+**My part:**
+- Chose to prove the CI traces with a red run (option A): "I didn't really want red tests in
+  the history, but on the other hand it shows that everything works."
+- Accepted the plan of 5 iterations because each has only a few changes, so the commits are
+  easier to read; the shared helpers so the E2E files do not duplicate code; removing the dead
+  branch because a branch whose condition can never be true is unnecessary, and the code looks
+  simpler without it.
+- Considered the Page Object pattern for the E2E tests, but decided it is too much for 8 tests.
+- Asked why the Allure report is missing for a draft PR; it turned out to be only an artifact
+  that does not open from disk, which became a Docs sync item for `docs/TESTING.md`.
+- Decided to tick "Bugs found …" with the note "none found" instead of leaving it open.
+- By hand: opened the Allure report of #131 and the failed test's trace in the trace viewer, to
+  see how they look and what can be inspected there.
+
+**Learned:**
+- Why 100 % coverage still missed the RGBA PNG: coverage shows which lines ran, not which cases
+  were checked; the only PNG test used a plain RGB picture.
+- What a Playwright trace records (a snapshot per step, clicks, network, console) and why it
+  matters for a failure that happens only in CI.
