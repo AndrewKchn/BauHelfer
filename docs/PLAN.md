@@ -19,11 +19,11 @@ written issue by issue.
 | Part | Choice | Why |
 |---|---|---|
 | Backend | **Python 3.12 + Django 5** | Built-in auth, form validation, ORM, migrations, admin and i18n — everything BauHelfer needs. Fastest path to a working result |
-| Frontend | **Django templates + HTMX 2 + Tailwind CSS 4 + daisyUI 5** | The whole project stays in Python with minimal JavaScript. HTMX adds interactivity (filters, applications, chat). Tailwind gives a mobile-first layout. Decided in #3: **daisyUI** on top of Tailwind (short classes like `btn`, no own JS, so no clash with HTMX; Flowbite and plain Tailwind rejected). Own colour theme with dark mode in #83. Tailwind is **built** by the standalone CLI via `pytailwindcss` (no Node.js), not loaded from a CDN: smaller CSS, no flash of unstyled page, and no visitor IPs sent to a CDN (GDPR). **HTMX 2.0.10**, not the new 4.0 (released Aug 2026): far more docs and examples. HTMX, daisyUI and its theme plugin (`daisyui-theme.mjs`, same 5.7.47 release, #83) are downloaded files in the repo; HTMX is served by WhiteNoise, the daisyUI files are used only to build the CSS |
+| Frontend | **Django templates + HTMX 2 + Tailwind CSS 4 + daisyUI 5** | The whole project stays in Python with minimal JavaScript. HTMX adds interactivity (applications, chat); the job filters are a plain GET form that reloads the page (#18, `docs/specs/job-list.md` D9). Tailwind gives a mobile-first layout. Decided in #3: **daisyUI** on top of Tailwind (short classes like `btn`, no own JS, so no clash with HTMX; Flowbite and plain Tailwind rejected). Own colour theme with dark mode in #83. Tailwind is **built** by the standalone CLI via `pytailwindcss` (no Node.js), not loaded from a CDN: smaller CSS, no flash of unstyled page, and no visitor IPs sent to a CDN (GDPR). **HTMX 2.0.10**, not the new 4.0 (released Aug 2026): far more docs and examples. HTMX, daisyUI and its theme plugin (`daisyui-theme.mjs`, same 5.7.47 release, #83) are downloaded files in the repo; HTMX is served by WhiteNoise, the daisyUI files are used only to build the CSS |
 | Database | **PostgreSQL**: Docker locally, **Supabase** (Frankfurt, free plan) in production | Django standard, same engine everywhere. Supabase instead of a Render database: Render's free database expires after 30 days, Supabase's does not (it pauses after 7 days without activity). Only plain PostgreSQL is used, via the Session pooler; Data API off, RLS on |
 | Text translation | **Claude API** (`claude-haiku-4-5`) | Handles construction slang and context; translations are cached in the DB |
 | Map | **Leaflet + OpenStreetMap**, Nominatim geocoding | Free, no API keys |
-| Job photos | **Cloudflare R2** (EU jurisdiction) via `django-storages` + `boto3`; **Pillow** for validation, resizing and EXIF stripping | The Render disk is wiped on every deploy. R2 is S3-compatible, free up to 10 GB with free egress, data stays in the EU, and the app stays stateless (can run several instances) |
+| Job photos | **Supabase Storage** (the same project as the database, Frankfurt) via `django-storages` S3 + `boto3`; **Pillow** for validation, resizing and EXIF stripping | The Render disk is wiped on every deploy. Decided in #64: Cloudflare R2 rejected, it needs a payment card even on the free tier. The database stores only paths, so moving later means new env values and copying the files. Production needs six env variables (`MEDIA_S3_*`, `MEDIA_PUBLIC_URL`) and does not start without them; the app stays stateless (can run several instances) |
 | Chat | HTMX polling every 3–5 s | Simpler than WebSockets, enough for the MVP |
 | Tests / quality | **pytest-django**, **ruff**, **Allure Report 3** | Decided in #89: an Allure report (GitHub Pages) groups tests by level and by story, with a readable title and steps from each test's docstring, like test cases in Jira. Issue titles come from GitHub at CI time |
 | CI | **GitHub Actions**: ruff, pytest, coverage on every PR; required to merge into `main` | |
@@ -44,10 +44,14 @@ written issue by issue.
 - **EmployerProfile**: `company_name` (optional: a private person has none), `trades` — one or
   more from a fixed list, incl. "private person" and "other" (#12). The contact person is
   `User.name`.
-- **Job**: employer, job type, description, `original_language`, address / district, coordinates,
-  date and hours, number of workers, hourly rate in € (≥ `MINIMUM_WAGE = 13.90`),
-  status open | filled | done | cancelled.
-- **JobPhoto**: job, image, uploaded_at; up to 5 per job, resized to max 1600 px, EXIF removed.
+- **Job** (#15, `docs/specs/job.md`): employer, job type (the worker `Skill` list), description,
+  `original_language`, address, `district` (the 25 Stadtbezirke + "Munich area (outside the
+  city)"), coordinates as two decimals (no PostGIS), `date` + `start_time` + `hours` 1–10
+  (§ 3 ArbZG), `workers_needed` 1–10, `hourly_rate` in € (at least the minimum wage of the
+  job's date, `settings.MINIMUM_WAGES`, #16), status open | filled | done | cancelled,
+  `created_at`.
+- **JobPhoto** (#64): job, `image` (max 1600 px, EXIF removed), `thumbnail` (300 × 300, for the
+  job list), uploaded_at; random file names, up to 5 per job.
 - **Application**: job, worker, message, `workers_offered`, status pending | accepted | rejected.
 - **Translation**: translation cache (source text hash + language → translated text).
 - **Message**: chat within an accepted application.
@@ -69,6 +73,7 @@ BauHelfer/
 ├── tests/  tests/e2e/ # checks that belong to no app; Playwright flows
 ├── docs/PLAN.md  docs/AI_LOG.md  docs/SECURITY.md  docs/TESTING.md
 ├── docs/specs/        # specs for complex tickets, decided before the failing tests
+├── docs/mockups/      # planned phone screens (#122) + built/ screenshots of the real app
 ├── CLAUDE.md  .claude/skills/   # instructions and the /ai-log, /sprint-docs skills
 ├── docker-compose.yml  pyproject.toml  render.yaml  .github/workflows/ci.yml
 ```
@@ -78,7 +83,7 @@ BauHelfer/
 `backend`, `frontend`, `database`, `i18n`, `ai`, `legal`, `devops`, `testing`, `docs`, `stretch`
 (+ default `bug` and `enhancement`; other default labels are removed).
 
-## Milestones and issues (84)
+## Milestones and issues (91)
 
 Each issue has a **Description** and a **Done when…** checklist. Numbers are GitHub issue numbers;
 the status of each issue lives on the board, not here.
@@ -119,16 +124,19 @@ the status of each issue lives on the board, not here.
 - #113 Theme tests pass only with minified CSS (`testing`, `bug`)
 - #15 Job model and migrations (`database`)
 - #16 Create / edit / cancel job (employer) (`backend`, `frontend`)
-- #64 Job photos: up to 5 per job, resize, strip EXIF, Cloudflare R2 storage (`backend`,
+- #64 Job photos: upload up to 5, resize, strip EXIF, Supabase Storage (`backend`,
   `frontend`, `devops`, `legal`) — after #16 and #5
-- #17 Minimum-wage validation (13.90 €/h) (`backend`, `legal`)
-- #18 Job list with filters: date, job type, district (HTMX) (`frontend`)
+- #17 Minimum-wage validation (13.90 €/h) (`backend`, `legal`) — covered by #16
+- #18 Job list with filters: date, job type, district (`frontend`)
 - #19 Job detail page (`frontend`)
-- #20 Employer dashboard "My jobs" (`frontend`)
+- #117 `/ai-log`: ask why when every recommendation was accepted (`devops`, `docs`)
+- #122 Save the UI mockups in the repo and check them before each spec (`docs`)
+- #125 Mark overridden methods with `@override` (`backend`)
 - #21 E2E tests (Playwright) and coverage review for M3 (`testing`)
 - #95 Docs sync — M3 (`docs`)
 
 ### M4 · Applications — due 1 Nov
+- #20 Employer dashboard "My jobs" (`frontend`) — moved from M3
 - #22 Apply to job (worker) with message and number of workers (`backend`, `frontend`)
 - #23 Employer views applications per job (`frontend`)
 - #24 Accept / reject application; job becomes "filled" when enough workers (`backend`)
@@ -136,6 +144,11 @@ the status of each issue lives on the board, not here.
 - #26 Worker dashboard "My applications" (`frontend`)
 - #27 Email notifications: new application, accepted / rejected (`backend`)
 - #81 Email verification at signup (`backend`) — after #27, needs real email sending
+- #124 Application logging: key events in Render's logs, without personal data (`backend`,
+  `devops`)
+- #121 Allure report: history between runs, clearer labels and links, tags (`devops`,
+  `testing`)
+- #133 Test section comments name their spec; one shared `frozen_now` fixture (`testing`)
 - #28 E2E tests (Playwright) and coverage review for M4 (`testing`)
 - #96 Docs sync — M4 (`docs`)
 
@@ -174,6 +187,7 @@ the status of each issue lives on the board, not here.
 - #49 End-to-end manual test scenario, fix bugs (`testing`)
 - #50 Final docs: architecture diagram, AI_LOG summary (`docs`)
 - #51 Defense presentation and demo script (`docs`)
+- #132 Own 404 and 500 pages on `base.html` (`frontend`)
 - #100 Docs sync — M8 (`docs`)
 
 ### Stretch (no due date)
@@ -239,7 +253,7 @@ Board: [BauHelfer](https://github.com/users/AndrewKchn/projects/1), columns Todo
   ticket, ideas, open questions, needed doc changes and security / personal-data changes are
   posted as comments in the sprint's "Docs sync — Mx" issue (#94–#100). That issue is the
   sprint's last ticket: `/sprint-docs` drafts the changes to `docs/PLAN.md`,
-  `docs/SECURITY.md` and `README.md`. `CLAUDE.md` is the exception — Claude follows it, so it
+  `docs/SECURITY.md`, `docs/TESTING.md`, `docs/mockups/README.md`, the specs and `README.md`. `CLAUDE.md` is the exception — Claude follows it, so it
   is fixed in the ticket that makes it wrong.
 - **`main` is protected** (ruleset "Protect main"): changes only through PRs, no force push, no
   deletion, no bypass. Squash merge is disabled — PRs are merged with a merge commit, so the
@@ -248,7 +262,7 @@ Board: [BauHelfer](https://github.com/users/AndrewKchn/projects/1), columns Todo
 ## Verification
 
 - `gh label list` — 12 labels; `gh api repos/AndrewKchn/BauHelfer/milestones --jq '.[].title'` — 9 milestones.
-- `gh issue list --state all --limit 100 --json number --jq length` → 84; every issue has a
+- `gh issue list --state all --limit 100 --json number --jq length` → 91; every issue has a
   milestone and a label.
 - `gh project item-list 1 --owner AndrewKchn` — all issues are on the board, each non-Stretch
   issue has a Sprint.
