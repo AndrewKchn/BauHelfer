@@ -39,9 +39,9 @@ Copy `.env.example` to `.env` before the first run.
   that belong to no app (settings, layout, deploy) and `tests/e2e/` for Playwright
   (see `docs/TESTING.md`)
 - `docs/specs/` — specs for complex tickets, written and decided before the failing tests
-  (first: `onboarding.md`, #10)
+  (first: `onboarding.md`, #10); every decision says when to reopen it ("Revisit when …")
 - `docs/mockups/` — frozen phone mockups of the planned UI (PNG + `README.md`: screen → tickets),
-  saved in #122
+  saved in #122; `docs/mockups/built/<screen>.png` — the same screen as built (#19)
 - Django apps (`accounts/`, `jobs/`, `chat/`, …) are added ticket by ticket, see the plan
 
 ## Conventions
@@ -64,6 +64,9 @@ Copy `.env.example` to `.env` before the first run.
 3. Integration tests with the Django test client.
 4. E2E (Playwright, `tests/e2e/`) only in the per-milestone test tickets.
 
+Every new test is mutation-checked: break the code it guards, see it fail, undo only that file
+(pitfalls in `docs/TESTING.md`).
+
 Every test file: docstring starting `Unit tests:` / `Integration tests:` / `E2E tests:` and
 `pytest.mark.story(N)` in `pytestmark` (a test from another ticket gets its own marker). Every
 test: docstring = short line (the title in the Allure report) + numbered steps ending with
@@ -72,7 +75,11 @@ test: docstring = short line (the title in the Allure report) + numbered steps e
 ## Working with the student
 
 - The student is new to Django: explain each part as it is written.
-- Offer real choices with a recommendation; the student decides. Record when they reject or
+- Offer real choices; the student decides. A real fork (2–3 options with different costs):
+  name the decision in plain words, let the student give their criteria, then show the options
+  as a table "option → cost" (how it looks, code, mockup fit, what breaks), and only then
+  recommend against those criteria. A small choice (a label, a colour) gets a default the
+  student can object to. Record when they reject or
   change a suggestion — it goes into `docs/AI_LOG.md`.
 - Never commit, push or open a PR without an explicit "yes". Never merge. Exception, agreed
   in #11: the draft PR of step 5 below is opened without asking (its commits were approved).
@@ -86,6 +93,24 @@ test: docstring = short line (the title in the Allure report) + numbered steps e
    tests, then implementation, then
    any fixes or integration tests. Docs are not edited in the ticket, except `CLAUDE.md`:
    if the ticket makes it wrong (commands, structure, conventions), fix it in the same branch.
+   - A reversible decision is tried, not argued: a small experiment without a commit first.
+   - A big ticket grows in iterations in one branch and one PR: one spec section per
+     iteration, each with its own tests → code → tests commits, and an "Iterations" block in
+     the issue next to "Done when…" (one checkbox per iteration with its decisions and
+     commits, ticked after them).
+   - When a spec decision changes a "Done when…" item, propose the issue edit right away
+     (posted after "yes").
+   - After every iteration that changes a page, Claude makes screenshots at 360 px in both
+     themes before the commit, and the student looks at them. A ticket that changes a screen
+     from `docs/mockups/` ends with one screenshot of it at 390 px, light theme, full page,
+     test data only, overwriting `docs/mockups/built/<screen>.png` before the AI_LOG commit
+     (`uv run pytest tests/e2e/built_screenshots.py`; a new screen adds a line there).
+   - Only when a ticket connects an external service (storage, mail, maps…): before the spec,
+     check for a payment card, the free limits and an EU region; secrets never in chat or
+     screenshots, a separate key for the local check, deleted afterwards (Claude appends
+     empty variables to `.env` without reading it); production env variables on Render
+     before the merge; one manual check against the real service, its result in the PR's
+     "How to test".
 4. Draft one comment per item for the sprint's "Docs sync — Mx" issue: a new idea, an open
    question, a doc change needed, or a security / personal-data change (linked to its code and
    tests, for `docs/SECURITY.md`). Show them; after "yes", post them with `gh issue comment`.
@@ -107,4 +132,5 @@ test: docstring = short line (the title in the Allure report) + numbered steps e
 
 The last ticket of every milestone is "Docs sync — Mx" (#94–#100). It follows the ticket
 workflow above; instead of tests → code, run `/sprint-docs`: it turns the issue's comments and
-the sprint's work into a draft of doc changes, and the student decides.
+the sprint's work into a draft of doc changes, and the student decides. After its PR is merged,
+close the milestone (GitHub does not): `gh api -X PATCH repos/AndrewKchn/BauHelfer/milestones/<number> -f state=closed`.
