@@ -138,22 +138,17 @@ class JobFilterForm(forms.Form):
         job_type_filter = self.cleaned_data.get("job_type")
         district_filter = self.cleaned_data.get("district")
 
+        # So a date here is "7" or "30", never another value (#21: the old else was dead).
         if date_filter:
+            # "Next 7 days" is today and the 6 days after it (spec R14, D12).
             today = timezone.localdate()
-            if date_filter == "7":
-                end_date = today + timedelta(days=6)
-            elif date_filter == "30":
-                end_date = today + timedelta(days=29)
-            else:
-                end_date = None
-            if end_date:
-                # "Next 7 days" is today and the 6 days after it (spec R14, D12).
-                queryset = queryset.filter(date__range=(today, end_date))
+            end_date = today + timedelta(days=int(date_filter) - 1)
+            queryset = queryset.filter(date__range=(today, end_date))
 
-        if job_type_filter and job_type_filter != "":
+        if job_type_filter:
             queryset = queryset.filter(job_type=job_type_filter)
 
-        if district_filter and district_filter != "":
+        if district_filter:
             queryset = queryset.filter(district=district_filter)
 
         return queryset
