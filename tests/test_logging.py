@@ -6,6 +6,7 @@ only place logs need to go.
 
 import importlib
 import logging
+import re
 
 import pytest
 from django.conf import settings
@@ -123,3 +124,27 @@ def test_server_error_is_printed_once_with_debug_on(apply_logging, capfd):
 
     out, err = capfd.readouterr()
     assert (out + err).count("Internal Server Error: /jobs/") == 1
+
+
+def test_local_lines_start_with_the_time_production_lines_do_not(
+    production, apply_logging, capsys
+):
+    """The terminal shows the time in each line; on Render it adds the time itself.
+
+    1. Apply local LOGGING, log an event; then the same with production's LOGGING
+    2. Expect: the local line starts with "[dd/Mon/yyyy hh:mm:ss] INFO"
+    3. Expect: the production line starts with "INFO", with no time of its own
+    """
+    apply_logging(settings.LOGGING)
+    logging.getLogger("jobs.views").info("Job created: job_id=%s", 1)
+    local_line = capsys.readouterr().out
+
+    apply_logging(production.LOGGING)
+    logging.getLogger("jobs.views").info("Job created: job_id=%s", 1)
+    production_line = capsys.readouterr().out
+
+    assert re.match(
+        r"\[\d{2}/\w{3}/\d{4} \d{2}:\d{2}:\d{2}\] INFO jobs.views Job created",
+        local_line,
+    )
+    assert production_line.startswith("INFO jobs.views Job created")
