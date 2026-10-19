@@ -1715,3 +1715,55 @@ them; it fixed them with `page.route()` and `site_cleaning` and took them again.
 - Why a doc has to be checked against the code and the board, not only against notes: two
   rows of `SECURITY.md` had become false without anyone noticing.
 - Why one overwritten screenshot file plus git history beats a folder of versions.
+
+## 2026-10-19 · #124 Application logging: key events in Render's logs, without personal data
+
+**Task given to AI:** add a `LOGGING` config and log key events (registration, failed login,
+job created / cancelled) to stdout for Render's Logs tab, with user ids only, never an email.
+Django's built-in `logging`, no new dependency.
+
+**AI helped:** explained loggers, levels, handlers and formatters with a Mermaid diagram of
+how a record travels to Render. Before writing tests it read Django's `DEFAULT_LOGGING` and
+found that 500 errors never reached Render's logs: Django prints them only with DEBUG on and
+mails them to `ADMINS`, which is empty. It wrote 17 tests (settings, caplog for each event,
+"the email is nowhere in the log text") and the code: `accounts/signals.py` for the
+`user_login_failed` signal, connected in `AccountsConfig.ready()`, so `/admin/` logins count
+too. It mutation-checked every guarded line. It looked up Render's log limits in Render's
+docs (7 days, 6,000 lines per minute, HTTP request logs only on Pro, how `level` is detected
+not documented), created #135 and posted five Docs sync comments in #96.
+
+**AI failed:**
+- While undoing mutants with `git checkout -- <file>` it wiped its own uncommitted
+  implementation in five files. This pitfall from #21 is already in `docs/TESTING.md`. It
+  noticed from the file-change notices, said so, rewrote the code and redid every mutant,
+  restoring from a backup copy instead.
+- Its comment in `base.py` gave the wrong reason for the `"django"` entry. The mutation
+  "remove it" left every test green: errors reach stdout through the root logger anyway.
+  The entry only stops each error from being printed twice with DEBUG on. Comment fixed,
+  test added.
+- It did not foresee that configuring `"django"` resets its child loggers, so `runserver`'s
+  request lines lost their time. I found that when I ran the server.
+
+**My part:**
+- Failed login: of two options with their cost I chose the signal over our own
+  `LoginView.form_invalid`: the admin login matters more, and only the signal sees it.
+- I ran `runserver` myself and went through every event. I noticed that request lines had
+  lost their time. After AI's experiment with Django's own `django.server` format I saw two
+  different line formats ("no level, and no time next to the warning"), so I chose the time
+  in front of our format, locally only.
+- I asked for DEBUG steps: SQL queries and how components talk to each other. My criteria:
+  stay within the ticket and learn to see Django from inside. Then I asked: why a logger at
+  all, if a toolbar shows everything? The answer (toolbar = local only, nothing kept; logs =
+  live site, other people's requests) made AI drop its own "SQL to the terminal" option as
+  a duplicate. The toolbar became #135, and I approved the dev dependency.
+- I asked about Render's limits before finishing. This led to checking the docs and to two
+  decisions: no gunicorn access log (its format starts with the IP), and check the `level`
+  filter after the merge.
+- I accepted moving "blocked login" to #91, the `unknown account` wording and calling the
+  event tests integration tests: they matched what I wanted.
+
+**Learned:**
+- Why a logger's level is a threshold, not what it writes: DEBUG locally showed no DEBUG
+  lines, because our code never calls `logger.debug()`.
+- How a signal reaches our code without anyone calling it: `authenticate()` sends
+  `user_login_failed`, and `ready()` imports the receiver so that `@receiver` runs.

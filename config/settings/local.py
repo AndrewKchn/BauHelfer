@@ -1,9 +1,28 @@
 """Settings for development on your own machine."""
 
 from .base import *
-from .base import env
+from .base import LOGGING, env
 
 DEBUG = env.bool("DEBUG", default=True)
+
+# Our apps log everything here, DEBUG included (#124). A new dict, not an edit of base's:
+# production.py imports the same base.LOGGING and must keep INFO.
+# With the time first: Render adds it on the server, the terminal does not.
+LOGGING = {
+    **LOGGING,
+    "formatters": {
+        "simple": {
+            "format": "[{asctime}] {levelname} {name} {message}",
+            "datefmt": "%d/%b/%Y %H:%M:%S",  # as runserver printed it before
+            "style": "{",
+        },
+    },
+    "loggers": {
+        **LOGGING["loggers"],
+        "accounts": {"level": "DEBUG"},
+        "jobs": {"level": "DEBUG"},
+    },
+}
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "[::1]"]
 
