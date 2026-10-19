@@ -1,5 +1,6 @@
 """Views for account pages. Login, logout and password reset use Django's built-in views."""
 
+import logging
 from typing import override
 
 from django.contrib import messages
@@ -21,6 +22,9 @@ from .forms import (
 )
 from .models import User
 
+# "accounts.views". Ids only, never an email or other personal data (#124).
+logger = logging.getLogger(__name__)
+
 
 class RegisterView(CreateView):
     """Show the signup form; on success create the user and log them in right away."""
@@ -41,6 +45,7 @@ class RegisterView(CreateView):
         """Save the new user, start their session and show a welcome message."""
         response = super().form_valid(form)  # saves the user into self.object
         login(self.request, self.object)
+        logger.info("User registered: user_id=%s", self.object.pk)
         messages.success(
             self.request, _("Welcome to BauHelfer! Your account is ready.")
         )

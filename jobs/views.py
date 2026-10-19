@@ -3,6 +3,7 @@ employer pages: post, list own, edit, cancel (#16, docs/specs/job-form.md), add 
 photos (#64, docs/specs/job-photos.md).
 """
 
+import logging
 from typing import override
 
 from django.contrib import messages
@@ -26,6 +27,9 @@ from accounts.views import RoleRequiredMixin
 
 from .forms import JobFilterForm, JobForm, JobPhotosForm
 from .models import Job, JobPhoto
+
+# "jobs.views". Ids only, never an email or other personal data (#124).
+logger = logging.getLogger(__name__)
 
 
 class EmployerRequiredMixin(RoleRequiredMixin):
@@ -85,7 +89,13 @@ class JobCreateView(EmployerRequiredMixin, EmployerProfileRequiredMixin, CreateV
         # Translation (#32) starts from it and corrects it if the text is in another one.
         form.instance.original_language = self.request.user.preferred_language
         messages.success(self.request, _("Job posted. You can add photos below."))
-        return super().form_valid(form)  # saves the job and redirects
+        response = super().form_valid(form)  # saves the job and redirects
+        logger.info(
+            "Job created: job_id=%s employer_id=%s",
+            self.object.pk,
+            self.request.user.pk,
+        )
+        return response
 
     @override
     def get_success_url(self):
@@ -191,6 +201,7 @@ class JobCancelView(OwnOpenJobMixin, DetailView):
         job = self.get_object()  # 404 unless it is the employer's own open job
         job.status = Job.Status.CANCELLED
         job.save(update_fields=["status"])
+        logger.info("Job cancelled: job_id=%s employer_id=%s", job.pk, request.user.pk)
         messages.success(request, _("Job cancelled."))
         return redirect("my_jobs")
 

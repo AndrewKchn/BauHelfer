@@ -127,6 +127,39 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL = "BauHelfer <noreply@bauhelfer.local>"
 
 
+# Logging (#124)
+# Everything goes to stdout: Render shows it in its Logs tab (its disk is wiped on every
+# deploy, so no log files). No time in the line, Render adds it. Our apps log events with
+# ids only, never an email, name, phone or message text.
+# Django's own default prints errors to the console only with DEBUG on and mails them
+# to ADMINS (none), so a 500 on the live server left no trace. Now every logger, Django's
+# too, passes its records up to the root logger's console handler, at every DEBUG value.
+# The "django" entry drops Django's default handlers, so with DEBUG on an error is not
+# printed twice (once to stderr, once to stdout).
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,  # keep the loggers of Django and the libraries
+    "formatters": {
+        "simple": {"format": "{levelname} {name} {message}", "style": "{"},
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "stream": "ext://sys.stdout",  # the default would be stderr
+            "formatter": "simple",
+        },
+    },
+    # One handler on the root logger; the others pass their records up to it. pytest's
+    # caplog listens there too, so the tests see every record.
+    "root": {"handlers": ["console"], "level": "WARNING"},
+    "loggers": {
+        "accounts": {"level": "INFO"},  # also accounts.views, accounts.signals, …
+        "jobs": {"level": "INFO"},
+        "django": {"level": "INFO"},
+    },
+}
+
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
