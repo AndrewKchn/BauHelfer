@@ -14,11 +14,11 @@ import pytest
 from django.contrib.auth import get_user_model
 from playwright.sync_api import expect
 
+from .helpers import LAPTOP, PASSWORD, PHONE, assert_fits_the_screen, log_in
+
 pytestmark = [pytest.mark.django_db, pytest.mark.story(14)]
 
 User = get_user_model()
-
-PASSWORD = "Gerüst-2026-Munich"
 
 
 def sign_up(page, email):
@@ -29,28 +29,6 @@ def sign_up(page, email):
     page.get_by_label("Password", exact=True).fill(PASSWORD)
     page.get_by_label("Password confirmation").fill(PASSWORD)
     page.get_by_role("button", name="Register").click()
-
-
-def log_in(page, email, password):
-    """Log in through the "Log in" link in the header."""
-    page.goto("/")
-    page.get_by_role("link", name="Log in").click()
-    page.get_by_label("Email").fill(email)
-    page.get_by_label("Password").fill(password)
-    page.get_by_role("button", name="Log in").click()
-
-
-# Most workers use a phone, many employers a laptop: one signup flow on each screen size.
-PHONE = {"width": 360, "height": 740}  # a small Android phone; base.html fits 360 px
-LAPTOP = {"width": 1366, "height": 768}  # a common laptop screen
-
-
-def assert_fits_the_screen(page):
-    """The page is not wider than the screen: no sideways scrolling on a phone."""
-    overflow = page.evaluate(
-        "document.documentElement.scrollWidth - document.documentElement.clientWidth"
-    )
-    assert overflow == 0, f"{page.url} is {overflow}px wider than the screen"
 
 
 def test_worker_signs_up_and_fills_in_the_profile_on_a_phone(page):
