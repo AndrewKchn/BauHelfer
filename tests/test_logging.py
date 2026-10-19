@@ -6,10 +6,11 @@ only place logs need to go.
 
 import importlib
 import logging
-import logging.config
 
 import pytest
 from django.conf import settings
+from django.test import override_settings
+from django.utils.log import configure_logging
 
 from tests.test_deploy import MEDIA_ENV
 
@@ -28,9 +29,12 @@ def production(monkeypatch):
 
 @pytest.fixture
 def apply_logging():
-    """Apply a LOGGING dict as Django does at startup; put the test settings back after."""
-    yield logging.config.dictConfig
-    logging.config.dictConfig(settings.LOGGING)
+    """Apply a LOGGING dict as Django does at startup; put the test settings back after.
+
+    configure_logging applies Django's DEFAULT_LOGGING first, then ours on top of it.
+    """
+    yield lambda config: configure_logging(settings.LOGGING_CONFIG, config)
+    configure_logging(settings.LOGGING_CONFIG, settings.LOGGING)
 
 
 def test_production_logs_app_events_at_info(production):
@@ -103,3 +107,19 @@ def test_server_error_is_printed_to_stdout_with_debug_off(
     assert "ERROR django.request Internal Server Error: /jobs/" in (
         capsys.readouterr().out
     )
+
+
+def test_server_error_is_printed_once_with_debug_on(apply_logging, capfd):
+    """With DEBUG on, an error is printed once, not by Django's default handler as well.
+
+    1. Apply local LOGGING (on top of Django's default, as at startup)
+    2. With DEBUG on, log an error the way Django does for a crashed view
+    3. Expect: the line appears once in stdout and stderr together
+    """
+    apply_logging(settings.LOGGING)
+
+    with override_settings(DEBUG=True):  # Django's default prints only with DEBUG on
+        logging.getLogger("django.request").error("Internal Server Error: /jobs/")
+
+    out, err = capfd.readouterr()
+    assert (out + err).count("Internal Server Error: /jobs/") == 1
