@@ -4,6 +4,8 @@ Spec: docs/specs/job-photos.md, iteration 1 (R4-R5, AC1-AC7, D3-D5). No database
 function gets a file and returns a file.
 """
 
+import io
+
 import pytest
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -34,6 +36,26 @@ def test_accepted_formats_come_back_as_jpeg(image_format):
     photo = prepare_photo(make_upload(image_format))
 
     assert open_result(photo).format == "JPEG"
+
+
+@pytest.mark.story(21)
+@pytest.mark.parametrize("mode", ["RGBA", "P"])
+def test_png_with_transparency_or_palette_comes_back_as_jpeg(mode):
+    """A PNG with transparency or a colour palette becomes a plain RGB JPEG.
+
+    JPEG has neither, so Pillow cannot save such a picture as JPEG without converting it
+    first; the PNG in the test above is plain RGB and never reaches the conversion.
+
+    1. Prepare a PNG in the given mode (RGBA: with transparency, P: with a palette)
+    2. Expect: no error, and the result is an RGB JPEG
+    """
+    buffer = io.BytesIO()
+    Image.new(mode, (300, 200)).save(buffer, "PNG")
+
+    photo = prepare_photo(SimpleUploadedFile("logo.png", buffer.getvalue()))
+
+    result = open_result(photo)
+    assert (result.format, result.mode) == ("JPEG", "RGB")
 
 
 # Refused files (R4, AC2-AC4, D4)
@@ -96,6 +118,42 @@ def test_picture_over_pixel_limit_is_refused(monkeypatch):
         prepare_photo(make_upload("PNG", size=(150, 100)))
 
     assert error.value.code == "too_many_pixels"
+
+
+@pytest.mark.story(21)
+def test_picture_over_twice_the_pixel_limit_is_refused(monkeypatch):
+    """Over twice the pixel limit Pillow refuses to open the file; the user gets our message.
+
+    1. Lower Pillow's pixel limit to 10,000 for this test
+    2. Prepare a 150 × 150 picture (22,500 pixels: over twice the limit, where Pillow raises
+       DecompressionBombError instead of warning)
+    3. Expect: ValidationError with the code "too_many_pixels", not Pillow's error
+    """
+    monkeypatch.setattr(Image, "MAX_IMAGE_PIXELS", 10_000)
+
+    with pytest.raises(ValidationError) as error:
+        prepare_photo(make_upload("PNG", size=(150, 150)))
+
+    assert error.value.code == "too_many_pixels"
+
+
+@pytest.mark.story(21)
+def test_cut_off_file_is_refused():
+    """A JPEG cut off in the middle (a broken upload) is refused with our message.
+
+    Its header is fine, so Image.open() accepts it; the missing pixels show up only when
+    the picture is read for resizing.
+
+    1. Prepare a JPEG and keep only the first half of its bytes
+    2. Expect: ValidationError with the code "invalid_image", not Pillow's OSError
+    """
+    data = make_upload(size=(800, 600)).read()
+    upload = SimpleUploadedFile("photo.jpg", data[: len(data) // 2])
+
+    with pytest.raises(ValidationError) as error:
+        prepare_photo(upload)
+
+    assert error.value.code == "invalid_image"
 
 
 # Resizing (R5, AC5)
