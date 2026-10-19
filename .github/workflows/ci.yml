@@ -77,7 +77,20 @@ jobs:
         continue-on-error: true
 
       - name: Tests with coverage (fails below 80%)
-        run: uv run pytest --cov --alluredir=allure-results
+        # --tracing retain-on-failure (#21): Playwright records every E2E test and keeps the
+        # recording only of a failed one, in test-results/<test>/trace.zip.
+        run: uv run pytest --cov --alluredir=allure-results --tracing retain-on-failure
+
+      # Only when a test failed. Download the artifact from the run's Summary page, then
+      # `uv run playwright show-trace trace.zip` replays the test step by step: the page,
+      # the clicks, the network, the console (docs/TESTING.md).
+      - name: Keep the E2E traces of failed tests
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-traces
+          path: test-results/
+          if-no-files-found: ignore  # a failure outside the E2E tests leaves no trace
 
       - name: Docstring coverage (fails below 80%)
         run: uv run interrogate .
