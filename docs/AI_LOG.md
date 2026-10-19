@@ -1675,3 +1675,43 @@ the issue from #14 asked for the employer flow on a phone, not a laptop.
   were checked; the only PNG test used a plain RGB picture.
 - What a Playwright trace records (a snapshot per step, clicks, network, console) and why it
   matters for a failure that happens only in CI.
+
+## 2026-10-19 · #95 Docs sync — M3
+
+**Task given to AI:** run `/sprint-docs` for M3: handle the 43 comments collected in #95,
+check `docs/PLAN.md`, `CLAUDE.md`, `docs/SECURITY.md`, `docs/TESTING.md` and
+`docs/mockups/README.md` against the board and the code, and catch up on the "built"
+screenshots of the M3 screens (decided in #19).
+
+**AI helped:** drafted a table "comment → proposal → why" for all 43 comments plus before →
+after per doc. It checked the docs against reality, not only against the comments, and found
+five things nobody had posted: #22/#23 were in milestone M3 but Sprint M4 and #20 had moved to
+M4, so PLAN.md and the board disagreed (89 issues, not 84); "Playwright traces stay local"
+had become false since #21; photos are loaded straight from Supabase, so Supabase sees
+visitors' IPs, against "No CDN"; and #64's title still said R2. It grepped all 32 test and
+function names in the new `SECURITY.md` rows and compared every milestone list in PLAN.md
+with `gh issue list` with a script (all 8 match). After my answers it created #132 and #133,
+moved #22, #23, #124 to M4, renamed #64, made 6 commits, and posted one reply per comment
+with its commit or issue. It also wrote a Playwright script that takes the four built
+screenshots with made-up data.
+
+**AI failed:** the first built screenshots had broken photos (`live_server` does not serve
+uploads, which `docs/TESTING.md` already said) and a job type written as its key "cleanup",
+which is not in `Skill`. Both were found when it looked at the screenshots, before I saw
+them; it fixed them with `page.route()` and `site_cleaning` and took them again.
+
+**My part:**
+- #22 and #23 go back to M4: "M3 is closed". #124 logging also goes to M4, not M7: "the
+  earlier the logs, the better".
+- House numbers or faces on photos: of three options with their cost (upload hint, private
+  bucket, only a known limitation) I chose simplicity at this stage — only the limitation.
+- I kept the screenshot script in the repo (`tests/e2e/built_screenshots.py`), against the
+  recommendation to keep it outside: so every later ticket takes the screenshots the same
+  way, and the script is there to show at the defense.
+- I accepted the small defaults (#132 in M8, #133 in M4, renaming #64, not cleaning empty
+  filter values): they were small, and they matched what I wanted.
+
+**Learned:**
+- Why a doc has to be checked against the code and the board, not only against notes: two
+  rows of `SECURITY.md` had become false without anyone noticing.
+- Why one overwritten screenshot file plus git history beats a folder of versions.
