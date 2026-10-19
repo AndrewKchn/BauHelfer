@@ -12,12 +12,15 @@ import re
 
 import pytest
 from django.contrib.auth import get_user_model
+from django.core.files.base import ContentFile
 from django.utils import timezone
 from PIL import Image
 from playwright.sync_api import expect
 
 from accounts.models import EmployerProfile
-from jobs.models import minimum_wage_on
+from jobs.models import JobPhoto, minimum_wage_on
+from jobs.tests.images import make_upload
+from jobs.tests.test_views import make_job
 
 from .helpers import PASSWORD, PHONE, assert_fits_the_screen, log_in
 
@@ -26,6 +29,8 @@ pytestmark = [pytest.mark.django_db, pytest.mark.story(21)]
 User = get_user_model()
 
 NEXT_WEEK = timezone.localdate() + datetime.timedelta(days=7)
+# Inside "Next 7 days", which ends on day 6 (#18, job-list.md D12): NEXT_WEEK is outside it.
+IN_3_DAYS = timezone.localdate() + datetime.timedelta(days=3)
 
 
 def make_employer(email):
@@ -149,3 +154,93 @@ def test_employer_posts_edits_and_cancels_a_job_on_a_phone(page):
 
     page.goto("/")
     expect(main.get_by_role("link", name="Carrying materials")).to_have_count(0)
+
+
+def test_worker_filters_the_jobs_and_opens_one_on_a_phone(page):
+    """A guest filters the job list, opens a job, logs in as a worker and applies.
+
+    1. Create three open jobs: carrying in Sendling in 3 days (with 3 photos), demolition
+       in Sendling in 20 days, carrying in Schwabing-West in 3 days; a worker account
+    2. Set a 360 x 740 phone screen, open the home page
+    3. Expect: "3 open"
+    4. Choose "Next 7 days" and the district Sendling, click "Show"
+    5. Expect: the choice is in the address, "1 open", only the carrying job
+    6. Open the job
+    7. Expect: no exact address, "1 / 3" on the screen
+    8. Click "Next photo", then "Previous photo"
+    9. Expect: "2 / 3", then "1 / 3" again on the screen
+    10. Click "Log in to apply", log in as the worker
+    11. Expect: back on the same job page
+    12. Click "Apply"
+    13. Expect: "Applying is not available yet." on the job page
+    14. Open the filtered list again, click "Reset filters"
+    15. Expect: "3 open" again
+    16. Expect: no page on the way is wider than the screen
+    """
+    employer = make_employer("max@example.com")
+    job = make_job(
+        employer,
+        job_type="carrying",
+        district="sendling",
+        address="Lindwurmstraße 1",
+        date=IN_3_DAYS,
+    )
+    for _ in range(3):
+        JobPhoto.objects.create(
+            job=job, image=ContentFile(make_upload().read(), name="photo.jpg")
+        )
+    make_job(
+        employer,
+        job_type="demolition",
+        district="sendling",
+        date=timezone.localdate() + datetime.timedelta(days=20),
+    )
+    make_job(employer, job_type="carrying", district="schwabing_west", date=IN_3_DAYS)
+    User.objects.create_user(email="ana@example.com", password=PASSWORD, role="worker")
+    page.set_viewport_size(PHONE)
+    main = page.get_by_role("main")
+
+    page.goto("/")
+    expect(main.get_by_text("3 open")).to_be_visible()
+    assert_fits_the_screen(page)
+
+    page.get_by_label("Date").select_option(label="Next 7 days")
+    page.get_by_label("District").select_option("sendling")
+    page.get_by_role("button", name="Show").click()
+
+    expect(page).to_have_url(re.compile(r"[?&]district=sendling"))
+    expect(main.get_by_text("1 open")).to_be_visible()
+    cards = main.get_by_role("listitem")
+    expect(cards).to_have_count(1)
+    expect(cards.get_by_text("Sendling")).to_be_visible()
+    assert_fits_the_screen(page)
+
+    cards.get_by_role("link", name="Carrying materials").click()
+    expect(page).to_have_url(re.compile(rf"/jobs/{job.pk}/$"))
+    expect(main.get_by_text("Lindwurmstraße")).to_have_count(0)
+    expect(
+        main.get_by_text("The exact address is shown after the employer accepts you.")
+    ).to_be_visible()
+    expect(main.get_by_text("1 / 3")).to_be_in_viewport()
+    assert_fits_the_screen(page)
+
+    page.get_by_role("button", name="Next photo").click()
+    expect(main.get_by_text("2 / 3")).to_be_in_viewport()
+    expect(main.get_by_text("1 / 3")).not_to_be_in_viewport()
+    page.get_by_role("button", name="Previous photo").click()
+    expect(main.get_by_text("1 / 3")).to_be_in_viewport()
+
+    page.get_by_role("link", name="Log in to apply").click()
+    page.get_by_label("Email").fill("ana@example.com")
+    page.get_by_label("Password").fill(PASSWORD)
+    page.get_by_role("button", name="Log in").click()
+    expect(page).to_have_url(re.compile(rf"/jobs/{job.pk}/$"))
+
+    page.get_by_role("button", name="Apply").click()
+    expect(page).to_have_url(re.compile(rf"/jobs/{job.pk}/$"))
+    expect(page.get_by_text("Applying is not available yet.")).to_be_visible()
+    assert_fits_the_screen(page)
+
+    page.goto("/?date=7&district=sendling")
+    page.get_by_role("link", name="Reset filters").click()
+    expect(main.get_by_text("3 open")).to_be_visible()
