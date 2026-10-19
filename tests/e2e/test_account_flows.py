@@ -14,6 +14,9 @@ import pytest
 from django.contrib.auth import get_user_model
 from playwright.sync_api import expect
 
+from accounts.models import EmployerProfile, WorkerProfile
+from jobs.tests.test_views import make_job
+
 from .helpers import LAPTOP, PASSWORD, PHONE, assert_fits_the_screen, log_in
 
 pytestmark = [pytest.mark.django_db, pytest.mark.story(14)]
@@ -182,3 +185,73 @@ def test_user_resets_a_forgotten_password(page, mailoutbox):
 
     log_in(page, "olga@example.com", new_password)
     expect(page.get_by_role("banner").get_by_text("olga@example.com")).to_be_visible()
+
+
+# The longest name and company name the forms accept (max_length=150), without a space the
+# browser could break the line at; an email as long as a real one can get (found in #11, #12).
+LONG_NAME = "Wolfeschlegelsteinhausenbergerdorff" * 4 + "x" * 10
+LONG_EMAIL = "kontakt.baustellenkoordination.muenchen@hochundtiefbau-beispiel.de"
+
+
+@pytest.mark.story(21)
+def test_long_worker_name_fits_a_phone(page):
+    """A worker name of 150 letters without spaces does not make pages scroll sideways.
+
+    1. Create a worker with a 150-letter name, a long email and a profile
+    2. Set a 360 x 740 phone screen, log in
+    3. Open the profile page, the profile form and the job list with the header menu open
+    4. Expect: no page is wider than the screen
+    """
+    user = User.objects.create_user(
+        email=LONG_EMAIL, password=PASSWORD, role=User.Role.WORKER, name=LONG_NAME
+    )
+    WorkerProfile.objects.create(
+        user=user,
+        team_size=1,
+        skills=["demolition"],
+        languages=["de"],
+        legal_status="minijob",
+    )
+    page.set_viewport_size(PHONE)
+    log_in(page, LONG_EMAIL)
+
+    for url in ("/accounts/profile/worker/", "/accounts/profile/worker/edit/", "/"):
+        page.goto(url)
+        page.get_by_label("Menu").click()
+        assert_fits_the_screen(page)
+
+
+@pytest.mark.story(21)
+def test_long_company_name_fits_a_phone(page):
+    """A company and person name of 150 letters without spaces fits a phone.
+
+    1. Create an employer with a 150-letter name and company name, a long email and a job
+    2. Set a 360 x 740 phone screen, log in
+    3. Open "My company", its form, "My jobs" and the job page, with the header menu open
+    4. Log out, open the job page as a guest
+    5. Expect: no page is wider than the screen
+    """
+    user = User.objects.create_user(
+        email=LONG_EMAIL, password=PASSWORD, role=User.Role.EMPLOYER, name=LONG_NAME
+    )
+    EmployerProfile.objects.create(
+        user=user, company_name=LONG_NAME, trades=["demolition"]
+    )
+    job = make_job(user)
+    page.set_viewport_size(PHONE)
+    log_in(page, LONG_EMAIL)
+
+    pages = (
+        "/accounts/profile/employer/",
+        "/accounts/profile/employer/edit/",
+        "/jobs/mine/",
+        f"/jobs/{job.pk}/",
+    )
+    for url in pages:
+        page.goto(url)
+        page.get_by_label("Menu").click()
+        assert_fits_the_screen(page)
+
+    page.get_by_role("button", name="Log out").click()
+    page.goto(f"/jobs/{job.pk}/")
+    assert_fits_the_screen(page)
