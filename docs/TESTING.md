@@ -23,12 +23,21 @@ milestone test tickets (#14, #21, #28, #40), together with a coverage review.
 
 ```
 accounts/tests/        unit + integration tests of the accounts app (one folder per app)
-tests/                 checks that belong to no app: settings, base layout, theme, deploy
+jobs/tests/            the same for the jobs app
+tests/                 checks that belong to no app: settings, base layout, theme, deploy,
+                       migrations, media storage, mockups
 tests/e2e/             Playwright flows; a flow goes through several apps
+tests/e2e/helpers.py   shared E2E helpers: PHONE, LAPTOP, log_in(), assert_fits_the_screen()
+tests/e2e/built_screenshots.py   not a test (no test_ prefix, run by path): saves
+                       docs/mockups/built/*.png
+conftest.py            fixtures for every test: fast_password_hasher, in_memory_file_storage
 ```
 
 A test of one app lives in that app: if the app is removed, its tests go with it. The level
 is in the file docstring (`Unit tests:` …), not in the folder name.
+
+`tests/test_migrations.py` fails when a model changes without a migration
+(`makemigrations --check`).
 
 ## How to run
 
@@ -46,6 +55,15 @@ uv run playwright show-trace test-results/<test>/trace.zip   # replay it
 uv run pytest --cov                                      # with the coverage table
 ```
 
+The Allure report of a pull request is only an artifact (GitHub Pages shows `main`). Opening
+its `index.html` from disk shows nothing, because the browser blocks loading `data/` from
+`file://`, so serve it:
+
+```bash
+gh run download <run-id> -n allure-report -D allure-report-pr
+uv run python -m http.server 8000 -d allure-report-pr   # then open http://localhost:8000
+```
+
 ## What CI checks
 
 On every pull request ([`.github/workflows/ci.yml`](../.github/workflows/ci.yml)); a red
@@ -57,6 +75,8 @@ check blocks the merge:
 - `interrogate`: **≥ 80 %** of functions and classes have a docstring
 - the Allure report is built from the results: tests grouped by milestone and story,
   the report of `main` at <https://andrewkchn.github.io/BauHelfer/>
+- a failed run uploads the `playwright-traces` artifact (`test-results/`, #21): download it
+  from the run's Summary page and replay with `uv run playwright show-trace trace.zip`
 
 ## How tests are named and described
 
@@ -66,12 +86,33 @@ check blocks the merge:
 - Test name says the behaviour: `test_form_without_the_box_is_invalid`.
 - Test docstring: a short title line (shown in the Allure report), then numbered steps,
   the checks start with `Expect: …`.
+- A section comment that cites spec items names the issue and the spec file:
+  `# Filters, iteration 2 (#18, docs/specs/job-list.md R12-R21; AC15-AC19)` (older files: #133).
 - A test without a story or a docstring stops the run (`tests/story_labels.py`).
 
 ## Techniques we use
 
-- **Breaking the code on purpose.** A new test must fail once: delete the line it guards,
-  see it red, put the line back. A test that never failed may test nothing.
+- **Breaking the code on purpose.** Every new test must fail once: delete the line it guards,
+  see it red, put the line back. A test that never failed may test nothing. It also finds
+  problems in the code: in #64 Django admin's `max_num` only hid extra rows, so a hand-made
+  POST saved 6 photos (fixed with `validate_max`); in #19 removing `prefetch_related` changed
+  nothing, so it was not needed. Pitfalls we hit:
+  - Undo only the file you broke, never a whole folder (in #18 that wiped uncommitted tests).
+  - Break only a file without uncommitted changes, or undo the mutation with the reverse
+    edit: `git checkout -- <file>` also undoes your own work in it (#21).
+  - A broken build input (`tailwind/input.css`): after undoing it, **rebuild
+    `static/css/app.css`**, or the next run still reads the broken build (#113).
+  - A mutant of the same size in the same second can reuse the cached `.pyc`: run with
+    `PYTHONDONTWRITEBYTECODE=1` (#64).
+- **A fixed clock.** Tests that depend on the time replace `django.utils.timezone.now` with
+  pytest's `monkeypatch` (`frozen_now` in `jobs/tests/test_models.py` and
+  `jobs/tests/test_job_filter.py`; one shared fixture: #133). No new dependency.
+- **Uploaded files in tests.** `in_memory_file_storage` (root `conftest.py`) keeps photos in
+  memory, never in `media/` or the real bucket. `live_server` cannot serve them, so a
+  screenshot that must show photos returns a picture with `page.route("**/media/**", …)`;
+  E2E checks of the carousel do not need it (#21).
+- **Tailwind sees only the files in `@source`** (`tailwind/input.css`), incl. `*/forms.py`
+  since #64: a class used only in a widget would otherwise be missing from `app.css`.
 - **A fresh database for every test.** pytest-django creates a test database once per run
   and rolls back every test's changes, so tests do not depend on each other or on order.
   E2E tests use `live_server`, which empties the tables after each test instead.
@@ -84,8 +125,11 @@ check blocks the merge:
   rounds (~0.7 s each), slow on purpose against stolen hashes. The root `conftest.py`
   switches the tests to one MD5 round: the whole run went from ~2 min to ~30 s. A test in
   `tests/test_deploy.py` checks that production still uses PBKDF2.
-- **Screen sizes in E2E.** The worker flow runs on a 360 px phone and checks that no page
-  scrolls sideways; the employer flow runs on a laptop screen.
+- **Screen sizes in E2E.** The worker flow and the employer job flow
+  ([test_job_flows.py](../tests/e2e/test_job_flows.py), #21) run on a 360 px phone and check
+  that no page scrolls sideways; only the employer signup runs on a laptop screen. The
+  mockups in `docs/mockups/` are 390 px wide, and so are the built screenshots next to them;
+  checks stay at 360 px.
 - **Testing a data migration** (`test_migration_keeps_existing_confirmations` in
   [test_work_permit.py](../accounts/tests/test_work_permit.py), #13): Django's
   `MigrationExecutor` moves the test database back to the migration before, the test creates
@@ -99,6 +143,13 @@ check blocks the merge:
 - **Non-text contrast.** `tests/test_theme_contrast.py` checks text colours on their
   backgrounds (WCAG AA, 4.5:1), not input borders or the focus outline (WCAG 1.4.11, 3:1).
   Pages were checked by hand; an automatic check is a candidate for #48.
+- **JavaScript coverage.** Coverage measures Python only. The scripts in
+  `templates/jobs/job_form.html` and `templates/jobs/job_detail.html` are checked only by the
+  E2E tests, and nothing warns when a new script has none. Revisit when the apply form (#22)
+  adds JavaScript.
+- **The `@override` rule** (`CLAUDE.md`). A one-time script found all 20 overriding methods
+  in #125; no test checks new ones. Revisit when we add a type checker (it would flag
+  `@override` on mixin methods) or the rule is broken in review.
 
 ## Manual testing
 
