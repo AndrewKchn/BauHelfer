@@ -16,7 +16,7 @@ possible, and the fix is published before the details.
 
 ## Personal data we store
 
-All in [accounts/models.py](../accounts/models.py):
+In [accounts/models.py](../accounts/models.py) and [jobs/models.py](../jobs/models.py):
 
 - **Account:** email, password (as a hash), name, phone (optional), role, preferred language,
   and when a worker confirmed being allowed to work in Germany (`work_permit_confirmed_at`;
@@ -25,6 +25,10 @@ All in [accounts/models.py](../accounts/models.py):
   address: no feature needs it.
 - **Employer profile (#12):** company name (optional), trades. No address, VAT or registration
   number.
+- **Job (#15):** the job's address — for a private employer this is their home address. It is
+  stored as entered; only the job's own employer sees it (#19), everyone else the district.
+- **Job photos (#64):** pictures the employer uploads, without EXIF (no GPS, no camera data),
+  under random file names.
 
 The phone is checked for a callable format: `+` and a country code or `0` and a German area
 code, 10–15 digits (`validate_phone` in [accounts/validators.py](../accounts/validators.py),
@@ -63,6 +67,32 @@ Everything is stored in the EU, see [Hosting](#hosting-and-secrets).
 | Invalid team sizes never reach the database | 1–10 in the form and as a `CheckConstraint` in the database | `WorkerProfile` in [accounts/models.py](../accounts/models.py) | `test_database_rejects_team_size_outside_1_to_10` in [test_worker_profile.py](../accounts/tests/test_worker_profile.py) |
 | Only workers confirm the work permit, and the date is private | The required checkbox is only in the worker form (`WorkerUserForm`); employers are never asked. The date is shown only on the worker's own page; the card says only "Confirmed by the worker" / "Not confirmed". An admin can clear it. A data migration kept existing confirmations | `work_permit_confirmed_at`, `can_apply()` in [accounts/models.py](../accounts/models.py), `WorkerUserForm` in [accounts/forms.py](../accounts/forms.py), [0004_work_permit_confirmed_at.py](../accounts/migrations/0004_work_permit_confirmed_at.py) | `test_form_without_the_box_is_invalid`, `test_can_apply`, `test_migration_keeps_existing_confirmations` in [test_work_permit.py](../accounts/tests/test_work_permit.py); `test_profile_is_not_saved_without_the_box`, `test_employer_form_has_no_work_permit_box`, `test_profile_card_shows_confirmation_without_date`, `test_admin_shows_and_clears_the_confirmation` in [test_work_permit_views.py](../accounts/tests/test_work_permit_views.py) |
 
+## Jobs (#15–#19)
+
+| Protection | How | Code | Tests |
+|---|---|---|---|
+| Only employers post, edit and cancel jobs | Guests go to login, workers get 403; posting needs a company profile first | `EmployerRequiredMixin` (on `RoleRequiredMixin` from #12) in [jobs/views.py](../jobs/views.py) | `test_guest_is_sent_to_login`, `test_worker_gets_403` in [test_views.py](../jobs/tests/test_views.py) |
+| An employer changes only their own open jobs, and learns nothing about others | Edit and cancel look the job up only in `request.user.jobs.open()`: another employer's job or a job that is not open gives **404, not 403**, so the answer does not reveal that it exists. One query for GET and POST | `OwnOpenJobMixin.get_queryset` in [jobs/views.py](../jobs/views.py) | `test_other_employer_gets_404`, `test_job_that_is_not_open_gives_404` in [test_views.py](../jobs/tests/test_views.py) |
+| Owner and status cannot be posted | The form has no `employer` or `status` field: the view sets `employer = request.user`, the model sets `status = open`; extra POST fields are ignored | `JobForm` in [jobs/forms.py](../jobs/forms.py), [jobs/views.py](../jobs/views.py) | `test_posted_fields_for_owner_and_status_are_ignored` in [test_views.py](../jobs/tests/test_views.py), `test_form_fields` in [test_forms.py](../jobs/tests/test_forms.py) |
+| Cancelling only on purpose | POST only; the GET page only asks. The row stays with `status = cancelled` | `JobCancelView` in [jobs/views.py](../jobs/views.py) | `test_cancel_page_asks_first`, `test_owner_cancels_a_job` in [test_views.py](../jobs/tests/test_views.py) |
+| Job forms cannot be sent from another site | `{% csrf_token %}` in all three forms. The test client skips the CSRF check by default, so one test sends a POST without the token and one checks that each page puts it in its form | [templates/jobs/](../templates/jobs/) | `test_job_forms_need_the_csrf_token`, `test_job_form_pages_carry_the_csrf_token` in [test_views.py](../jobs/tests/test_views.py) |
+| No job below the minimum wage (MiLoG) | The rate is checked against the minimum wage of the job's **date** (13.90 € in 2026, 14.60 € from 2027); the model validator keeps the lowest rate | `MINIMUM_WAGES` in [base.py](../config/settings/base.py), `minimum_wage_on` in [jobs/models.py](../jobs/models.py), `JobForm.clean` in [jobs/forms.py](../jobs/forms.py) | [test_minimum_wage.py](../jobs/tests/test_minimum_wage.py); `test_rate_one_cent_below_minimum_wage_of_the_date_is_rejected`, `test_same_rate_is_accepted_before_the_rise` in [test_forms.py](../jobs/tests/test_forms.py) |
+| Invalid jobs never reach the database | `hours` and `workers_needed` stay 1–10 as `CheckConstraint`s; the employer field offers only users with the employer role; deleting an employer deletes their jobs | `Job` in [jobs/models.py](../jobs/models.py) | `test_out_of_range_is_rejected_by_database`, `test_only_employers_can_be_chosen_as_employer`, `test_deleting_employer_deletes_their_jobs` in [test_models.py](../jobs/tests/test_models.py) |
+| The public job list shows no personal data | Guests see the list too. A card shows job type, rate, district, date, time and workers — **never the address, the description or the employer**. Only open jobs that have not started | [_job_card.html](../templates/jobs/_job_card.html), `JobListView` in [jobs/views.py](../jobs/views.py), `upcoming()` in [jobs/models.py](../jobs/models.py) | `test_card_shows_what_a_worker_needs_and_no_address`, `test_home_page_hides_jobs_that_are_not_open` in [test_job_list_views.py](../jobs/tests/test_job_list_views.py) |
+| Filter values cannot do harm | A GET form (changes nothing, so no CSRF token needed). Every value is checked against the fixed lists; one that is not listed (`?district=moon`) is ignored without an error. Values go only into the ORM | `JobFilterForm` in [jobs/forms.py](../jobs/forms.py) | `test_a_value_that_is_not_listed_is_ignored_without_an_error`, `test_filter_form_is_a_get_form_with_a_show_button` in [test_job_list_views.py](../jobs/tests/test_job_list_views.py); `test_a_value_that_is_not_listed_makes_only_that_field_invalid` in [test_job_filter.py](../jobs/tests/test_job_filter.py) |
+| The exact address only for the owner | The public job page shows everyone else the district and "The exact address is shown after the employer accepts you." The view decides (`show_address`), not the template, so #25 adds the accepted worker in one place. The employer card has no phone or email | `JobDetailView.get_context_data` in [jobs/views.py](../jobs/views.py), [job_detail.html](../templates/jobs/job_detail.html) | `test_owner_sees_the_address`, `test_others_do_not_see_the_address`, `test_page_has_no_contact_details_of_the_employer` in [test_job_detail_views.py](../jobs/tests/test_job_detail_views.py) |
+| "Apply" checks the role on the server | Not only a hidden button: guests go to login, employers get 403, GET gives 405 (a stub until #22) | `JobApplyView` (`WorkerRequiredMixin`) in [jobs/views.py](../jobs/views.py) | `test_apply_stub_sends_guest_to_login`, `test_apply_stub_refuses_employers`, `test_apply_stub_refuses_get` in [test_job_detail_views.py](../jobs/tests/test_job_detail_views.py) |
+
+## Job photos (#64)
+
+| Protection | How | Code | Tests |
+|---|---|---|---|
+| No location or camera data in photos | EXIF (incl. GPS) is removed from every photo and thumbnail before storing; photos on their side are turned upright first | `prepare_photo`, `make_thumbnail` in [jobs/photos.py](../jobs/photos.py) | `test_exif_is_removed`, `test_photo_on_its_side_is_turned_upright` in [test_photos.py](../jobs/tests/test_photos.py), `test_thumbnail_has_no_exif` in [test_thumbnails.py](../jobs/tests/test_thumbnails.py) |
+| Only real pictures, no "decompression bombs" | The format is read from the content (JPEG / PNG / WebP only), max 5 MB checked before opening, Pillow's pixel limit; every photo is re-encoded, so no byte of the upload is stored as it came | [jobs/photos.py](../jobs/photos.py) | `test_text_file_named_jpg_is_refused`, `test_file_over_5_mb_is_refused`, `test_picture_over_pixel_limit_is_refused`, `test_cut_off_file_is_refused` in [test_photos.py](../jobs/tests/test_photos.py) |
+| File names tell nothing | Random names: an original name can hold a person's name | `job_photo_path` in [jobs/models.py](../jobs/models.py) | `test_stored_name_is_random` in [test_job_photo_model.py](../jobs/tests/test_job_photo_model.py) |
+| Files go with their row | A `post_delete` signal deletes both files after the commit, also when a job or an account is deleted | [jobs/models.py](../jobs/models.py) | `test_deleting_job_deletes_files`, `test_deleting_employer_deletes_files`, `test_file_stays_until_commit` in [test_job_photo_model.py](../jobs/tests/test_job_photo_model.py), `test_deleting_a_photo_deletes_both_files` in [test_thumbnails.py](../jobs/tests/test_thumbnails.py) |
+| Only the owner of an open job adds or deletes photos | Others get 404, guests go to login, workers get 403; POST only, CSRF checked. The limit of 5 also holds for a hand-made admin POST (`validate_max`) | [jobs/views.py](../jobs/views.py), [jobs/admin.py](../jobs/admin.py) | `test_other_employer_gets_404`, `test_cancelled_job_gets_404`, `test_guest_is_sent_to_login`, `test_worker_gets_403`, `test_get_is_not_allowed`, `test_photo_forms_need_the_csrf_token` in [test_job_photo_views.py](../jobs/tests/test_job_photo_views.py); `test_admin_refuses_a_sixth_photo` in [test_job_photo_admin.py](../jobs/tests/test_job_photo_admin.py) |
+
 ## Django defaults we rely on
 
 Not tested separately, because they are Django's own behaviour and not our settings:
@@ -100,8 +130,15 @@ accepted on purpose, see [Known limitations](#known-limitations).
   [.gitignore](../.gitignore); [.env.example](../.env.example) has only placeholders. On Render
   the secret key is generated once by Render ([render.yaml](../render.yaml)); CI uses a dummy key
   ([ci.yml](../.github/workflows/ci.yml)).
-- **Data stays in the EU.** The web service runs on Render and the database on Supabase, both in
-  Frankfurt ([render.yaml](../render.yaml)).
+- **Data stays in the EU.** The web service runs on Render, the database and the job photos on
+  Supabase, all in Frankfurt ([render.yaml](../render.yaml)).
+- **Photo storage keys only on Render.** The S3 key pair of Supabase Storage bypasses Supabase's
+  row-level security, so it lives only in Render's environment (`sync: false` in
+  [render.yaml](../render.yaml)), never in the repo; production does not start without the six
+  `MEDIA_*` variables ([production.py](../config/settings/production.py); tests
+  `test_production_does_not_start_without_a_storage_variable`,
+  `test_render_asks_for_the_storage_variables` in
+  [tests/test_media_production.py](../tests/test_media_production.py)).
 - **Only allowed host names.** Production answers only on the name Render gives the service
   (`ALLOWED_HOSTS` in [production.py](../config/settings/production.py); tests
   `test_production_allows_the_host_name_render_gives_the_service` and
@@ -109,7 +146,9 @@ accepted on purpose, see [Known limitations](#known-limitations).
 - **No CDN.** CSS and HTMX are served from our own server, so no third party sees our visitors or
   can change the code they run (`test_layout_loads_css_and_htmx`,
   `test_htmx_file_is_served_in_the_chosen_version` in
-  [tests/test_base_layout.py](../tests/test_base_layout.py)).
+  [tests/test_base_layout.py](../tests/test_base_layout.py)). Job photos are the exception: the
+  browser loads them from Supabase's public address (`MEDIA_PUBLIC_URL`), so Supabase — already
+  our database host, in the EU — sees the IP address of visitors of pages with photos.
 
 ## Tests
 
@@ -118,8 +157,13 @@ accepted on purpose, see [Known limitations](#known-limitations).
   `test_production_hashes_passwords_with_pbkdf2` in [tests/test_deploy.py](../tests/test_deploy.py).
 - **`DJANGO_ALLOW_ASYNC_UNSAFE`** is set only in [tests/e2e/conftest.py](../tests/e2e/conftest.py)
   (Playwright's event loop), never in the site settings.
-- **Playwright traces stay local.** `test-results/` holds everything the E2E tests typed,
-  passwords included, so it is in [.gitignore](../.gitignore).
+- **Playwright traces hold only test data.** `test-results/` holds everything the E2E tests
+  typed, passwords included, so it is in [.gitignore](../.gitignore). Since #21 a failed CI run
+  uploads it as the `playwright-traces` artifact, which anyone signed in to GitHub can download
+  from this public repo: the E2E tests use made-up accounts only, never real data.
+- **Photos never go to a real bucket in tests.** The root [conftest.py](../conftest.py) switches
+  file storage to memory (`in_memory_file_storage`); the production storage settings are tested
+  with made-up values and no network ([tests/test_media_production.py](../tests/test_media_production.py)).
 
 ## Repository and CI
 
@@ -156,5 +200,15 @@ accepted on purpose, see [Known limitations](#known-limitations).
   only test accounts. With real users: count the invalid numbers, fix only the unambiguous ones
   in a data migration, ask users to correct the rest, never delete silently; a database
   constraint last.
+- **A filled job cannot be cancelled yet.** Cancelling works only for open jobs; what happens
+  to accepted workers is decided in #24.
+- **The address is hidden in text only.** A job photo can still show a house number, a facade,
+  a face or a number plate (`docs/specs/job-photos.md` D32). Decided in #95 to keep it simple
+  for now: no upload hint, no private photos.
+- **Photos are public.** The bucket is public: anyone with a photo's address can open it. The
+  names are random (128 bits) and the job list is public anyway (`docs/specs/job-photos.md`
+  D30).
+- **Cancelled and past jobs keep a public page** with district, date and description, and their
+  photos stay until the job or the account is deleted. Revisit with data minimisation in M7.
 - **Only the phone format is checked:** "+49 (0)151 …" passes, though some phones cannot dial
   the "(0)". Decided not to add a rule for it.
