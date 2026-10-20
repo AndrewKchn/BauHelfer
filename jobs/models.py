@@ -1,4 +1,6 @@
-"""Jobs: what an employer posts and workers apply to (#15), and their photos (#64)."""
+"""Jobs: what an employer posts and workers apply to (#15), their photos (#64) and the
+applications of workers (#22).
+"""
 
 import uuid
 from datetime import datetime, timedelta
@@ -268,3 +270,61 @@ def delete_photo_file(sender, instance, **kwargs):
             storage.delete(name)
 
     transaction.on_commit(delete_files)
+
+
+class Application(models.Model):
+    """A worker's application to a job: a message and how many people they bring (#22).
+
+    docs/specs/application.md. The employer accepts or rejects it in #24.
+    """
+
+    class Status(models.TextChoices):
+        PENDING = "pending", _("Pending")
+        ACCEPTED = "accepted", _("Accepted")
+        REJECTED = "rejected", _("Rejected")
+
+    job = models.ForeignKey(
+        Job,
+        on_delete=models.CASCADE,  # the applications go with their job
+        related_name="applications",  # job.applications.all()
+        verbose_name=_("job"),
+    )
+    worker = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,  # deleting the account deletes its applications
+        related_name="applications",  # user.applications.all()
+        limit_choices_to={"role": User.Role.WORKER},
+        verbose_name=_("worker"),
+    )
+    # A CharField, not a TextField: the column becomes varchar(500), so even code that
+    # skips the form cannot save more. The form shows it as a <textarea> (spec D3).
+    message = models.CharField(_("message"), max_length=500, blank=True)
+    # The form allows at most the team size and the workers needed (D4); the database only
+    # knows the fixed range, the same as Job.workers_needed.
+    workers_offered = models.PositiveSmallIntegerField(
+        _("workers offered"),
+        default=1,
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
+    )
+    status = models.CharField(
+        _("status"), max_length=10, choices=Status.choices, default=Status.PENDING
+    )
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("application")
+        verbose_name_plural = _("applications")
+        constraints = (
+            # One application per worker and job (spec R2, D5): the view checks first, this
+            # stops two requests that arrive at the same instant.
+            models.UniqueConstraint(
+                fields=("job", "worker"), name="application_one_per_worker_and_job"
+            ),
+            models.CheckConstraint(
+                condition=models.Q(workers_offered__gte=1, workers_offered__lte=10),
+                name="application_workers_offered_1_to_10",
+            ),
+        )
+
+    def __str__(self):
+        return f"{self.worker} → {self.job}"
