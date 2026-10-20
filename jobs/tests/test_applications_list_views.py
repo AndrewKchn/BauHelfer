@@ -2,7 +2,7 @@
 
 Each test goes through the whole stack: middleware, URL, view, template and database.
 Spec: docs/specs/applications-list.md, iteration 1 (R1-R5, D3-D8), acceptance criteria
-AC1-AC7.
+AC1-AC7, and from iteration 2 the link to the worker page (R8, AC10).
 """
 
 import datetime
@@ -276,6 +276,27 @@ def test_queries_do_not_grow_with_the_applications(employer_client, job):
     with_three = count_page_queries(employer_client, job)
 
     assert with_three == with_one
+
+
+# The link to the worker page (iteration 2: R8; AC10)
+
+
+def test_each_name_links_to_the_workers_page(employer_client, job):
+    """The employer opens a worker's profile by tapping the name.
+
+    1. Save applications from Ivan and Olga
+    2. Open the job's applications page
+    3. Expect: a link to each worker's page, with the worker's name as its text
+    """
+    ivan = apply(job, "ivan@example.com", "Ivan Petrenko").worker
+    olga = apply(job, "olga@example.com", "Olga Popescu").worker
+
+    response = employer_client.get(applications_url(job))
+
+    for worker in (ivan, olga):
+        url = reverse("worker_detail", args=[worker.pk])
+        assertContains(response, f'href="{url}"')
+        assertContains(response, f">{worker.name}</a>")
 
 
 # The link from "My jobs" (R5, D8; AC7)
