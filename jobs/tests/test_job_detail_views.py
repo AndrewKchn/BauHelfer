@@ -1,7 +1,7 @@
-"""Integration tests: the job page and the "Apply" stub through the Django test client.
+"""Integration tests: the job page and who may post to "Apply", through the test client.
 
 Each test goes through the whole stack: middleware, URL, view, template and database.
-Ticket #19. Spec: docs/specs/job-detail.md (R1-R19), acceptance criteria AC2-AC14. AC1 is a
+Ticket #19; the stub's body became the real application in #22 (test_application_views.py). Spec: docs/specs/job-detail.md (R1-R19), acceptance criteria AC2-AC14. AC1 is a
 unit test in test_models.py. Photo files are in the in-memory storage (conftest.py).
 """
 
@@ -22,6 +22,7 @@ from pytest_django.asserts import (
 from jobs.models import JobPhoto
 
 from .images import make_upload
+from .test_application import make_worker
 
 # The same helpers as the other job pages: an employer with a profile, a job next week.
 from .test_views import NEXT_WEEK, make_employer, make_job
@@ -47,10 +48,8 @@ def job(employer):
 
 @pytest.fixture
 def worker():
-    """A worker (no profile needed: the page and the stub do not check it, spec D5)."""
-    return User.objects.create_user(
-        email="ivan@example.com", password="x", role="worker"
-    )
+    """A worker who can apply (profile and work permit, checked since #22)."""
+    return make_worker()
 
 
 @pytest.fixture
@@ -261,18 +260,18 @@ def test_job_that_takes_no_applications_does_not_ask_for_workers(client, employe
 # Buttons by who looks (spec R8, D3, D5; AC6)
 
 
-def test_worker_sees_apply_button(client, job, worker):
-    """A worker gets an "Apply" button that posts to the stub.
+def test_worker_sees_apply_form(client, job, worker):
+    """A worker gets the "Apply" form that posts to job_apply (the form itself: #22).
 
-    1. Log in as a worker
+    1. Log in as a worker who can apply
     2. Open an open upcoming job's page
-    3. Expect: a POST form to job_apply with an "Apply" button; no "Log in to apply"
+    3. Expect: a POST form to job_apply under "Apply"; no "Log in to apply"
     """
     client.force_login(worker)
 
     response = client.get(detail_url(job))
 
-    assertContains(response, f'action="{apply_url(job)}"')
+    assertContains(response, f'action="{apply_url(job)}#apply"')
     assertContains(response, "Apply")
     assertNotContains(response, "Log in to apply")
 
@@ -336,25 +335,11 @@ def test_owner_sees_no_edit_link_on_a_cancelled_job(client, employer):
     assertNotContains(response, reverse("job_edit", args=[job.pk]))
 
 
-# The "Apply" stub (spec R9, D3; AC7)
+# Who may post to "Apply" (spec R9, D3; AC7). What a post does: #22,
+# test_application_views.py.
 
 
-def test_apply_stub_says_not_available_and_comes_back(client, job, worker):
-    """Pressing "Apply" brings the worker back to the job with a message (spec D3).
-
-    1. Log in as a worker
-    2. POST to the job's apply URL, following the redirect
-    3. Expect: redirected to the job's page, "Applying is not available yet." is shown
-    """
-    client.force_login(worker)
-
-    response = client.post(apply_url(job), follow=True)
-
-    assertRedirects(response, detail_url(job))
-    assertContains(response, "Applying is not available yet.")
-
-
-def test_apply_stub_refuses_get(client, job, worker):
+def test_apply_refuses_get(client, job, worker):
     """The apply URL takes only POST.
 
     1. Log in as a worker
@@ -368,7 +353,7 @@ def test_apply_stub_refuses_get(client, job, worker):
     assert response.status_code == 405
 
 
-def test_apply_stub_sends_guest_to_login(client, job):
+def test_apply_sends_guest_to_login(client, job):
     """A guest who posts to the apply URL is sent to the login page.
 
     1. POST to the job's apply URL as a guest
@@ -383,7 +368,7 @@ def test_apply_stub_sends_guest_to_login(client, job):
     )
 
 
-def test_apply_stub_refuses_employers(client, job, other_employer):
+def test_apply_refuses_employers(client, job, other_employer):
     """An employer cannot apply.
 
     1. Log in as an employer
@@ -397,7 +382,7 @@ def test_apply_stub_refuses_employers(client, job, other_employer):
     assert response.status_code == 403
 
 
-def test_apply_stub_gives_404_for_unknown_job(client, worker):
+def test_apply_gives_404_for_unknown_job(client, worker):
     """Applying to a job that does not exist gives 404.
 
     1. Log in as a worker
