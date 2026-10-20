@@ -12,7 +12,8 @@ uv run pre-commit install                # once per clone: ruff runs before ever
 uv run playwright install chromium       # once per clone: browser for the E2E tests
 docker compose up -d                     # start PostgreSQL (needed for runserver and tests)
 uv run tailwindcss -i tailwind/input.css -o static/css/app.css --watch   # rebuild CSS on change
-uv run python manage.py runserver        # dev server (settings: config.settings.local)
+uv run python manage.py runserver        # dev server (settings: config.settings.local), with
+                                         # Django Debug Toolbar on every page (DEBUG on)
 uv run python manage.py makemigrations   # after model changes
 uv run python manage.py migrate          # after makemigrations and after pulling main
 uv run pytest                            # all tests, E2E included
@@ -23,7 +24,8 @@ Copy `.env.example` to `.env` before the first run.
 
 ## Structure
 
-- `config/settings/` — `base.py` (shared), `local.py` (dev), `production.py` (Render)
+- `config/settings/` — `base.py` (shared), `local.py` (dev; adds Django Debug Toolbar except
+  under pytest), `production.py` (Render)
 - `templates/` — Django templates; every page extends `base.html` (a test checks it)
 - `tailwind/` — `input.css` (with our light/dark themes) + `daisyui.mjs` + `daisyui-theme.mjs`,
   built into `static/css/app.css` (not in git)
