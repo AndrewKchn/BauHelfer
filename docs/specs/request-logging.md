@@ -21,7 +21,9 @@ R2. A middleware `config.middleware.RequestLogMiddleware` logs one INFO line per
 R3. The path is `request.path`: no query string, no host (D5).
 R4. For the password reset link (`url_name` `password_reset_confirm`) the URL pattern is
     logged instead of the path: `/accounts/reset/<uidb64>/<token>/`. This covers the link
-    from the email and Django's redirect to `…/set-password/` (D3).
+    from the email and Django's redirect to `…/set-password/` (D3). The middleware matches
+    the URL itself (`resolve()`), so this holds when another middleware answers before the
+    view (D7).
 R5. A request whose User-Agent starts with `Render/` (the health check) is answered as
     before but not logged (D4).
 R6. The middleware is added in `production.py` only, right after WhiteNoise, so static
@@ -32,6 +34,8 @@ R7. The logger is `config.middleware`; `LOGGING` gives the `config` logger level
 
 - A separate health check path without the database (H2): rejected, see D4.
 - The visitor's IP (`X-Forwarded-For`): not logged.
+- gunicorn's own lines (start, workers, stop, timeouts) keep gunicorn's format: a few lines
+  per start, no requests and no personal data. Not unified with `LOGGING`, no new ticket.
 - Log retention and search: Render's free plan keeps logs for a limited time; not changed.
 
 ## Acceptance criteria (→ tests)
@@ -49,6 +53,8 @@ AC7. A request with User-Agent `Render/1.0` logs nothing from `config.middleware
 AC8. No line holds the User-Agent or the Referer sent with the request.
 AC9. `production.py` has the middleware right after WhiteNoise; `local.py` does not have it.
 AC10. A request for a static file logs nothing from `config.middleware`.
+AC11. A logged-in user without a role opens a reset link: `OnboardingMiddleware` redirects
+      before the view, and the line still shows the pattern, not the uid or token.
 
 ## Limitations (for docs/SECURITY.md)
 
@@ -56,6 +62,10 @@ AC10. A request for a static file logs nothing from `config.middleware`.
   (#124) and Django's 4xx/5xx warnings are still logged for them.
 - Paths with ids (`/jobs/42/`) are logged as they are: job ids are not personal data.
 - A path that matches no URL (404) is logged as sent, whatever a visitor typed into it.
+- Django's own `django.request` logger (kept in #124) writes the full path for a 404 or a
+  500. If the reset page itself crashes, the 500 line holds the uid and token. Only people
+  with access to the Render dashboard see it, and the token expires when the password is
+  changed or after 3 days (`PASSWORD_RESET_TIMEOUT`). Not hidden on purpose (D8).
 
 ## Decisions (me, 2026-10-20)
 
@@ -86,3 +96,12 @@ D5. **No query string.** Search filters are not needed in the log, and a query s
     carry anything. Revisit when we need to see which filters people use.
 D6. **Production only, right after WhiteNoise.** Locally `runserver` prints its own request
     lines; a second one would be a duplicate. Revisit when we stop using `runserver`.
+D7. **The middleware matches the URL itself.** `request.resolver_match` is set only when the
+    request reaches the view; the manual gunicorn check showed a reset link with a bad Host
+    logged with its token, and `OnboardingMiddleware` (#10) answers first the same way.
+    `resolve()` runs a second time per request, which costs microseconds. Found by the
+    manual check, after D3.
+D8. **Django's `django.request` lines are not filtered.** A logging filter that rewrites
+    Django's messages depends on their text and would break silently; turning the logger
+    off would lose 404/500 tracebacks (#124). Revisit when SMTP (#27) is on, or when a 500
+    on the reset page shows up in the logs.

@@ -7,6 +7,8 @@ every full path. This line has only what we chose (docs/specs/request-logging.md
 import logging
 import time
 
+from django.urls import Resolver404, resolve
+
 logger = logging.getLogger(__name__)
 
 # URL names whose path holds a secret: the pattern is logged instead (D3).
@@ -45,8 +47,13 @@ class RequestLogMiddleware:
     @staticmethod
     def safe_path(request):
         """The path without the query string; a secret URL as its pattern (R3, R4)."""
-        # Django sets resolver_match when a URL matched; on a 404 it is None.
-        match = request.resolver_match
-        if match and match.url_name in SECRET_URL_NAMES:
+        # Matched here, not taken from request.resolver_match: Django sets that only when
+        # the request reaches the view, and a middleware may answer first (a user without
+        # a role is redirected by OnboardingMiddleware, #10).
+        try:
+            match = resolve(request.path_info)
+        except Resolver404:
+            return request.path  # no such URL: nothing to hide
+        if match.url_name in SECRET_URL_NAMES:
             return "/" + match.route  # "/accounts/reset/<uidb64>/<token>/"
         return request.path

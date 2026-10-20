@@ -4,6 +4,8 @@ The tests run with production's MIDDLEWARE, so the request log sits where it doe
 Render. A line is "<METHOD> <path> <status> <ms>ms" (docs/specs/request-logging.md R2).
 """
 
+import re
+
 import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
@@ -42,8 +44,7 @@ def test_page_is_logged_with_method_path_status_and_time(client, caplog):
 
     [record] = [r for r in caplog.records if r.name == "config.middleware"]
     assert record.levelname == "INFO"
-    assert record.getMessage().startswith("GET / 200 ")
-    assert record.getMessage().removeprefix("GET / 200 ").removesuffix("ms").isdigit()
+    assert re.fullmatch(r"GET / 200 \d+ms", record.getMessage())
 
 
 def test_post_with_redirect_is_logged_with_its_status(client, caplog):
@@ -105,6 +106,30 @@ def test_password_reset_link_is_logged_without_uid_and_token(client, caplog):
         ["GET", RESET_PATTERN, "302"],
         ["GET", RESET_PATTERN, "200"],
     ]
+    assert token not in caplog.text
+    assert uid not in caplog.text
+
+
+def test_reset_link_is_hidden_when_a_middleware_answers_first(client, caplog):
+    """The reset link stays hidden when a middleware redirects before the URL is matched.
+
+    1. Log in as a user without a role
+    2. Open a reset link: OnboardingMiddleware (#10) redirects to the role choice before
+       Django matches the URL
+    3. Expect: one line "GET /accounts/reset/<uidb64>/<token>/ 302 …"
+    4. Expect: neither the uid nor the token is in any record
+    """
+    user = User.objects.create_user(email="ben@example.com", password="Gerüst-2026")
+    client.force_login(user)
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+
+    client.get(
+        reverse("password_reset_confirm", kwargs={"uidb64": uid, "token": token})
+    )
+
+    [line] = request_lines(caplog)
+    assert line.startswith(f"GET {RESET_PATTERN} 302 ")
     assert token not in caplog.text
     assert uid not in caplog.text
 
