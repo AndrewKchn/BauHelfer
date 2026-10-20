@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Applications" %} · BauHelfer{% endblock %}
+
+{% block content %}
+  {# The employer's view of one job's applications (#23, applications-list.md R2, R3). #}
+  <a href="{% url 'my_jobs' %}" class="link text-sm font-semibold">← {% translate "Back to my jobs" %}</a>
+
+  <div class="card mt-3 bg-base-100 shadow-sm">
+    <div class="card-body gap-1 p-3">
+      {% include "jobs/_job_summary.html" with with_status=True %}
+    </div>
+  </div>
+
+  {# |length runs the query once; the loop below reuses its rows. #}
+  <h1 class="mt-6 text-sm font-semibold uppercase tracking-wide text-base-content/70">
+    {% blocktranslate with count=applications|length %}Applications ({{ count }}){% endblocktranslate %}
+  </h1>
+
+  {% if applications %}
+    <ul class="mt-2 flex flex-col gap-3">
+      {% for application in applications %}
+        {# No phone or email: they are revealed only after acceptance (#25). #}
+        {% with worker=application.worker profile=application.worker.worker_profile %}
+          <li class="card bg-base-100 shadow-sm">
+            <div class="card-body gap-2 p-3">
+              <div class="flex items-start justify-between gap-2">
+                <p class="min-w-0 break-words font-semibold">{{ worker.name }}</p>
+                <span class="badge shrink-0 {% if application.status == 'accepted' %}badge-success{% elif application.status == 'pending' %}badge-warning{% else %}badge-ghost{% endif %}">{{ application.get_status_display }}</span>
+              </div>
+              <p class="text-sm text-base-content/70">
+                {{ profile.team_label }} ·
+                {% blocktranslate count workers=application.workers_offered %}brings {{ workers }} worker{% plural %}brings {{ workers }} workers{% endblocktranslate %}
+              </p>
+              <div class="flex flex-wrap gap-2">
+                {% for name in profile.skill_names %}<span class="badge badge-outline">{{ name }}</span>{% endfor %}
+              </div>
+              <p class="text-sm">
+                {{ profile.get_legal_status_display }} ·
+                {% if worker.work_permit_confirmed_at %}{% translate "Work permit confirmed" %}{% else %}{% translate "Work permit not confirmed" %}{% endif %}
+              </p>
+              {% if application.message %}
+                {# whitespace-pre-line keeps the line breaks the worker typed. #}
+                <p class="whitespace-pre-line break-words">“{{ application.message }}”</p>
+              {% endif %}
+              <p class="text-xs text-base-content/60">
+                {% blocktranslate with date=application.created_at|date:"j M" %}Sent {{ date }}{% endblocktranslate %}
+              </p>
+            </div>
+          </li>
+        {% endwith %}
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="mt-2">{% translate "No applications yet." %}</p>
+  {% endif %}
+{% endblock %}
