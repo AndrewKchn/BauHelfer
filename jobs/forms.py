@@ -1,5 +1,5 @@
 """Job forms: an employer posts or edits a job (#16); workers filter the job list (#18);
-job photos, one in the admin and several on the edit page (#64).
+job photos, one in the admin and several on the edit page (#64); a worker applies (#22).
 """
 
 from datetime import timedelta
@@ -13,7 +13,14 @@ from django.utils.translation import ngettext
 
 from accounts.models import Skill
 
-from .models import MINIMUM_WAGE, District, Job, JobPhoto, minimum_wage_on
+from .models import (
+    MINIMUM_WAGE,
+    Application,
+    District,
+    Job,
+    JobPhoto,
+    minimum_wage_on,
+)
 from .photos import prepare_photo
 
 
@@ -267,3 +274,36 @@ class JobPhotosForm(forms.Form):
                 JobPhoto.objects.create(job=self.job, image=photo)
                 for photo in self.cleaned_data["photos"]
             ]
+
+
+class ApplicationForm(forms.ModelForm):
+    """A worker applies to a job: a message and how many people they bring (#22).
+
+    docs/specs/application.md R3, R4, D3, D4. Job and worker are not form fields: the view
+    passes them in, and they go straight into the application.
+    """
+
+    class Meta:
+        model = Application
+        fields = ("message", "workers_offered")
+        labels = {"message": _("Message to the employer")}  # noqa: RUF012
+        # A box for a few lines; maxlength="500" comes from the model field by itself (D3).
+        widgets = {  # noqa: RUF012
+            "message": forms.Textarea(attrs={"class": "textarea w-full", "rows": 3})
+        }
+
+    def __init__(self, *args, job, worker, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.instance.job = job
+        self.instance.worker = worker
+        # No more people than the crew has, and no more than the job needs (D4).
+        limit = min(worker.worker_profile.team_size, job.workers_needed)
+        if limit == 1:
+            # Nothing to choose: no field, the model's default 1 is saved.
+            del self.fields["workers_offered"]
+        else:
+            # A new field with this worker's limit: Django checks it on the server and puts
+            # min="1" max="<limit>" on the <input>, so the browser checks it too.
+            self.fields["workers_offered"] = forms.IntegerField(
+                label=_("Workers I bring"), min_value=1, max_value=limit, initial=limit
+            )

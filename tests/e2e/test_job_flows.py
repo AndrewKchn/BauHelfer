@@ -17,7 +17,7 @@ from django.utils import timezone
 from PIL import Image
 from playwright.sync_api import expect
 
-from accounts.models import EmployerProfile
+from accounts.models import EmployerProfile, WorkerProfile
 from jobs.models import JobPhoto, minimum_wage_on
 from jobs.tests.images import make_upload
 from jobs.tests.test_views import make_job
@@ -160,7 +160,8 @@ def test_worker_filters_the_jobs_and_opens_one_on_a_phone(page):
     """A guest filters the job list, opens a job, logs in as a worker and applies.
 
     1. Create three open jobs: carrying in Sendling in 3 days (with 3 photos), demolition
-       in Sendling in 20 days, carrying in Schwabing-West in 3 days; a worker account
+       in Sendling in 20 days, carrying in Schwabing-West in 3 days; a worker who can
+       apply (profile, work permit)
     2. Set a 360 x 740 phone screen, open the home page
     3. Expect: "3 open"
     4. Choose "Next 7 days" and the district Sendling, click "Show"
@@ -171,8 +172,8 @@ def test_worker_filters_the_jobs_and_opens_one_on_a_phone(page):
     9. Expect: "2 / 3", then "1 / 3" again on the screen
     10. Click "Log in to apply", log in as the worker
     11. Expect: back on the same job page
-    12. Click "Apply"
-    13. Expect: "Applying is not available yet." on the job page
+    12. Write a message to the employer, click "Send application" (#22)
+    13. Expect: "Application sent." and "You applied" on the job page
     14. Open the filtered list again, click "Reset filters"
     15. Expect: "3 open" again
     16. Expect: no page on the way is wider than the screen
@@ -196,7 +197,15 @@ def test_worker_filters_the_jobs_and_opens_one_on_a_phone(page):
         date=timezone.localdate() + datetime.timedelta(days=20),
     )
     make_job(employer, job_type="carrying", district="schwabing_west", date=IN_3_DAYS)
-    User.objects.create_user(email="ana@example.com", password=PASSWORD, role="worker")
+    worker = User.objects.create_user(
+        email="ana@example.com",
+        password=PASSWORD,
+        role="worker",
+        work_permit_confirmed_at=timezone.now(),
+    )
+    WorkerProfile.objects.create(
+        user=worker, skills=["carrying"], languages=["de"], legal_status="minijob"
+    )
     page.set_viewport_size(PHONE)
     main = page.get_by_role("main")
 
@@ -236,9 +245,13 @@ def test_worker_filters_the_jobs_and_opens_one_on_a_phone(page):
     page.get_by_role("button", name="Log in").click()
     expect(page).to_have_url(re.compile(rf"/jobs/{job.pk}/$"))
 
-    page.get_by_role("button", name="Apply").click()
-    expect(page).to_have_url(re.compile(rf"/jobs/{job.pk}/$"))
-    expect(page.get_by_text("Applying is not available yet.")).to_be_visible()
+    page.get_by_label("Message to the employer").fill("I can start at 8.")
+    page.get_by_role("button", name="Send application").click()
+    # The browser keeps the form's #apply after the redirect; the page then has no element
+    # with that id, so it stays at the top with the message.
+    expect(page).to_have_url(re.compile(rf"/jobs/{job.pk}/(#apply)?$"))
+    expect(page.get_by_text("Application sent.")).to_be_visible()
+    expect(main.get_by_text("You applied")).to_be_visible()
     assert_fits_the_screen(page)
 
     page.goto("/?date=7&district=sendling")

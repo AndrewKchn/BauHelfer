@@ -1,6 +1,7 @@
-"""Job pages: the public job list (#18) and job page (#19, docs/specs/job-detail.md), and the
-employer pages: post, list own, edit, cancel (#16, docs/specs/job-form.md), add and delete
-photos (#64, docs/specs/job-photos.md).
+"""Job pages: the public job list (#18) and job page (#19, docs/specs/job-detail.md) with
+the apply form (#22, docs/specs/application.md), and the employer pages: post, list own,
+edit, cancel (#16, docs/specs/job-form.md), add and delete photos (#64,
+docs/specs/job-photos.md).
 """
 
 import logging
@@ -25,7 +26,7 @@ from django.views.generic.detail import SingleObjectMixin
 from accounts.models import User
 from accounts.views import RoleRequiredMixin
 
-from .forms import JobFilterForm, JobForm, JobPhotosForm
+from .forms import ApplicationForm, JobFilterForm, JobForm, JobPhotosForm
 from .models import Job, JobPhoto
 
 # "jobs.views". Ids only, never an email or other personal data (#124).
@@ -258,27 +259,63 @@ class JobDetailView(DetailView):
 
     @override
     def get_context_data(self, **kwargs):
-        """Add who looks: the owner sees the address and "Edit"."""
+        """Add who looks: the owner sees the address and "Edit", a worker the apply part."""
         context = super().get_context_data(**kwargs)
-        is_owner = self.request.user == self.object.employer
+        user = self.request.user
+        job = self.object
+        is_owner = user == job.employer
         context["is_owner"] = is_owner
         # Decided here, not in the template: #25 adds the worker whose application was
         # accepted, and the template stays as it is.
         context["show_address"] = is_owner
+        # Only for workers: a guest's page keeps its 2 queries (application.md AC11).
+        if user.is_authenticated and user.role == User.Role.WORKER:
+            # Their application, also when the job is closed now (D7); None if there is none.
+            application = job.applications.filter(worker=user).first()
+            context["application"] = application
+            # Whether the job takes applications is checked by the template, around the form.
+            if application is None and user.can_apply():
+                # JobApplyView passes in the form with its errors; otherwise an empty one.
+                context.setdefault("apply_form", ApplicationForm(job=job, worker=user))
         return context
 
 
-class JobApplyView(WorkerRequiredMixin, SingleObjectMixin, View):
-    """POST: the "Apply" button. A stub until #22 builds the application (spec R9, D3).
+class JobApplyView(WorkerRequiredMixin, JobDetailView):
+    """POST: the apply form on the job page saves an application (#22, application.md R5).
 
-    Only POST (a GET gives 405). The URL, the button and who may post stay; #22 replaces the
-    body of post().
+    A JobDetailView, so a form with errors is shown on the same job page with everything on
+    it (D1). Only POST (a GET gives 405), workers only (#19 R9).
     """
 
-    model = Job
+    http_method_names = ("post",)
 
     def post(self, request, *args, **kwargs):
-        """Say that applying does not work yet and go back to the job's page."""
-        job = self.get_object()  # 404 for a job id that does not exist
-        messages.info(request, _("Applying is not available yet."))
+        """Check that the worker may apply here, then save the form or show its errors."""
+        # self.object: get_context_data() reads it when the page is shown again.
+        job = self.object = self.get_object()  # 404 for a job id that does not exist
+        worker = request.user
+        # The page shows none of these cases a form; these checks stop a POST sent anyway.
+        if not worker.can_apply():
+            messages.error(request, _("Complete your profile to apply."))
+            return redirect("job_detail", pk=job.pk)
+        if not job.accepts_applications:
+            messages.error(request, _("This job no longer takes applications."))
+            return redirect("job_detail", pk=job.pk)
+        if job.applications.filter(worker=worker).exists():
+            messages.info(request, _("You have already applied to this job."))
+            return redirect("job_detail", pk=job.pk)
+
+        form = ApplicationForm(request.POST, job=job, worker=worker)
+        if not form.is_valid():
+            # The same page again, with the typed values and the errors.
+            return self.render_to_response(self.get_context_data(apply_form=form))
+        application = form.save()
+        # Ids only: the message may hold a phone number or a name (#124, D9).
+        logger.info(
+            "Application created: application_id=%s job_id=%s worker_id=%s",
+            application.pk,
+            job.pk,
+            worker.pk,
+        )
+        messages.success(request, _("Application sent."))
         return redirect("job_detail", pk=job.pk)

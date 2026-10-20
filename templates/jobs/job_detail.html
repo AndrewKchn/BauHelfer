@@ -110,19 +110,46 @@
     </div>
   </section>
 
-  {# One button by who looks (spec R8). #}
+  {# By who looks (#19 spec R8; #22 application.md R6): the owner "Edit"; a worker their #}
+  {# application, the form or the way to the profile; a guest "Log in to apply". #}
   <div class="mt-4">
     {% if is_owner %}
       {% if job.status == "open" %}
         <a href="{% url 'job_edit' job.pk %}" class="btn w-full">{% translate "Edit" %}</a>
       {% endif %}
+    {% elif application %}
+      {# Shown also when the job is closed now: the worker sees what they sent (D7). #}
+      <section class="card bg-base-100 shadow-sm">
+        <div class="card-body flex-row flex-wrap items-center gap-2 p-4">
+          <span class="font-semibold">{% translate "You applied" %}</span>
+          <span>·</span>
+          <span>{% blocktranslate count counter=application.workers_offered %}{{ counter }} worker{% plural %}{{ counter }} workers{% endblocktranslate %}</span>
+          <span class="badge bg-base-content/10 font-semibold">{{ application.get_status_display }}</span>
+        </div>
+      </section>
     {% elif job.accepts_applications %}
-      {% if user.role == "worker" %}
-        {# A stub until #22: it answers "not available yet" and comes back here (D3). #}
-        <form method="post" action="{% url 'job_apply' job.pk %}">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-primary w-full">{% translate "Apply" %}</button>
-        </form>
+      {% if apply_form %}
+        {# The form on the job page (D1). #apply: after an error the page comes back #}
+        {# scrolled to the form. No novalidate: the browser itself stops a number over the #}
+        {# limit and a message over 500 characters (D3, D4); the view checks them again. #}
+        <section id="apply" class="card bg-base-100 shadow-sm">
+          <form method="post" action="{% url 'job_apply' job.pk %}#apply" class="card-body p-4">
+            {% csrf_token %}
+            <h2 class="text-lg font-semibold">{% translate "Apply" %}</h2>
+            {% with form=apply_form %}
+              {% include "_form_errors.html" %}
+              {% include "_form_field.html" with field=form.message %}
+              {# No field when only 1 is possible (D4). #}
+              {% if form.workers_offered %}
+                {% include "_form_field.html" with field=form.workers_offered %}
+              {% endif %}
+            {% endwith %}
+            <button type="submit" class="btn btn-primary mt-2 w-full">{% translate "Send application" %}</button>
+          </form>
+        </section>
+      {% elif user.role == "worker" %}
+        {# No profile or no work-permit confirmation: both are on the profile form (D6). #}
+        <a href="{% url 'worker_profile_edit' %}" class="btn btn-primary w-full">{% translate "Complete your profile to apply" %}</a>
       {% elif not user.is_authenticated %}
         {# next= brings the guest back to this job after login. #}
         <a href="{% url 'login' %}?next={{ request.path|urlencode }}" class="btn btn-primary w-full">{% translate "Log in to apply" %}</a>

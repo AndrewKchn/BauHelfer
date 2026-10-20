@@ -96,7 +96,7 @@ def test_save_built_screenshots(page):
     )
     WorkerProfile.objects.create(
         user=worker,
-        team_size=1,
+        team_size=2,  # a crew, so the apply form shows "Workers I bring" (#22)
         skills=["carrying"],
         languages=["de"],
         legal_status="gewerbe",
