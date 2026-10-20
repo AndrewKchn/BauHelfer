@@ -1767,3 +1767,61 @@ not documented), created #135 and posted five Docs sync comments in #96.
   lines, because our code never calls `logger.debug()`.
 - How a signal reaches our code without anyone calling it: `authenticate()` sends
   `user_login_failed`, and `ready()` imports the receiver so that `@receiver` runs.
+
+## 2026-10-20 · #137 Gunicorn access log on Render: decide what request lines show
+
+**Task given to AI:** decide what Render's request lines show. In #124 I assumed gunicorn's
+access log was off, but Render turns it on by default: every request was a line with the
+User-Agent, the Referer and the full path (a password reset token included), plus the health
+check every 5 seconds. The issue asked for a spec decision (keep, own format, or off; a light
+health check path or not), `GUNICORN_CMD_ARGS` set in `render.yaml`, and a test for it.
+
+**AI helped:**
+- Explained the request path (browser → Render's proxy → gunicorn → Django), what an access
+  log line holds field by field, and why our `LOGGING` never saw it: gunicorn is another
+  program.
+- Showed the options as tables with their cost, then compared B (gunicorn's format + our own
+  logger class) and C (a Django middleware) in detail with code sketches.
+- Wrote the spec `docs/specs/request-logging.md` (D1–D8), 12 failing tests, then
+  `RequestLogMiddleware`: `GET /jobs/42/ 200 35ms`, no query string, the reset link as its URL
+  pattern, no line for Render's health check or static files, production only.
+- The `render.yaml` test parses `GUNICORN_CMD_ARGS` with gunicorn's own argument parser, so it
+  checks what gunicorn will understand, not a string.
+- Mutation-checked every test (10 mutations) and ran real gunicorn with production settings
+  and `curl` before the commit.
+
+**AI failed:**
+- The first implementation took the URL from `request.resolver_match`, which Django sets only
+  when the request reaches the view. Its own gunicorn run showed
+  `GET /accounts/reset/MQ/abc123-secrettoken/ 400`: a token in the log. The same happens when
+  `OnboardingMiddleware` redirects a user without a role. No test caught it; fixed with
+  `resolve()` and a test that showed the real token before the fix.
+- The format test passed without the `ms` (`removesuffix` does nothing when the suffix is
+  missing); a mutation found it, now `re.fullmatch`.
+- Its local check instructions ran `collectstatic` before switching to production settings, so
+  my run gave 500 (no static manifest). It also predicted 302 for a made-up reset token; Django
+  answers 200 ("invalid link").
+
+**My part:**
+- My criteria for the decision: informative logs without extra lines, the health check out of
+  the logs, no personal data, and above all no password reset token.
+- The health check idea is mine: Render keeps checking `/` with the database, only its lines
+  are not logged (H3). AI had recommended a separate `/health/` page without the database; I
+  kept `/` because the check then covers the database too.
+- I asked for a detailed comparison of B and C before choosing C: the same line format as our
+  events from #124, and it is tested with Django's test client.
+- Agreed to record Django's own `django.request` 500 line (which holds the token if the reset
+  page crashes) as a limitation instead of filtering it: it is a rare case, and only I have
+  access to Render's logs.
+- I asked why the log lines have two formats. gunicorn's startup lines keep their own format:
+  "if there are few of them and only at startup, we leave it; no tickets, there are too many
+  already — I need to spend more time on features."
+- By hand: ran gunicorn locally with the arguments from `render.yaml` and production settings,
+  sent `curl` requests (browser, `Render/1.0`, query string, reset link, static file, 404) and
+  checked every line. The check on Render's logs follows after the merge.
+
+**Learned:**
+- Which program writes which log line: gunicorn writes its own (startup, and the access log
+  if it is on), Django writes ours through `LOGGING`.
+- Why a middleware that answers early leaves `request.resolver_match` empty: Django matches
+  the URL only at the end of the middleware chain, right before the view.
