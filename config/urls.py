@@ -15,6 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from django.apps import apps
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -32,3 +33,10 @@ urlpatterns = [
 # Uploaded photos from media/ on the dev server (#64). static() returns nothing when DEBUG
 # is off, so production never serves them from here: they come from Supabase Storage.
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# Django Debug Toolbar's /__debug__/ URLs (#135), only where local.py installed it: the
+# package does not exist on Render, so importing it there would stop the server.
+if apps.is_installed("debug_toolbar"):
+    from debug_toolbar.toolbar import debug_toolbar_urls
+
+    urlpatterns += debug_toolbar_urls()

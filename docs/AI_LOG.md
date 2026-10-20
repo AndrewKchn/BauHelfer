@@ -1825,3 +1825,45 @@ health check path or not), `GUNICORN_CMD_ARGS` set in `render.yaml`, and a test 
   if it is on), Django writes ours through `LOGGING`.
 - Why a middleware that answers early leaves `request.resolver_match` empty: Django matches
   the URL only at the end of the middleware chain, right before the view.
+
+## 2026-10-20 · #135 Django Debug Toolbar for local development
+
+**Task given to AI:** set up Django Debug Toolbar for local development only: a dev
+dependency, configured in `config/settings/local.py`, shown with DEBUG on and for 127.0.0.1,
+not loaded by the tests and never on Render.
+
+**AI helped:**
+- Explained where the toolbar plugs into Django: an app (its templates and static files), a
+  middleware that injects the panel into the finished HTML, and the `/__debug__/` URLs.
+- Found the trap before writing code: pytest loads the same `local.py`, and pytest-django
+  switches DEBUG off only after the settings are loaded, so `if DEBUG:` would not keep the
+  toolbar out of the tests. Checked in pytest's source that `PYTEST_VERSION` is set at the
+  very start of `main()`.
+- Read the toolbar's source: `debug_toolbar_urls()` returns nothing with DEBUG off, and the
+  package has its own system check against running in tests.
+- Wrote unit tests (which settings load it) and integration tests (the toolbar on a page with
+  DEBUG on, gone with DEBUG off, `urls.py` loading without the package as on Render).
+- Mutation-checked the code (6 mutations) and ran `runserver` with DEBUG on and off.
+
+**AI failed:**
+- The first test for `urls.py` did not catch the removal of the `apps.is_installed` check:
+  with DEBUG off the toolbar adds no URLs anyway. A mutation found it. The new test hides the
+  package through `sys.modules`, as on Render, and fails without the check.
+- The toolbar's docs recipe (`if not settings.TESTING:` in `urls.py`) does not fit our split
+  settings: `production.py` has no `TESTING`, and the import would stop the server. AI noticed
+  this and used `apps.is_installed("debug_toolbar")` instead.
+
+**My part:**
+- Of the two ways to keep the toolbar out of the tests, I chose the one from the toolbar's docs
+  (`PYTEST_VERSION` in `local.py`) over a separate `config/settings/test.py`: it is the
+  official way, and it needs fewer files.
+- Agreed not to edit `docs/TESTING.md` in this ticket. Following the CLAUDE.md rule, the change
+  is proposed in #96 and the "Done when…" item was edited.
+- By hand: opened `runserver` with the toolbar, went through every panel, clicked through the
+  site and looked at what each panel shows.
+
+**Learned:**
+- Why a middleware can change a page after the view has built it: it wraps the whole request,
+  so it gets the finished response back and can add the panel before `</body>`.
+- Why a check in settings does not help under pytest: the settings are loaded before
+  pytest-django switches DEBUG off, so `local.py` checks the `PYTEST_VERSION` variable instead.
