@@ -1867,3 +1867,57 @@ not loaded by the tests and never on Render.
   so it gets the finished response back and can add the panel before `</body>`.
 - Why a check in settings does not help under pytest: the settings are loaded before
   pytest-django switches DEBUG off, so `local.py` checks the `PYTEST_VERSION` variable instead.
+
+## 2026-10-20 · #22 Apply to job (worker) with message and number of workers
+
+**Task given to AI:** replace the "Apply" stub from #19 with real applications: a worker
+sends a short message and the number of people they bring (up to the team size). Context: the
+notes in the issue from #94 (use `User.can_apply()`, link to the worker profile) and from #19
+(also check `job.accepts_applications`), the mockup `docs/mockups/job-detail.png`.
+
+**AI helped:**
+- Compared the ticket with the mockup and the later tickets (#23–#26), and wrote the spec
+  `docs/specs/application.md` (D1–D10) before the tests.
+- Showed the choice "where does the form live" as a table of three options with their costs
+  (on the job page, a separate page, HTMX).
+- Explained the request path layer by layer: model → migration → form → view → template, and
+  which rule belongs in which layer (browser, form, view, database).
+- Wrote unit tests (model constraints, form limits) and integration tests (the view, the job
+  page in every state, the log line), then the code. `JobApplyView` inherits `JobDetailView`,
+  so a form with errors comes back on the same job page.
+- Mutation-checked every new test with a script (32 mutations, all caught), took screenshots
+  at 360 px in both themes.
+
+**AI failed:**
+- Proposed to commit the spec and the failing tests together. I pointed out that we always
+  commit the spec separately; AI checked the git history and split them.
+- In the spec the message was a `TextField`, which has no length limit in PostgreSQL; only
+  the form knew about 500 characters. Changed after my question (see My part).
+- Checked `accepts_applications` twice: in the view and in the template around the form. A
+  mutation survived and showed that the view check did nothing; it was removed.
+- Did not update the E2E test from #21, which still expected the stub's message; the full test
+  run found it. Then the URL check failed too: the browser keeps the form's `#apply` after the
+  redirect. AI did not expect that.
+
+**My part:**
+- For the form I gave my criteria first: easy to use on a phone and less code. Then I chose
+  option A, the form on the job page with a normal POST, over a separate page and HTMX.
+- I asked whether a message over 500 characters is stopped in the browser and also checked on
+  the server, because a limit only in the browser is easy to get around (devtools, curl). This
+  led to three levels: `maxlength` in the browser, the form validator, and `varchar(500)` in
+  the database (`CharField` instead of `TextField`).
+- I noticed that the spec and the tests were proposed as one commit, while we always committed
+  them separately.
+- I accepted the defaults a–h (optional message, number field, one application per job,
+  profile link, "You applied", checks in the view, ids-only log): they matched what I wanted,
+  and there was little to decide in them.
+- Approved the "Done when…" edit: "≤ team size and ≤ workers needed".
+- By hand: ran the app locally and went through every state as an employer and a worker (no
+  profile, the form, the browser limits, sending, "You applied", F5 does not send again).
+
+**Learned:**
+- Why a rule like "one application per job" needs the database and not only the view: two
+  requests at the same instant both pass the view's check, only the unique constraint stops
+  the second.
+- Why a form with errors is rendered and a valid one redirected (Post/Redirect/Get): the
+  rendered page keeps the typed values and the errors, the redirect makes F5 safe.
