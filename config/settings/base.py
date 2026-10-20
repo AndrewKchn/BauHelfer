@@ -155,6 +155,7 @@ LOGGING = {
     "loggers": {
         "accounts": {"level": "INFO"},  # also accounts.views, accounts.signals, …
         "jobs": {"level": "INFO"},
+        "config": {"level": "INFO"},  # the request log in production (#137)
         "django": {"level": "INFO"},
     },
 }

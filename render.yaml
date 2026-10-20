@@ -45,6 +45,12 @@ services:
     healthCheckPath: /  # Render switches to the new version only once this page answers
 
     envVars:
+      # Our own gunicorn arguments: Render's default adds "--access-logfile -", a line per
+      # request with the User-Agent, the Referer and the full path (#137). Setting this
+      # replaces the default whole, so the port and --preload are written out again. Request
+      # lines come from config/middleware.py instead (docs/specs/request-logging.md).
+      - key: GUNICORN_CMD_ARGS
+        value: --preload --bind=0.0.0.0:10000
       - key: DJANGO_SETTINGS_MODULE
         value: config.settings.production
       - key: TAILWINDCSS_VERSION

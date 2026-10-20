@@ -10,6 +10,16 @@ RENDER_EXTERNAL_HOSTNAME = env("RENDER_EXTERNAL_HOSTNAME", default="")
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS = [*ALLOWED_HOSTS, RENDER_EXTERNAL_HOSTNAME]
 
+# One line per request in Render's logs (#137, docs/specs/request-logging.md). Right after
+# WhiteNoise, so static files never reach it. A new list: base's is shared with local.py,
+# where runserver prints its own request lines (D6).
+_after_whitenoise = MIDDLEWARE.index("whitenoise.middleware.WhiteNoiseMiddleware") + 1
+MIDDLEWARE = [
+    *MIDDLEWARE[:_after_whitenoise],
+    "config.middleware.RequestLogMiddleware",
+    *MIDDLEWARE[_after_whitenoise:],
+]
+
 STORAGES = {
     # Uploaded photos (#64): a Supabase Storage bucket through its S3 protocol, because the
     # Render disk is wiped on every deploy (docs/specs/job-photos.md D2). Every value is
