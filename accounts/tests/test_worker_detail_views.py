@@ -1,8 +1,8 @@
 """Integration tests: a worker's profile as an employer sees it (#23).
 
 Each test goes through the whole stack: middleware, URL, view, template and database.
-Spec: docs/specs/applications-list.md, iteration 2 (R7, D2, D4, D9, D10), acceptance
-criteria AC8 and AC9. The link from the applications page (AC10) is in
+Spec: docs/specs/applications-list.md, iteration 2 (R7, D2, D4, D9, D10, D14), acceptance
+criteria AC8, AC9 and AC19. The link from the list on the job page (AC10) is in
 jobs/tests/test_applications_list_views.py.
 """
 
@@ -54,13 +54,14 @@ def test_employer_the_worker_applied_to_sees_the_profile(client, employer, worke
 
     1. Ivan (crew of 3, demolition, German, Minijob, work permit) applied to Anna's job
     2. Log in as Anna and open Ivan's worker page
-    3. Expect: Ivan's name, "Crew of 3", the skill, the language, the legal status and
-       "Confirmed by the worker"
+    3. Expect: the title "Worker profile"; Ivan's name, "Crew of 3", the skill, the
+       language, the legal status and "Confirmed by the worker"
     """
     client.force_login(employer)
 
     response = client.get(worker_url(worker))
 
+    assertContains(response, ">Worker profile</h1>")
     assertContains(response, "Ivan Petrenko")
     assertContains(response, "Crew of 3")
     assertContains(response, "Demolition")
@@ -95,6 +96,21 @@ def test_profile_stays_visible_after_the_job_is_cancelled(
     3. Expect: status 200 with Ivan's name
     """
     Job.objects.filter(pk=job.pk).update(status=Job.Status.CANCELLED)
+    client.force_login(employer)
+
+    response = client.get(worker_url(worker))
+
+    assertContains(response, "Ivan Petrenko")
+
+
+def test_worker_who_applied_to_two_jobs_is_shown_once(client, employer, worker, job):
+    """Two applications to the same employer still give one page, not an error.
+
+    1. Ivan applied to two of Anna's jobs
+    2. Log in as Anna and open Ivan's worker page
+    3. Expect: status 200 with Ivan's name (the lookup finds him once, not twice)
+    """
+    Application.objects.create(job=make_job(employer), worker=worker)
     client.force_login(employer)
 
     response = client.get(worker_url(worker))
@@ -159,3 +175,16 @@ def test_unknown_id_and_employer_id_give_404(client, employer, job):
 
     assert client.get(reverse("worker_detail", args=[999999])).status_code == 404
     assert client.get(worker_url(employer)).status_code == 404
+
+
+def test_worker_without_profile_gives_404(client, employer, worker, job):
+    """A worker whose profile is gone has nothing to show: 404, not a server error.
+
+    1. Ivan applied to Anna's job; then his profile is deleted (only possible in the admin)
+    2. Log in as Anna and open Ivan's worker page
+    3. Expect: 404
+    """
+    worker.worker_profile.delete()
+    client.force_login(employer)
+
+    assert client.get(worker_url(worker)).status_code == 404
