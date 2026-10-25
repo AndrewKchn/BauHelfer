@@ -7,7 +7,12 @@
 {% block title %}{{ job.get_job_type_display }} · BauHelfer{% endblock %}
 
 {% block content %}
-  <a href="{% url 'home' %}" class="link link-hover text-sm">← {% translate "Jobs" %}</a>
+  {# The owner comes from "My jobs" and goes back there (#23, applications-list.md D17). #}
+  {% if is_owner %}
+    <a href="{% url 'my_jobs' %}" class="link link-hover text-sm">← {% translate "My jobs" %}</a>
+  {% else %}
+    <a href="{% url 'home' %}" class="link link-hover text-sm">← {% translate "Jobs" %}</a>
+  {% endif %}
 
   {# Photos (spec R14-R18, D7, D8): a swipe carousel, one big 4:3 photo at a time. The #}
   {# browser does the swiping (CSS scroll-snap, daisyUI "carousel"); each slide has its own #}
@@ -93,22 +98,84 @@
     <div class="card-body break-words p-4">{{ job.description|linebreaksbr }}</div>
   </section>
 
-  {# Who hires: the profile card has no phone or email (spec R6). A job made in the admin #}
-  {# by an employer without a profile shows the account's name. The profile comes with the #}
-  {# job (select_related), so the missing one costs no query either. #}
-  <section class="card mt-4 bg-base-100 shadow-sm">
-    <div class="card-body p-4">
-      {% with profile=job.employer.employer_profile %}
-        {# A section title, not the name: the card itself shows the company and the person. #}
-        <h2 class="text-lg font-semibold">{% translate "Employer" %}</h2>
-        {% if profile %}
-          {% include "accounts/_employer_profile_card.html" %}
+  {% if is_owner %}
+    {# The owner knows their own company: they see the applications instead (#23, #}
+    {# applications-list.md R13, D15, D16), laid out as in the UI mockup "My jobs" (D11). #}
+    {# Nobody else gets `applications`: a worker who applied never sees the others. #}
+    <section id="applications" class="card mt-4 bg-base-100 shadow-sm">
+      <div class="card-body p-4">
+        {# |length runs the query once; the loop below reuses its rows. #}
+        <h2 class="text-lg font-semibold">
+          {% blocktranslate with count=applications|length %}Applications ({{ count }}){% endblocktranslate %}
+        </h2>
+        {% if applications %}
+          <ul class="mt-2 flex flex-col gap-3">
+            {% for application in applications %}
+              {# No phone or email: they are revealed only after acceptance (#25). #}
+              {% with worker=application.worker profile=application.worker.worker_profile %}
+                <li class="flex gap-3 rounded-box bg-base-200 p-3">
+                  <div class="avatar avatar-placeholder shrink-0 self-start">
+                    <div class="w-10 rounded-full bg-primary text-primary-content">
+                      <span aria-hidden="true">{{ worker.initials }}</span>
+                    </div>
+                  </div>
+                  <div class="flex min-w-0 flex-1 flex-col gap-1">
+                    <div class="flex items-start justify-between gap-2">
+                      <a href="{% url 'worker_detail' worker.pk %}" class="link min-w-0 break-words font-semibold">{{ worker.name }}</a>
+                      <span class="badge shrink-0 {% if application.status == 'accepted' %}badge-success{% elif application.status == 'pending' %}badge-warning{% else %}badge-ghost{% endif %}">{{ application.get_status_display }}</span>
+                    </div>
+                    <p class="text-sm text-base-content/70">
+                      {{ profile.team_label }} ·
+                      {% blocktranslate count workers=application.workers_offered %}brings {{ workers }} worker{% plural %}brings {{ workers }} workers{% endblocktranslate %}
+                    </p>
+                    <p class="text-sm text-base-content/70">
+                      {{ profile.get_legal_status_display }} ·
+                      {% if worker.work_permit_confirmed_at %}{% translate "Work permit confirmed" %}{% else %}{% translate "Work permit not confirmed" %}{% endif %}
+                    </p>
+                    {# Only the skill this job needs (D12); all skills are on the worker page. #}
+                    <p>
+                      {% if job.job_type in profile.skills %}
+                        <span class="badge badge-success badge-sm">✓ {{ job.get_job_type_display }}</span>
+                      {% else %}
+                        {# The same badge, grey with "−"; the hidden words tell a screen reader. #}
+                        <span class="badge badge-outline badge-sm text-base-content/60"><span class="sr-only">{% translate "No skill:" %}</span><span aria-hidden="true">−</span> {{ job.get_job_type_display }}</span>
+                      {% endif %}
+                    </p>
+                    {% if application.message %}
+                      {# whitespace-pre-line keeps the line breaks the worker typed. #}
+                      <p class="mt-1 whitespace-pre-line break-words">“{{ application.message }}”</p>
+                    {% endif %}
+                    <p class="text-xs text-base-content/60">
+                      {% blocktranslate with date=application.created_at|date:"j M" %}Sent {{ date }}{% endblocktranslate %}
+                    </p>
+                  </div>
+                </li>
+              {% endwith %}
+            {% endfor %}
+          </ul>
         {% else %}
-          <p>{{ job.employer.name }}</p>
+          <p>{% translate "No applications yet." %}</p>
         {% endif %}
-      {% endwith %}
-    </div>
-  </section>
+      </div>
+    </section>
+  {% else %}
+    {# Who hires: the profile card has no phone or email (spec R6). A job made in the admin #}
+    {# by an employer without a profile shows the account's name. The profile comes with #}
+    {# the job (select_related), so the missing one costs no query either. #}
+    <section class="card mt-4 bg-base-100 shadow-sm">
+      <div class="card-body p-4">
+        {% with profile=job.employer.employer_profile %}
+          {# A section title, not the name: the card itself shows the company and the person. #}
+          <h2 class="text-lg font-semibold">{% translate "Employer" %}</h2>
+          {% if profile %}
+            {% include "accounts/_employer_profile_card.html" %}
+          {% else %}
+            <p>{{ job.employer.name }}</p>
+          {% endif %}
+        {% endwith %}
+      </div>
+    </section>
+  {% endif %}
 
   {# By who looks (#19 spec R8; #22 application.md R6): the owner "Edit"; a worker their #}
   {# application, the form or the way to the profile; a guest "Log in to apply". #}

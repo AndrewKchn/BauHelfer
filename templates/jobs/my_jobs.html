@@ -14,17 +14,14 @@
         <li class="card bg-base-100 shadow-sm">
           <div class="card-body gap-1 p-3">
             {% include "jobs/_job_summary.html" with with_status=True %}
-            {# Applications in every status (#23, applications-list.md D3, D8); only open jobs #}
-            {# can change (spec D7), the views answer 404 for the others anyway. #}
-            <div class="mt-1 flex flex-wrap gap-2 text-sm font-semibold">
-              <a href="{% url 'job_applications' job.pk %}" class="link">{% translate "Applications" %}</a>
-              {% if job.status == "open" %}
-                <span aria-hidden="true" class="text-base-content/50">·</span>
+            {# Only open jobs can change (spec D7); the views answer 404 for the others anyway. #}
+            {% if job.status == "open" %}
+              <div class="mt-1 flex gap-2 text-sm font-semibold">
                 <a href="{% url 'job_edit' job.pk %}" class="link">{% translate "Edit" %}</a>
                 <span aria-hidden="true" class="text-base-content/50">·</span>
                 <a href="{% url 'job_cancel' job.pk %}" class="link text-error">{% translate "Cancel job" %}</a>
-              {% endif %}
-            </div>
+              </div>
+            {% endif %}
           </div>
         </li>
       {% endfor %}
