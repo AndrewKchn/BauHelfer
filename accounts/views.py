@@ -10,7 +10,13 @@ from django.db import transaction
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import CreateView, TemplateView, UpdateView, View
+from django.views.generic import (
+    CreateView,
+    DetailView,
+    TemplateView,
+    UpdateView,
+    View,
+)
 
 from .forms import (
     EmployerProfileForm,
@@ -189,6 +195,42 @@ class WorkerProfileEditView(ProfileEditView):
     profile_form_class = WorkerProfileForm
     profile_name = "worker_profile"
     success_url_name = "worker_profile"
+
+
+class WorkerDetailView(RoleRequiredMixin, DetailView):
+    """A worker's profile as an employer sees it, without contacts (#23).
+
+    docs/specs/applications-list.md R7, D2, D4, D10. Employers only: guests go to login,
+    workers get 403, also for their own id (their page is worker_profile).
+    """
+
+    role = User.Role.EMPLOYER
+    template_name = "accounts/worker_detail.html"
+    context_object_name = "worker"
+
+    @override
+    def get_queryset(self):
+        """Only workers who applied to one of the logged-in employer's jobs (D2).
+
+        get_object() looks the id from the URL up in here, so anyone else, an employer's id
+        or an unknown id gives 404 (D4). distinct(): a worker who applied to two of the
+        employer's jobs would be found twice, and get_object() would fail.
+        """
+        return (
+            User.objects.filter(
+                worker_profile__isnull=False,
+                applications__job__employer=self.request.user,
+            )
+            .select_related("worker_profile")
+            .distinct()
+        )
+
+    @override
+    def get_context_data(self, **kwargs):
+        """Give the shared profile card its `profile`."""
+        context = super().get_context_data(**kwargs)
+        context["profile"] = self.object.worker_profile
+        return context
 
 
 class EmployerProfileView(ProfileView):

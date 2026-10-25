@@ -27,6 +27,8 @@ urlpatterns = [
         views.WorkerProfileEditView.as_view(),
         name="worker_profile_edit",
     ),
+    # Another worker's profile, for the employers they applied to (#23): pk = the user id.
+    path("workers/<int:pk>/", views.WorkerDetailView.as_view(), name="worker_detail"),
     path(
         "profile/employer/",
         views.EmployerProfileView.as_view(),
