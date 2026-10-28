@@ -3,19 +3,10 @@
 {# and time, then how many workers are needed. No address or description (spec D1, R7). #}
 {# daisyUI makes every <p> in a card-body grow, so both share the row: text-end puts the #}
 {# rate at the right edge, as in the mockup. #}
-{# A 72 px square on the left: the first photo with "3 photos", or the hard-hat placeholder #}
-{# (#64, job-photos.md R29). job.photos.all comes from prefetch_related in the view, so it #}
-{# costs no query per card. min-w-0 lets the district be cut with "…" next to the square. #}
-{% with photos=job.photos.all %}
+{# The photo square on the left (_job_thumbnail.html); min-w-0 lets the district be cut #}
+{# with "…" next to it. #}
 <div class="flex gap-3">
-  <div class="relative size-18 shrink-0">
-    {% if photos %}
-      <img src="{{ photos.0.thumbnail_url }}" alt="{% translate 'Job photo' %}" class="size-full rounded-box object-cover">
-      <span class="absolute bottom-1 end-1 rounded bg-base-100/85 px-1 text-xs">{% blocktranslate count photos=photos|length %}{{ photos }} photo{% plural %}{{ photos }} photos{% endblocktranslate %}</span>
-    {% else %}
-      {% include "jobs/_photo_placeholder.html" %}
-    {% endif %}
-  </div>
+  {% include "jobs/_job_thumbnail.html" with photos=job.photos.all %}
   <div class="min-w-0 flex-1">
     <div class="flex items-start justify-between gap-2">
       <p class="text-base font-semibold"><a href="{% url 'job_detail' job.pk %}" class="link link-hover">{{ job.get_job_type_display }}</a></p>
@@ -32,4 +23,3 @@
     </div>
   </div>
 </div>
-{% endwith %}

@@ -10,6 +10,7 @@ from typing import override
 
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
+from django.db.models import Count
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
@@ -115,8 +116,24 @@ class MyJobsView(EmployerRequiredMixin, ListView):
 
     @override
     def get_queryset(self):
-        """Only the logged-in employer's jobs."""
-        return self.request.user.jobs.order_by("date", "start_time")
+        """Only the logged-in employer's jobs, each with its number of applications."""
+        return (
+            self.request.user.jobs.annotate(applications_count=Count("applications"))
+            .prefetch_related("photos")
+            .order_by("date", "start_time")
+        )
+
+    @override
+    def get_context_data(self, **kwargs):
+        """One tab per status that has jobs, in the order of Job.Status."""
+        context = super().get_context_data(**kwargs)
+        jobs = context["jobs"]
+        context["groups"] = [
+            {"status": status, "label": label, "jobs": group}
+            for status, label in Job.Status.choices
+            if (group := [job for job in jobs if job.status == status])
+        ]
+        return context
 
 
 class JobEditView(OwnOpenJobMixin, UpdateView):
