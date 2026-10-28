@@ -53,7 +53,8 @@ def jpeg_file(name="baustelle.jpg"):
 def test_employer_posts_edits_and_cancels_a_job_on_a_phone(page):
     """An employer posts a job, adds a photo, edits and cancels it on a phone.
 
-    1. Create an employer with a company profile, set a 360 x 740 phone screen, log in
+    1. Create an employer with a company profile, set a 360 x 740 phone screen, log in:
+       the employer lands on "My jobs" (#20)
     2. Open "Post a job" from the header menu, fill in the form with 12.00 €/h
     3. Click "Publish job"
     4. Expect: the minimum-wage error under the rate, the typed values are kept
@@ -78,10 +79,12 @@ def test_employer_posts_edits_and_cancels_a_job_on_a_phone(page):
     make_employer("max@example.com")
     page.set_viewport_size(PHONE)
     log_in(page, "max@example.com")
+    expect(page.get_by_role("heading", name="My jobs")).to_be_visible()
     main = page.get_by_role("main")
 
     page.get_by_label("Menu").click()
-    page.get_by_role("link", name="Post a job").click()
+    # "My jobs" has its own "+ Post a job" button, so the menu link is found by its exact name.
+    page.get_by_role("link", name="Post a job", exact=True).click()
     expect(page.get_by_role("heading", name="Post a job")).to_be_visible()
     assert_fits_the_screen(page)
     page.get_by_label("Job type").select_option(label="Carrying materials")
