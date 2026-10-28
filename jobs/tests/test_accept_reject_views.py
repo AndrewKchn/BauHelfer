@@ -471,3 +471,89 @@ def test_rejecting_is_logged_with_ids_only(employer_client, employer, job, caplo
         f"Application rejected: application_id={ivan.pk} job_id={job.pk} "
         f"employer_id={employer.pk}"
     ) in jobs_records(caplog)
+
+
+# How an application looks (D21-D24)
+
+
+@pytest.mark.parametrize(
+    ("status", "colour"),
+    [
+        ("pending", "badge-warning"),
+        ("accepted", "badge-success"),
+        ("closed", "badge-info"),
+        ("rejected", "badge-error"),
+    ],
+)
+def test_status_badge_has_the_colour_of_its_status(
+    employer_client, job, status, colour
+):
+    """Each status has its own colour, as the job statuses on "My jobs" (spec D21).
+
+    1. Save an application in the given status
+    2. Open the job's page as its employer
+    3. Expect: the status badge carries the status's colour class
+    """
+    taken = 1 if status == "accepted" else 0
+    application = apply(
+        job, "ivan@example.com", "Ivan Petrenko", status=status, workers_accepted=taken
+    )
+
+    response = employer_client.get(detail_url(job))
+
+    badge = f'{colour}">{application.get_status_display()}</span>'
+    assertContains(response, badge)
+
+
+def test_worker_sees_the_coloured_badge_of_their_application(client, job):
+    """The worker's own application uses the same badge (spec D21).
+
+    1. Save a rejected application of Ivan
+    2. Open the job's page as Ivan
+    3. Expect: "Rejected" in red (badge-error)
+    """
+    application = apply(job, "ivan@example.com", "Ivan Petrenko", status="rejected")
+    client.force_login(application.worker)
+
+    response = client.get(detail_url(job))
+
+    assertContains(response, 'badge-error">Rejected</span>')
+
+
+@pytest.mark.parametrize(
+    ("status", "colour"),
+    [
+        ("filled", "badge-info"),
+        ("done", "badge-secondary"),
+        ("cancelled", "badge-error"),
+    ],
+)
+def test_closed_job_status_has_its_colour(client, job, status, colour):
+    """A filled, done or cancelled job shows its status in the "My jobs" colour (D24).
+
+    1. Set the job filled, done or cancelled
+    2. Open its page as a guest
+    3. Expect: the status badge carries the status's colour class
+    """
+    Job.objects.filter(pk=job.pk).update(status=status)
+    job.refresh_from_db()
+
+    response = client.get(detail_url(job))
+
+    assertContains(response, f'{colour}">{job.get_status_display()}</span>')
+
+
+def test_application_shows_neither_crew_size_nor_confirmed_permit(employer_client, job):
+    """Only what tells applications apart: no crew size, no "permit confirmed" (D22, D23).
+
+    1. Save an application of Ivan, a crew of 3 with a confirmed permit, bringing 2
+    2. Open the job's page as its employer
+    3. Expect: "2 workers"; no "Crew of 3", "crew of 3" or "Work permit"
+    """
+    apply(job, "ivan@example.com", "Ivan Petrenko", 2)
+
+    response = employer_client.get(detail_url(job))
+
+    assertContains(response, "2 workers")
+    assertNotContains(response, "rew of 3")
+    assertNotContains(response, "Work permit")
