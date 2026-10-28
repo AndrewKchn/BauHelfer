@@ -64,9 +64,13 @@ R7. On the job page, under each pending application of an open job: a green
 R8. When accepting it would fill the job, a line under the buttons: "Accepting fills the
     job: the other pending applications will be closed." (D9).
 R9. An accepted application shows "Accepted" and, if only part of the crew was taken,
-    "1 of 2 workers accepted".
+    "1 of 2 workers" in place of "2 workers" (D22).
 R10. One log line per accept / reject / filled job, ids only (#124).
 R11. Every new string is wrapped for translation.
+R11a. After seeing the page (D21-D25): each application status and the job's own status
+     in its colour; under the worker's name only how many people come; the rest on the
+     box's full width; no crew size and no work-permit line, except a red "Work permit
+     not confirmed" chip when it is missing. This changes applications-list.md R3 and R10.
 
 ### Acceptance criteria (→ tests)
 
@@ -87,6 +91,11 @@ AC8. The owner's job page shows "Accept 2" and "Reject" forms for a pending appl
      an open job; "Accept 1 of 2" when 1 place is left; no buttons on an accepted or
      rejected application and on a filled job; the "fills the job" line only when it would.
 AC9. A database check stops `workers_accepted` above `workers_offered`.
+AC9a. Badges: Pending `badge-warning`, Accepted `badge-success`, Job filled `badge-info`,
+      Rejected `badge-error`, also on the worker's own application; the job's Filled
+      `badge-info`, Done `badge-secondary`, Cancelled `badge-error`. An application shows
+      "2 workers" and neither the crew size nor "Work permit"; "Work permit not
+      confirmed" only when it is missing.
 
 ## Iteration 2: workers found
 
@@ -207,6 +216,33 @@ D18. **Cancelling a job with accepted workers stays as it is** (Claude's default
 D19. **No bar on "My jobs"** (Claude's default): features before polish.
 D20. **Existing data is not migrated** (Claude's default): `workers_accepted` starts at 0;
      before this ticket nothing could accept an application except the admin.
+D21. **Status badges in colour** (mine, 2026-10-29, after using iteration 1 on the local
+     server: "Rejected" and "Job filled" looked like plain text): the colours of the job
+     statuses on "My jobs" (my-jobs.md D7) — Pending yellow, Accepted green, Job filled
+     blue (as a filled job), Rejected red (as a cancelled one). One shared
+     `_application_status_badge.html`, so the worker's own application has them too.
+D22. **One number of workers, bold, under the name** (mine, 2026-10-29): "2 workers", or
+     "1 of 2 workers" when part of a crew was taken. I found the number lost in "Crew of 3
+     · brings 2 workers", and three formats with "of" ("crew of 10", "2 of 3") confusing.
+     The crew's size is on the worker page: the rest of a crew cannot be taken anyway.
+     Rejected: "1 worker · 2 offered" for a partial crew (Claude's recommendation); the
+     crew's size when bigger than the offer.
+D23. **The mockup's compact box** (mine, 2026-10-29: "on the mockup everything is so
+     concise"): avatar, name with the number and the badge in one head, the rest on the
+     full width with nothing under the avatar; the job's skill and the legal status as two
+     chips that wrap whole. No "Work permit confirmed": nobody can apply without it (#22),
+     so it was the same on every application. A red "Work permit not confirmed" chip only
+     when an admin removed it after applying (Claude's default, accepted the same day: after
+     a complaint the employer must not hire someone without the right to work).
+D24. **The job's own status in colour on its page** (mine, 2026-10-29): Filled blue, Done
+     slate, Cancelled red, as on "My jobs"; "Past" stays grey. my-jobs.md D8 left this
+     until #24 makes filled jobs common.
+D25. **The message after a decision may be out of view** (mine, 2026-10-29, Claude's
+     recommendation): the page comes back at the application (D8), the messages are at the
+     top of the page. The changed badges show the result. Rejected: back to the top
+     without the anchor (scrolling down after every tap); messages as a toast fixed on the
+     screen (every page changes, a small JS) — a polish idea for M8. **Revisit when**
+     employers miss what happened.
 
 ## Differences from the mockups
 
@@ -217,5 +253,6 @@ D20. **Existing data is not migrated** (Claude's default): `workers_accepted` st
 | "My jobs": "Accepting 2 fills the job: you need only 1 more." | "Accepting fills the job: the other pending applications will be closed." | D9: the closing is what the employer must know |
 | "My jobs": "Workers found 2 / 3" bar in the card | the bar on the owner's job page | D11, D19 |
 | "My jobs": "Pending" / "Accepted" badges | also "Rejected", "Job filled" and "Cancelled" | D13, D15 |
+| "My jobs": "Crew of 2 · ★ 4,7 (9) · work permit ✓" | "2 workers" in bold; the skill and legal status as chips; no work permit | D22, D23 |
 | "Job detail": "1 of 3 workers found" | the same once someone is accepted, "Needs 3 workers" before | D10 |
 | No way to take back an acceptance | "Remove" on an accepted application | D2 |
