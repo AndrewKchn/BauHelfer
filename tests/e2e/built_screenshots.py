@@ -55,8 +55,8 @@ def shoot(page, path, name):
 def test_save_built_screenshots(page):
     """Save the built screenshots of the screens that exist.
 
-    1. Create an employer with three jobs (one with three photos, one with two
-       applications) and a worker
+    1. Create an employer with three open jobs (one with three photos, one with two
+       applications) and a cancelled one, and a worker
     2. Open the job list as a guest, the job page as the worker, "Post a job", "My jobs"
        and the job page with the applications as the employer, on a 390 x 844 screen in
        the light theme
@@ -74,6 +74,7 @@ def test_save_built_screenshots(page):
         employer,
         job_type="carrying",
         description="Carry 200 tiles to the third floor, no lift. Gloves provided.",
+        address="Lindwurmstraße 125",
         district="sendling",
         date=today + 2 * DAY,
         workers_needed=3,
@@ -84,14 +85,28 @@ def test_save_built_screenshots(page):
             job=job, image=ContentFile(photo_bytes(colour), name="p.jpg")
         )
     demolition = make_job(
-        employer, job_type="demolition", district="schwabing_west", date=today + 3 * DAY
+        employer,
+        job_type="demolition",
+        address="Belgradstraße 9",
+        district="schwabing_west",
+        date=today + 3 * DAY,
     )
     make_job(
         employer,
         job_type="site_cleaning",
+        address="Fürstenrieder Straße 50",
         district="laim",
         date=today + 5 * DAY,
         hours=4,
+    )
+    # A cancelled job, so "My jobs" shows a second group badge (#20); the job list shows
+    # open jobs only.
+    make_job(
+        employer,
+        job_type="painting",
+        district="laim",
+        date=today + 6 * DAY,
+        status="cancelled",
     )
     worker = User.objects.create_user(
         email="ana@example.com", password=PASSWORD, role="worker", name="Ana"
