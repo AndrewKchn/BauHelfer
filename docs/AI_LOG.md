@@ -1981,3 +1981,65 @@ profile. Context: the "My jobs" mockup, #22's `Application` model, and the later
   and the profile come in the same SQL query with a JOIN, not one query per application.
 - Why a queryset filter gives 404 for everyone who may not see a worker: `get_object()` looks
   the id up only among the workers who applied to my jobs, so nobody can walk through the ids.
+
+## 2026-10-28 · #20 Employer dashboard "My jobs"
+
+**Task given to AI:** turn "My jobs" into the employer's dashboard: jobs grouped by status,
+the number of applications per job, quick links to edit and to the applications. Context: the
+mockup `docs/mockups/my-jobs.png`, the decisions of #23 (the applications are on the job
+page), and three ideas I had left on the issue: the address on the card, a photo thumbnail,
+and landing on "My jobs" after login.
+
+**AI helped:**
+- Compared the mockup with the page and listed the differences before the spec; found that
+  "My jobs" already existed since #16 and what was missing.
+- Asked 4 defense questions at the start and, when I asked, answered them right away: N+1
+  and `annotate(Count(...))`, grouping in the view vs. `{% regroup %}`, why another employer
+  sees nothing (`request.user.jobs`), why the address is safe on my own page.
+- Showed three ways to swipe between groups with their costs and recommended CSS scroll-snap,
+  as the job page's photo carousel (#19): the swipe works without JavaScript.
+- Ran an experiment without commits and showed screenshots at 360 px in both themes after
+  each change I asked for; measured that the badge row fits 360 px (19 px to spare).
+- Wrote the spec with two iterations, the failing tests (first checked against the stashed
+  experiment, so I knew the tests were right), the code, and mutation-checked every new test:
+  15 mutations in iteration 1 and 4 in iteration 2, all caught.
+- Explained how Django's `LoginView` picks the page after login (`?next=` first, then
+  `get_default_redirect_url()`), so overriding only that method keeps `?next=` and its safety
+  check.
+
+**AI failed:**
+- The first layout wrapped "Cancel job" to its own line (links next to the photo); the
+  `neutral` colour for Done almost disappeared in the dark theme; the badge row was 14 px too
+  wide at 360 px. All found on screenshots or by measuring, before any commit.
+- I found that the date broke in the middle ("Fri 30 / Oct"). AI's first fix kept the date
+  whole but left the "·" at the edge of a line.
+- Each iteration broke an E2E test from #16 / #21: the cancelled job's status moved from the
+  card to the group badge, and after login "My jobs" has a second "Post a job" link. Found by
+  running the whole suite; the tests were updated with a `story(20)` marker.
+- The spec draft named the wrong E2E ticket (#121 instead of #28); AI caught it before the
+  commit.
+
+**My part:**
+- Asked to get the answers to the defense questions first, before the decisions.
+- My idea: groups as tabs that are swiped on a phone. After seeing them I asked for badges
+  instead of tabs, filled with their status colour when active: it is clearer, and a colour
+  is easier to find my way by.
+- Chose the district only first, then changed it to the address and the district: only the
+  employer sees this page, so the address is safe here.
+- Kept my ideas from #23: the photo on the card and landing on "My jobs" after login (added
+  to "Done when…").
+- Asked for the date always on its own line, without the "·": it broke in the middle, and
+  with short names it stayed on the same line; I wanted every card to look the same.
+- Asked where else status badges are shown; decided to leave the grey ones on the job page
+  for now, but to record it for later (D8, a comment in #96).
+- Asked to commit the spec on its own, as the first commit, as in the earlier tickets.
+- By hand: ran the app on my local server and went through the required steps (the PR's
+  "How to test"), and read the spec before the tests.
+
+**Learned:**
+- Why `annotate(Count(...))` keeps the number of queries the same for 1 or 100 jobs: the
+  database counts the applications of all jobs in one query with a JOIN and GROUP BY, instead
+  of one query per card.
+- How `LoginView` chooses the page after login: a safe `?next=` first, only then
+  `get_default_redirect_url()`. Overriding only that method keeps Django's check of `?next=`,
+  so there is no open redirect.
