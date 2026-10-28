@@ -358,20 +358,23 @@ def test_my_jobs_offers_edit_and_cancel_for_open_jobs_only(employer_client, empl
     assertNotContains(response, reverse("job_cancel", args=[cancelled_job.pk]))
 
 
+@pytest.mark.story(20)
 def test_my_jobs_card_follows_the_mockup(employer_client, employer):
     """A job card in "My jobs" looks like the UI mockup.
 
     1. Save an open demolition job next week, 08:00, 6 hours, 2 workers, 20.00 €
     2. Open "My jobs"
-    3. Expect: the title "Demolition · <weekday> <day> <month>"; time, hours, workers and
-       rate in one line that wraps only between its parts; the district in a line of its
-       own; the links "Edit" and "Cancel job"
+    3. Expect: the title "Demolition", the date "<weekday> <day> <month>" on the line below
+       (#20, my-jobs.md D9); time, hours, workers and rate in one line that wraps only
+       between its parts; the district in a line of its own; the links "Edit" and
+       "Cancel job"
     """
     make_job(employer)
 
     response = employer_client.get(reverse("my_jobs"))
 
-    assertContains(response, f"Demolition · {dateformat.format(NEXT_WEEK, 'D j M')}")
+    date = dateformat.format(NEXT_WEEK, "D j M")
+    assertContains(response, f'Demolition<span class="block">{date}</span>')
     # The short parts share one line; on a phone it may wrap only between them, never
     # inside one ("2 / workers"), so each is a no-wrap span.
     for part in ["08:00", "6 h", "2 workers", "20.00 €/h"]:
