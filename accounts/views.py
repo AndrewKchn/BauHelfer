@@ -1,14 +1,15 @@
-"""Views for account pages. Login, logout and password reset use Django's built-in views."""
+"""Views for account pages. Login extends Django's view; logout and password reset use it as is."""
 
 import logging
 from typing import override
 
 from django.contrib import messages
 from django.contrib.auth import login
+from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db import transaction
 from django.shortcuts import redirect, render
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import (
     CreateView,
@@ -30,6 +31,21 @@ from .models import User
 
 # "accounts.views". Ids only, never an email or other personal data (#124).
 logger = logging.getLogger(__name__)
+
+
+class LoginView(auth_views.LoginView):
+    """Django's login, but an employer lands on "My jobs" (#20, docs/specs/my-jobs.md D4).
+
+    Django asks get_default_redirect_url() only when there is no safe `?next=` address, so
+    a `?next=` still wins. After a successful login request.user is the new user.
+    """
+
+    @override
+    def get_default_redirect_url(self):
+        """ "My jobs" for an employer; LOGIN_REDIRECT_URL (the home page) for everyone else."""
+        if self.request.user.role == User.Role.EMPLOYER:
+            return reverse("my_jobs")
+        return super().get_default_redirect_url()
 
 
 class RegisterView(CreateView):
