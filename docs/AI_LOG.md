@@ -1921,3 +1921,63 @@ notes in the issue from #94 (use `User.can_apply()`, link to the worker profile)
   the second.
 - Why a form with errors is rendered and a valid one redirected (Post/Redirect/Get): the
   rendered page keeps the typed values and the errors, the redirect makes F5 safe.
+
+## 2026-10-28 · #23 Employer views applications per job
+
+**Task given to AI:** Show an employer the applications to their job (worker name, team size,
+skills, legal status, message), only to the job's owner, with a link to each worker's
+profile. Context: the "My jobs" mockup, #22's `Application` model, and the later tickets
+#20, #24, #25, #38.
+
+**AI helped:**
+- Compared the ticket with the mockup and wrote the spec `docs/specs/applications-list.md`
+  before the tests. Showed the two real choices (where the list lives; who may open a
+  worker's profile) as tables with their costs and what later tickets would have to redo.
+- Built two iterations with tests first: a separate applications page, then the worker page
+  `/accounts/workers/<pk>/` (only for an employer the worker applied to, 404 for others).
+- Explained the reasons behind the data: work permit and legal status are what an employer
+  must check by law; phone and email only after acceptance (#25).
+- Ran quick experiments without commits and showed screenshots: the mockup layout, three
+  avatar colours, the job page with a short block vs. the full list.
+- When I moved the list onto the job page, kept the old version on a local branch, rewrote
+  the tests and the spec, and split the work into tests → code commits again.
+- Mutation-checked every new test; added a built screenshot of the owner's job page.
+
+**AI failed:**
+- Two mutations survived: without `.distinct()` a worker who applied to two of my jobs gives
+  a 500 error, and a worker without a profile gives a 500 too. Two tests were added.
+- Edited files with shell scripts, so VS Code showed me no diffs; I could not see the new
+  files until I refreshed. Afterwards it used the Edit tool.
+- The worker page repeated the name in the title and in the card; the grey "no skill" badge
+  disappeared on its background. Both found on screenshots.
+- The first initials rule (first two words) gave "MD" for "Maria del Carmen López"; found
+  after my question.
+- Proposed 5 commits after the experiment mixed code and tests; after my question it found a
+  way with 3. Wrote the spec in third person ("the student decided").
+- While preparing the commits it unstaged a file by mistake and had to rebuild it.
+
+**My part:**
+- Chose a separate applications page and the worker page only for employers the worker
+  applied to (my criteria: easy on a phone, nothing to redo later, less code), and two
+  iterations instead of one after asking why there was only one.
+- After using both pages on my local server, I joined them: the separate page was not handy
+  and the job page showed the employer things they do not need. So the owner sees the list on
+  the job page instead of the company card. AI recommended a short "Applications (N)" block
+  with a button instead.
+- My own ideas: the mockup's layout with avatars; only the job's own skill on an application
+  instead of all skills; the same badge for "has it" and "doesn't have it", only colour and
+  sign differ; "← My jobs" instead of "← Jobs" for the owner; no "Applications" link on "My
+  jobs".
+- Kept the avatar colour primary: AI's three variants did not fit the rest of the design.
+- Asked what initials do with one-word and five-word names; asked why the employer needs the
+  worker page at all, and kept it for #25 and #38.
+- Moved three ideas to #20 (land on "My jobs" after login, photos and the application count
+  on "My jobs") and left the "two crews of 4 for 5 places" case for #24.
+- Asked that specs are written in my voice, not "the student decided".
+- By hand: ran both versions on my local server and checked iteration 1 before its commit.
+
+**Learned:**
+- Why `select_related` keeps the query count the same for 1 or 10 applications: the worker
+  and the profile come in the same SQL query with a JOIN, not one query per application.
+- Why a queryset filter gives 404 for everyone who may not see a worker: `get_object()` looks
+  the id up only among the workers who applied to my jobs, so nobody can walk through the ids.

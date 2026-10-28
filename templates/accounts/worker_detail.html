@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Worker profile" %} · BauHelfer{% endblock %}
+
+{% block content %}
+  {# A worker's profile for an employer they applied to (#23, applications-list.md R7). #}
+  {# No contact details: the card has none, they come after acceptance (#25). The name is #}
+  {# in the card, so the title does not repeat it (D14), as "My profile" on the own page. #}
+  <div class="card bg-base-100 shadow-sm">
+    <div class="card-body gap-6">
+      <h1 class="card-title text-2xl">{% translate "Worker profile" %}</h1>
+
+      {% include "accounts/_worker_profile_card.html" %}
+    </div>
+  </div>
+{% endblock %}

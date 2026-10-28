@@ -115,6 +115,18 @@ class User(AbstractUser):
             and self.work_permit_confirmed_at is not None
         )
 
+    def initials(self):
+        """The avatar's letters (#23): first and last word, "ML" for "Maria del Carmen López".
+
+        A one-word name gives one letter, an empty name none (applications-list.md D13).
+        """
+        words = self.name.split()
+        if not words:
+            return ""
+        if len(words) == 1:
+            return words[0][0].upper()
+        return (words[0][0] + words[-1][0]).upper()
+
     def get_profile_url(self):
         """The profile form for this user's role; the role choice while there is no role."""
         url_names = {

@@ -1,7 +1,8 @@
 """Job pages: the public job list (#18) and job page (#19, docs/specs/job-detail.md) with
 the apply form (#22, docs/specs/application.md), and the employer pages: post, list own,
 edit, cancel (#16, docs/specs/job-form.md), add and delete photos (#64,
-docs/specs/job-photos.md).
+docs/specs/job-photos.md). The job page shows its employer the applications (#23,
+docs/specs/applications-list.md).
 """
 
 import logging
@@ -259,7 +260,8 @@ class JobDetailView(DetailView):
 
     @override
     def get_context_data(self, **kwargs):
-        """Add who looks: the owner sees the address and "Edit", a worker the apply part."""
+        """Add who looks: the owner sees the address, "Edit" and the applications, a worker
+        the apply part."""
         context = super().get_context_data(**kwargs)
         user = self.request.user
         job = self.object
@@ -268,6 +270,14 @@ class JobDetailView(DetailView):
         # Decided here, not in the template: #25 adds the worker whose application was
         # accepted, and the template stays as it is.
         context["show_address"] = is_owner
+        if is_owner:
+            # Only for the owner (applications-list.md D16): a guest's page keeps its 2
+            # queries. select_related: each application's worker and profile come in the
+            # same query, so 10 applications cost one query, not 21 (D7). The skills are an
+            # array in the profile row and need no query of their own. Newest first (D5).
+            context["applications"] = job.applications.select_related(
+                "worker__worker_profile"
+            ).order_by("-created_at")
         # Only for workers: a guest's page keeps its 2 queries (application.md AC11).
         if user.is_authenticated and user.role == User.Role.WORKER:
             # Their application, also when the job is closed now (D7); None if there is none.

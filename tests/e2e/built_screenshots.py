@@ -21,7 +21,7 @@ from django.utils import timezone
 from PIL import Image, ImageDraw
 
 from accounts.models import EmployerProfile, WorkerProfile
-from jobs.models import JobPhoto
+from jobs.models import Application, JobPhoto
 from jobs.tests.test_views import make_job
 
 from .helpers import PASSWORD, log_in
@@ -55,9 +55,11 @@ def shoot(page, path, name):
 def test_save_built_screenshots(page):
     """Save the built screenshots of the screens that exist.
 
-    1. Create an employer with three jobs (one with three photos) and a worker
-    2. Open the job list as a guest, the job page as the worker, "Post a job" and "My jobs"
-       as the employer, on a 390 x 844 screen in the light theme
+    1. Create an employer with three jobs (one with three photos, one with two
+       applications) and a worker
+    2. Open the job list as a guest, the job page as the worker, "Post a job", "My jobs"
+       and the job page with the applications as the employer, on a 390 x 844 screen in
+       the light theme
     3. Expect: one full-page PNG per screen in docs/mockups/built/
     """
     OUT.mkdir(exist_ok=True)
@@ -81,7 +83,7 @@ def test_save_built_screenshots(page):
         JobPhoto.objects.create(
             job=job, image=ContentFile(photo_bytes(colour), name="p.jpg")
         )
-    make_job(
+    demolition = make_job(
         employer, job_type="demolition", district="schwabing_west", date=today + 3 * DAY
     )
     make_job(
@@ -103,6 +105,35 @@ def test_save_built_screenshots(page):
     )
     worker.work_permit_confirmed_at = timezone.now()
     worker.save()
+    # Two applications to the demolition job, for its employer's page (#23); Ana applies
+    # to nothing, so the job page above still shows her the apply form.
+    for email, name, team, skills, message in (
+        (
+            "andrii@example.com",
+            "Andrii Petrenko",
+            2,
+            ["demolition"],
+            "We are a crew of two.",
+        ),
+        ("mehmet@example.com", "Mehmet Kaya", 1, ["carrying"], ""),
+    ):
+        applicant = User.objects.create_user(
+            email=email,
+            password=PASSWORD,
+            role="worker",
+            name=name,
+            work_permit_confirmed_at=timezone.now(),
+        )
+        WorkerProfile.objects.create(
+            user=applicant,
+            team_size=team,
+            skills=skills,
+            languages=["uk"],
+            legal_status="gewerbe",
+        )
+        Application.objects.create(
+            job=demolition, worker=applicant, workers_offered=team, message=message
+        )
 
     # live_server does not serve uploads (in-memory storage): answer every photo address.
     picture = photo_bytes("#d9822b")
@@ -119,3 +150,4 @@ def test_save_built_screenshots(page):
     log_in(page, "max@example.com")
     shoot(page, "/jobs/new/", "post-a-job")
     shoot(page, "/jobs/mine/", "my-jobs")
+    shoot(page, f"/jobs/{demolition.pk}/", "job-applications")
