@@ -69,9 +69,10 @@ def test_owner_sees_each_application_with_the_workers_details(employer_client, j
     1. Save an application from Ivan, a crew of 3 (Gewerbe, work permit confirmed)
        bringing 2, with a message
     2. Open the job's page as its employer
-    3. Expect: the list instead of the employer card, with the name, "Crew of 3",
-       "brings 2 workers", the legal status, "Work permit confirmed", the message in
-       quotes, "Pending" and the day it was sent
+    3. Expect: the list instead of the employer card, with the name, "2 workers", the
+       legal status, the message in quotes, "Pending" and the day it was sent
+    4. Expect: no crew size and no work-permit line: changed in #24
+       (accept-reject.md D22, D23)
     """
     application = apply(
         job, "ivan@example.com", "Ivan Petrenko", workers_offered=2, message="We are 3."
@@ -83,10 +84,10 @@ def test_owner_sees_each_application_with_the_workers_details(employer_client, j
     assertContains(response, LIST)
     assertNotContains(response, "Huber Bau GmbH")  # the employer card
     assertContains(response, "Ivan Petrenko")
-    assertContains(response, "Crew of 3")
-    assertContains(response, "brings 2 workers")
+    assertContains(response, "2 workers")
+    assertNotContains(response, "Crew of 3")
     assertContains(response, "Self-employed (Gewerbe)")
-    assertContains(response, "Work permit confirmed")
+    assertNotContains(response, "Work permit")
     assertContains(response, "“We are 3.”")
     assertContains(response, "Pending")
     sent = dateformat.format(timezone.localdate(), "j M")
@@ -149,7 +150,7 @@ def test_unconfirmed_work_permit_is_shown(employer_client, job):
     1. Save an application from a worker without the work-permit confirmation (possible
        when the admin removes it after applying)
     2. Open the job's page
-    3. Expect: "Work permit not confirmed", not "Work permit confirmed"
+    3. Expect: "Work permit not confirmed" (since #24 the only work-permit text, D23)
     """
     worker = make_worker("ivan@example.com", permit=False)
     Application.objects.create(job=job, worker=worker)
@@ -157,7 +158,6 @@ def test_unconfirmed_work_permit_is_shown(employer_client, job):
     response = employer_client.get(detail_url(job))
 
     assertContains(response, "Work permit not confirmed")
-    assertNotContains(response, "Work permit confirmed")
 
 
 def test_page_shows_no_contact_details(employer_client, job):

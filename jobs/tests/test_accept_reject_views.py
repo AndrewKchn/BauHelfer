@@ -5,6 +5,8 @@ Spec: docs/specs/accept-reject.md, iteration 1 (R5-R10, D1, D3, D5, D8, D9, D15)
 acceptance criteria AC6-AC8. The model's rules are in test_accept_reject.py.
 """
 
+import re
+
 import pytest
 from django.urls import reverse
 from pytest_django.asserts import assertContains, assertNotContains
@@ -386,7 +388,7 @@ def test_part_of_a_crew_accepted_is_shown(employer_client, job):
 
     1. Save an accepted crew of Ivan offering 2 with 1 taken
     2. Open the job's page as its employer
-    3. Expect: "Accepted" and "1 of 2 workers accepted"
+    3. Expect: "Accepted" and "1 of 2 workers" in place of "2 workers" (D22)
     """
     apply(
         job,
@@ -400,7 +402,9 @@ def test_part_of_a_crew_accepted_is_shown(employer_client, job):
     response = employer_client.get(detail_url(job))
 
     assertContains(response, "Accepted")
-    assertContains(response, "1 of 2 workers accepted")
+    assertContains(response, "1 of 2 workers")
+    # "2 workers" right after a tag would be the plain count, which it replaces.
+    assert not re.search(r">\s*2 workers", response.content.decode())
 
 
 def test_closed_application_says_job_filled(employer_client, job):

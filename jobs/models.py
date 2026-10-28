@@ -179,6 +179,16 @@ class Job(models.Model):
         end = start + timedelta(hours=self.hours)
         return end.time()
 
+    def workers_found(self):
+        """How many workers the employer has taken: the sum over accepted applications.
+
+        People, not applications: a crew of 2 is two workers (accept-reject.md D4).
+        """
+        total = self.applications.filter(status=Application.Status.ACCEPTED).aggregate(
+            total=models.Sum("workers_accepted")
+        )["total"]
+        return total or 0  # Sum gives None when nothing is accepted
+
     @property
     def accepts_applications(self):
         """Whether workers can still apply: open and not started yet (#19 spec R7, D2).
@@ -272,16 +282,24 @@ def delete_photo_file(sender, instance, **kwargs):
     transaction.on_commit(delete_files)
 
 
+class ApplicationStateError(Exception):
+    """The application or its job is no longer in a state that allows this decision."""
+
+
 class Application(models.Model):
     """A worker's application to a job: a message and how many people they bring (#22).
 
-    docs/specs/application.md. The employer accepts or rejects it in #24.
+    docs/specs/application.md. The employer accepts or rejects it (#24,
+    docs/specs/accept-reject.md).
     """
 
     class Status(models.TextChoices):
         PENDING = "pending", _("Pending")
         ACCEPTED = "accepted", _("Accepted")
         REJECTED = "rejected", _("Rejected")
+        # Nobody refused it: the job was filled by others. Pending again if the job opens
+        # again (accept-reject.md D15).
+        CLOSED = "closed", _("Job filled")
 
     job = models.ForeignKey(
         Job,
@@ -306,6 +324,11 @@ class Application(models.Model):
         default=1,
         validators=[MinValueValidator(1), MaxValueValidator(10)],
     )
+    # How many of the crew the employer took: 0 until accepted, then at most the places left
+    # (accept-reject.md R1, D1).
+    workers_accepted = models.PositiveSmallIntegerField(
+        _("workers accepted"), default=0
+    )
     status = models.CharField(
         _("status"), max_length=10, choices=Status.choices, default=Status.PENDING
     )
@@ -324,7 +347,52 @@ class Application(models.Model):
                 condition=models.Q(workers_offered__gte=1, workers_offered__lte=10),
                 name="application_workers_offered_1_to_10",
             ),
+            # Never more of a crew than it offered, even when saved outside accept().
+            models.CheckConstraint(
+                condition=models.Q(workers_accepted__lte=models.F("workers_offered")),
+                name="application_workers_accepted_not_above_offered",
+            ),
         )
 
     def __str__(self):
         return f"{self.worker} → {self.job}"
+
+    def _lock(self):
+        """Lock the job row, then read this application and its job again.
+
+        Called inside transaction.atomic(). A second accept of the same job (a double tap,
+        another tab) waits here until the first one has finished, and then reads what the
+        first one saved, not the old copy it was loaded with (accept-reject.md D6).
+        """
+        self.job = Job.objects.select_for_update().get(pk=self.job_id)
+        self.refresh_from_db(fields=["status", "workers_accepted"])
+        if self.job.status != Job.Status.OPEN or self.status != self.Status.PENDING:
+            raise ApplicationStateError
+
+    def accept(self):
+        """Take as many of the crew as places are left; fill the job if it is full now.
+
+        accept-reject.md R3, D1, D15. When the job is filled, every other pending
+        application of it is closed ("Job filled"). Raises ApplicationStateError, and
+        changes nothing, unless the job is open and this application pending.
+        """
+        with transaction.atomic():
+            self._lock()
+            places_left = self.job.workers_needed - self.job.workers_found()
+            self.workers_accepted = min(self.workers_offered, places_left)
+            self.status = self.Status.ACCEPTED
+            self.save(update_fields=["status", "workers_accepted"])
+            if self.workers_accepted == places_left:
+                self.job.status = Job.Status.FILLED
+                self.job.save(update_fields=["status"])
+                # One UPDATE for all of them; this one is accepted already, so not in it.
+                self.job.applications.filter(status=self.Status.PENDING).update(
+                    status=self.Status.CLOSED
+                )
+
+    def reject(self):
+        """Reject this application (R4); the same rules and lock as accept()."""
+        with transaction.atomic():
+            self._lock()
+            self.status = self.Status.REJECTED
+            self.save(update_fields=["status"])

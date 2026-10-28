@@ -2,7 +2,8 @@
 the apply form (#22, docs/specs/application.md), and the employer pages: post, list own,
 edit, cancel (#16, docs/specs/job-form.md), add and delete photos (#64,
 docs/specs/job-photos.md). The job page shows its employer the applications (#23,
-docs/specs/applications-list.md).
+docs/specs/applications-list.md), who accepts or rejects them (#24,
+docs/specs/accept-reject.md).
 """
 
 import logging
@@ -29,7 +30,7 @@ from accounts.models import User
 from accounts.views import RoleRequiredMixin
 
 from .forms import ApplicationForm, JobFilterForm, JobForm, JobPhotosForm
-from .models import Job, JobPhoto
+from .models import Application, ApplicationStateError, Job, JobPhoto
 
 # "jobs.views". Ids only, never an email or other personal data (#124).
 logger = logging.getLogger(__name__)
@@ -295,6 +296,9 @@ class JobDetailView(DetailView):
             context["applications"] = job.applications.select_related(
                 "worker__worker_profile"
             ).order_by("-created_at")
+            # The template picks "Accept 2" or "Accept 1 of 2" and the "fills the job"
+            # warning with it (accept-reject.md R7, R8).
+            context["places_left"] = job.workers_needed - job.workers_found()
         # Only for workers: a guest's page keeps its 2 queries (application.md AC11).
         if user.is_authenticated and user.role == User.Role.WORKER:
             # Their application, also when the job is closed now (D7); None if there is none.
@@ -346,3 +350,94 @@ class JobApplyView(WorkerRequiredMixin, JobDetailView):
         )
         messages.success(request, _("Application sent."))
         return redirect("job_detail", pk=job.pk)
+
+
+class OwnPendingApplicationMixin(EmployerRequiredMixin, SingleObjectMixin):
+    """The page works on a pending application to one of the employer's own open jobs.
+
+    accept-reject.md R5, D5. Like OwnOpenJobMixin: anything else is not in the queryset,
+    so the answer is 404. The views have only post(), so a GET gives 405: a link must not
+    decide.
+    """
+
+    @override
+    def get_queryset(self):
+        """Pending applications to the logged-in employer's open jobs."""
+        return Application.objects.filter(
+            job__employer=self.request.user,
+            job__status=Job.Status.OPEN,
+            status=Application.Status.PENDING,
+        ).select_related("worker")
+
+
+def back_to(application):
+    """The job page, scrolled to this application (accept-reject.md R6, D8)."""
+    url = reverse("job_detail", args=[application.job_id])
+    return redirect(f"{url}#application-{application.pk}")
+
+
+class ApplicationAcceptView(OwnPendingApplicationMixin, View):
+    """POST: accept an application, part of a crew if fewer places are left (R3, R6)."""
+
+    def post(self, request, *args, **kwargs):
+        """Accept, say how many workers were taken and whether the job is filled now."""
+        application = self.get_object()
+        try:
+            application.accept()
+        except ApplicationStateError:
+            # Another tab or a double tap decided it a moment earlier (D6).
+            messages.info(request, _("This application was already decided."))
+            return back_to(application)
+        count = application.workers_accepted
+        messages.success(
+            request,
+            ngettext(
+                "Accepted: %(count)d worker from %(name)s.",
+                "Accepted: %(count)d workers from %(name)s.",
+                count,
+            )
+            % {"count": count, "name": application.worker.name},
+        )
+        logger.info(
+            "Application accepted: application_id=%s job_id=%s employer_id=%s "
+            "workers=%s",
+            application.pk,
+            application.job_id,
+            request.user.pk,
+            count,
+        )
+        if application.job.status == Job.Status.FILLED:
+            messages.success(
+                request,
+                _("The job is filled. The other pending applications were closed."),
+            )
+            logger.info(
+                "Job filled: job_id=%s employer_id=%s",
+                application.job_id,
+                request.user.pk,
+            )
+        return back_to(application)
+
+
+class ApplicationRejectView(OwnPendingApplicationMixin, View):
+    """POST: reject an application (R4, R6)."""
+
+    def post(self, request, *args, **kwargs):
+        """Reject and say so."""
+        application = self.get_object()
+        try:
+            application.reject()
+        except ApplicationStateError:
+            messages.info(request, _("This application was already decided."))
+            return back_to(application)
+        messages.success(
+            request,
+            _("Rejected: %(name)s.") % {"name": application.worker.name},
+        )
+        logger.info(
+            "Application rejected: application_id=%s job_id=%s employer_id=%s",
+            application.pk,
+            application.job_id,
+            request.user.pk,
+        )
+        return back_to(application)
