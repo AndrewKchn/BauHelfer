@@ -1,6 +1,7 @@
 {% load i18n %}
 {# One job on the job list (#18), as in the UI mockup "Jobs list": type and rate, then place #}
-{# and time, then how many workers are needed. No address or description (spec D1, R7). #}
+{# and time, then how many workers are still needed (#24: minus the accepted ones). No #}
+{# address or description (spec D1, R7). #}
 {# daisyUI makes every <p> in a card-body grow, so both share the row: text-end puts the #}
 {# rate at the right edge, as in the mockup. #}
 {# The photo square on the left (_job_thumbnail.html); min-w-0 lets the district be cut #}
@@ -19,7 +20,7 @@
     <p class="text-sm text-base-content/70">{{ job.date|date:"D j M" }} · {{ job.start_time|time:"H:i" }}–{{ job.end_time|time:"H:i" }}</p>
     <div>
       {# The whole phrase is translated: word order and form change with the number. #}
-      <span class="badge badge-accent mt-1 font-semibold">{% blocktranslate count workers=job.workers_needed %}Needs {{ workers }} worker{% plural %}Needs {{ workers }} workers{% endblocktranslate %}</span>
+      <span class="badge badge-accent mt-1 font-semibold">{% blocktranslate count workers=job.places_left %}Needs {{ workers }} worker{% plural %}Needs {{ workers }} workers{% endblocktranslate %}</span>
     </div>
   </div>
 </div>

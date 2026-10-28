@@ -296,8 +296,9 @@ class ApplicationForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.instance.job = job
         self.instance.worker = worker
-        # No more people than the crew has, and no more than the job needs (D4).
-        limit = min(worker.worker_profile.team_size, job.workers_needed)
+        # No more people than the crew has, and no more than the places still free (D4;
+        # accept-reject.md R15).
+        limit = min(worker.worker_profile.team_size, job.places_left)
         if limit == 1:
             # Nothing to choose: no field, the model's default 1 is saved.
             del self.fields["workers_offered"]

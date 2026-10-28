@@ -9,6 +9,7 @@ from typing import override
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction
+from django.db.models.functions import Coalesce
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.utils import timezone
@@ -92,6 +93,19 @@ class JobQuerySet(models.QuerySet):
         now = timezone.localtime()
         later_today = models.Q(date=now.date(), start_time__gt=now.time())
         return self.filter(models.Q(date__gt=now.date()) | later_today)
+
+    def with_workers_found(self):
+        """Add `accepted_workers` to each job: the workers taken, from the same query.
+
+        One SUM over the accepted applications per job (accept-reject.md D12), so a list of
+        20 jobs costs no 20 extra queries. Coalesce: a job with none gets 0, not None.
+        """
+        accepted = models.Q(applications__status=Application.Status.ACCEPTED)
+        return self.annotate(
+            accepted_workers=Coalesce(
+                models.Sum("applications__workers_accepted", filter=accepted), 0
+            )
+        )
 
 
 class Job(models.Model):
@@ -188,6 +202,18 @@ class Job(models.Model):
             total=models.Sum("workers_accepted")
         )["total"]
         return total or 0  # Sum gives None when nothing is accepted
+
+    @property
+    def places_left(self):
+        """How many workers the job still needs (accept-reject.md R14, R15).
+
+        Uses `accepted_workers` when the job was loaded with with_workers_found(); else
+        one query.
+        """
+        found = getattr(self, "accepted_workers", None)
+        if found is None:
+            found = self.workers_found()
+        return self.workers_needed - found
 
     @property
     def accepts_applications(self):

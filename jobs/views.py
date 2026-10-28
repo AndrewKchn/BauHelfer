@@ -246,9 +246,12 @@ class JobListView(ListView):
         self.filter_form = JobFilterForm(self.request.GET)
         # prefetch_related: the photos of all jobs on the page in one more query, not one
         # query per card (job-photos.md R30, D28).
+        # with_workers_found(): "Needs 1 worker" counts only the free places, from the same
+        # query (accept-reject.md R14, R16).
         jobs = (
             Job.objects.open()
             .upcoming()
+            .with_workers_found()
             .order_by("date", "start_time")
             .prefetch_related("photos")
         )
@@ -274,7 +277,11 @@ class JobDetailView(DetailView):
     # The employer and their profile come in the same query as the job (spec R12): the page
     # shows both, and without this each would cost a query of its own. The photos are one
     # more query, made by the template (R19).
-    queryset = Job.objects.select_related("employer__employer_profile")
+    # with_workers_found(): "1 of 3 workers found" and the places left, in the same query
+    # (accept-reject.md R12, R16).
+    queryset = Job.objects.select_related(
+        "employer__employer_profile"
+    ).with_workers_found()
 
     @override
     def get_context_data(self, **kwargs):
@@ -297,8 +304,8 @@ class JobDetailView(DetailView):
                 "worker__worker_profile"
             ).order_by("-created_at")
             # The template picks "Accept 2" or "Accept 1 of 2" and the "fills the job"
-            # warning with it (accept-reject.md R7, R8).
-            context["places_left"] = job.workers_needed - job.workers_found()
+            # warning with it (accept-reject.md R7, R8); loaded with the job, no query.
+            context["places_left"] = job.places_left
         # Only for workers: a guest's page keeps its 2 queries (application.md AC11).
         if user.is_authenticated and user.role == User.Role.WORKER:
             # Their application, also when the job is closed now (D7); None if there is none.

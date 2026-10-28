@@ -76,7 +76,13 @@
     {# "Needs 3 workers" only while workers can apply (spec D10). #}
     {% if job.accepts_applications %}
       <span class="badge badge-success font-semibold">{{ job.get_status_display }}</span>
-      <span class="badge badge-accent font-semibold">{% blocktranslate count workers=job.workers_needed %}Needs {{ workers }} worker{% plural %}Needs {{ workers }} workers{% endblocktranslate %}</span>
+      {# "1 of 3 workers found" once someone is accepted; before it "Needs 3 workers", #}
+      {# not "0 of 3" (#24, accept-reject.md R12, D10). #}
+      {% if job.accepted_workers %}
+        <span class="badge badge-accent font-semibold">{% blocktranslate with found=job.accepted_workers needed=job.workers_needed %}{{ found }} of {{ needed }} workers found{% endblocktranslate %}</span>
+      {% else %}
+        <span class="badge badge-accent font-semibold">{% blocktranslate count workers=job.workers_needed %}Needs {{ workers }} worker{% plural %}Needs {{ workers }} workers{% endblocktranslate %}</span>
+      {% endif %}
     {% elif job.status == "open" %}
       <span class="badge border-transparent bg-base-content/10">{% translate "Past" %}</span>
     {% else %}
@@ -106,6 +112,14 @@
     <section id="applications" class="card mt-4 bg-base-100 shadow-sm">
       <div class="card-body p-4">
         {# |length runs the query once; the loop below reuses its rows. #}
+        {# Workers found as on the "My jobs" mockup, only for the owner (#24, R13, D11). #}
+        <div class="mb-2">
+          <div class="flex justify-between text-sm">
+            <span>{% translate "Workers found" %}</span>
+            <span class="font-semibold">{{ job.accepted_workers }} / {{ job.workers_needed }}</span>
+          </div>
+          <progress class="progress progress-accent w-full" value="{{ job.accepted_workers }}" max="{{ job.workers_needed }}"></progress>
+        </div>
         <h2 class="text-lg font-semibold">
           {% blocktranslate with count=applications|length %}Applications ({{ count }}){% endblocktranslate %}
         </h2>
