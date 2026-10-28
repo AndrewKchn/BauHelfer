@@ -49,6 +49,7 @@ def jpeg_file(name="baustelle.jpg"):
     return {"name": name, "mimeType": "image/jpeg", "buffer": buffer.getvalue()}
 
 
+@pytest.mark.story(20)
 def test_employer_posts_edits_and_cancels_a_job_on_a_phone(page):
     """An employer posts a job, adds a photo, edits and cancels it on a phone.
 
@@ -69,7 +70,8 @@ def test_employer_posts_edits_and_cancels_a_job_on_a_phone(page):
     14. Expect: "My jobs" with "Job saved." and the job at 22.00 €/h
     15. Expect: the job is on the public job list
     16. Click "Cancel job", then "Yes, cancel the job"
-    17. Expect: "Job cancelled.", the job is "Cancelled" in "My jobs" without "Edit"
+    17. Expect: "Job cancelled.", the job is in the "Cancelled 1" group of "My jobs"
+        (#20) without "Edit"
     18. Expect: the job is no longer on the public job list
     19. Expect: no page on the way is wider than the screen
     """
@@ -148,7 +150,8 @@ def test_employer_posts_edits_and_cancels_a_job_on_a_phone(page):
     page.get_by_role("button", name="Yes, cancel the job").click()
 
     expect(page.get_by_text("Job cancelled.")).to_be_visible()
-    expect(card.get_by_text("Cancelled")).to_be_visible()
+    # Since #20 the status is the group's badge, not a badge on the card (my-jobs.md D13).
+    expect(page.get_by_role("tab", name="Cancelled 1")).to_be_visible()
     expect(card.get_by_role("link", name="Edit")).to_have_count(0)
     assert_fits_the_screen(page)
 
