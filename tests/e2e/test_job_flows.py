@@ -49,10 +49,12 @@ def jpeg_file(name="baustelle.jpg"):
     return {"name": name, "mimeType": "image/jpeg", "buffer": buffer.getvalue()}
 
 
+@pytest.mark.story(20)
 def test_employer_posts_edits_and_cancels_a_job_on_a_phone(page):
     """An employer posts a job, adds a photo, edits and cancels it on a phone.
 
-    1. Create an employer with a company profile, set a 360 x 740 phone screen, log in
+    1. Create an employer with a company profile, set a 360 x 740 phone screen, log in:
+       the employer lands on "My jobs" (#20)
     2. Open "Post a job" from the header menu, fill in the form with 12.00 €/h
     3. Click "Publish job"
     4. Expect: the minimum-wage error under the rate, the typed values are kept
@@ -69,17 +71,20 @@ def test_employer_posts_edits_and_cancels_a_job_on_a_phone(page):
     14. Expect: "My jobs" with "Job saved." and the job at 22.00 €/h
     15. Expect: the job is on the public job list
     16. Click "Cancel job", then "Yes, cancel the job"
-    17. Expect: "Job cancelled.", the job is "Cancelled" in "My jobs" without "Edit"
+    17. Expect: "Job cancelled.", the job is in the "Cancelled 1" group of "My jobs"
+        (#20) without "Edit"
     18. Expect: the job is no longer on the public job list
     19. Expect: no page on the way is wider than the screen
     """
     make_employer("max@example.com")
     page.set_viewport_size(PHONE)
     log_in(page, "max@example.com")
+    expect(page.get_by_role("heading", name="My jobs")).to_be_visible()
     main = page.get_by_role("main")
 
     page.get_by_label("Menu").click()
-    page.get_by_role("link", name="Post a job").click()
+    # "My jobs" has its own "+ Post a job" button, so the menu link is found by its exact name.
+    page.get_by_role("link", name="Post a job", exact=True).click()
     expect(page.get_by_role("heading", name="Post a job")).to_be_visible()
     assert_fits_the_screen(page)
     page.get_by_label("Job type").select_option(label="Carrying materials")
@@ -148,7 +153,8 @@ def test_employer_posts_edits_and_cancels_a_job_on_a_phone(page):
     page.get_by_role("button", name="Yes, cancel the job").click()
 
     expect(page.get_by_text("Job cancelled.")).to_be_visible()
-    expect(card.get_by_text("Cancelled")).to_be_visible()
+    # Since #20 the status is the group's badge, not a badge on the card (my-jobs.md D13).
+    expect(page.get_by_role("tab", name="Cancelled 1")).to_be_visible()
     expect(card.get_by_role("link", name="Edit")).to_have_count(0)
     assert_fits_the_screen(page)
 

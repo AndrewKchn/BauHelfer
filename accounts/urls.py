@@ -14,7 +14,8 @@ urlpatterns = [
     path("register/", views.RegisterView.as_view(), name="register"),
     path(
         "login/",
-        auth_views.LoginView.as_view(
+        # Django's LoginView with the landing page by role (#20).
+        views.LoginView.as_view(
             authentication_form=LoginForm, redirect_authenticated_user=True
         ),
         name="login",
