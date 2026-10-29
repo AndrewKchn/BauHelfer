@@ -174,34 +174,47 @@
                     {# whitespace-pre-line keeps the line breaks the worker typed. #}
                     <p class="whitespace-pre-line break-words">“{{ application.message }}”</p>
                   {% endif %}
-                  <p class="text-xs text-base-content/60">
-                    {% blocktranslate with date=application.created_at|date:"j M" %}Sent {{ date }}{% endblocktranslate %}
-                  </p>
-                    {# Decisions only on a pending application of an open job (#24, R7, D5). #}
-                    {# Plain POST forms: the page reloads at this application (D3, D8). #}
-                    {% if job.status == "open" and application.status == "pending" %}
-                      <div class="grid grid-cols-2 gap-2">
-                        <form method="post" action="{% url 'application_accept' application.pk %}">
-                          {% csrf_token %}
-                          <button type="submit" class="btn btn-success w-full">
-                            {# As many of the crew as places are left (D1). #}
-                            {% if application.workers_offered > places_left %}
-                              {% blocktranslate with taken=places_left offered=application.workers_offered %}Accept {{ taken }} of {{ offered }}{% endblocktranslate %}
-                            {% else %}
-                              {% blocktranslate with count=application.workers_offered %}Accept {{ count }}{% endblocktranslate %}
-                            {% endif %}
-                          </button>
-                        </form>
-                        <form method="post" action="{% url 'application_reject' application.pk %}">
-                          {% csrf_token %}
-                          <button type="submit" class="btn btn-outline w-full">{% translate "Reject" %}</button>
-                        </form>
-                      </div>
-                      {# Told before the tap: the others will be closed (R8, D9). #}
-                      {% if application.workers_offered >= places_left %}
-                        <p class="text-sm text-base-content/70">{% translate "Accepting fills the job: the other pending applications will be closed." %}</p>
-                      {% endif %}
+                  <div class="flex items-center justify-between gap-2">
+                    <p class="text-xs text-base-content/60">
+                      {% blocktranslate with date=application.created_at|date:"j M" %}Sent {{ date }}{% endblocktranslate %}
+                    </p>
+                    {# A worker who drops out: the employer cancels them (#24, R20, D2). On the #}
+                    {# date's line, so the box does not grow (D26). The browser asks first: a #}
+                    {# tap by mistake cannot be undone (D16). |safe before |escapejs: the name #}
+                    {# is escaped once, for JavaScript, not also for HTML (it would show &#x27;). #}
+                    {% if application.status == "accepted" and job.status == "open" or application.status == "accepted" and job.status == "filled" %}
+                      {% blocktranslate asvar question with name=worker.name|safe %}Cancel {{ name }}? This cannot be undone.{% endblocktranslate %}
+                      <form method="post" action="{% url 'application_cancel' application.pk %}" onsubmit="return confirm('{{ question|escapejs }}')">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline btn-sm">{% translate "Cancel" %}</button>
+                      </form>
                     {% endif %}
+                  </div>
+                  {# Decisions only on a pending application of an open job (#24, R7, D5). #}
+                  {# Plain POST forms: the page reloads at this application (D3, D8). #}
+                  {% if job.status == "open" and application.status == "pending" %}
+                    <div class="grid grid-cols-2 gap-2">
+                      <form method="post" action="{% url 'application_accept' application.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success w-full">
+                          {# As many of the crew as places are left (D1). #}
+                          {% if application.workers_offered > places_left %}
+                            {% blocktranslate with taken=places_left offered=application.workers_offered %}Accept {{ taken }} of {{ offered }}{% endblocktranslate %}
+                          {% else %}
+                            {% blocktranslate with count=application.workers_offered %}Accept {{ count }}{% endblocktranslate %}
+                          {% endif %}
+                        </button>
+                      </form>
+                      <form method="post" action="{% url 'application_reject' application.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline w-full">{% translate "Reject" %}</button>
+                      </form>
+                    </div>
+                    {# Told before the tap: the others will be closed (R8, D9). #}
+                    {% if application.workers_offered >= places_left %}
+                      <p class="text-sm text-base-content/70">{% translate "Accepting fills the job: the other pending applications will be closed." %}</p>
+                    {% endif %}
+                  {% endif %}
                 </li>
               {% endwith %}
             {% endfor %}

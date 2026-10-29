@@ -26,6 +26,11 @@ urlpatterns = [
         name="application_reject",
     ),
     path(
+        "applications/<int:pk>/cancel/",
+        views.ApplicationCancelView.as_view(),
+        name="application_cancel",
+    ),
+    path(
         "photos/<int:pk>/delete/",
         views.JobPhotoDeleteView.as_view(),
         name="job_photo_delete",

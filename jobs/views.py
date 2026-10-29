@@ -359,21 +359,24 @@ class JobApplyView(WorkerRequiredMixin, JobDetailView):
         return redirect("job_detail", pk=job.pk)
 
 
-class OwnPendingApplicationMixin(EmployerRequiredMixin, SingleObjectMixin):
-    """The page works on a pending application to one of the employer's own open jobs.
+class OwnApplicationMixin(EmployerRequiredMixin, SingleObjectMixin):
+    """The page works on an application to one of the employer's own jobs.
 
-    accept-reject.md R5, D5. Like OwnOpenJobMixin: anything else is not in the queryset,
-    so the answer is 404. The views have only post(), so a GET gives 405: a link must not
-    decide.
+    accept-reject.md R5, R19, D5. Only an application in `status` to a job in one of
+    `job_statuses`; like OwnOpenJobMixin, anything else is not in the queryset, so the
+    answer is 404. The views have only post(), so a GET gives 405: a link must not decide.
     """
+
+    status = Application.Status.PENDING
+    job_statuses = (Job.Status.OPEN,)
 
     @override
     def get_queryset(self):
-        """Pending applications to the logged-in employer's open jobs."""
+        """This employer's applications in `status` to jobs in `job_statuses`."""
         return Application.objects.filter(
             job__employer=self.request.user,
-            job__status=Job.Status.OPEN,
-            status=Application.Status.PENDING,
+            job__status__in=self.job_statuses,
+            status=self.status,
         ).select_related("worker")
 
 
@@ -383,7 +386,7 @@ def back_to(application):
     return redirect(f"{url}#application-{application.pk}")
 
 
-class ApplicationAcceptView(OwnPendingApplicationMixin, View):
+class ApplicationAcceptView(OwnApplicationMixin, View):
     """POST: accept an application, part of a crew if fewer places are left (R3, R6)."""
 
     def post(self, request, *args, **kwargs):
@@ -426,7 +429,7 @@ class ApplicationAcceptView(OwnPendingApplicationMixin, View):
         return back_to(application)
 
 
-class ApplicationRejectView(OwnPendingApplicationMixin, View):
+class ApplicationRejectView(OwnApplicationMixin, View):
     """POST: reject an application (R4, R6)."""
 
     def post(self, request, *args, **kwargs):
@@ -447,4 +450,39 @@ class ApplicationRejectView(OwnPendingApplicationMixin, View):
             application.job_id,
             request.user.pk,
         )
+        return back_to(application)
+
+
+class ApplicationCancelView(OwnApplicationMixin, View):
+    """POST: cancel an accepted worker of an open or filled job (R18-R20, D2)."""
+
+    status = Application.Status.ACCEPTED
+    job_statuses = (Job.Status.OPEN, Job.Status.FILLED)
+
+    def post(self, request, *args, **kwargs):
+        """Cancel, and say whether the job is open again."""
+        application = self.get_object()
+        try:
+            reopened = application.cancel()
+        except ApplicationStateError:
+            messages.info(request, _("This application was already decided."))
+            return back_to(application)
+        name = application.worker.name
+        if reopened:
+            text = _("Cancelled: %(name)s. The job is open again.") % {"name": name}
+        else:
+            text = _("Cancelled: %(name)s.") % {"name": name}
+        messages.success(request, text)
+        logger.info(
+            "Application cancelled: application_id=%s job_id=%s employer_id=%s",
+            application.pk,
+            application.job_id,
+            request.user.pk,
+        )
+        if reopened:
+            logger.info(
+                "Job reopened: job_id=%s employer_id=%s",
+                application.job_id,
+                request.user.pk,
+            )
         return back_to(application)

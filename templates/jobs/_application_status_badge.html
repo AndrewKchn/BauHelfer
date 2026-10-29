@@ -1,3 +1,4 @@
 {# An application's status in the colours of the job statuses on "My jobs" (#24): #}
-{# Pending yellow, Accepted green, Job filled blue (as a filled job), Rejected red. #}
-<span class="badge shrink-0 font-semibold {% if application.status == 'pending' %}badge-warning{% elif application.status == 'accepted' %}badge-success{% elif application.status == 'closed' %}badge-info{% else %}badge-error{% endif %}">{{ application.get_status_display }}</span>
+{# Pending yellow, Accepted green, Job filled blue (as a filled job), Rejected red, #}
+{# Cancelled slate (as a done job): taken off after acceptance, not refused (D13). #}
+<span class="badge shrink-0 font-semibold {% if application.status == 'pending' %}badge-warning{% elif application.status == 'accepted' %}badge-success{% elif application.status == 'closed' %}badge-info{% elif application.status == 'cancelled' %}badge-secondary{% else %}badge-error{% endif %}">{{ application.get_status_display }}</span>

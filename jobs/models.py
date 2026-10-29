@@ -326,6 +326,8 @@ class Application(models.Model):
         # Nobody refused it: the job was filled by others. Pending again if the job opens
         # again (accept-reject.md D15).
         CLOSED = "closed", _("Job filled")
+        # Accepted, then cancelled by the employer: not the same as refused (D13).
+        CANCELLED = "cancelled", _("Cancelled")
 
     job = models.ForeignKey(
         Job,
@@ -383,16 +385,18 @@ class Application(models.Model):
     def __str__(self):
         return f"{self.worker} → {self.job}"
 
-    def _lock(self):
+    def _lock(self, job_statuses=(Job.Status.OPEN,), status=Status.PENDING):
         """Lock the job row, then read this application and its job again.
 
-        Called inside transaction.atomic(). A second accept of the same job (a double tap,
-        another tab) waits here until the first one has finished, and then reads what the
-        first one saved, not the old copy it was loaded with (accept-reject.md D6).
+        Called inside transaction.atomic(). A second decision on the same job (a double
+        tap, another tab) waits here until the first one has finished, and then reads what
+        the first one saved, not the old copy it was loaded with (accept-reject.md D6).
+        Raises ApplicationStateError unless the job and the application are in the given
+        statuses.
         """
         self.job = Job.objects.select_for_update().get(pk=self.job_id)
         self.refresh_from_db(fields=["status", "workers_accepted"])
-        if self.job.status != Job.Status.OPEN or self.status != self.Status.PENDING:
+        if self.job.status not in job_statuses or self.status != status:
             raise ApplicationStateError
 
     def accept(self):
@@ -422,3 +426,27 @@ class Application(models.Model):
             self._lock()
             self.status = self.Status.REJECTED
             self.save(update_fields=["status"])
+
+    def cancel(self):
+        """Cancel an accepted worker; a filled job opens again (R18, D13-D15).
+
+        The applications closed when the job filled are pending again: nobody refused
+        them. Returns True if the job was filled and is open again. Raises
+        ApplicationStateError, and changes nothing, unless this application is accepted
+        and the job open or filled.
+        """
+        with transaction.atomic():
+            self._lock(
+                job_statuses=(Job.Status.OPEN, Job.Status.FILLED),
+                status=self.Status.ACCEPTED,
+            )
+            self.status = self.Status.CANCELLED
+            self.save(update_fields=["status"])
+            if self.job.status != Job.Status.FILLED:
+                return False
+            self.job.status = Job.Status.OPEN
+            self.job.save(update_fields=["status"])
+            self.job.applications.filter(status=self.Status.CLOSED).update(
+                status=self.Status.PENDING
+            )
+            return True
