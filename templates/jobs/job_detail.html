@@ -76,11 +76,18 @@
     {# "Needs 3 workers" only while workers can apply (spec D10). #}
     {% if job.accepts_applications %}
       <span class="badge badge-success font-semibold">{{ job.get_status_display }}</span>
-      <span class="badge badge-accent font-semibold">{% blocktranslate count workers=job.workers_needed %}Needs {{ workers }} worker{% plural %}Needs {{ workers }} workers{% endblocktranslate %}</span>
+      {# "1 of 3 workers found" once someone is accepted; before it "Needs 3 workers", #}
+      {# not "0 of 3" (#24, accept-reject.md R12, D10). #}
+      {% if job.accepted_workers %}
+        <span class="badge badge-accent font-semibold">{% blocktranslate with found=job.accepted_workers needed=job.workers_needed %}{{ found }} of {{ needed }} workers found{% endblocktranslate %}</span>
+      {% else %}
+        <span class="badge badge-accent font-semibold">{% blocktranslate count workers=job.workers_needed %}Needs {{ workers }} worker{% plural %}Needs {{ workers }} workers{% endblocktranslate %}</span>
+      {% endif %}
     {% elif job.status == "open" %}
       <span class="badge border-transparent bg-base-content/10">{% translate "Past" %}</span>
     {% else %}
-      <span class="badge border-transparent bg-base-content/10">{{ job.get_status_display }}</span>
+      {# The colours of "My jobs" (#20 D7; my-jobs.md D8 left this to #24). #}
+      <span class="badge font-semibold {% if job.status == 'filled' %}badge-info{% elif job.status == 'done' %}badge-secondary{% else %}badge-error{% endif %}">{{ job.get_status_display }}</span>
     {% endif %}
   </div>
 
@@ -105,6 +112,14 @@
     <section id="applications" class="card mt-4 bg-base-100 shadow-sm">
       <div class="card-body p-4">
         {# |length runs the query once; the loop below reuses its rows. #}
+        {# Workers found as on the "My jobs" mockup, only for the owner (#24, R13, D11). #}
+        <div class="mb-2">
+          <div class="flex justify-between text-sm">
+            <span>{% translate "Workers found" %}</span>
+            <span class="font-semibold">{{ job.accepted_workers }} / {{ job.workers_needed }}</span>
+          </div>
+          <progress class="progress progress-accent w-full" value="{{ job.accepted_workers }}" max="{{ job.workers_needed }}"></progress>
+        </div>
         <h2 class="text-lg font-semibold">
           {% blocktranslate with count=applications|length %}Applications ({{ count }}){% endblocktranslate %}
         </h2>
@@ -113,42 +128,96 @@
             {% for application in applications %}
               {# No phone or email: they are revealed only after acceptance (#25). #}
               {% with worker=application.worker profile=application.worker.worker_profile %}
-                <li class="flex gap-3 rounded-box bg-base-200 p-3">
-                  <div class="avatar avatar-placeholder shrink-0 self-start">
-                    <div class="w-10 rounded-full bg-primary text-primary-content">
-                      <span aria-hidden="true">{{ worker.initials }}</span>
+                {# The id brings the employer back here after a decision (#24, D8). #}
+                <li id="application-{{ application.pk }}" class="flex flex-col gap-2 rounded-box bg-base-200 p-3">
+                  {# The head as on the mockup: avatar, name and how many people, status. #}
+                  <div class="flex items-center gap-3">
+                    <div class="avatar avatar-placeholder shrink-0">
+                      <div class="w-10 rounded-full bg-primary text-primary-content">
+                        <span aria-hidden="true">{{ worker.initials }}</span>
+                      </div>
                     </div>
+                    <div class="min-w-0 flex-1">
+                      <a href="{% url 'worker_detail' worker.pk %}" class="link break-words font-semibold">{{ worker.name }}</a>
+                      {# How many people come is what the employer looks for first (#24). The #}
+                      {# crew's size is on the worker page: the rest of a crew cannot be taken. #}
+                      <p class="text-sm">
+                        <span class="font-semibold">
+                          {% if application.status == "accepted" and application.workers_accepted < application.workers_offered %}
+                            {# Only part of a crew taken (#24, accept-reject.md R9, D1). #}
+                            {% blocktranslate with taken=application.workers_accepted offered=application.workers_offered %}{{ taken }} of {{ offered }} workers{% endblocktranslate %}
+                          {% else %}
+                            {% blocktranslate count workers=application.workers_offered %}{{ workers }} worker{% plural %}{{ workers }} workers{% endblocktranslate %}
+                          {% endif %}
+                        </span>
+                      </p>
+                    </div>
+                    {% include "jobs/_application_status_badge.html" %}
                   </div>
-                  <div class="flex min-w-0 flex-1 flex-col gap-1">
-                    <div class="flex items-start justify-between gap-2">
-                      <a href="{% url 'worker_detail' worker.pk %}" class="link min-w-0 break-words font-semibold">{{ worker.name }}</a>
-                      <span class="badge shrink-0 {% if application.status == 'accepted' %}badge-success{% elif application.status == 'pending' %}badge-warning{% else %}badge-ghost{% endif %}">{{ application.get_status_display }}</span>
-                    </div>
-                    <p class="text-sm text-base-content/70">
-                      {{ profile.team_label }} ·
-                      {% blocktranslate count workers=application.workers_offered %}brings {{ workers }} worker{% plural %}brings {{ workers }} workers{% endblocktranslate %}
-                    </p>
-                    <p class="text-sm text-base-content/70">
-                      {{ profile.get_legal_status_display }} ·
-                      {% if worker.work_permit_confirmed_at %}{% translate "Work permit confirmed" %}{% else %}{% translate "Work permit not confirmed" %}{% endif %}
-                    </p>
+                  {# The rest on the box's full width, nothing under the avatar. Chips wrap as a #}
+                  {# whole. The work permit only when it is missing: nobody can apply without #}
+                  {# it (#22), so only an admin who removed it later makes this chip appear. #}
+                  <div class="flex flex-wrap gap-1">
                     {# Only the skill this job needs (D12); all skills are on the worker page. #}
-                    <p>
-                      {% if job.job_type in profile.skills %}
-                        <span class="badge badge-success badge-sm">✓ {{ job.get_job_type_display }}</span>
-                      {% else %}
-                        {# The same badge, grey with "−"; the hidden words tell a screen reader. #}
-                        <span class="badge badge-outline badge-sm text-base-content/60"><span class="sr-only">{% translate "No skill:" %}</span><span aria-hidden="true">−</span> {{ job.get_job_type_display }}</span>
-                      {% endif %}
-                    </p>
-                    {% if application.message %}
-                      {# whitespace-pre-line keeps the line breaks the worker typed. #}
-                      <p class="mt-1 whitespace-pre-line break-words">“{{ application.message }}”</p>
+                    {% if job.job_type in profile.skills %}
+                      <span class="badge badge-success badge-sm">✓ {{ job.get_job_type_display }}</span>
+                    {% else %}
+                      {# The same badge, grey with "−"; the hidden words tell a screen reader. #}
+                      <span class="badge badge-outline badge-sm text-base-content/60"><span class="sr-only">{% translate "No skill:" %}</span><span aria-hidden="true">−</span> {{ job.get_job_type_display }}</span>
                     {% endif %}
+                    <span class="badge badge-outline badge-sm">{{ profile.get_legal_status_display }}</span>
+                    {% if not worker.work_permit_confirmed_at %}
+                      <span class="badge badge-error badge-sm">{% translate "Work permit not confirmed" %}</span>
+                    {% endif %}
+                  </div>
+                  {% if application.message %}
+                    {# whitespace-pre-line keeps the line breaks the worker typed. #}
+                    <p class="whitespace-pre-line break-words">“{{ application.message }}”</p>
+                  {% endif %}
+                  <div class="flex items-center justify-between gap-2">
                     <p class="text-xs text-base-content/60">
                       {% blocktranslate with date=application.created_at|date:"j M" %}Sent {{ date }}{% endblocktranslate %}
                     </p>
+                    {# A worker who drops out: the employer cancels them (#24, R20, D2). On the #}
+                    {# date's line, so the box does not grow (D26). The browser asks first: a #}
+                    {# tap by mistake cannot be undone (D16). |safe before |escapejs: the name #}
+                    {# is escaped once, for JavaScript, not also for HTML (it would show &#x27;). #}
+                    {% if application.status == "accepted" and job.status == "open" or application.status == "accepted" and job.status == "filled" %}
+                      {% blocktranslate asvar question with name=worker.name|safe %}Cancel {{ name }}? This cannot be undone.{% endblocktranslate %}
+                      <form method="post" action="{% url 'application_cancel' application.pk %}" onsubmit="return confirm('{{ question|escapejs }}')">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline btn-sm">{% translate "Cancel" %}</button>
+                      </form>
+                    {% endif %}
                   </div>
+                  {# Decisions only on a pending application of an open job (#24, R7, D5). #}
+                  {# Plain POST forms: the page reloads at this application (D3, D8). #}
+                  {% if job.status == "open" and application.status == "pending" %}
+                    <div class="grid grid-cols-2 gap-2">
+                      <form method="post" action="{% url 'application_accept' application.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success w-full">
+                          {# As many of the crew as places are left (D1). #}
+                          {% if application.workers_offered > places_left %}
+                            {% blocktranslate with taken=places_left offered=application.workers_offered %}Accept {{ taken }} of {{ offered }}{% endblocktranslate %}
+                          {% else %}
+                            {% blocktranslate with count=application.workers_offered %}Accept {{ count }}{% endblocktranslate %}
+                          {% endif %}
+                        </button>
+                      </form>
+                      {# The browser asks first, as for Cancel: a rejected worker cannot apply #}
+                    {# again (D16, D27). |safe before |escapejs: see Cancel below. #}
+                    {% blocktranslate asvar reject_question with name=worker.name|safe %}Reject {{ name }}? This cannot be undone.{% endblocktranslate %}
+                    <form method="post" action="{% url 'application_reject' application.pk %}" onsubmit="return confirm('{{ reject_question|escapejs }}')">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline w-full">{% translate "Reject" %}</button>
+                      </form>
+                    </div>
+                    {# Told before the tap: the others will be closed (R8, D9). #}
+                    {% if application.workers_offered >= places_left %}
+                      <p class="text-sm text-base-content/70">{% translate "Accepting fills the job: the other pending applications will be closed." %}</p>
+                    {% endif %}
+                  {% endif %}
                 </li>
               {% endwith %}
             {% endfor %}
@@ -191,7 +260,7 @@
           <span class="font-semibold">{% translate "You applied" %}</span>
           <span>·</span>
           <span>{% blocktranslate count counter=application.workers_offered %}{{ counter }} worker{% plural %}{{ counter }} workers{% endblocktranslate %}</span>
-          <span class="badge bg-base-content/10 font-semibold">{{ application.get_status_display }}</span>
+          {% include "jobs/_application_status_badge.html" %}
         </div>
       </section>
     {% elif job.accepts_applications %}
