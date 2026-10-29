@@ -205,7 +205,10 @@
                           {% endif %}
                         </button>
                       </form>
-                      <form method="post" action="{% url 'application_reject' application.pk %}">
+                      {# The browser asks first, as for Cancel: a rejected worker cannot apply #}
+                    {# again (D16, D27). |safe before |escapejs: see Cancel below. #}
+                    {% blocktranslate asvar reject_question with name=worker.name|safe %}Reject {{ name }}? This cannot be undone.{% endblocktranslate %}
+                    <form method="post" action="{% url 'application_reject' application.pk %}" onsubmit="return confirm('{{ reject_question|escapejs }}')">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-outline w-full">{% translate "Reject" %}</button>
                       </form>

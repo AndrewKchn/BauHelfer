@@ -315,6 +315,29 @@ def test_pending_application_has_accept_and_reject_buttons(employer_client, job)
     assertContains(response, "Reject")
 
 
+def test_reject_asks_the_browser_first(employer_client, job):
+    """A Reject tap by mistake is caught by the browser's own dialog (spec D27).
+
+    1. Save a pending application of Ivan O'Brien
+    2. Open the job's page as its employer
+    3. Expect: the reject form has onsubmit="return confirm(…)" with "Reject Ivan
+       O'Brien? This cannot be undone.", the apostrophe escaped for JavaScript only;
+       the accept form has no onsubmit
+    """
+    application = apply(job, "ivan@example.com", "Ivan O'Brien")
+
+    response = employer_client.get(detail_url(job))
+
+    reject = action_url("application_reject", application)
+    assertContains(
+        response,
+        f'action="{reject}" onsubmit="return confirm(\'Reject Ivan O\\u0027Brien? '
+        "This cannot be undone.')\"",
+    )
+    accept = action_url("application_accept", application)
+    assertContains(response, f'action="{accept}">')
+
+
 def test_crew_bigger_than_the_places_left_gets_accept_part(employer_client, job):
     """The button says how many of the crew are taken (spec R7, D1).
 
