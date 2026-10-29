@@ -258,6 +258,11 @@ D26. **"Cancel", on the line of the date** (mine, 2026-10-29, after seeing "Remo
      `application_cancel`; first called "Remove" / `remove()`. No clash with cancelling a
      job (`job_cancel`, #16): another object, another prefix. A 32 px `btn-sm`, not the
      24 px `btn-xs` first tried (Claude's default): easier to hit on a phone.
+D27. **The browser asks before "Reject" too** (mine, 2026-10-29, Claude's recommendation):
+     the same `confirm()` as Cancel (D16). Accept and Reject sit side by side, and a
+     rejected worker cannot apply again (one application per job, #22). Accept stays
+     without a question. This changes D9's "no confirmation for Reject".
+
 ## Differences from the mockups
 
 | Mockup | App | Why |
