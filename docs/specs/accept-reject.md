@@ -14,7 +14,7 @@ otherwise.
 Since #23 the employer sees the applications on the job page but can only read them. This
 ticket lets them accept or reject each one. When the accepted workers reach the number the
 job needs, the job becomes "filled" by itself and the other pending applications are
-closed ("Job filled"). If an accepted worker drops out, the employer can remove them, the job
+closed ("Job filled"). If an accepted worker drops out, the employer can cancel them, the job
 opens again and the closed applications are pending again.
 
 Three iterations in one branch and one PR:
@@ -22,7 +22,7 @@ Three iterations in one branch and one PR:
 1. **Accept and reject:** the buttons, accepting part of a crew, the job fills itself.
 2. **Workers found:** "1 of 3 workers found" on the job page, the places left on the job
    list and in the apply form.
-3. **Remove an accepted worker:** the application becomes "Cancelled", a filled job opens
+3. **Cancel an accepted worker:** the application becomes "Cancelled", a filled job opens
    again, the closed applications are pending again.
 
 ### Out of scope
@@ -123,32 +123,33 @@ AC13. A crew of 3 applying to that job gets at most 1 in the form (no field: 1 i
       choice); a POST with 2 is an error.
 AC14. The job list and the guest's job page make the same number of queries as before.
 
-## Iteration 3: remove an accepted worker
+## Iteration 3: cancel an accepted worker
 
 ### Requirements
 
 R17. The status "cancelled" from R0 is used (D13).
-R18. `Application.remove()`: accepted → cancelled, on an open or filled job, the same lock.
+R18. `Application.cancel()`: accepted → cancelled, on an open or filled job, the same lock.
      A filled job becomes open again (D14) and its closed applications pending again (D15);
      the rejected ones stay rejected.
-R19. POST `/jobs/applications/<pk>/remove/` (`application_remove`), the same access rules
+R19. POST `/jobs/applications/<pk>/cancel/` (`application_cancel`), the same access rules
      as R5 but for an accepted application of an open or filled job.
-R20. On the job page an accepted application has an outlined "Remove" button (D16), and
-     the message after it: "Removed: Andrii Petrenko. The job is open again." (the second
-     sentence only if it was filled).
+R20. On the job page an accepted application has a small outlined "Cancel" button on the
+     line of its date (D26); the browser asks "Cancel Andrii Petrenko? This cannot be
+     undone." first (D16). The message after it: "Cancelled: Andrii Petrenko. The job is
+     open again." (the second sentence only if it was filled).
 R21. The worker sees "Cancelled" on their application on the job page (as the other
      statuses, #22).
 
 ### Acceptance criteria (→ tests)
 
-AC15. Removing an accepted application → "cancelled"; `workers_found()` no longer counts it.
-AC16. Removing one from a filled job → the job is open again, its closed applications are
+AC15. Cancelling an accepted application → "cancelled"; `workers_found()` no longer counts it.
+AC16. Cancelling one from a filled job → the job is open again, its closed applications are
       pending, the rejected ones stay rejected.
-AC17. `remove()` on a pending, rejected or cancelled application, or on a cancelled or done
+AC17. `cancel()` on a pending, rejected or cancelled application, or on a cancelled or done
       job, raises an error and changes nothing.
-AC18. Access as AC7 for `application_remove`.
-AC19. The owner's page shows "Remove" only on accepted applications of an open or filled
-      job.
+AC18. Access as AC7 for `application_cancel`.
+AC19. The owner's page shows "Cancel" only on accepted applications of an open or filled
+      job, with onsubmit="return confirm(…)" and the worker's name escaped for JavaScript.
 
 ## Decisions
 
@@ -159,7 +160,7 @@ D1. **Accept part of a crew, automatically** (mine, 2026-10-28; option C1): "Acc
     (A); accepting more than needed (B); a number field to choose how many (C2: one more
     element on every application on a phone) — kept as a Stretch idea. **Revisit when**
     employers ask to take fewer of a crew than places are left.
-D2. **The employer can remove an accepted worker** (mine, 2026-10-28; option B): a worker
+D2. **The employer can cancel an accepted worker** (mine, 2026-10-28; option B): a worker
     may drop out on the phone (#25) or in the chat (#35), and without this the job stays
     filled for ever. Rejected: final decisions (A); everything reversible (C: rejected
     workers hope in vain); the worker
@@ -173,12 +174,12 @@ D3. **Plain POST forms, the page reloads** (mine, 2026-10-28; option A): one vie
 D4. **Workers found = the sum of accepted workers, not the number of accepted
     applications** (Claude's default): a crew of 2 is two workers.
 D5. **Decisions only on an open job** (Claude's default): a filled job has no pending
-    applications left; done and cancelled jobs are history. Removing (R19) also works on a
+    applications left; done and cancelled jobs are history. Cancelling (R19) also works on a
     filled job, that is its point.
 D6. **One transaction with the job row locked** (`select_for_update`, Claude's default): two
     clicks at the same instant (two tabs, a double tap) would otherwise both see "1 place
     left" and accept 2 workers. The second waits for the first and then sees the job filled.
-D7. **The rules live in model methods** (`accept()`, `reject()`, `remove()`, Claude's
+D7. **The rules live in model methods** (`accept()`, `reject()`, `cancel()`, Claude's
     default): the views stay short, the unit tests call the methods without HTTP, and the
     admin or a future API cannot skip the rule. Not a signal: a signal hides what happens on
     save.
@@ -194,9 +195,9 @@ D11. **The bar only on the owner's job page** (Claude's default), daisyUI `progr
 D12. **The number found comes with the jobs** (`annotate(Sum(...))`, Claude's default) on
      the job list and job page; `accept()` counts again under the lock, because only that
      number is safe from a second click.
-D13. **"Cancelled", not "Rejected", after a removal** (Claude's default): the worker should
+D13. **"Cancelled", not "Rejected", after cancelling** (Claude's default): the worker should
      see that they were accepted and then taken off, not refused at once.
-D14. **A filled job opens again after a removal** (Claude's default): it goes back to the job
+D14. **A filled job opens again after cancelling** (Claude's default): it goes back to the job
      list (if it has not started) and new workers can apply.
 D15. **The extra applications are "closed" ("Job filled"), not rejected, and come back as
      pending when the job opens again** (mine, 2026-10-28): nobody refused these workers,
@@ -207,7 +208,13 @@ D15. **The extra applications are "closed" ("Job filled"), not rejected, and com
      pending on a filled job (the worker waits in vain). This changes the issue's "Done
      when…" item "Remaining pending applications are rejected when filled". **Revisit when**
      a job opens again days later and the returning workers are mostly no longer free.
-D16. **"Remove" without a confirmation page** (Claude's default), as Reject (D9).
+D16. **The browser asks before "Cancel"** (mine, 2026-10-29, option A: "it can be tapped by
+     mistake"): `onsubmit="return confirm(…)"`, one attribute, the phone's own dialog.
+     Rejected: no question (Claude's first default); a "Cancel …? [Yes]" part that opens in
+     place (`<details>`, no JS, the box grows); a confirmation page, as "Cancel job"
+     (#16: most code). Cost: without JavaScript the form is sent at once, and only an E2E
+     test (#28) can click the dialog. Accept stays without a question: it is the common
+     action and can be undone with Cancel.
 D17. **No admin changes** (Claude's default): a status changed in the admin skips the rules
      (no filling, no closing); the admin is for fixing data by hand.
 D18. **Cancelling a job with accepted workers stays as it is** (Claude's default; job-form.md
@@ -244,6 +251,13 @@ D25. **The message after a decision may be out of view** (mine, 2026-10-29, Clau
      screen (every page changes, a small JS) — a polish idea for M8. **Revisit when**
      employers miss what happened.
 
+D26. **"Cancel", on the line of the date** (mine, 2026-10-29, after seeing "Remove" on a line
+     of its own): the box keeps its height, and "Cancel" matches the "Cancelled" badge the
+     worker then sees. One name everywhere (mine, the same day, after asking why the
+     code said "remove"): the button, the status, `cancel()`, `ApplicationCancelView` and
+     `application_cancel`; first called "Remove" / `remove()`. No clash with cancelling a
+     job (`job_cancel`, #16): another object, another prefix. A 32 px `btn-sm`, not the
+     24 px `btn-xs` first tried (Claude's default): easier to hit on a phone.
 ## Differences from the mockups
 
 | Mockup | App | Why |
@@ -255,4 +269,4 @@ D25. **The message after a decision may be out of view** (mine, 2026-10-29, Clau
 | "My jobs": "Pending" / "Accepted" badges | also "Rejected", "Job filled" and "Cancelled" | D13, D15 |
 | "My jobs": "Crew of 2 · ★ 4,7 (9) · work permit ✓" | "2 workers" in bold; the skill and legal status as chips; no work permit | D22, D23 |
 | "Job detail": "1 of 3 workers found" | the same once someone is accepted, "Needs 3 workers" before | D10 |
-| No way to take back an acceptance | "Remove" on an accepted application | D2 |
+| No way to take back an acceptance | "Cancel" on an accepted application | D2, D26 |
