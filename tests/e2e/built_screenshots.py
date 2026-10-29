@@ -56,7 +56,7 @@ def test_save_built_screenshots(page):
     """Save the built screenshots of the screens that exist.
 
     1. Create an employer with three open jobs (one with three photos, one with two
-       applications) and a cancelled one, and a worker
+       applications, one of them accepted) and a cancelled one, and a worker
     2. Open the job list as a guest, the job page as the worker, "Post a job", "My jobs"
        and the job page with the applications as the employer, on a 390 x 844 screen in
        the light theme
@@ -149,6 +149,11 @@ def test_save_built_screenshots(page):
         Application.objects.create(
             job=demolition, worker=applicant, workers_offered=team, message=message
         )
+    # Mehmet accepted (#24): "1 of 2 workers found", the bar, "Cancel", and Andrii's crew
+    # of 2 gets "Accept 1 of 2" with the "fills the job" warning.
+    Application.objects.filter(worker__email="mehmet@example.com").update(
+        status=Application.Status.ACCEPTED, workers_accepted=1
+    )
 
     # live_server does not serve uploads (in-memory storage): answer every photo address.
     picture = photo_bytes("#d9822b")
