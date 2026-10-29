@@ -2043,3 +2043,65 @@ and landing on "My jobs" after login.
 - How `LoginView` chooses the page after login: a safe `?next=` first, only then
   `get_default_redirect_url()`. Overriding only that method keeps Django's check of `?next=`,
   so there is no open redirect.
+
+## 2026-10-29 · #24 Accept / reject application; job becomes "filled" when enough workers
+
+**Task given to AI:** let the employer accept or reject applications, make the job "filled"
+when enough workers are accepted and reject the remaining pending ones. Context: the mockups
+`my-jobs.png` and `job-detail.png`, and #23's decision that the applications live on the job
+page.
+
+**AI helped:**
+- Asked 4 defense questions at the start: the transaction and two clicks at once, POST
+  instead of links, where the "filled" rule lives, how another employer is kept out.
+- Showed three real forks as "option → cost" tables (a crew bigger than the places left,
+  changing a decision, plain forms vs. HTMX) and recommended against my criteria.
+- Wrote the spec with three iterations, failing tests before each one, and the code:
+  `accept()` / `reject()` / `cancel()` on the model in one transaction with the job row
+  locked (`select_for_update`), `annotate(Sum)` + `Coalesce` for "1 of 3 workers found"
+  without extra queries, the apply form limited to the places left.
+- Mutation-checked every new test: 68 mutations, all caught by the end.
+- Explained why the worker's name in `confirm('…')` needs `|safe` before `|escapejs`
+  (escaped once, for JavaScript; otherwise XSS or `&#x27;` in the dialog), with a test.
+- Made screenshots at 360 px in both themes after every change I asked for, the built
+  screenshot, six "Docs sync — M4" comments and the draft PR.
+
+**AI failed:**
+- After my decision D15 the spec still said "rejected" for the extra applications in R8 and
+  five other places. I noticed it in R8.
+- "Not working" on my local server after iteration 2: `runserver` restarted in the middle of
+  saving several files and kept the old `views.py`. AI found it by comparing file times with
+  the server process; a restart fixed it.
+- The action was called "Remove" / `remove()`; after I renamed the button to "Cancel" AI kept
+  `remove()` in the model and URL with a weak reason. I asked why, and everything was renamed.
+- A test check (`">2 workers"`) could never fail because of a line break; AI caught it and used
+  a regular expression.
+- Screenshots twice showed grey buttons and bar: the CSS was not rebuilt after new classes.
+- The iteration 3 commit first held only the tests: one `git add` failed on an old path. AI
+  noticed and redid the two local commits before pushing.
+
+**My part:**
+- Chose to accept part of a crew automatically ("Accept 1 of 2"): maybe it is the only
+  application. Choosing the number became a Stretch idea (#143).
+- Chose that the employer can cancel an accepted worker, because a worker may drop out in the
+  chat; "Withdraw" for the worker went to #26 as a comment.
+- Chose plain POST forms over HTMX: simpler.
+- Asked why the extra applications should be "rejected": nobody refused them, they were just
+  not needed. So they got their own status "Job filled" and come back when the job opens
+  again (D15), instead of AI's first default.
+- After using it on my local server: asked for the status colours of the jobs on the
+  badges, for the number of workers to stand out, for the compact box of the mockup, and to
+  drop "Work permit confirmed" (the same on every application). Then asked why "1 of 2
+  workers · crew of 10", "2 workers · crew of 10" and "2 of 3 workers" all looked different,
+  and kept only the number of workers.
+- Asked how an admin can remove the work permit; kept the red chip for that case.
+- Renamed "Remove" to "Cancel", asked for a question before it (it can be tapped by
+  mistake), then for the same before Reject, and for one name in the code too.
+- By hand: ran the app on my local server after each iteration, found that iteration 2 did
+  not show up, and went through accept, reject, cancel and the job filling.
+
+**Learned:**
+- Why `select_for_update` stops two clicks from accepting too many workers: the second
+  request waits for the job row until the first one commits, then reads the new state.
+- Why `SUM` needs `Coalesce` (no accepted workers gives NULL, not 0), and why the name in
+  `confirm('…')` needs `|safe` before `|escapejs`: it is escaped once, for JavaScript.
