@@ -207,6 +207,17 @@ class Job(models.Model):
         """
         return timezone.localdate() > self.ends_at.date()
 
+    @property
+    def tab(self):
+        """Which tab of "My jobs" this job is in (my-applications.md R22, D3, D6).
+
+        Its status, except an open job that is over: it is "past", since it did not happen.
+        A filled job stays "filled": the work probably happened, and #37 marks it done.
+        """
+        if self.status == self.Status.OPEN and self.is_over:
+            return "past"
+        return self.status
+
     def cancel(self):
         """Cancel this open job and its accepted workers (contacts.md R2, D3, D9).
 

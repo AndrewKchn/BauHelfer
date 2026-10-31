@@ -130,12 +130,14 @@ class MyJobsView(EmployerRequiredMixin, ListView):
 
     template_name = "jobs/my_jobs.html"
     context_object_name = "jobs"
-    # In the order of Job.Status, each in the colour of its status (my-jobs.md D7).
+    # In the order of Job.Status, each in the colour of its status (my-jobs.md D7); then
+    # "Past" in the quiet grey of "My applications" (my-applications.md R22, D20).
     tabs = (
         (Job.Status.OPEN, "badge-success"),
         (Job.Status.FILLED, "badge-info"),
         (Job.Status.DONE, "badge-secondary"),
         (Job.Status.CANCELLED, "badge-error"),
+        ("past", "bg-base-300"),
     )
 
     @override
@@ -149,11 +151,15 @@ class MyJobsView(EmployerRequiredMixin, ListView):
 
     @override
     def get_context_data(self, **kwargs):
-        """One tab per status that has jobs, in the order of Job.Status."""
+        """One tab per status that has jobs, in the order of Job.Status (Job.tab).
+
+        Jobs that are over go to the end of their tab, as on "My applications"
+        (my-applications.md D21): yesterday's filled job after tomorrow's.
+        """
         context = super().get_context_data(**kwargs)
-        context["groups"] = tab_groups(
-            context["jobs"], self.tabs, dict(Job.Status.choices), lambda job: job.status
-        )
+        jobs = sorted(context["jobs"], key=lambda job: job.is_over)
+        labels = dict(Job.Status.choices, past=_("Past"))
+        context["groups"] = tab_groups(jobs, self.tabs, labels, lambda job: job.tab)
         return context
 
 

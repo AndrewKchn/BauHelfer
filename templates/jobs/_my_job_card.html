@@ -17,7 +17,8 @@
           <span class="font-normal text-base-content/70">{% translate "No applications yet" %}</span>
         {% endif %}
         {# Only open jobs can change (spec D7); the views answer 404 for the others anyway. #}
-        {% if job.status == "open" %}
+        {# A past one cannot either; its views still accept it until #37 (#26, D6). #}
+        {% if job.tab == "open" %}
           <span aria-hidden="true" class="text-base-content/50">·</span>
           <a href="{% url 'job_edit' job.pk %}" class="link">{% translate "Edit" %}</a>
           <span aria-hidden="true" class="text-base-content/50">·</span>

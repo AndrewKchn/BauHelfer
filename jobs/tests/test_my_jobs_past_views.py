@@ -93,6 +93,21 @@ def test_past_tab_comes_last_in_grey(employer_client, employer):
     assertContains(response, 'data-colour="bg-base-300"')
 
 
+def test_jobs_that_are_over_go_last_in_their_tab(employer_client, employer):
+    """Tomorrow's filled job comes before yesterday's, as on "My applications" (D21).
+
+    1. Save a filled job that ended yesterday, then a filled job tomorrow
+    2. Open "My jobs"
+    3. Expect: the "filled" tab has tomorrow's job first, yesterday's last
+    """
+    over = make_job(employer, date=TODAY - DAY, status=Job.Status.FILLED)
+    coming = make_job(employer, date=TODAY + DAY, status=Job.Status.FILLED)
+
+    response = employer_client.get(reverse("my_jobs"))
+
+    assert groups(response) == [("filled", [coming, over])]
+
+
 # No changes to a past job (R23, D6; AC20)
 
 
