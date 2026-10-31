@@ -1,7 +1,8 @@
 {% load i18n %}
 {# A 72 px square: the job's first photo with "3 photos", or the hard-hat placeholder (#64, #}
-{# job-photos.md R29). Used by the job list (#18) and "My jobs" (#20). `photos` is #}
-{# job.photos.all, from prefetch_related in the view, so it costs no query per card. #}
+{# job-photos.md R29). Used by the job list (#18), "My jobs" (#20) and "My applications" #}
+{# (#26). `photos` is job.photos.all, from prefetch_related in the view, so it costs no #}
+{# query per card. #}
 <div class="relative size-18 shrink-0">
   {% if photos %}
     <img src="{{ photos.0.thumbnail_url }}" alt="{% translate 'Job photo' %}" class="size-full rounded-box object-cover">

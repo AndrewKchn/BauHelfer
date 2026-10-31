@@ -27,9 +27,10 @@
                 <span aria-hidden="true" class="text-xl">☰</span>
               </summary>
               <ul class="menu dropdown-content z-10 mt-2 w-48 rounded-box bg-base-100 p-2 shadow">
-                {# Only pages that exist; #16, #18 and #20 add their own links (spec decision D4). #}
+                {# Only pages that exist; #16, #18, #20 and #26 add their own links (spec decision D4). #}
                 {% if user.role == "worker" %}
                   <li><a href="{% url 'worker_profile' %}">{% translate "My profile" %}</a></li>
+                  <li><a href="{% url 'my_applications' %}">{% translate "My applications" %}</a></li>
                 {% elif user.role == "employer" %}
                   <li><a href="{% url 'employer_profile' %}">{% translate "My company" %}</a></li>
                   <li><a href="{% url 'job_create' %}">{% translate "Post a job" %}</a></li>

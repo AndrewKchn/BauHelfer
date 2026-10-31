@@ -1,8 +1,8 @@
 """Integration tests: the worker dashboard "My applications" (#26).
 
 Each test goes through the whole stack: middleware, URL, view, model, template and database.
-Spec: docs/specs/my-applications.md, iteration 1 (R3-R12, D9, D11-D16, D20), acceptance
-criteria AC4-AC11. The rules behind the tabs (Job.is_over, Application.tab) are in
+Spec: docs/specs/my-applications.md, iteration 1 (R3-R12, D9, D11-D16, D20, D21),
+acceptance criteria AC4-AC11. Photo files in the in-memory storage. The rules behind the tabs (Job.is_over, Application.tab) are in
 test_my_applications.py; "My jobs" keeps its own tests (AC12). The swipe between the tabs is
 JavaScript, checked by the E2E tests.
 """
@@ -19,6 +19,7 @@ from pytest_django.asserts import assertContains, assertNotContains
 from jobs.models import Application, Job
 
 from .test_application import make_worker
+from .test_my_jobs_views import add_photo
 from .test_views import make_employer, make_job
 
 pytestmark = [pytest.mark.django_db, pytest.mark.story(26)]
@@ -183,6 +184,21 @@ def test_soonest_job_first_inside_a_tab(ivan_client, ivan, employer):
     assert groups(response) == [("pending", [sooner, later])]
 
 
+def test_jobs_that_are_over_go_last_in_their_tab(ivan_client, ivan, employer):
+    """Tomorrow's accepted job comes before yesterday's (R4, D21).
+
+    1. Save Ivan's accepted applications to a job yesterday, then to one tomorrow
+    2. Open "My applications"
+    3. Expect: the "accepted" tab has tomorrow's job first, yesterday's last
+    """
+    over = apply(make_job(employer, date=TODAY - DAY), ivan, "accepted")
+    coming = apply(make_job(employer, date=TODAY + DAY), ivan, "accepted")
+
+    response = ivan_client.get(URL)
+
+    assert groups(response) == [("accepted", [coming, over])]
+
+
 @pytest.mark.parametrize(
     ("status", "date", "colour"),
     [
@@ -221,17 +237,22 @@ def count_queries(client):
 
 
 def test_queries_do_not_grow_with_the_applications(ivan_client, ivan, employer):
-    """Jobs and employers of all applications come at once, not one query per card.
+    """Jobs, employers and photos of all applications come at once, not per card.
 
-    1. Save one accepted application of Ivan; count the page's queries
-    2. Add an accepted and a pending one to jobs of other employers; count again
+    1. Save one accepted application of Ivan to a job with a photo; count the queries
+    2. Add an accepted and a pending one to jobs with photos of other employers; count
+       again
     3. Expect: the same number of queries (no "N+1")
     """
-    apply(make_job(employer), ivan, "accepted")
+    job = make_job(employer)
+    add_photo(job)
+    apply(job, ivan, "accepted")
     with_one = count_queries(ivan_client)
 
     for email, status in [("b@example.com", "accepted"), ("c@example.com", "pending")]:
-        apply(make_job(make_employer(email)), ivan, status)
+        job = make_job(make_employer(email))
+        add_photo(job)
+        apply(job, ivan, status)
     with_three = count_queries(ivan_client)
 
     assert with_three == with_one
@@ -253,6 +274,25 @@ def test_card_links_to_the_job_page(ivan_client, ivan, employer):
     response = ivan_client.get(URL)
 
     assertContains(response, f'href="{reverse("job_detail", args=[job.pk])}"')
+
+
+def test_card_shows_the_photo_or_the_placeholder(ivan_client, ivan, employer):
+    """As on "My jobs": the job's thumbnail, or the placeholder (D13).
+
+    1. Save Ivan's applications to a job with a photo and to one without
+    2. Open "My applications"
+    3. Expect: the photo's thumbnail (not the big photo) and "No photo"
+    """
+    with_photo = make_job(employer)
+    photo = add_photo(with_photo)
+    apply(with_photo, ivan)
+    apply(make_job(employer), ivan)
+
+    response = ivan_client.get(URL)
+
+    assertContains(response, photo.thumbnail.url)
+    assertNotContains(response, photo.image.url)
+    assertContains(response, "No photo")
 
 
 def test_card_shows_the_crew(ivan_client, ivan, employer):
@@ -421,20 +461,19 @@ def test_waiting_card_has_no_closed_line(ivan_client, ivan, employer):
 def test_pending_application_of_a_cancelled_job_shows_job_cancelled(
     ivan_client, ivan, employer
 ):
-    """The badge says "Job cancelled", not "Pending", here and on the job page (R10, D9).
+    """On the job page the badge says "Job cancelled", not "Pending" (R10, D9).
 
     1. Save Ivan's pending application to a cancelled job
-    2. Open "My applications", then the job's page
-    3. Expect: both show the badge "Job cancelled" and no "Pending" badge
+    2. Open the job's page
+    3. Expect: the badge "Job cancelled" and no "Pending" badge
     """
     job = make_job(employer, status=Job.Status.CANCELLED)
     apply(job, ivan)
 
-    for url in [URL, reverse("job_detail", args=[job.pk])]:
-        response = ivan_client.get(url)
+    response = ivan_client.get(reverse("job_detail", args=[job.pk]))
 
-        assertContains(response, ">Job cancelled</span>")
-        assertNotContains(response, ">Pending</span>")
+    assertContains(response, ">Job cancelled</span>")
+    assertNotContains(response, ">Pending</span>")
 
 
 # No applications, the menu (R11, R12; AC10, AC11)

@@ -197,6 +197,16 @@ class Job(models.Model):
         """When the job ends: start time plus hours, the time only."""
         return self.ends_at.time()
 
+    @property
+    def is_over(self):
+        """Whether the day the job ends is over, Munich time (my-applications.md R1, D8).
+
+        The one rule for the contacts (contacts.md D4) and the "Past" tabs: on the day
+        itself a late worker can still call. A night shift ends the next morning, so it is
+        over only the day after that.
+        """
+        return timezone.localdate() > self.ends_at.date()
+
     def cancel(self):
         """Cancel this open job and its accepted workers (contacts.md R2, D3, D9).
 
@@ -417,12 +427,27 @@ class Application(models.Model):
 
         Only an accepted application, and only until the day the job ends is over, Munich
         time (contacts.md R1, D2, D4): on the day itself a late worker can still call. The
-        one rule for the job page and #26.
+        one rule for the job page and "My applications" (#26).
         """
-        return (
-            self.status == self.Status.ACCEPTED
-            and timezone.localdate() <= self.job.ends_at.date()
-        )
+        return self.status == self.Status.ACCEPTED and not self.job.is_over
+
+    @property
+    def tab(self):
+        """Which tab of "My applications" this application is in (my-applications.md R2).
+
+        Its status, except: a pending one of a cancelled job is "cancelled", since nobody
+        will answer it (D9); a pending or "Job filled" one of a job that is over is "past":
+        it is over and did not happen (D3).
+        """
+        if (
+            self.status == self.Status.PENDING
+            and self.job.status == Job.Status.CANCELLED
+        ):
+            return self.Status.CANCELLED
+        waiting = self.status in (self.Status.PENDING, self.Status.CLOSED)
+        if waiting and self.job.is_over:
+            return "past"
+        return self.status
 
     def _lock(self, job_statuses=(Job.Status.OPEN,), status=Status.PENDING):
         """Lock the job row, then read this application and its job again.

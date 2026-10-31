@@ -1,0 +1,52 @@
+{% comment %}
+  Tabs by status for a dashboard: "My jobs" (#20) and "My applications" (#26,
+  docs/specs/my-applications.md D2). Needs `groups` (from tab_groups() in jobs/views.py:
+  status, label, colour, items) and `card`, the template that draws one item as `item`.
+
+  One tab per group, drawn as a badge: outlined, or filled with its colour while active. The
+  groups lie side by side in a scroll-snap strip, as the photos on the job page (#19): a
+  swipe moves to the next group without JavaScript. Each tab is a link to its group; the
+  script only makes the click smooth and keeps the active tab and the height in step.
+{% endcomment %}
+<div role="tablist" class="mt-4 flex gap-1.5 overflow-x-auto" id="status-tabs">
+  {% for group in groups %}
+    <a role="tab" href="#tab-{{ group.status }}" class="badge badge-outline shrink-0 px-2 font-medium" data-index="{{ forloop.counter0 }}" data-colour="{{ group.colour }}">{{ group.label }} {{ group.items|length }}</a>
+  {% endfor %}
+</div>
+<div class="carousel mt-3 w-full items-start" id="status-groups">
+  {% for group in groups %}
+    <ul class="carousel-item flex w-full flex-col gap-3" id="tab-{{ group.status }}">
+      {% for item in group.items %}
+        {% include card %}
+      {% endfor %}
+    </ul>
+  {% endfor %}
+</div>
+<script>
+  // Tested in the E2E tests only: the Django test client runs no JavaScript.
+  (() => {
+    const strip = document.getElementById("status-groups");
+    const tabs = document.querySelectorAll("#status-tabs [data-index]");
+    const show = (index) => {
+      tabs.forEach((tab, i) => {
+        tab.classList.toggle(tab.dataset.colour, i === index);
+        tab.classList.toggle("badge-outline", i !== index);
+        tab.setAttribute("aria-selected", i === index);
+      });
+      // The strip is as tall as the group on screen, not as the longest one.
+      strip.style.height = strip.children[index].offsetHeight + "px";
+    };
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", (event) => {
+        event.preventDefault();
+        const index = Number(tab.dataset.index);
+        strip.scrollTo({ left: index * strip.clientWidth, behavior: "smooth" });
+        show(index);
+      });
+    });
+    strip.addEventListener("scroll", () => {
+      show(Math.round(strip.scrollLeft / strip.clientWidth));
+    });
+    show(0);
+  })();
+</script>

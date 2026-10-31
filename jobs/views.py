@@ -110,11 +110,32 @@ class JobCreateView(EmployerRequiredMixin, EmployerProfileRequiredMixin, CreateV
         return reverse("job_edit", args=[self.object.pk]) + "#photos"
 
 
+def tab_groups(items, tabs, labels, tab_of):
+    """The groups for templates/_status_tabs.html: one per tab that has items, in order.
+
+    `tabs` gives (key, colour) per tab, the colour it is filled with while active
+    (my-applications.md D2, D20); `labels` the name of each key; `tab_of(item)` which tab
+    an item is in.
+    """
+    return [
+        {"status": key, "label": labels[key], "colour": colour, "items": group}
+        for key, colour in tabs
+        if (group := [item for item in items if tab_of(item) == key])
+    ]
+
+
 class MyJobsView(EmployerRequiredMixin, ListView):
     """The employer's own jobs in every status, soonest first (spec R14, D5)."""
 
     template_name = "jobs/my_jobs.html"
     context_object_name = "jobs"
+    # In the order of Job.Status, each in the colour of its status (my-jobs.md D7).
+    tabs = (
+        (Job.Status.OPEN, "badge-success"),
+        (Job.Status.FILLED, "badge-info"),
+        (Job.Status.DONE, "badge-secondary"),
+        (Job.Status.CANCELLED, "badge-error"),
+    )
 
     @override
     def get_queryset(self):
@@ -129,12 +150,58 @@ class MyJobsView(EmployerRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         """One tab per status that has jobs, in the order of Job.Status."""
         context = super().get_context_data(**kwargs)
-        jobs = context["jobs"]
-        context["groups"] = [
-            {"status": status, "label": label, "jobs": group}
-            for status, label in Job.Status.choices
-            if (group := [job for job in jobs if job.status == status])
-        ]
+        context["groups"] = tab_groups(
+            context["jobs"], self.tabs, dict(Job.Status.choices), lambda job: job.status
+        )
+        return context
+
+
+class MyApplicationsView(WorkerRequiredMixin, ListView):
+    """The worker's own applications in tabs, soonest job first (#26,
+    docs/specs/my-applications.md R3, R4)."""
+
+    template_name = "jobs/my_applications.html"
+    context_object_name = "applications"
+    # What the worker has to act on first, then what waits, then what is closed (D12); in
+    # the colours of the application status badges, "Past" grey (D20).
+    tabs = (
+        (Application.Status.ACCEPTED, "badge-success"),
+        (Application.Status.PENDING, "badge-warning"),
+        (Application.Status.CLOSED, "badge-info"),
+        (Application.Status.REJECTED, "badge-error"),
+        (Application.Status.CANCELLED, "badge-secondary"),
+        ("past", "badge-neutral"),
+    )
+
+    @override
+    def get_queryset(self):
+        """Only the logged-in worker's applications, each with its job and employer.
+
+        select_related: the job and the employer in the same query; prefetch_related: the
+        photos of all jobs in one more. Two queries however many cards (D11, D13).
+        """
+        return (
+            self.request.user.applications.select_related("job__employer")
+            .prefetch_related("job__photos")
+            .order_by("job__date", "job__start_time")
+        )
+
+    @override
+    def get_context_data(self, **kwargs):
+        """One tab per group that has applications (Application.tab, R2).
+
+        Jobs that are over go to the end of their tab, the rest stays soonest first (R4,
+        D21): an accepted worker looks for tomorrow's job, not yesterday's. sorted() keeps
+        the order of the items it finds equal.
+        """
+        context = super().get_context_data(**kwargs)
+        applications = sorted(
+            context["applications"], key=lambda application: application.job.is_over
+        )
+        labels = dict(Application.Status.choices, past=_("Past"))
+        context["groups"] = tab_groups(
+            applications, self.tabs, labels, lambda application: application.tab
+        )
         return context
 
 

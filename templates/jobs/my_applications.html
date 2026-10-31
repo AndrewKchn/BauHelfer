@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "My applications" %} · BauHelfer{% endblock %}
+
+{% block content %}
+  <h1 class="text-2xl font-bold">{% translate "My applications" %}</h1>
+  {% if groups %}
+    {# The same tabs as "My jobs" (#26, my-applications.md D1, D2); empty ones left out. #}
+    {% include "_status_tabs.html" with card="jobs/_my_application_card.html" %}
+  {% else %}
+    <p class="mt-4">{% translate "You have not applied to any job yet." %}</p>
+    <a href="{% url 'home' %}" class="btn btn-primary mt-4">{% translate "Find a job" %}</a>
+  {% endif %}
+{% endblock %}

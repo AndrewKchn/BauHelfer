@@ -1,0 +1,5 @@
+{% load i18n %}{% comment %}
+  How many people come with an application: "2 workers", or "1 of 2 workers" when only part
+  of the crew was taken (#24, accept-reject.md R9, D1). On the employer's job page and on
+  "My applications" (#26). Needs `application`.
+{% endcomment %}{% if application.status == "accepted" and application.workers_accepted < application.workers_offered %}{% blocktranslate with taken=application.workers_accepted offered=application.workers_offered %}{{ taken }} of {{ offered }} workers{% endblocktranslate %}{% else %}{% blocktranslate count workers=application.workers_offered %}{{ workers }} worker{% plural %}{{ workers }} workers{% endblocktranslate %}{% endif %}

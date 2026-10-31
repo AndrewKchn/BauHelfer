@@ -1,0 +1,29 @@
+{% load i18n %}
+{# One job on "My jobs" (#20), drawn by _status_tabs.html with the job as `item`. #}
+{% with job=item %}
+  <li class="card bg-base-100 shadow-sm">
+    <div class="card-body gap-2 p-3">
+      <div class="flex gap-3">
+        {% include "jobs/_job_thumbnail.html" with photos=job.photos.all %}
+        <div class="min-w-0 flex-1">
+          {% include "jobs/_job_summary.html" with with_address=True %}
+        </div>
+      </div>
+      {# The links use the card's full width, so they stay on one line on a phone. #}
+      <div class="flex flex-wrap gap-x-2 text-sm font-semibold">
+        {% if job.applications_count %}
+          <a href="{% url 'job_detail' job.pk %}#applications" class="link">{% blocktranslate count applications=job.applications_count %}{{ applications }} application{% plural %}{{ applications }} applications{% endblocktranslate %}</a>
+        {% else %}
+          <span class="font-normal text-base-content/70">{% translate "No applications yet" %}</span>
+        {% endif %}
+        {# Only open jobs can change (spec D7); the views answer 404 for the others anyway. #}
+        {% if job.status == "open" %}
+          <span aria-hidden="true" class="text-base-content/50">·</span>
+          <a href="{% url 'job_edit' job.pk %}" class="link">{% translate "Edit" %}</a>
+          <span aria-hidden="true" class="text-base-content/50">·</span>
+          <a href="{% url 'job_cancel' job.pk %}" class="link text-error">{% translate "Cancel job" %}</a>
+        {% endif %}
+      </div>
+    </div>
+  </li>
+{% endwith %}

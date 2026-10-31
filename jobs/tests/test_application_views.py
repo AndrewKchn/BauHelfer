@@ -220,16 +220,21 @@ def test_worker_who_cannot_apply_sees_a_link_to_the_profile(client, job, who):
     assertNotContains(response, MESSAGE_FIELD)
 
 
-@pytest.mark.parametrize("status", ["open", "cancelled"])
+@pytest.mark.parametrize(
+    ("status", "badge"), [("open", "Pending"), ("cancelled", "Job cancelled")]
+)
 def test_worker_who_applied_sees_the_application_not_the_form(
-    worker_client, job, worker, status
+    worker_client, job, worker, status, badge
 ):
     """After applying the page shows what was sent, also when the job closed (spec D7).
+
+    Since #26 (my-applications.md R10, D9) a pending application of a cancelled job says
+    "Job cancelled".
 
     1. Save a pending application of the worker with 2 workers
     2. Leave the job open, or cancel it
     3. Open the job's page as the worker
-    4. Expect: "You applied", "2 workers", "Pending"; no message field
+    4. Expect: "You applied", "2 workers", "Pending" / "Job cancelled"; no message field
     """
     Application.objects.create(job=job, worker=worker, workers_offered=2)
     job.status = status
@@ -239,7 +244,7 @@ def test_worker_who_applied_sees_the_application_not_the_form(
 
     assertContains(response, "You applied")
     assertContains(response, "2 workers")
-    assertContains(response, "Pending")
+    assertContains(response, badge)
     assertNotContains(response, MESSAGE_FIELD)
 
 

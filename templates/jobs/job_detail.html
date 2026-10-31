@@ -141,14 +141,7 @@
                       {# How many people come is what the employer looks for first (#24). The #}
                       {# crew's size is on the worker page: the rest of a crew cannot be taken. #}
                       <p class="text-sm">
-                        <span class="font-semibold">
-                          {% if application.status == "accepted" and application.workers_accepted < application.workers_offered %}
-                            {# Only part of a crew taken (#24, accept-reject.md R9, D1). #}
-                            {% blocktranslate with taken=application.workers_accepted offered=application.workers_offered %}{{ taken }} of {{ offered }} workers{% endblocktranslate %}
-                          {% else %}
-                            {% blocktranslate count workers=application.workers_offered %}{{ workers }} worker{% plural %}{{ workers }} workers{% endblocktranslate %}
-                          {% endif %}
-                        </span>
+                        <span class="font-semibold">{% include "jobs/_crew.html" %}</span>
                       </p>
                     </div>
                     {% include "jobs/_application_status_badge.html" %}
