@@ -1,4 +1,4 @@
-"""URLs of the job pages, mounted under /jobs/ (#16, #19, #24)."""
+"""URLs of the job pages, mounted under /jobs/ (#16, #19, #24, #26)."""
 
 from django.urls import path
 
@@ -7,6 +7,12 @@ from . import views
 urlpatterns = [
     path("new/", views.JobCreateView.as_view(), name="job_create"),
     path("mine/", views.MyJobsView.as_view(), name="my_jobs"),
+    # The worker's own applications (#26).
+    path(
+        "applications/",
+        views.MyApplicationsView.as_view(),
+        name="my_applications",
+    ),
     # <int:pk>: only digits reach the view; get_object() finds the job by this id.
     path("<int:pk>/", views.JobDetailView.as_view(), name="job_detail"),
     path("<int:pk>/apply/", views.JobApplyView.as_view(), name="job_apply"),
@@ -29,6 +35,12 @@ urlpatterns = [
         "applications/<int:pk>/cancel/",
         views.ApplicationCancelView.as_view(),
         name="application_cancel",
+    ),
+    # The worker withdraws their own application (#26).
+    path(
+        "applications/<int:pk>/withdraw/",
+        views.ApplicationWithdrawView.as_view(),
+        name="application_withdraw",
     ),
     path(
         "photos/<int:pk>/delete/",

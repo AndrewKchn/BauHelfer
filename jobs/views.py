@@ -3,7 +3,8 @@ the apply form (#22, docs/specs/application.md), and the employer pages: post, l
 edit, cancel (#16, docs/specs/job-form.md), add and delete photos (#64,
 docs/specs/job-photos.md). The job page shows its employer the applications (#23,
 docs/specs/applications-list.md), who accepts or rejects them (#24,
-docs/specs/accept-reject.md).
+docs/specs/accept-reject.md). The worker sees their applications on "My applications" and
+withdraws them there (#26, docs/specs/my-applications.md).
 """
 
 import logging
@@ -110,11 +111,34 @@ class JobCreateView(EmployerRequiredMixin, EmployerProfileRequiredMixin, CreateV
         return reverse("job_edit", args=[self.object.pk]) + "#photos"
 
 
+def tab_groups(items, tabs, labels, tab_of):
+    """The groups for templates/_status_tabs.html: one per tab that has items, in order.
+
+    `tabs` gives (key, colour) per tab, the colour it is filled with while active
+    (my-applications.md D2, D20); `labels` the name of each key; `tab_of(item)` which tab
+    an item is in.
+    """
+    return [
+        {"status": key, "label": labels[key], "colour": colour, "items": group}
+        for key, colour in tabs
+        if (group := [item for item in items if tab_of(item) == key])
+    ]
+
+
 class MyJobsView(EmployerRequiredMixin, ListView):
     """The employer's own jobs in every status, soonest first (spec R14, D5)."""
 
     template_name = "jobs/my_jobs.html"
     context_object_name = "jobs"
+    # In the order of Job.Status, each in the colour of its status (my-jobs.md D7); then
+    # "Past" in the quiet grey of "My applications" (my-applications.md R22, D20).
+    tabs = (
+        (Job.Status.OPEN, "badge-success"),
+        (Job.Status.FILLED, "badge-info"),
+        (Job.Status.DONE, "badge-secondary"),
+        (Job.Status.CANCELLED, "badge-error"),
+        ("past", "bg-base-300"),
+    )
 
     @override
     def get_queryset(self):
@@ -127,14 +151,65 @@ class MyJobsView(EmployerRequiredMixin, ListView):
 
     @override
     def get_context_data(self, **kwargs):
-        """One tab per status that has jobs, in the order of Job.Status."""
+        """One tab per status that has jobs, in the order of Job.Status (Job.tab).
+
+        Jobs that are over go to the end of their tab, as on "My applications"
+        (my-applications.md D21): yesterday's filled job after tomorrow's.
+        """
         context = super().get_context_data(**kwargs)
-        jobs = context["jobs"]
-        context["groups"] = [
-            {"status": status, "label": label, "jobs": group}
-            for status, label in Job.Status.choices
-            if (group := [job for job in jobs if job.status == status])
-        ]
+        jobs = sorted(context["jobs"], key=lambda job: job.is_over)
+        labels = dict(Job.Status.choices, past=_("Past"))
+        context["groups"] = tab_groups(jobs, self.tabs, labels, lambda job: job.tab)
+        return context
+
+
+class MyApplicationsView(WorkerRequiredMixin, ListView):
+    """The worker's own applications in tabs, soonest job first (#26,
+    docs/specs/my-applications.md R3, R4)."""
+
+    template_name = "jobs/my_applications.html"
+    context_object_name = "applications"
+    # What the worker has to act on first, then what waits, then what is closed (D12); in
+    # the colours of the application status badges, "Withdrawn" and "Past" grey (D20).
+    tabs = (
+        (Application.Status.ACCEPTED, "badge-success"),
+        (Application.Status.PENDING, "badge-warning"),
+        (Application.Status.CLOSED, "badge-info"),
+        (Application.Status.REJECTED, "badge-error"),
+        (Application.Status.CANCELLED, "badge-secondary"),
+        (Application.Status.WITHDRAWN, "bg-base-300"),
+        ("past", "bg-base-300"),
+    )
+
+    @override
+    def get_queryset(self):
+        """Only the logged-in worker's applications, each with its job and employer.
+
+        select_related: the job and the employer in the same query; prefetch_related: the
+        photos of all jobs in one more. Two queries however many cards (D11, D13).
+        """
+        return (
+            self.request.user.applications.select_related("job__employer")
+            .prefetch_related("job__photos")
+            .order_by("job__date", "job__start_time")
+        )
+
+    @override
+    def get_context_data(self, **kwargs):
+        """One tab per group that has applications (Application.tab, R2).
+
+        Jobs that are over go to the end of their tab, the rest stays soonest first (R4,
+        D21): an accepted worker looks for tomorrow's job, not yesterday's. sorted() keeps
+        the order of the items it finds equal.
+        """
+        context = super().get_context_data(**kwargs)
+        applications = sorted(
+            context["applications"], key=lambda application: application.job.is_over
+        )
+        labels = dict(Application.Status.choices, past=_("Past"))
+        context["groups"] = tab_groups(
+            applications, self.tabs, labels, lambda application: application.tab
+        )
         return context
 
 
@@ -500,3 +575,40 @@ class ApplicationCancelView(OwnApplicationMixin, View):
                 request.user.pk,
             )
         return back_to(application)
+
+
+class ApplicationWithdrawView(WorkerRequiredMixin, SingleObjectMixin, View):
+    """POST: the worker withdraws their own application (#26, my-applications.md R18).
+
+    Workers only; only their own applications are in the queryset, so any other id gives
+    404. Only post(), so a GET gives 405: a link must not withdraw.
+    """
+
+    @override
+    def get_queryset(self):
+        """Only the logged-in worker's applications."""
+        return self.request.user.applications.all()
+
+    def post(self, request, *args, **kwargs):
+        """Withdraw and go back to "My applications"."""
+        application = self.get_object()
+        try:
+            reopened = application.withdraw()
+        except ApplicationStateError:
+            # Decided, or the job started, since the page was loaded.
+            messages.info(request, _("This application can no longer be withdrawn."))
+            return redirect("my_applications")
+        messages.success(request, _("Application withdrawn."))
+        logger.info(
+            "Application withdrawn: application_id=%s job_id=%s worker_id=%s",
+            application.pk,
+            application.job_id,
+            request.user.pk,
+        )
+        if reopened:
+            logger.info(
+                "Job reopened: job_id=%s worker_id=%s",
+                application.job_id,
+                request.user.pk,
+            )
+        return redirect("my_applications")

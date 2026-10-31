@@ -197,6 +197,27 @@ class Job(models.Model):
         """When the job ends: start time plus hours, the time only."""
         return self.ends_at.time()
 
+    @property
+    def is_over(self):
+        """Whether the day the job ends is over, Munich time (my-applications.md R1, D8).
+
+        The one rule for the contacts (contacts.md D4) and the "Past" tabs: on the day
+        itself a late worker can still call. A night shift ends the next morning, so it is
+        over only the day after that.
+        """
+        return timezone.localdate() > self.ends_at.date()
+
+    @property
+    def tab(self):
+        """Which tab of "My jobs" this job is in (my-applications.md R22, D3, D6).
+
+        Its status, except an open job that is over: it is "past", since it did not happen.
+        A filled job stays "filled": the work probably happened, and #37 marks it done.
+        """
+        if self.status == self.Status.OPEN and self.is_over:
+            return "past"
+        return self.status
+
     def cancel(self):
         """Cancel this open job and its accepted workers (contacts.md R2, D3, D9).
 
@@ -238,15 +259,22 @@ class Job(models.Model):
         return self.workers_needed - found
 
     @property
+    def has_started(self):
+        """Whether the job's date and start time have come, Munich time (#26 R15).
+
+        From then on workers can neither apply nor withdraw (my-applications.md D17).
+        """
+        now = timezone.localtime()  # Munich time, as the job's date and start time
+        return (self.date, self.start_time) <= (now.date(), now.time())
+
+    @property
     def accepts_applications(self):
         """Whether workers can still apply: open and not started yet (#19 spec R7, D2).
 
         The same rule as JobQuerySet.open().upcoming(), for one job already loaded: the job
         page uses it for the "Past" badge and the "Apply" button.
         """
-        now = timezone.localtime()  # Munich time, as the job's date and start time
-        has_started = (self.date, self.start_time) <= (now.date(), now.time())
-        return self.status == self.Status.OPEN and not has_started
+        return self.status == self.Status.OPEN and not self.has_started
 
 
 def job_photo_path(instance, filename):
@@ -354,6 +382,8 @@ class Application(models.Model):
         CLOSED = "closed", _("Job filled")
         # Accepted, then cancelled by the employer: not the same as refused (D13).
         CANCELLED = "cancelled", _("Cancelled")
+        # The worker left by themselves; final (#26, my-applications.md D4).
+        WITHDRAWN = "withdrawn", _("Withdrawn")
 
     job = models.ForeignKey(
         Job,
@@ -417,14 +447,29 @@ class Application(models.Model):
 
         Only an accepted application, and only until the day the job ends is over, Munich
         time (contacts.md R1, D2, D4): on the day itself a late worker can still call. The
-        one rule for the job page and #26.
+        one rule for the job page and "My applications" (#26).
         """
-        return (
-            self.status == self.Status.ACCEPTED
-            and timezone.localdate() <= self.job.ends_at.date()
-        )
+        return self.status == self.Status.ACCEPTED and not self.job.is_over
 
-    def _lock(self, job_statuses=(Job.Status.OPEN,), status=Status.PENDING):
+    @property
+    def tab(self):
+        """Which tab of "My applications" this application is in (my-applications.md R2).
+
+        Its status, except: a pending one of a cancelled job is "cancelled", since nobody
+        will answer it (D9); a pending or "Job filled" one of a job that is over is "past":
+        it is over and did not happen (D3).
+        """
+        if (
+            self.status == self.Status.PENDING
+            and self.job.status == Job.Status.CANCELLED
+        ):
+            return self.Status.CANCELLED
+        waiting = self.status in (self.Status.PENDING, self.Status.CLOSED)
+        if waiting and self.job.is_over:
+            return "past"
+        return self.status
+
+    def _lock(self, job_statuses=(Job.Status.OPEN,), statuses=(Status.PENDING,)):
         """Lock the job row, then read this application and its job again.
 
         Called inside transaction.atomic(). A second decision on the same job (a double
@@ -435,8 +480,24 @@ class Application(models.Model):
         """
         self.job = Job.objects.select_for_update().get(pk=self.job_id)
         self.refresh_from_db(fields=["status", "workers_accepted"])
-        if self.job.status not in job_statuses or self.status != status:
+        if self.job.status not in job_statuses or self.status not in statuses:
             raise ApplicationStateError
+
+    def _reopen_job(self):
+        """Open the job again if it was filled; its closed applications are pending again.
+
+        A place was freed (accept-reject.md D14, D15): nobody refused the closed ones.
+        Called inside the transaction of cancel() and withdraw(), after _lock(). Returns
+        True if the job was filled and is open now.
+        """
+        if self.job.status != Job.Status.FILLED:
+            return False
+        self.job.status = Job.Status.OPEN
+        self.job.save(update_fields=["status"])
+        self.job.applications.filter(status=self.Status.CLOSED).update(
+            status=self.Status.PENDING
+        )
+        return True
 
     def accept(self):
         """Take as many of the crew as places are left; fill the job if it is full now.
@@ -477,15 +538,41 @@ class Application(models.Model):
         with transaction.atomic():
             self._lock(
                 job_statuses=(Job.Status.OPEN, Job.Status.FILLED),
-                status=self.Status.ACCEPTED,
+                statuses=(self.Status.ACCEPTED,),
             )
             self.status = self.Status.CANCELLED
             self.save(update_fields=["status"])
-            if self.job.status != Job.Status.FILLED:
-                return False
-            self.job.status = Job.Status.OPEN
-            self.job.save(update_fields=["status"])
-            self.job.applications.filter(status=self.Status.CLOSED).update(
-                status=self.Status.PENDING
-            )
-            return True
+            return self._reopen_job()
+
+    # What a worker can withdraw, and from which jobs (my-applications.md R16, D5).
+    WITHDRAWABLE = (Status.PENDING, Status.CLOSED, Status.ACCEPTED)
+    WITHDRAWABLE_FROM = (Job.Status.OPEN, Job.Status.FILLED)
+
+    @property
+    def can_withdraw(self):
+        """Whether the worker can still withdraw it: in play, and the job not started.
+
+        my-applications.md R16, D5, D17. The card shows "Withdraw" only then; withdraw()
+        checks the same again after locking.
+        """
+        return (
+            self.status in self.WITHDRAWABLE
+            and self.job.status in self.WITHDRAWABLE_FROM
+            and not self.job.has_started
+        )
+
+    def withdraw(self):
+        """The worker leaves: "withdrawn"; a place they took is free again (R17, D18).
+
+        Like cancel(): a filled job opens again. Returns True if it did. Raises
+        ApplicationStateError, and changes nothing, unless can_withdraw, read again under
+        the lock: the employer may have decided in the meantime.
+        """
+        with transaction.atomic():
+            self._lock(job_statuses=self.WITHDRAWABLE_FROM, statuses=self.WITHDRAWABLE)
+            if self.job.has_started:
+                raise ApplicationStateError
+            took_a_place = self.status == self.Status.ACCEPTED
+            self.status = self.Status.WITHDRAWN
+            self.save(update_fields=["status"])
+            return took_a_place and self._reopen_job()

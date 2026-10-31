@@ -66,7 +66,7 @@ def test_jobs_are_grouped_by_status_in_order(employer_client, employer):
 
     response = employer_client.get(reverse("my_jobs"))
 
-    groups = [(group["status"], group["jobs"]) for group in response.context["groups"]]
+    groups = [(group["status"], group["items"]) for group in response.context["groups"]]
     assert groups == [
         ("open", [open_job]),
         ("filled", [filled]),

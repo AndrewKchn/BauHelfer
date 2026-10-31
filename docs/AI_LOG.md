@@ -2166,3 +2166,63 @@ accepted. Context: the mockup `my-applications.png` (a "Contact" box) and the co
   the next morning.
 - Why hiding a phone is data minimisation and not deletion: the site stops showing it, but
   it cannot make anyone forget a number they have seen.
+
+## 2026-11-01 · #26 Worker dashboard "My applications"
+
+**Task given to AI:** a page where a worker sees all their own applications with status and
+job details. Context: the mockup `my-applications.png`, a comment in the issue from #24
+proposing a "Withdraw" button, and the rule from #25 for when contacts are shown.
+
+**AI helped:**
+- Compared the mockup with the app before the spec and asked 4 defense questions.
+- Explained what a shared `{% include %}` is, with code for both pages, and moved
+  "My jobs" onto one tab component `_status_tabs.html` that both dashboards use.
+- Wrote the spec (`docs/specs/my-applications.md`) and built it in three iterations, each
+  failing tests → code → spec notes:
+  - "My applications" with tabs, a Contact box, `Job.is_over` and `Application.tab`;
+  - "Withdraw" with a new status (migration 0007), the job row locked, a filled job
+    opening again through `_reopen_job()`, now shared with the employer's "Cancel";
+  - the employer's "Past" tab with `Job.tab`.
+- Mutation-checked every new test: 67 mutations, all caught.
+- Took screenshots at 360 px in both themes after each change, retook the built
+  screenshots, posted six "Docs sync — M4" comments, opened the draft PR.
+
+**AI failed:**
+- Skipped the "option → cost" tables for the first three forks and only wrote down my
+  answers. I asked where they were; AI showed them afterwards.
+- The first card put the status badge next to the title: it took the width, the lines
+  wrapped, and the card looked unlike "My jobs". I found it on my local server.
+- Sorted yesterday's accepted job above tomorrow's; AI saw it on its own screenshot.
+- Promised a "grey" for Withdrawn and Past: `badge-neutral` was dark blue and the loudest
+  badge on the employer's card, `badge-ghost` had the card's own background and looked
+  like plain text. Found on screenshots; now `bg-base-300`.
+- Wrote "This application was already decided." for a refused withdraw, which is wrong
+  after the job has started; fixed while writing the tests.
+- One mutation counted as caught only because the whole file failed on a missing import;
+  AI redid it properly. It also wrote one test that could catch nothing and removed it.
+
+**My part:**
+- Tabs: "like in #20". Withdraw: now, for every application still in play. My criterion:
+  the employer must see what happened, and a worker who withdrew has withdrawn, so it is a
+  status and not a deleted row.
+- "Past": I rejected "any status": what happened happened, what did not fill just passed.
+  So "Past" holds only what did not happen, the same on both sides. My own idea: a "Past"
+  tab for the employer too (I remembered the cron problem; AI explained a computed tab
+  needs none).
+- Asked where the option tables were, and what a shared include is, before agreeing.
+- The cards took too much space and looked unlike "My jobs", so I chose option A (photo +
+  summary). I wanted status badges too: we tried them on both pages without a commit and
+  I took them out. I left that decision for later, out of the spec at first, until I saw
+  the finished cards.
+- Asked why the header is taller for the employer; left it.
+- My own idea: buttons in the colour of the status they lead to. Posted to #96; the
+  badges and the greys are decided in that ticket.
+- Accepted Claude's small defaults where I did not ask: they matched what I wanted.
+- Checked every iteration by hand on my local server, as I always do.
+
+**Learned:**
+- How `{% include %}` with a template name in a variable lets two pages share the same
+  tabs, each with its own card.
+- Why a computed "Past" needs no cron while changing a status at a set time would.
+- Why `withdraw()` locks the job and reads the status again: the employer may have
+  decided in another tab in the meantime.
