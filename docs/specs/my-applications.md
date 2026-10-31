@@ -3,7 +3,8 @@
 Status: **agreed**. I decided D1–D6 on 2026-10-31 (my criteria: the same tabs as "My jobs";
 the employer must see what happens, and a worker who drops out has dropped out; "Past" is
 what is over and did not happen). D7–D20 are Claude's defaults, which I accepted on
-2026-10-31, before any tests.
+2026-10-31, before any tests. D13 I changed and D21 I accepted on 2026-10-31 after seeing
+the page.
 
 Marks: **(mine, date)** — my decision; **(Claude's default, accepted)** — Claude's default
 that I accepted.
@@ -42,15 +43,16 @@ R2. `Application.tab` (a property): which tab the application is in (D3, D9, D10
     - otherwise its status.
 R3. `jobs/applications/` (`my_applications`): workers only (a guest goes to login, an employer
     gets 403). Only the logged-in worker's own applications, each with its job and the job's
-    employer in the same query (D11).
+    employer in the same query, the photos in one more (D11).
 R4. Tabs in this order, only those that have applications: Accepted, Pending, Job filled,
     Rejected, Cancelled, Past (D12). Each tab has its count. Inside a tab, the soonest job
-    first.
+    first, and the jobs that are over last (D21).
 R5. The tabs are the same component as on "My jobs": `templates/_status_tabs.html`, used by
     both pages (D2). "My jobs" looks and works as before.
-R6. Each card: the job summary of "My jobs" (`jobs/_job_summary.html`, title links to the job
-    page), the status badge, and how many of the crew: "2 workers", or "1 of 2 workers" when
-    only part of the crew was taken (D13).
+R6. Each card as on "My jobs": the photo or the placeholder (`jobs/_job_thumbnail.html`) and
+    the job summary (`jobs/_job_summary.html`, title links to the job page), no status badge
+    (D13). Under them, on the card's full width: how many of the crew, "2 workers", or "1 of 2
+    workers" when only part of the crew was taken.
 R7. An accepted application that `shows_contacts`: a "Contact" box with the employer's name,
     phone (or "not given") and the job's exact address (D14). The email is never shown
     (contacts.md R5).
@@ -63,8 +65,8 @@ R9. One short line per closed status (D16):
     - Past: "The job is over."
     - Accepted, no longer `shows_contacts`: "The job is over. The contacts are no longer
       shown."
-R10. A pending application of a cancelled job shows the badge "Job cancelled", here and on the
-     job page (D9).
+R10. On the job page, a pending application of a cancelled job shows the badge "Job
+     cancelled" (D9).
 R11. No applications: "You have not applied to any job yet." and a link "Find a job" to the
      job list.
 R12. The menu of a worker gets "My applications" after "My profile".
@@ -182,8 +184,14 @@ D11. **One query for the list** (Claude's default, accepted): `select_related` b
      on "My jobs".
 D12. **Accepted first** (Claude's default, accepted): what the worker has to act on (call,
      go to work) comes first; then what waits, then what is closed.
-D13. **The card reuses the job summary of "My jobs", without the photo** (Claude's default,
-     accepted): the same layout at 360 px, tested in #20; the mockup has no photo here.
+D13. **The card looks like a "My jobs" card: photo, summary, no status badge** (mine,
+     2026-10-31, after seeing the page; option A). My criteria: one style with "My jobs", and
+     less space. The tab already says the status; the line of R9 explains the special cases.
+     Costs one more query for the photos, not one per card. Rejected: the summary next to a
+     status badge, without a photo (Claude's first default: the badge took the width, the
+     lines wrapped and left empty space, and it looked unlike "My jobs"); the badge under the
+     title (B: more compact, but still unlike "My jobs"). **Revisit when** status badges on
+     the cards of both dashboards are tried (I want to try them for the employer too).
 D14. **The contact box: name, phone, address, as on the mockup** (Claude's default,
      accepted). The company name is not in it: the title links to the job page, which has
      the whole employer card.
@@ -200,6 +208,9 @@ D19. **"Withdraw" only on "My applications"** (Claude's default, accepted): one 
      button; the job page keeps its "You applied" card.
 D20. **Colours** (Claude's default, accepted): the tabs of "My applications" in the colours of
      `_application_status_badge.html`; "Withdrawn" and "Past" neutral (grey).
+D21. **Jobs that are over go to the end of their tab** (Claude's default, accepted after
+     seeing the page): soonest first put yesterday's accepted job above tomorrow's, the one
+     the worker opens the page for.
 
 ## Known limitations (→ docs/SECURITY.md)
 
@@ -210,7 +221,7 @@ D20. **Colours** (Claude's default, accepted): the tabs of "My applications" in 
 
 | Mockup | App | Why |
 |---|---|---|
-| One list with badges | tabs by status, as "My jobs" | D1 |
+| One list with badges | tabs by status, as "My jobs"; no badge on the card, a photo instead | D1, D13 |
 | "Open chat" | none | #35 |
 | "Done" and "Rate the employer" | none; accepted stays "Accepted" | #37–#39, D3 |
 | Green banner "… accepted your application" | none | no notifications; #27 |
