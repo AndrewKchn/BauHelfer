@@ -193,8 +193,11 @@ D13. **The card looks like a "My jobs" card: photo, summary, no status badge** (
      Costs one more query for the photos, not one per card. Rejected: the summary next to a
      status badge, without a photo (Claude's first default: the badge took the width, the
      lines wrapped and left empty space, and it looked unlike "My jobs"); the badge under the
-     title (B: more compact, but still unlike "My jobs"). **Revisit when** status badges on
-     the cards of both dashboards are tried (I want to try them for the employer too).
+     title (B: more compact, but still unlike "My jobs"). A status badge in the bottom row
+     of the cards on both dashboards was tried without a commit: it fitted, but repeated the
+     tab on almost every card; I left it out for now. **Revisit when** the buttons get the
+     colours of their statuses (my idea, posted to #96): the badges on the cards are decided
+     there together with the colours.
 D14. **The contact box: name, phone, address, as on the mockup** (Claude's default,
      accepted). The company name is not in it: the title links to the job page, which has
      the whole employer card.
