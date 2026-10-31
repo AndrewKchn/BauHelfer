@@ -137,7 +137,8 @@ AC18. The job page does not offer the apply form after withdrawing.
 ### Requirements
 
 R22. On "My jobs", an open job that `is_over` goes into a tab "Past" after "Cancelled" (D6).
-     Filled, done and cancelled jobs stay in their tabs.
+     Filled, done and cancelled jobs stay in their tabs; the ones that are over go to the end
+     of their tab (D21).
 R23. A job in "Past" shows no "Edit" and "Cancel job" links (D6).
 
 ### Acceptance criteria (→ tests)
@@ -218,7 +219,7 @@ D20. **Colours** (Claude's default, accepted): the tabs of "My applications" in 
      posted to #96): the colours of all statuses are decided there together.
 D21. **Jobs that are over go to the end of their tab** (Claude's default, accepted after
      seeing the page): soonest first put yesterday's accepted job above tomorrow's, the one
-     the worker opens the page for.
+     the worker opens the page for. The same on "My jobs" for the filled jobs (iteration 3).
 
 ## Known limitations (→ docs/SECURITY.md)
 
