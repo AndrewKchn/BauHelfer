@@ -9,7 +9,7 @@
 @source "../templates";  /* project templates */
 @source "../*/templates";  /* app templates, e.g. accounts/templates/ */
 @source "../*/forms.py";  /* classes set on form widgets, e.g. "file-input" in jobs/forms.py */
-@source "../*/views.py";  /* tab colours of the dashboards, e.g. "badge-neutral" in jobs/views.py */
+@source "../*/views.py";  /* tab colours of the dashboards, e.g. "bg-base-300" in jobs/views.py */
 
 /* daisyUI 5.7.47 (downloaded file): ready classes like btn, navbar, alert.
  * themes: false: none of daisyUI's built-in themes, only our two below. */

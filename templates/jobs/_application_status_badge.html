@@ -2,9 +2,10 @@
 {# An application's status in the colours of the job statuses on "My jobs" (#24): #}
 {# Pending yellow, Accepted green, Job filled blue (as a filled job), Rejected red, #}
 {# Cancelled slate (as a done job): taken off after acceptance, not refused (D13). #}
+{# Withdrawn grey: the worker left by themselves (#26, my-applications.md D20). #}
 {# A pending one of a cancelled job says so: nobody will answer it (#26, my-applications D9). #}
 {% if application.status == "pending" and application.job.status == "cancelled" %}
   <span class="badge badge-secondary shrink-0 font-semibold">{% translate "Job cancelled" %}</span>
 {% else %}
-  <span class="badge shrink-0 font-semibold {% if application.status == 'pending' %}badge-warning{% elif application.status == 'accepted' %}badge-success{% elif application.status == 'closed' %}badge-info{% elif application.status == 'cancelled' %}badge-secondary{% else %}badge-error{% endif %}">{{ application.get_status_display }}</span>
+  <span class="badge shrink-0 font-semibold {% if application.status == 'pending' %}badge-warning{% elif application.status == 'accepted' %}badge-success{% elif application.status == 'closed' %}badge-info{% elif application.status == 'cancelled' %}badge-secondary{% elif application.status == 'withdrawn' %}bg-base-300{% else %}badge-error{% endif %}">{{ application.get_status_display }}</span>
 {% endif %}

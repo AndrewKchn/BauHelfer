@@ -3,7 +3,8 @@ the apply form (#22, docs/specs/application.md), and the employer pages: post, l
 edit, cancel (#16, docs/specs/job-form.md), add and delete photos (#64,
 docs/specs/job-photos.md). The job page shows its employer the applications (#23,
 docs/specs/applications-list.md), who accepts or rejects them (#24,
-docs/specs/accept-reject.md).
+docs/specs/accept-reject.md). The worker sees their applications on "My applications" and
+withdraws them there (#26, docs/specs/my-applications.md).
 """
 
 import logging
@@ -163,14 +164,15 @@ class MyApplicationsView(WorkerRequiredMixin, ListView):
     template_name = "jobs/my_applications.html"
     context_object_name = "applications"
     # What the worker has to act on first, then what waits, then what is closed (D12); in
-    # the colours of the application status badges, "Past" grey (D20).
+    # the colours of the application status badges, "Withdrawn" and "Past" grey (D20).
     tabs = (
         (Application.Status.ACCEPTED, "badge-success"),
         (Application.Status.PENDING, "badge-warning"),
         (Application.Status.CLOSED, "badge-info"),
         (Application.Status.REJECTED, "badge-error"),
         (Application.Status.CANCELLED, "badge-secondary"),
-        ("past", "badge-neutral"),
+        (Application.Status.WITHDRAWN, "bg-base-300"),
+        ("past", "bg-base-300"),
     )
 
     @override
@@ -567,3 +569,40 @@ class ApplicationCancelView(OwnApplicationMixin, View):
                 request.user.pk,
             )
         return back_to(application)
+
+
+class ApplicationWithdrawView(WorkerRequiredMixin, SingleObjectMixin, View):
+    """POST: the worker withdraws their own application (#26, my-applications.md R18).
+
+    Workers only; only their own applications are in the queryset, so any other id gives
+    404. Only post(), so a GET gives 405: a link must not withdraw.
+    """
+
+    @override
+    def get_queryset(self):
+        """Only the logged-in worker's applications."""
+        return self.request.user.applications.all()
+
+    def post(self, request, *args, **kwargs):
+        """Withdraw and go back to "My applications"."""
+        application = self.get_object()
+        try:
+            reopened = application.withdraw()
+        except ApplicationStateError:
+            # Decided, or the job started, since the page was loaded.
+            messages.info(request, _("This application can no longer be withdrawn."))
+            return redirect("my_applications")
+        messages.success(request, _("Application withdrawn."))
+        logger.info(
+            "Application withdrawn: application_id=%s job_id=%s worker_id=%s",
+            application.pk,
+            application.job_id,
+            request.user.pk,
+        )
+        if reopened:
+            logger.info(
+                "Job reopened: job_id=%s worker_id=%s",
+                application.job_id,
+                request.user.pk,
+            )
+        return redirect("my_applications")

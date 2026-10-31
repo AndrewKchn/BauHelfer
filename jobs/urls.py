@@ -36,6 +36,12 @@ urlpatterns = [
         views.ApplicationCancelView.as_view(),
         name="application_cancel",
     ),
+    # The worker withdraws their own application (#26).
+    path(
+        "applications/<int:pk>/withdraw/",
+        views.ApplicationWithdrawView.as_view(),
+        name="application_withdraw",
+    ),
     path(
         "photos/<int:pk>/delete/",
         views.JobPhotoDeleteView.as_view(),

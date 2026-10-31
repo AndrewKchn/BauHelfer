@@ -207,7 +207,7 @@ def test_jobs_that_are_over_go_last_in_their_tab(ivan_client, ivan, employer):
         ("closed", TODAY + DAY, "badge-info"),
         ("rejected", TODAY + DAY, "badge-error"),
         ("cancelled", TODAY + DAY, "badge-secondary"),
-        ("pending", TODAY - DAY, "badge-neutral"),
+        ("pending", TODAY - DAY, "bg-base-300"),
     ],
     ids=["accepted", "pending", "closed", "rejected", "cancelled", "past"],
 )

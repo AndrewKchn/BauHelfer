@@ -14,7 +14,18 @@
           {% include "jobs/_job_summary.html" %}
         </div>
       </div>
-      <p class="text-sm"><span class="font-semibold">{% translate "Your crew:" %}</span> {% include "jobs/_crew.html" %}</p>
+      {# "Withdraw" on the crew's line, so it takes no line of its own (D19); the browser #}
+      {# asks first: it cannot be undone (D4). #}
+      <div class="flex items-center justify-between gap-2">
+        <p class="text-sm"><span class="font-semibold">{% translate "Your crew:" %}</span> {% include "jobs/_crew.html" %}</p>
+        {% if application.can_withdraw %}
+          {% translate "Withdraw your application? This cannot be undone." as question %}
+          <form method="post" action="{% url 'application_withdraw' application.pk %}" onsubmit="return confirm('{{ question|escapejs }}')" class="shrink-0">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline btn-sm">{% translate "Withdraw" %}</button>
+          </form>
+        {% endif %}
+      </div>
       {# The employer's name and phone and the exact address, while the contacts are shown; #}
       {# never the email (R7, D14; contacts.md R1, R5). tel: dials it on a phone. #}
       {% if application.shows_contacts %}
@@ -28,23 +39,27 @@
       {% if application.tab == "pending" and application.message %}
         <p class="whitespace-pre-line break-words text-sm">{% translate "Your message:" %} “{{ application.message }}”</p>
       {% endif %}
-      {# Why it is closed, in one neutral line (R9, D16). A pending application of a #}
-      {# cancelled job is in "Cancelled" (D9); an accepted one is cancelled with the job. #}
-      <p class="text-sm text-base-content/70">
-        {% if application.tab == "past" %}
-          {% translate "The job is over." %}
-        {% elif application.status == "rejected" %}
-          {% translate "The employer chose other workers." %}
-        {% elif application.status == "closed" %}
-          {% translate "The job was filled by other workers." %}
-        {% elif job.status == "cancelled" %}
-          {% translate "The employer cancelled the job." %}
-        {% elif application.status == "cancelled" %}
-          {% translate "The employer cancelled your place." %}
-        {% elif application.status == "accepted" and not application.shows_contacts %}
-          {% translate "The job is over. The contacts are no longer shown." %}
-        {% endif %}
-      </p>
+      {# Why it is closed, in one neutral line (R9, D16); none while it is in play. A pending #}
+      {# application of a cancelled job is in "Cancelled" (D9); an accepted one is cancelled #}
+      {# with the job. "as why", then one <p>: no empty line in the card. #}
+      {% if application.tab == "past" %}
+        {% translate "The job is over." as why %}
+      {% elif application.status == "withdrawn" %}
+        {% translate "You withdrew this application." as why %}
+      {% elif application.status == "rejected" %}
+        {% translate "The employer chose other workers." as why %}
+      {% elif application.status == "closed" %}
+        {% translate "The job was filled by other workers." as why %}
+      {% elif job.status == "cancelled" %}
+        {% translate "The employer cancelled the job." as why %}
+      {% elif application.status == "cancelled" %}
+        {% translate "The employer cancelled your place." as why %}
+      {% elif application.status == "accepted" and not application.shows_contacts %}
+        {% translate "The job is over. The contacts are no longer shown." as why %}
+      {% endif %}
+      {% if why %}
+        <p class="text-sm text-base-content/70">{{ why }}</p>
+      {% endif %}
     </div>
   </li>
 {% endwith %}

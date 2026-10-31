@@ -285,7 +285,7 @@ def test_employer_sees_withdrawn_without_buttons_or_phone(client, employer, job,
     response = client.get(reverse("job_detail", args=[job.pk]))
 
     assertContains(response, "Ivan Petrenko")
-    assertContains(response, 'badge-neutral">Withdrawn</span>')
+    assertContains(response, 'bg-base-300">Withdrawn</span>')
     for name in ("application_accept", "application_reject", "application_cancel"):
         assertNotContains(response, reverse(name, args=[application.pk]))
     assertNotContains(response, WORKER_PHONE)
