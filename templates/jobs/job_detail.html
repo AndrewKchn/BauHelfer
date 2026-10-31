@@ -91,14 +91,13 @@
     {% endif %}
   </div>
 
-  {# The address only for the job's own employer, decided by the view (spec R5, D4). #}
-  <p class="mt-3 text-sm">
-    {% if show_address %}
-      <span class="font-semibold">{% translate "Address" %}:</span> {{ job.address }}
-    {% else %}
-      <span class="text-base-content/70">{% translate "The exact address is shown after the employer accepts you." %}</span>
-    {% endif %}
-  </p>
+  {# The address for the job's own employer and an accepted worker, decided by the view #}
+  {# (spec R5, D4; contacts.md R3). The hint only for who can still be accepted (R6, D8). #}
+  {% if show_address %}
+    <p class="mt-3 text-sm"><span class="font-semibold">{% translate "Address" %}:</span> {{ job.address }}</p>
+  {% elif address_hint %}
+    <p class="mt-3 text-sm text-base-content/70">{% translate "The exact address is shown after the employer accepts you." %}</p>
+  {% endif %}
 
   <section class="card mt-4 bg-base-100 shadow-sm">
     {# linebreaksbr keeps the employer's line breaks; the text is escaped first. #}
@@ -126,7 +125,7 @@
         {% if applications %}
           <ul class="mt-2 flex flex-col gap-3">
             {% for application in applications %}
-              {# No phone or email: they are revealed only after acceptance (#25). #}
+              {# The phone only in an accepted application, the email never (#25). #}
               {% with worker=application.worker profile=application.worker.worker_profile %}
                 {# The id brings the employer back here after a decision (#24, D8). #}
                 <li id="application-{{ application.pk }}" class="flex flex-col gap-2 rounded-box bg-base-200 p-3">
@@ -170,6 +169,14 @@
                       <span class="badge badge-error badge-sm">{% translate "Work permit not confirmed" %}</span>
                     {% endif %}
                   </div>
+                  {# The worker's phone only while the application shows contacts; never #}
+                  {# the email (#25, contacts.md R4, R5, D1). tel: dials it on a phone. #}
+                  {% if application.shows_contacts %}
+                    <p class="text-sm">
+                      <span class="font-semibold">{% translate "Phone" %}:</span>
+                      {% include "accounts/_phone.html" with phone=worker.phone %}
+                    </p>
+                  {% endif %}
                   {% if application.message %}
                     {# whitespace-pre-line keeps the line breaks the worker typed. #}
                     <p class="whitespace-pre-line break-words">“{{ application.message }}”</p>
@@ -228,18 +235,22 @@
       </div>
     </section>
   {% else %}
-    {# Who hires: the profile card has no phone or email (spec R6). A job made in the admin #}
-    {# by an employer without a profile shows the account's name. The profile comes with #}
-    {# the job (select_related), so the missing one costs no query either. #}
+    {# Who hires: the profile card has no phone or email (spec R6), except the phone for an #}
+    {# accepted worker until the day of the job is over (#25, contacts.md R3, D7). A job made #}
+    {# in the admin by an employer without a profile shows the account's name. The profile #}
+    {# comes with the job (select_related), so the missing one costs no query either. #}
     <section class="card mt-4 bg-base-100 shadow-sm">
       <div class="card-body p-4">
-        {% with profile=job.employer.employer_profile %}
+        {% with profile=job.employer.employer_profile show_phone=application.shows_contacts %}
           {# A section title, not the name: the card itself shows the company and the person. #}
           <h2 class="text-lg font-semibold">{% translate "Employer" %}</h2>
           {% if profile %}
             {% include "accounts/_employer_profile_card.html" %}
           {% else %}
             <p>{{ job.employer.name }}</p>
+            {% if show_phone %}
+              <p><span class="font-semibold">{% translate "Phone" %}:</span> {% include "accounts/_phone.html" with phone=job.employer.phone %}</p>
+            {% endif %}
           {% endif %}
         {% endwith %}
       </div>

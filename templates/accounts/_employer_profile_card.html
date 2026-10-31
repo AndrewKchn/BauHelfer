@@ -1,7 +1,8 @@
 {% load i18n %}
 {% comment %}
-  Who the employer is, read-only. Used on the employer's own profile page; #19 will show it to
-  workers on the job page, so no contact details here (revealed only after acceptance, #25).
+  Who the employer is, read-only. Used on the employer's own profile page and on the job page
+  (#19). No contact details, except the phone when `show_phone` is set: the job page sets it
+  for an accepted worker until the day of the job is over (#25, contacts.md R3, D7).
   Needs `profile` (an EmployerProfile).
 {% endcomment %}
 <dl class="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-4 sm:gap-x-6">
@@ -12,6 +13,11 @@
 
   <dt class="font-semibold">{% translate "Contact person" %}</dt>
   <dd class="min-w-0 break-words">{{ profile.user.name }}</dd>
+
+  {% if show_phone %}
+    <dt class="font-semibold">{% translate "Phone" %}</dt>
+    <dd class="min-w-0 break-words">{% include "accounts/_phone.html" with phone=profile.user.phone %}</dd>
+  {% endif %}
 
   <dt class="font-semibold">{% translate "Trades" %}</dt>
   <dd class="flex min-w-0 flex-wrap gap-2">

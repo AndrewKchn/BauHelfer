@@ -92,7 +92,14 @@ class NameAndPhoneForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["name"].required = True
         # type="tel" opens the number keyboard on phones; the check itself is on the model.
-        self.fields["phone"].widget.input_type = "tel"
+        phone = self.fields["phone"]
+        phone.widget.input_type = "tel"
+        # Who sees the phone, after the model's format example (#25, contacts.md R7, D10):
+        # here, not on the model, so no migration. Built per form, in the user's language.
+        phone.help_text = f"{phone.help_text} " + _(
+            "Optional. Shown only to the people you work with, until the day of the job "
+            "is over."
+        )
 
 
 class WorkerUserForm(NameAndPhoneForm):

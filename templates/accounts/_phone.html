@@ -1,0 +1,4 @@
+{% load i18n %}{% comment %}
+  A phone shown to the other side after acceptance (#25, docs/specs/contacts.md): a tel: link
+  that dials it on a phone, or "not given". Needs `phone`.
+{% endcomment %}{% if phone %}<a href="tel:{{ phone }}" class="link">{{ phone }}</a>{% else %}{% translate "not given" %}{% endif %}
