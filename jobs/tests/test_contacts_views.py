@@ -142,6 +142,32 @@ def test_employer_without_a_phone_is_shown_as_not_given(client):
     assertContains(response, "not given")
 
 
+def test_employer_without_a_profile_shows_the_phone_under_the_name(client):
+    """A job made in the admin by an employer without a profile still shows the phone (R3).
+
+    1. Save a job of an employer with a phone and no company profile, and Ivan's accepted
+       application
+    2. Open the job's page as Ivan
+    3. Expect: the employer's name and phone
+    """
+    karl = User.objects.create_user(
+        email="karl@example.com",
+        password="x",
+        role="employer",
+        name="Karl Meier",
+        phone=EMPLOYER_PHONE,
+    )
+    job = make_job(karl)
+    ivan = worker()
+    apply(job, ivan, "accepted")
+    client.force_login(ivan)
+
+    response = client.get(detail_url(job))
+
+    assertContains(response, "Karl Meier")
+    assertContains(response, EMPLOYER_PHONE)
+
+
 # The employer's side (R4, R5, D6; AC6)
 
 

@@ -2,8 +2,8 @@
 
 Status: **agreed**. I decided D1–D4 on 2026-10-29 and 2026-10-30 (my criterion: as little
 personal data on the site as possible, but the two sides must be able to reach each other on
-the day of the job); D5–D10 are Claude's defaults, which I accepted on 2026-10-31, before any
-tests.
+the day of the job); D5, D6 and D8–D10 are Claude's defaults, which I accepted on 2026-10-31,
+before any tests. D7 I changed on 2026-10-31 after seeing the page.
 
 Marks: **(mine, date)** — my decision; **(Claude's default, accepted)** — Claude's default
 that I accepted; **(Claude's recommendation)** — what Claude advised where I chose
@@ -37,8 +37,8 @@ R2. `Job.cancel()` in one transaction, the job row locked (as `Application._lock
     `JobCancelView` calls it instead of setting the status itself.
 R3. The job page, for a worker whose application `shows_contacts`:
     - the address line shows the exact address (`show_address`, job-detail.md R5);
-    - the "You applied" card gets a "Contact" part: the employer's phone, or "not given"
-      (D1, D7). The contact person's name is already on the employer card below.
+    - the employer card gets a "Phone" row under "Contact person": the employer's phone,
+      or "not given" (D1, D7). An employer without a profile: under their name.
 R4. The job page, for the owner: an application that `shows_contacts` shows the worker's phone,
     or "not given" (D6). Other applications show no phone.
 R5. The email of either side is never shown on any page (D1).
@@ -100,9 +100,13 @@ D5. **One rule in one place: `Application.shows_contacts`** (Claude's default, a
 D6. **The employer sees the phone only in the application on the job page** (Claude's
     default, accepted): not on the worker page (`workers/<id>/`), so there is one place to
     check.
-D7. **The worker's "Contact" part sits in the "You applied" card** (Claude's default,
-    accepted): where the worker already looks for their status. The address stays in its
-    own line at the top, as for the owner, so it is not shown twice.
+D7. **The employer's phone sits in the employer card, under "Contact person"** (mine,
+    2026-10-31, after seeing the page): the worker looks for the phone where the employer
+    is. The card is shared with the employer's own profile page, so the row comes only when
+    the job page sets `show_phone`. The address stays in its own line at the top, as for the
+    owner, so it is not shown twice. Rejected: a "Contact" part in the "You applied" card
+    (Claude's first default, accepted on 2026-10-31: the phone was there because it comes
+    with the status, but the name and the phone were far apart).
 D8. **No "shown after the employer accepts you" for someone who will not be accepted**
     (Claude's default, accepted): a rejected or cancelled worker would read a promise that
     cannot come true.
@@ -123,5 +127,5 @@ D10. **The phone hint is set in the form, not on the model** (Claude's default, 
 
 | Mockup | App | Why |
 |---|---|---|
-| "My applications": a "Contact" box with name, phone and address | on the job page: the address line at the top, the phone in "You applied"; the box itself comes with #26 | D7, out of scope |
+| "My applications": a "Contact" box with name, phone and address | on the job page: the address line at the top, the phone in the employer card; the box itself comes with #26 | D7, out of scope |
 | "My applications": "Open chat" | none | #35 |
