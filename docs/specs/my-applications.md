@@ -108,14 +108,15 @@ R17. `Application.withdraw()` in one transaction, the job row locked (`_lock`, a
      job opened again.
 R18. `jobs/applications/<pk>/withdraw/` (`application_withdraw`): POST only, workers only, the
      worker's own application only (any other id: 404). Back to "My applications" with
-     "Application withdrawn." or, if it was already decided, "This application was already
-     decided." Logged with ids only (#124).
+     "Application withdrawn." or, if it cannot be withdrawn any more, "This application can
+     no longer be withdrawn." Logged with ids only (#124).
 R19. "Withdraw" button on the card while `can_withdraw`, only on "My applications" (D19); the
      browser asks "Withdraw your application? This cannot be undone." first.
 R20. The employer sees the application with the badge "Withdrawn" and no buttons (D4). It
      shows no phone (`shows_contacts` is False).
-R21. The worker's tab "Withdrawn" after "Cancelled", before "Past". Withdrawn is final: the
-     worker cannot apply to that job again (the unique constraint, application.md D5).
+R21. The worker's tab "Withdrawn" after "Cancelled", before "Past"; its card says "You
+     withdrew this application." (D16). Withdrawn is final: the worker cannot apply to that
+     job again (the unique constraint, application.md D5).
 
 ### Acceptance criteria (→ tests)
 
