@@ -12,6 +12,7 @@ from typing import override
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Count
+from django.http import Http404
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
@@ -30,7 +31,7 @@ from accounts.models import User
 from accounts.views import RoleRequiredMixin
 
 from .forms import ApplicationForm, JobFilterForm, JobForm, JobPhotosForm
-from .models import Application, ApplicationStateError, Job, JobPhoto
+from .models import Application, ApplicationStateError, Job, JobPhoto, JobStateError
 
 # "jobs.views". Ids only, never an email or other personal data (#124).
 logger = logging.getLogger(__name__)
@@ -210,7 +211,8 @@ class JobCancelView(OwnOpenJobMixin, DetailView):
     """GET asks "cancel this job?", POST cancels it (spec R13, D6).
 
     Cancelling changes the status and keeps the row: the job stays in "My jobs", and the
-    applications to it (#22) keep their job.
+    applications to it (#22) keep their job. Its accepted workers are cancelled too, so
+    they no longer see the contacts (#25, contacts.md D3).
     """
 
     template_name = "jobs/job_confirm_cancel.html"
@@ -219,8 +221,11 @@ class JobCancelView(OwnOpenJobMixin, DetailView):
     def post(self, request, *args, **kwargs):
         """Mark the job cancelled and go back to "My jobs"."""
         job = self.get_object()  # 404 unless it is the employer's own open job
-        job.status = Job.Status.CANCELLED
-        job.save(update_fields=["status"])
+        try:
+            job.cancel()
+        except JobStateError:
+            # Another tab cancelled it a moment earlier: the same 404 as get_object().
+            raise Http404 from None
         logger.info("Job cancelled: job_id=%s employer_id=%s", job.pk, request.user.pk)
         messages.success(request, _("Job cancelled."))
         return redirect("my_jobs")
@@ -269,7 +274,7 @@ class JobDetailView(DetailView):
     """One job with everything about it, for everyone, in any status (#19, spec R1-R8, D1).
 
     No login mixin: guests see the page too. The address is shown only to the job's own
-    employer (D4).
+    employer (D4) and, since #25, to a worker whose application shows contacts.
     """
 
     template_name = "jobs/job_detail.html"
@@ -292,9 +297,7 @@ class JobDetailView(DetailView):
         job = self.object
         is_owner = user == job.employer
         context["is_owner"] = is_owner
-        # Decided here, not in the template: #25 adds the worker whose application was
-        # accepted, and the template stays as it is.
-        context["show_address"] = is_owner
+        application = None
         if is_owner:
             # Only for the owner (applications-list.md D16): a guest's page keeps its 2
             # queries. select_related: each application's worker and profile come in the
@@ -315,6 +318,17 @@ class JobDetailView(DetailView):
             if application is None and user.can_apply():
                 # JobApplyView passes in the form with its errors; otherwise an empty one.
                 context.setdefault("apply_form", ApplicationForm(job=job, worker=user))
+        # Decided here, not in the template (job-detail.md D4): the owner, and an accepted
+        # worker until the day of the job is over (contacts.md R3, D5).
+        show_address = is_owner or bool(application and application.shows_contacts)
+        context["show_address"] = show_address
+        # "Shown after the employer accepts you" only to someone who can still be accepted
+        # (R6, D8): not to a rejected or cancelled worker, nor after the job.
+        context["address_hint"] = not show_address and (
+            application is None
+            or application.status
+            in (Application.Status.PENDING, Application.Status.CLOSED)
+        )
         return context
 
 

@@ -186,12 +186,34 @@ class Job(models.Model):
         return f"{self.get_job_type_display()} – {self.date}"
 
     @property
-    def end_time(self):
-        """When the job ends: start time plus hours; past midnight gives the next morning."""
-        # A time cannot be added to, a date and time can; only the time is returned.
+    def ends_at(self):
+        """When the job ends, date and time: past midnight gives the next morning."""
+        # A time cannot be added to, a date and time can.
         start = datetime.combine(self.date, self.start_time)
-        end = start + timedelta(hours=self.hours)
-        return end.time()
+        return start + timedelta(hours=self.hours)
+
+    @property
+    def end_time(self):
+        """When the job ends: start time plus hours, the time only."""
+        return self.ends_at.time()
+
+    def cancel(self):
+        """Cancel this open job and its accepted workers (contacts.md R2, D3, D9).
+
+        The accepted applications become "cancelled", so they show no contacts any more;
+        pending, closed and rejected ones stay. The job row is locked, as in
+        Application._lock: a second click with an old copy reads "cancelled" and stops.
+        Raises JobStateError, and changes nothing, unless the job is open.
+        """
+        with transaction.atomic():
+            status = Job.objects.select_for_update().get(pk=self.pk).status
+            if status != self.Status.OPEN:
+                raise JobStateError
+            self.status = self.Status.CANCELLED
+            self.save(update_fields=["status"])
+            self.applications.filter(status=Application.Status.ACCEPTED).update(
+                status=Application.Status.CANCELLED
+            )
 
     def workers_found(self):
         """How many workers the employer has taken: the sum over accepted applications.
@@ -308,6 +330,10 @@ def delete_photo_file(sender, instance, **kwargs):
     transaction.on_commit(delete_files)
 
 
+class JobStateError(Exception):
+    """The job is no longer in a state that allows this change."""
+
+
 class ApplicationStateError(Exception):
     """The application or its job is no longer in a state that allows this decision."""
 
@@ -384,6 +410,19 @@ class Application(models.Model):
 
     def __str__(self):
         return f"{self.worker} → {self.job}"
+
+    @property
+    def shows_contacts(self):
+        """Whether the worker and the employer see each other's phone and the address.
+
+        Only an accepted application, and only until the day the job ends is over, Munich
+        time (contacts.md R1, D2, D4): on the day itself a late worker can still call. The
+        one rule for the job page and #26.
+        """
+        return (
+            self.status == self.Status.ACCEPTED
+            and timezone.localdate() <= self.job.ends_at.date()
+        )
 
     def _lock(self, job_statuses=(Job.Status.OPEN,), status=Status.PENDING):
         """Lock the job row, then read this application and its job again.

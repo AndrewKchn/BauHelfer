@@ -122,21 +122,24 @@ def test_save_built_screenshots(page):
     worker.save()
     # Two applications to the demolition job, for its employer's page (#23); Ana applies
     # to nothing, so the job page above still shows her the apply form.
-    for email, name, team, skills, message in (
+    # Mehmet has a phone: accepted, it is shown to the employer (#25).
+    for email, name, phone, team, skills, message in (
         (
             "andrii@example.com",
             "Andrii Petrenko",
+            "",
             2,
             ["demolition"],
             "We are a crew of two.",
         ),
-        ("mehmet@example.com", "Mehmet Kaya", 1, ["carrying"], ""),
+        ("mehmet@example.com", "Mehmet Kaya", "+49 151 2345678", 1, ["carrying"], ""),
     ):
         applicant = User.objects.create_user(
             email=email,
             password=PASSWORD,
             role="worker",
             name=name,
+            phone=phone,
             work_permit_confirmed_at=timezone.now(),
         )
         WorkerProfile.objects.create(

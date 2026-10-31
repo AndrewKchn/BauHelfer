@@ -2105,3 +2105,64 @@ page.
   request waits for the job row until the first one commits, then reads the new state.
 - Why `SUM` needs `Coalesce` (no accepted workers gives NULL, not 0), and why the name in
   `confirm('…')` needs `|safe` before `|escapejs`: it is escaped once, for JavaScript.
+
+## 2026-10-31 · #25 Reveal contacts to both sides after acceptance
+
+**Task given to AI:** show phone and address to both sides only after an application is
+accepted. Context: the mockup `my-applications.png` (a "Contact" box) and the comments #19,
+#22 and #23 had left in the code ("revealed only after acceptance, #25").
+
+**AI helped:**
+- Checked first that no phone leaked yet (profile pages show it only to their owner) and
+  asked 3 defense questions: why the rule is not only in the template, how a test proves
+  the phone is *not* there, whether a seen phone can be taken back.
+- Showed the application's states as a Mermaid diagram and walked through one example day
+  ("the worker is late at 06:50", "payment question on Friday", "a month later") to find
+  when contacts should disappear.
+- Showed the forks as "option → cost" tables: what to reveal (A phone + email, B only
+  the chat, C phone if given), and when a past job hides them.
+- Wrote the spec (`docs/specs/contacts.md`), failing tests first, then the code: one rule
+  `Application.shows_contacts` (accepted and the day the job ends is not over, Munich time,
+  so a night shift keeps its contacts until the next day), `Job.cancel()` in one
+  transaction with the job row locked, a `tel:` link, the hint under the phone field set in
+  the form so there is no migration.
+- Mutation-checked the new tests: 21 mutations, all caught.
+- Wiped my local database (except the admin) and made test users and jobs for every case,
+  plus 35 open jobs for the pagination.
+- Screenshots at 360 px in both themes, the built screenshot, four "Docs sync — M4"
+  comments and the draft PR.
+
+**AI failed:**
+- Put the employer's phone in the "You applied" card at the bottom of the page, far from
+  the employer's name. I found it on my local server.
+- Rebuilt the CSS while a class (`flex-row`) was missing from the templates, so the
+  "You applied" card broke into a column. AI saw it on its own screenshot and rebuilt the
+  CSS; the code was fine.
+- The built-screenshot script retook all four screens; AI put back the three this ticket
+  does not change, so only `job-applications.png` changed.
+
+**My part:**
+- My criterion: after a cancel nobody should see the data. My own rules from it: when a job
+  is cancelled, its accepted workers become "Cancelled"; a job in the past hides the
+  contacts too (from the next day, so a late worker can still call that morning).
+- I asked to discuss it in more detail, and asked which data is hidden and whether the
+  chat would be hidden too.
+- My own idea: show no contacts at all and let both sides swap them in the chat. I dropped
+  it myself: without a phone and without a chat (#35 is in M6) they could not reach each
+  other. So I chose C (the phone only if given, never the email) and to remove the phone
+  once the chat exists (Revisit when #35).
+- Accepted Claude's small defaults (one rule on the model, the phone only in the
+  application, the hint in the form): a small ticket, and they matched what I wanted.
+- After looking at the page: asked why the employer's phone was at the bottom and not in
+  the employer's block; it moved under "Contact person" (D7).
+- Asked for fresh test data on my local server and checked by hand every case from the
+  list: accept → the phone and address appear, a rejected and a cancelled worker see
+  nothing, cancel the job → the contacts are gone, yesterday's job hides them, the night
+  shift still shows them, an employer without a phone shows "not given", the pagination.
+
+**Learned:**
+- Why the rule compares today with the day the job *ends* and uses
+  `timezone.localdate()`: the job's date and time are Munich time, and a night shift ends
+  the next morning.
+- Why hiding a phone is data minimisation and not deletion: the site stops showing it, but
+  it cannot make anyone forget a number they have seen.
