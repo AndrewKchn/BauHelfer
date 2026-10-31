@@ -56,10 +56,11 @@ def test_save_built_screenshots(page):
     """Save the built screenshots of the screens that exist.
 
     1. Create an employer with three open jobs (one with three photos, one with two
-       applications, one of them accepted) and a cancelled one, and a worker
+       applications, one of them accepted) and a cancelled one, and a worker; Ivan with
+       an accepted, a pending and a past application (#26)
     2. Open the job list as a guest, the job page as the worker, "Post a job", "My jobs"
-       and the job page with the applications as the employer, on a 390 x 844 screen in
-       the light theme
+       and the job page with the applications as the employer, "My applications" as Ivan,
+       on a 390 x 844 screen in the light theme
     3. Expect: one full-page PNG per screen in docs/mockups/built/
     """
     OUT.mkdir(exist_ok=True)
@@ -158,6 +159,49 @@ def test_save_built_screenshots(page):
         status=Application.Status.ACCEPTED, workers_accepted=1
     )
 
+    # Ivan's applications for "My applications" (#26): accepted to a filled job (the
+    # contact box), pending with a message, and one to a job that is over ("Past"). None
+    # changes the job list or Ana's job page: the filled and the past job are not listed,
+    # and a pending application takes no place.
+    ivan = User.objects.create_user(
+        email="ivan@example.com",
+        password=PASSWORD,
+        role="worker",
+        name="Ivan Petrenko",
+        work_permit_confirmed_at=timezone.now(),
+    )
+    WorkerProfile.objects.create(
+        user=ivan,
+        team_size=2,
+        skills=["demolition"],
+        languages=["uk"],
+        legal_status="gewerbe",
+    )
+    employer.phone = "+49 170 7654321"
+    employer.save()
+    filled = make_job(
+        employer,
+        job_type="demolition",
+        address="Kurfürstenstraße 12",
+        district="maxvorstadt",
+        date=today + 4 * DAY,
+        status="filled",
+    )
+    Application.objects.create(
+        job=filled,
+        worker=ivan,
+        workers_offered=2,
+        workers_accepted=2,
+        status=Application.Status.ACCEPTED,
+    )
+    Application.objects.create(
+        job=job, worker=ivan, workers_offered=2, message="We are a crew of two."
+    )
+    over = make_job(
+        employer, job_type="site_cleaning", district="laim", date=today - 2 * DAY
+    )
+    Application.objects.create(job=over, worker=ivan)
+
     # live_server does not serve uploads (in-memory storage): answer every photo address.
     picture = photo_bytes("#d9822b")
     page.route(
@@ -174,3 +218,6 @@ def test_save_built_screenshots(page):
     shoot(page, "/jobs/new/", "post-a-job")
     shoot(page, "/jobs/mine/", "my-jobs")
     shoot(page, f"/jobs/{demolition.pk}/", "job-applications")
+    page.context.clear_cookies()
+    log_in(page, "ivan@example.com")
+    shoot(page, "/jobs/applications/", "my-applications")
