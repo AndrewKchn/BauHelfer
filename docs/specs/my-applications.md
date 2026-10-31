@@ -110,8 +110,9 @@ R18. `jobs/applications/<pk>/withdraw/` (`application_withdraw`): POST only, wor
      worker's own application only (any other id: 404). Back to "My applications" with
      "Application withdrawn." or, if it cannot be withdrawn any more, "This application can
      no longer be withdrawn." Logged with ids only (#124).
-R19. "Withdraw" button on the card while `can_withdraw`, only on "My applications" (D19); the
-     browser asks "Withdraw your application? This cannot be undone." first.
+R19. "Withdraw" button on the card's crew line while `can_withdraw`, only on "My
+     applications" (D19); the browser asks "Withdraw your application? This cannot be
+     undone." first.
 R20. The employer sees the application with the badge "Withdrawn" and no buttons (D4). It
      shows no phone (`shows_contacts` is False).
 R21. The worker's tab "Withdrawn" after "Cancelled", before "Past"; its card says "You
@@ -206,9 +207,15 @@ D18. **Withdrawing an accepted worker works like the employer's "Cancel"** (Clau
      accepted): the place is free again, the job opens, the closed applications are pending
      again (accept-reject.md D13–D15). The code is shared with `cancel()`.
 D19. **"Withdraw" only on "My applications"** (Claude's default, accepted): one place for the
-     button; the job page keeps its "You applied" card.
+     button; the job page keeps its "You applied" card. On the crew line, so it takes no line
+     of its own (accepted after seeing the page).
 D20. **Colours** (Claude's default, accepted): the tabs of "My applications" in the colours of
-     `_application_status_badge.html`; "Withdrawn" and "Past" neutral (grey).
+     `_application_status_badge.html`; "Withdrawn" and "Past" a quiet grey (`bg-base-300`):
+     nothing to do there. Tried after seeing the page: `badge-neutral`, the first default, is
+     dark blue in the light theme and was the loudest badge on the employer's card;
+     `badge-ghost` has the card's own background, so the badge and the active tab looked like
+     plain text. **Revisit when** the buttons get the colours of their statuses (my idea,
+     posted to #96): the colours of all statuses are decided there together.
 D21. **Jobs that are over go to the end of their tab** (Claude's default, accepted after
      seeing the page): soonest first put yesterday's accepted job above tomorrow's, the one
      the worker opens the page for.
