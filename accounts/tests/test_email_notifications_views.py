@@ -132,3 +132,22 @@ def test_password_reset_ignores_the_checkbox(client, mailoutbox):
     client.post(reverse("password_reset"), {"email": "worker@example.com"})
 
     assert [email.to for email in mailoutbox] == [["worker@example.com"]]
+
+
+@pytest.mark.parametrize(
+    ("role", "last_field"), [("worker", "legal_status"), ("employer", "trades")]
+)
+def test_checkbox_is_last_before_save(client, role, last_field):
+    """The checkbox is a setting, so it comes after all profile fields (mine, D4).
+
+    1. Log in as a worker (or employer) and open the profile form
+    2. Expect: the checkbox comes after the last profile field and before "Save profile"
+    """
+    client.force_login(make_user(role))
+
+    html = client.get(reverse(f"{role}_profile_edit")).content.decode()
+
+    last = html.rindex(f'name="{last_field}"')
+    box = html.index('name="email_notifications"')
+    save = html.index("Save profile")
+    assert last < box < save

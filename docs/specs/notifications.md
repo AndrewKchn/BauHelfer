@@ -95,7 +95,9 @@ R9.  `User.email_notifications`: a BooleanField, default True; the migration set
      existing users (D3).
 R10. The checkbox "Email notifications" is in the name-and-phone form both roles use
      (`NameAndPhoneForm`), so it is in the profile form at onboarding and when editing (D4).
-     Help text: which emails it covers and that password emails are always sent.
+     Help text: which emails it covers and that password emails are always sent. It comes
+     last, after the profile fields and before "Save profile", under a thin line, so it does
+     not read as one more trade or legal status (mine, 2026-11-01, after the screenshots).
 R11. The profile pages of both roles show "Email notifications: on / off".
 R12. The `notify_…` functions send nothing when the recipient's checkbox is off (nothing is
      logged either).
@@ -105,7 +107,8 @@ R14. The password reset email does not depend on the checkbox.
 
 ### Acceptance criteria (→ tests)
 
-AC9.  A new user has the checkbox on; existing users have it on after the migration.
+AC9.  A new user has the checkbox on; existing users have it on after the migration (the
+      migration was checked by hand: 7 of 7 local users on, 2026-11-01).
 AC10. The form shows it at onboarding and when editing, for a worker and an employer;
       unticking and saving turns it off.
 AC11. With the recipient's checkbox off, applying / accepting / rejecting send nothing; the
