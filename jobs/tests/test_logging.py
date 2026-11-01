@@ -83,11 +83,12 @@ def test_cancelling_a_job_is_logged_with_its_id_and_the_employer_id(
 
 @pytest.mark.story(22)
 def test_applying_is_logged_with_ids_and_without_the_message(client, employer, caplog):
-    """Applying writes one INFO record with ids only, never the message (#22 spec R7, D9).
+    """Applying writes INFO records with ids only, never the message (#22 spec R7, D9).
 
     1. Log in as a worker who can apply and send the apply form with a message
-    2. Expect: one INFO record
-       "Application created: application_id=<id> job_id=<id> worker_id=<id>"
+    2. Expect: two INFO records:
+       "Application created: application_id=<id> job_id=<id> worker_id=<id>", then the
+       employer's email "Notification sent: kind=new_application application_id=<id>" (#27)
     3. Expect: the message and the worker's email are in no record
     """
     job = make_job(employer)
@@ -100,12 +101,13 @@ def test_applying_is_logged_with_ids_and_without_the_message(client, employer, c
     )
 
     application = Application.objects.get()
-    [record] = app_records(caplog)
-    assert record.levelname == "INFO"
-    assert record.getMessage() == (
+    created = (
         f"Application created: application_id={application.pk} job_id={job.pk} "
         f"worker_id={worker.pk}"
     )
+    sent = f"Notification sent: kind=new_application application_id={application.pk}"
+    records = [(r.levelname, r.getMessage()) for r in app_records(caplog)]
+    assert records == [("INFO", created), ("INFO", sent)]
     assert "0176" not in caplog.text
     assert "ivan@example.com" not in caplog.text
 
