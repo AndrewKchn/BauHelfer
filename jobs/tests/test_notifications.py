@@ -1,7 +1,8 @@
 """Unit tests: the three notification emails, called directly with a made-up request (#27).
 
 Spec: docs/specs/notifications.md, iteration 1 (R1-R7, D8-D10), acceptance criteria
-AC4-AC7; iteration 2 (R12, R13, D4), AC11, AC12. The views that call these functions are in test_notifications_views.py.
+AC4-AC7; iteration 2 (R12, R13, D4), AC11, AC12; iteration 3 (R20, D13), AC17. Users here
+have confirmed addresses (`confirmed()`) unless a test says otherwise. The views that call these functions are in test_notifications_views.py.
 `mailoutbox` (pytest-django) is the list of emails Django's in-memory backend "sent".
 """
 
@@ -11,7 +12,7 @@ import pytest
 from django.core.mail.backends.base import BaseEmailBackend
 from django.test import RequestFactory
 from django.urls import reverse
-from django.utils import translation
+from django.utils import timezone, translation
 
 from jobs.models import Application
 from jobs.notifications import notify_decision, notify_new_application
@@ -25,6 +26,13 @@ pytestmark = [pytest.mark.django_db, pytest.mark.story(27)]
 MARCH_15 = datetime.date(2027, 3, 15)
 
 
+def confirmed(user):
+    """Mark `user`'s address as confirmed, as #81's link (or an admin) does (D13)."""
+    user.email_verified_at = timezone.now()
+    user.save()
+    return user
+
+
 @pytest.fixture
 def request_():
     """A request as the views get it; links are built from its host, http://testserver."""
@@ -34,7 +42,10 @@ def request_():
 @pytest.fixture
 def employer():
     """Anna, an employer with a phone; she posted the job."""
-    return make_employer("anna@example.com", name="Anna Huber", phone="+49 89 1234567")
+    employer = make_employer(
+        "anna@example.com", name="Anna Huber", phone="+49 89 1234567"
+    )
+    return confirmed(employer)
 
 
 @pytest.fixture
@@ -43,8 +54,7 @@ def worker():
     user = make_worker("ivan@example.com")
     user.name = "Ivan Petrenko"
     user.phone = "+49 176 7654321"
-    user.save()
-    return user
+    return confirmed(user)
 
 
 @pytest.fixture
@@ -289,6 +299,39 @@ def test_no_email_when_the_worker_turned_them_off(request_, application, mailout
     application.worker.save()
 
     notify_decision(request_, decide(application, Application.Status.ACCEPTED))
+
+    assert mailoutbox == []
+
+
+# Only confirmed addresses (R20, D13; AC17)
+
+
+def test_no_email_to_an_unconfirmed_employer(request_, application, mailoutbox, caplog):
+    """An employer whose address is not confirmed gets nothing, checkbox on or not.
+
+    1. Clear Anna's confirmation (her checkbox stays on); call notify_new_application
+    2. Expect: no email; no line from the jobs app
+    """
+    application.job.employer.email_verified_at = None
+    application.job.employer.save()
+
+    with caplog.at_level("INFO"):
+        notify_new_application(request_, application)
+
+    assert mailoutbox == []
+    assert jobs_records(caplog) == []
+
+
+def test_no_email_to_an_unconfirmed_worker(request_, application, mailoutbox):
+    """A worker whose address is not confirmed gets no decision email.
+
+    1. Clear Ivan's confirmation; reject his application and call notify_decision
+    2. Expect: no email
+    """
+    application.worker.email_verified_at = None
+    application.worker.save()
+
+    notify_decision(request_, decide(application, Application.Status.REJECTED))
 
     assert mailoutbox == []
 

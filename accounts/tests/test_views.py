@@ -7,6 +7,7 @@ from django.contrib.auth import get_user_model
 from django.core import mail
 from django.test import Client
 from django.urls import reverse
+from django.utils import timezone
 from pytest_django.asserts import assertContains, assertRedirects, assertTemplateUsed
 
 pytestmark = [pytest.mark.django_db, pytest.mark.story(9)]
@@ -321,6 +322,14 @@ def test_logout_by_link_is_not_allowed(client, user):
 # Password reset
 
 
+@pytest.fixture
+def confirmed_user(user):
+    """`user` with a confirmed address: only those get a reset email (#27, D13)."""
+    user.email_verified_at = timezone.now()
+    user.save()
+    return user
+
+
 def get_reset_link():
     """The path of the reset link from the only email that was sent."""
     assert len(mail.outbox) == 1
@@ -329,7 +338,7 @@ def get_reset_link():
     return match.group(1)
 
 
-def test_password_reset_full_flow(client, user):
+def test_password_reset_full_flow(client, confirmed_user):
     """A user resets a forgotten password with the link from the email.
 
     1. Ask for a reset link for anna@example.com
@@ -355,12 +364,12 @@ def test_password_reset_full_flow(client, user):
     assertRedirects(response, reverse("password_reset_complete"))
 
     # 4. The new password works, the old one does not.
-    user.refresh_from_db()
-    assert user.check_password(NEW_PASSWORD)
-    assert not user.check_password(PASSWORD)
+    confirmed_user.refresh_from_db()
+    assert confirmed_user.check_password(NEW_PASSWORD)
+    assert not confirmed_user.check_password(PASSWORD)
 
 
-def test_password_reset_link_works_only_once(client, user):
+def test_password_reset_link_works_only_once(client, confirmed_user):
     """A reset link stops working after the password is changed.
 
     1. Ask for a link and use it to set a new password
@@ -380,7 +389,7 @@ def test_password_reset_link_works_only_once(client, user):
     assertContains(response, "Link is not valid")
 
 
-def test_password_reset_new_passwords_must_match(client, user):
+def test_password_reset_new_passwords_must_match(client, confirmed_user):
     """The two new passwords must match, otherwise nothing changes.
 
     1. Open the reset link from the email
@@ -397,8 +406,8 @@ def test_password_reset_new_passwords_must_match(client, user):
 
     assert response.status_code == 200
     assertContains(response, "input-error")
-    user.refresh_from_db()
-    assert user.check_password(PASSWORD)
+    confirmed_user.refresh_from_db()
+    assert confirmed_user.check_password(PASSWORD)
 
 
 def test_password_reset_for_unknown_email_looks_the_same_but_sends_nothing(client):

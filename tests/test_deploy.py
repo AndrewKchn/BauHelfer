@@ -21,11 +21,22 @@ MEDIA_ENV = {
     "MEDIA_PUBLIC_URL": "abcdref.supabase.co/storage/v1/object/public/job-photos",
 }
 
+# The email variables production requires (#27, docs/specs/notifications.md R15, R17).
+# Made-up values; a real Brevo key starts with "xkeysib-" too.
+EMAIL_ENV = {
+    "BREVO_API_KEY": "xkeysib-test-key",
+    "DEFAULT_FROM_EMAIL": "BauHelfer <bauhelfer.test@gmail.com>",
+}
+
 
 @pytest.fixture(autouse=True)
 def media_env(monkeypatch):
-    """Set the photo storage variables as Render does, so production.py can load (#64)."""
-    for name, value in MEDIA_ENV.items():
+    """Set the variables production.py requires, as Render does, so it can load.
+
+    The photo storage (#64) and, since #27, the email ones. The name stayed from #64: other
+    test files import the fixture by it.
+    """
+    for name, value in {**MEDIA_ENV, **EMAIL_ENV}.items():
         monkeypatch.setenv(name, value)
 
 

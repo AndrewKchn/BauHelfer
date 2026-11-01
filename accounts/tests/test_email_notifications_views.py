@@ -10,6 +10,7 @@ import re
 import pytest
 from django.contrib.auth import get_user_model
 from django.urls import reverse
+from django.utils import timezone
 from pytest_django.asserts import assertContains
 
 from accounts.models import EmployerProfile, WorkerProfile
@@ -121,12 +122,13 @@ def test_profile_page_says_whether_the_emails_are_on(client, role, on, text):
 def test_password_reset_ignores_the_checkbox(client, mailoutbox):
     """Password emails are always sent, whatever the checkbox says (R14; AC13).
 
-    1. Turn a worker's notifications off
+    1. Turn a confirmed worker's notifications off
     2. Ask for a password reset with their email
     3. Expect: one email, to them
     """
     user = make_user("worker")
     user.email_notifications = False
+    user.email_verified_at = timezone.now()  # only confirmed addresses get it (D13)
     user.save()
 
     client.post(reverse("password_reset"), {"email": "worker@example.com"})

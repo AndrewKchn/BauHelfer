@@ -2,7 +2,8 @@
 
 Each test goes through the whole stack: middleware, URL, view, model, notification,
 template and database. Spec: docs/specs/notifications.md, iteration 1 (R1-R3, R7, D5, D6,
-D10), acceptance criteria AC1-AC4, AC7, AC8; iteration 2 (R12), AC11. What each email says is in
+D10), acceptance criteria AC1-AC4, AC7, AC8; iteration 2 (R12), AC11; iteration 3 (R20),
+AC17. Users here have confirmed addresses unless a test says otherwise. What each email says is in
 test_notifications.py.
 """
 
@@ -15,6 +16,7 @@ from pytest_django.asserts import assertContains
 from jobs.models import Application
 
 from .test_application import make_worker
+from .test_notifications import confirmed
 from .test_views import make_employer, make_job
 
 pytestmark = [pytest.mark.django_db, pytest.mark.story(27)]
@@ -25,7 +27,7 @@ FAILING_BACKEND = "jobs.tests.test_notifications.FailingBackend"
 @pytest.fixture
 def employer():
     """Anna, who posted the job."""
-    return make_employer("anna@example.com")
+    return confirmed(make_employer("anna@example.com"))
 
 
 @pytest.fixture
@@ -37,13 +39,14 @@ def job(employer):
 @pytest.fixture
 def ivan():
     """Ivan, a worker with a crew of 3 who can apply."""
-    return make_worker("ivan@example.com")
+    return confirmed(make_worker("ivan@example.com"))
 
 
 def apply(job, email, workers_offered=1, **fields):
-    """Save an application to `job` from a new worker with this email."""
+    """Save an application to `job` from a new confirmed worker with this email."""
+    worker = confirmed(make_worker(email))
     return Application.objects.create(
-        job=job, worker=make_worker(email), workers_offered=workers_offered, **fields
+        job=job, worker=worker, workers_offered=workers_offered, **fields
     )
 
 
@@ -231,6 +234,29 @@ def test_worker_who_turned_them_off_gets_no_email(client, employer, job, mailout
     """
     application = apply(job, "ivan@example.com")
     application.worker.email_notifications = False
+    application.worker.save()
+
+    post_as(client, employer, "application_accept", application.pk)
+
+    application.refresh_from_db()
+    assert application.status == Application.Status.ACCEPTED
+    assert mailoutbox == []
+
+
+# Only confirmed addresses (R20, D13; AC17)
+
+
+def test_unconfirmed_worker_is_accepted_without_an_email(
+    client, employer, job, mailoutbox
+):
+    """Accepting a worker whose address is not confirmed works; no email goes out.
+
+    1. Save Ivan's pending application; clear his confirmation
+    2. As Anna, press Accept
+    3. Expect: the application is accepted; no email
+    """
+    application = apply(job, "ivan@example.com")
+    application.worker.email_verified_at = None
     application.worker.save()
 
     post_as(client, employer, "application_accept", application.pk)

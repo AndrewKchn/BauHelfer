@@ -6,6 +6,7 @@ from django.urls import reverse
 from jobs.models import Application, Job
 
 from .test_application import make_worker
+from .test_notifications import confirmed
 from .test_views import form_data, make_employer, make_job
 
 pytestmark = [pytest.mark.django_db, pytest.mark.story(124)]
@@ -91,7 +92,7 @@ def test_applying_is_logged_with_ids_and_without_the_message(client, employer, c
        employer's email "Notification sent: kind=new_application application_id=<id>" (#27)
     3. Expect: the message and the worker's email are in no record
     """
-    job = make_job(employer)
+    job = make_job(confirmed(employer))  # only a confirmed address gets the email (#27)
     worker = make_worker()
     client.force_login(worker)
 
