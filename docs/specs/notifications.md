@@ -2,7 +2,8 @@
 
 Status: **agreed**. I decided D1–D5 on 2026-11-01 (my criterion: the emails must really
 arrive in production). D6–D12 are Claude's defaults, which I accepted on 2026-11-01, before
-any tests.
+any tests. D13 I decided on 2026-11-01 before iteration 3 (same criterion: emails to
+unconfirmed addresses harm the sender's reputation, and with it the emails themselves).
 
 Marks: **(mine, date)** — my decision; **(Claude's default, accepted)** — Claude's default
 that I accepted.
@@ -13,20 +14,21 @@ A worker learns that they were accepted only if they open "My applications"; an 
 sees a new application only on the job page. This ticket sends three emails: a new
 application to the employer, "accepted" and "rejected" to the worker. Each user can turn
 them off. In production they go out through Brevo, which also makes the password reset
-email work there: until now it was only printed to the Render logs.
+email work there: until now it was only printed to the Render logs. Emails go only to
+confirmed addresses (D13); #81 lets users confirm theirs.
 
 Three iterations in one branch and one PR:
 
 1. The three emails, in the recipient's language.
 2. The "Email notifications" checkbox and the link to it in every email.
-3. Real sending in production through Brevo's HTTP API.
+3. Real sending in production through Brevo's HTTP API, only to confirmed addresses.
 
 ### Out of scope
 
 - Emails when a job is filled, an accepted worker is cancelled or a worker withdraws (D6).
 - HTML emails (D7).
 - One-click unsubscribe without logging in (D4).
-- Email verification at signup: #81.
+- Email verification at signup: #81. This ticket adds the field it fills (D13).
 - The translations themselves: M5 (#30). This ticket only renders each email in the
   recipient's language, so the translations will apply without code changes.
 
@@ -131,12 +133,28 @@ R16. `render.yaml` lists `BREVO_API_KEY` and `DEFAULT_FROM_EMAIL` as variables s
 R17. Production refuses to start without `BREVO_API_KEY` rather than send nothing (D12).
 R18. One manual check against the real Brevo with the local key `bauhelfer-local` (deleted
      afterwards): its result goes into the PR's "How to test".
+R19. `User.email_verified_at`: when the address was confirmed; empty = not confirmed (as
+     `work_permit_confirmed_at`). The migration leaves it empty for every existing account
+     (D13). #81 fills it from the link in its email.
+R20. `send()` sends nothing, and logs nothing, to a recipient without `email_verified_at`,
+     whatever their checkbox says: "may we" comes before "do they want" (D13).
+R21. Password reset sends its email only to an account with `email_verified_at`. The page
+     after the form says the same as now in every case: Django never tells whether an
+     account exists for the address.
+R22. Django admin shows `email_verified_at` and a superuser can set it, e.g. for the demo
+     accounts of the defense (Gmail "+" addresses that end in the project mailbox).
 
 ### Acceptance criteria (→ tests)
 
 AC15. Production settings use Brevo's anymail backend and read the key and the sender from
       the env.
 AC16. Local and test settings send nothing outside (console / locmem).
+AC17. A recipient without `email_verified_at` gets none of the three emails, with the
+      checkbox on; the action still works.
+AC18. Password reset: an unconfirmed account gets no email, a confirmed one gets it; the page
+      after the form is the same for both.
+AC19. The user's page in Django admin has the field and saves it.
+AC20. Existing accounts are unconfirmed after the migration (checked by hand, as AC9).
 
 ## Decisions
 
@@ -192,6 +210,18 @@ D11. **Sent in the request, no queue** (Claude's default, accepted): one HTTPS c
 D12. **Production fails at start without the key** (Claude's default, accepted): a missing
      variable shows up at the deploy, not as emails that silently never arrive.
 
+D13. **Emails go only to confirmed addresses** (mine, 2026-11-01; option B, criterion: the
+     emails must keep working, and bounces from typos or made-up addresses, or complaints
+     from people whose address someone else typed, harm the sender's reputation). Two
+     separate things: the checkbox is the user's "I do not want them", `email_verified_at`
+     the site's "we may not send there". Existing accounts start unconfirmed, so their
+     checkbox stays as they chose and works once they confirm (rejected: switching every
+     existing checkbox off in the migration). With #81's switch off, new accounts are active
+     but unconfirmed, so they get no email either. Rejected: sending to every address until
+     #81 (A: made-up addresses bounce at once); Brevo only in #81 (C: no real email in
+     production until then, and the reset links stay in the logs). Costs: until #81 only
+     accounts confirmed in admin get any email, password reset included.
+
 ## Open questions
 
 - Brevo's "Authorised IPs" may block calls from Render. The local key worked from home
@@ -204,7 +234,10 @@ D12. **Production fails at start without the key** (Claude's default, accepted):
 - The sender address is on brevosend.com (D2); some emails may land in spam.
 - A change made in Django admin sends no email (D5).
 - Turning the emails off needs logging in (D4).
-- Until this ticket, password reset links were printed to the Render logs; now they are sent.
+- Until this ticket, password reset links were printed to the Render logs; now they are sent,
+  to confirmed addresses only.
+- Until #81, only accounts confirmed in Django admin get any email, password reset included
+  (D13).
 
 ## Differences from the mockups
 
