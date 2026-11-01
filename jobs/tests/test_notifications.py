@@ -179,6 +179,50 @@ def test_subjects_are_one_line(request_, application, mailoutbox):
     assert not any("\n" in email.subject for email in mailoutbox)
 
 
+def test_emails_greet_the_recipient_by_name(request_, application, mailoutbox):
+    """Each email starts with "Hello <recipient's name>," (R5).
+
+    1. Send the new application email (to Anna), then the accepted one (to Ivan)
+    2. Expect: Anna's starts "Hello Anna Huber,", Ivan's "Hello Ivan Petrenko,"
+    """
+    notify_new_application(request_, application)
+    notify_decision(request_, decide(application, Application.Status.ACCEPTED))
+
+    to_anna, to_ivan = mailoutbox
+    assert to_anna.body.startswith("Hello Anna Huber,\n")
+    assert to_ivan.body.startswith("Hello Ivan Petrenko,\n")
+
+
+def test_email_without_a_name_says_hello(request_, application, mailoutbox):
+    """A recipient without a name (e.g. made in Django admin) gets a plain "Hello,".
+
+    1. Empty Ivan's name; reject his application and call notify_decision
+    2. Expect: the body starts "Hello,"
+    """
+    application.worker.name = ""
+    application.worker.save()
+
+    notify_decision(request_, decide(application, Application.Status.REJECTED))
+
+    [email] = mailoutbox
+    assert email.body.startswith("Hello,\n")
+
+
+def test_names_are_not_html_escaped(request_, application, mailoutbox):
+    """A plain-text email shows O'Brien, not O&#x27;Brien as an HTML page would (D7).
+
+    1. Name Ivan "Seán O'Brien"; send the new application email, then the rejected one
+    2. Expect: both bodies have "Seán O'Brien" as typed
+    """
+    application.worker.name = "Seán O'Brien"
+    application.worker.save()
+
+    notify_new_application(request_, application)
+    notify_decision(request_, decide(application, Application.Status.REJECTED))
+
+    assert all("Seán O'Brien" in email.body for email in mailoutbox)
+
+
 # The recipient's language (R3, D8; AC4)
 
 

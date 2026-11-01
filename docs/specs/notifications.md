@@ -60,6 +60,8 @@ R5. What each email says (D9). A job has no title: it is named by its type and d
       and the address are.
     - rejected: subject "Application not accepted: <job type>, <date>"; body: a link to the
       job list.
+    Every email starts with "Hello <recipient's name>," ("Hello," without a name), in one
+    shared `emails/_greeting.txt` (mine, 2026-11-01, after seeing the emails).
     No phone, no address, no message text, no email address in any email (D9).
 R6. Links are absolute, built from the request (`request.build_absolute_uri`): on Render
     they start with `https://` (`SECURE_PROXY_SSL_HEADER`).
