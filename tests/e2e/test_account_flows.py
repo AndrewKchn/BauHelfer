@@ -12,6 +12,7 @@ import re
 
 import pytest
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from playwright.sync_api import expect
 
 from accounts.models import EmployerProfile, WorkerProfile
@@ -158,8 +159,12 @@ def test_user_resets_a_forgotten_password(page, mailoutbox):
     8. Log in with the new password
     9. Expect: the header shows the email
     """
+    # Only a confirmed address gets a reset email (#27, notifications.md D13).
     User.objects.create_user(
-        email="olga@example.com", password=PASSWORD, role=User.Role.WORKER
+        email="olga@example.com",
+        password=PASSWORD,
+        role=User.Role.WORKER,
+        email_verified_at=timezone.now(),
     )
     new_password = "Neues-Passwort-2026"
 

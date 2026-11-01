@@ -1,0 +1,15 @@
+{% comment %}
+  The fields of a profile form page, both roles: the user's name and phone (user_form), then
+  the profile (profile_form), and last the "Email notifications" checkbox of user_form (#27,
+  notifications.md D4): a setting, not something about the user, so after everything else.
+  Use inside <form>.
+{% endcomment %}
+{% include "_form_errors.html" with form=user_form %}
+{% for field in user_form.visible_fields %}
+  {% if field.name != "email_notifications" %}{% include "_form_field.html" %}{% endif %}
+{% endfor %}
+{% include "_form_fields.html" with form=profile_form %}
+{# A line above it: right after the last choices it would look like one more of them. #}
+<div class="mt-4 border-t border-base-content/30 pt-2">
+  {% include "_form_field.html" with field=user_form.email_notifications %}
+</div>

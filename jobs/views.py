@@ -33,6 +33,7 @@ from accounts.views import RoleRequiredMixin
 
 from .forms import ApplicationForm, JobFilterForm, JobForm, JobPhotosForm
 from .models import Application, ApplicationStateError, Job, JobPhoto, JobStateError
+from .notifications import notify_decision, notify_new_application
 
 # "jobs.views". Ids only, never an email or other personal data (#124).
 logger = logging.getLogger(__name__)
@@ -444,6 +445,7 @@ class JobApplyView(WorkerRequiredMixin, JobDetailView):
             job.pk,
             worker.pk,
         )
+        notify_new_application(request, application)  # the employer (#27)
         messages.success(request, _("Application sent."))
         return redirect("job_detail", pk=job.pk)
 
@@ -505,6 +507,7 @@ class ApplicationAcceptView(OwnApplicationMixin, View):
             request.user.pk,
             count,
         )
+        notify_decision(request, application)  # the worker (#27)
         if application.job.status == Job.Status.FILLED:
             messages.success(
                 request,
@@ -539,6 +542,7 @@ class ApplicationRejectView(OwnApplicationMixin, View):
             application.job_id,
             request.user.pk,
         )
+        notify_decision(request, application)  # the worker (#27)
         return back_to(application)
 
 

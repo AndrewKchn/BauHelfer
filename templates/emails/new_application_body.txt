@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}{% include "emails/_greeting.txt" %}
+
+{% blocktranslate with name=application.worker.name job_type=job.get_job_type_display date=job.date|date:"DATE_FORMAT" count counter=application.workers_offered %}{{ name }} applied for your job {{ job_type }}, {{ date }}, with {{ counter }} worker.{% plural %}{{ name }} applied for your job {{ job_type }}, {{ date }}, with {{ counter }} workers.{% endblocktranslate %}
+
+{% translate "Accept or reject the application here:" %}
+{{ link }}
+
+{% include "emails/_footer.txt" %}
+{% endautoescape %}

@@ -13,15 +13,15 @@ from django.conf import settings
 from django.test import override_settings
 from django.utils.log import configure_logging
 
-from tests.test_deploy import MEDIA_ENV
+from tests.test_deploy import PRODUCTION_ENV
 
 pytestmark = pytest.mark.story(124)
 
 
 @pytest.fixture
 def production(monkeypatch):
-    """production.py loaded fresh, with the photo storage variables Render sets (#64)."""
-    for name, value in MEDIA_ENV.items():
+    """production.py loaded fresh, with the variables Render sets (photos #64, email #27)."""
+    for name, value in PRODUCTION_ENV.items():
         monkeypatch.setenv(name, value)
     from config.settings import production
 

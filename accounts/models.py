@@ -93,6 +93,22 @@ class User(AbstractUser):
         choices=Language.choices,
         default=Language.ENGLISH,
     )
+    # One switch for the three notification emails (#27, notifications.md D3, D4); password
+    # emails do not ask it. On by default: the emails are why there is a switch at all.
+    email_notifications = models.BooleanField(
+        _("email notifications"),
+        default=True,
+        help_text=_(
+            "New applications and decisions on applications. Emails about your password "
+            "are always sent."
+        ),
+    )
+    # When the user showed the address is theirs (#81 fills it from a link; an admin can
+    # too); empty = not confirmed. No email at all goes to an unconfirmed address: a typo or
+    # someone else's address would harm the sender's reputation (#27, notifications.md D13).
+    email_verified_at = models.DateTimeField(
+        _("email confirmed at"), null=True, blank=True
+    )
     # When the worker ticked "I am allowed to work in Germany" (#13); empty = not yet.
     # Their own statement, not a document check (docs/specs/work-permit.md).
     work_permit_confirmed_at = models.DateTimeField(

@@ -8,7 +8,7 @@ from django.contrib.auth import views as auth_views
 from django.urls import path
 
 from . import views
-from .forms import LoginForm
+from .forms import ConfirmedPasswordResetForm, LoginForm
 
 urlpatterns = [
     path("register/", views.RegisterView.as_view(), name="register"),
@@ -44,6 +44,8 @@ urlpatterns = [
     path(
         "password-reset/",
         auth_views.PasswordResetView.as_view(
+            # Only to confirmed addresses (#27, docs/specs/notifications.md D13).
+            form_class=ConfirmedPasswordResetForm,
             # .txt, not .html: an email is not a page and does not extend base.html.
             email_template_name="registration/password_reset_email.txt",
         ),

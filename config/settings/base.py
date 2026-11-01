@@ -121,8 +121,8 @@ MINIMUM_WAGES = {
 
 
 # Email
-# Printed to the terminal (and the Render logs) instead of sent. Real sending via SMTP comes
-# with email notifications (#27). Tests replace this with Django's in-memory backend.
+# Printed to the terminal by runserver instead of sent; production.py sends through Brevo
+# (#27). Tests replace this with Django's in-memory backend.
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL = "BauHelfer <noreply@bauhelfer.local>"
 

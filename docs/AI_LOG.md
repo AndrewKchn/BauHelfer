@@ -2226,3 +2226,75 @@ proposing a "Withdraw" button, and the rule from #25 for when contacts are shown
 - Why a computed "Past" needs no cron while changing a status at a set time would.
 - Why `withdraw()` locks the job and reads the status again: the employer may have
   decided in another tab in the meantime.
+
+## 2026-11-02 · #27 Email notifications: new application, accepted / rejected
+
+**Task given to AI:** send emails on key events: a new application to the employer,
+accepted / rejected to the worker, in the user's language; console locally, "a real SMTP
+provider" in production. An external service, so first check the providers: card, free
+limits, EU region.
+
+**AI helped:**
+- Checked the providers before the spec and found two problems the ticket did not know:
+  Render's free plan blocks the SMTP ports since 2025-09-26, and without our own domain
+  Gmail and Yahoo require an authenticated sender. Compared Brevo and Mailjet (both free,
+  EU, no card).
+- Walked me step by step through the Gmail mailbox, Brevo, the sender check and the API
+  key. It checked the key with a call that printed only the HTTP status, never the key.
+- Wrote the spec (`docs/specs/notifications.md`, D1–D13) and built three iterations, each
+  failing tests → code: the three emails in the recipient's language; the "Email
+  notifications" checkbox with a link in every email; Brevo through `django-anymail` in
+  production, only to confirmed addresses (`email_verified_at`).
+- Showed with a shell experiment that Django already writes the date in Polish
+  ("15 marca 2027"), so the language test works before our translations exist.
+- Mutation-checked every new test (about 30 mutations, all caught). Sent one real email
+  through Brevo inside a rolled-back transaction, so nothing stayed in the database.
+- Posted the iterations and six "Docs sync — M4" comments, opened the draft PR, wrote the
+  cheat-sheet tab.
+
+**AI failed:**
+- The first plan sent emails to every address. That is the reputation problem I raised
+  (bounces from made-up addresses, mail to someone else's address); it became D13.
+- The spec spoke of a "job title" that does not exist; found while reading the code before
+  the tests.
+- On the first screenshots the checkbox sat in the middle of the form. Moved to the end, it
+  looked like one more trade, so AI added a line. I found the line was almost invisible
+  in both themes; now `border-base-content/30`.
+- Three older test fixtures that load the production settings did not set the new Brevo
+  variables. Locally `.env` hid it; CI failed with 19 errors. Fixed with one shared
+  `PRODUCTION_ENV`.
+- A subject with a line break made Django refuse the email, and our `except` swallowed it
+  silently. Found by a mutation, now covered by a test.
+
+**My part:**
+- My criterion for the provider decisions: the emails must really arrive in production.
+  So I chose Brevo's HTTP API through `django-anymail` over our own backend or SMTP on
+  port 2525.
+- My idea: "BauHelfer" in the sender's name and address.
+- I asked whether emails were too much for the project. I kept the minimum (three emails,
+  plain text) and added my own idea: users can turn them off, because it should be
+  flexible and nobody likes spam. I chose one checkbox in the profile form (the same form
+  as at signup) plus a link in every email, not a one-click unsubscribe.
+- I chose the view, not the model or a signal, as the place that sends.
+- I asked why the recipient's language is done now if the translations come in M5; the
+  answer went into D8.
+- After reading the emails: a greeting with the recipient's name. After the screenshots:
+  the checkbox last, under a darker line.
+- I raised the risk of emails to unconfirmed addresses for the sender's reputation and
+  chose to send only to confirmed ones. I asked how #81's switch fits in. I wanted all
+  existing accounts excluded; AI explained an empty `email_verified_at` does that without
+  switching off their checkbox.
+- My idea: demo accounts for the defense (posted to #96); AI added Gmail "+" addresses.
+- I did not let AI change the spec just to record the manual check: it belongs in the PR
+  and in #96.
+- By hand: created the project mailbox and the Brevo account, confirmed the sender, made
+  the keys (the production one with "Transactional email" only), set both variables on
+  Render. On my local server I went through the possible scenarios (apply, accept, reject,
+  emails turned off) and read the emails in the terminal, and I checked the real email in
+  the inbox: sender, Reply-To, text.
+
+**Learned:**
+- Why the code that sends needs `translation.override`: Django renders in the language of
+  the request, which is the clicker's, not the recipient's.
+- Why a green local run can fail in CI: my `.env` had variables that CI does not have.
+- Why "may we send there" and "do they want it" are two different fields.

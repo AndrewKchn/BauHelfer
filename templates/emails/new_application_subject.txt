@@ -1,0 +1,1 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate with job_type=job.get_job_type_display date=job.date|date:"DATE_FORMAT" %}New application: {{ job_type }}, {{ date }}{% endblocktranslate %}{% endautoescape %}

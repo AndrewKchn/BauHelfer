@@ -273,12 +273,12 @@ def test_profile_form_rejects_empty_or_unknown_choices(field, value):
 
 
 def test_name_and_phone_form_fields():
-    """The second form on the page edits only the user's name and phone.
+    """The second form on the page edits only the user's name, phone and email switch.
 
     1. Open an empty name and phone form
-    2. Expect: only name and phone
+    2. Expect: only name, phone and the "Email notifications" checkbox (#27)
     """
-    assert list(NameAndPhoneForm().fields) == ["name", "phone"]
+    assert list(NameAndPhoneForm().fields) == ["name", "phone", "email_notifications"]
 
 
 def test_name_is_required_phone_is_optional(worker):

@@ -1,0 +1,9 @@
+{% load i18n %}
+{% comment %}
+  Whether the user gets the notification emails (#27, notifications.md R11), on their own
+  profile page of either role. Changed with the checkbox in the profile form. Needs `profile`.
+{% endcomment %}
+<dl class="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 sm:gap-x-6">
+  <dt class="font-semibold">{% translate "Email notifications" %}</dt>
+  <dd class="min-w-0 break-words">{% if profile.user.email_notifications %}{% translate "On" %}{% else %}{% translate "Off" %}{% endif %}</dd>
+</dl>

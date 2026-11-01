@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}{% include "emails/_greeting.txt" %}
+
+{% blocktranslate with job_type=job.get_job_type_display date=job.date|date:"DATE_FORMAT" %}The employer did not accept your application for {{ job_type }}, {{ date }}.{% endblocktranslate %}
+
+{% translate "Other jobs are waiting for you:" %}
+{{ link }}
+
+{% include "emails/_footer.txt" %}
+{% endautoescape %}

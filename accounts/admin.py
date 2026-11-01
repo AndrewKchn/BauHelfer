@@ -55,6 +55,8 @@ class UserAdmin(BaseUserAdmin):
                 )
             },
         ),
+        # A superuser can confirm an address by hand, e.g. for the demo accounts (#27, R22).
+        (_("Emails"), {"fields": ("email_verified_at", "email_notifications")}),
         (
             _("Permissions"),
             {

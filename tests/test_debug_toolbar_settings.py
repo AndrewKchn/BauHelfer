@@ -11,7 +11,7 @@ import importlib
 import pytest
 from django.conf import settings
 
-from tests.test_deploy import MEDIA_ENV
+from tests.test_deploy import PRODUCTION_ENV
 
 pytestmark = pytest.mark.story(135)
 
@@ -21,9 +21,9 @@ MIDDLEWARE = "debug_toolbar.middleware.DebugToolbarMiddleware"
 
 @pytest.fixture
 def outside_pytest(monkeypatch):
-    """The environment of runserver: no PYTEST_VERSION, Render's storage variables set."""
+    """The environment of runserver: no PYTEST_VERSION, Render's variables set."""
     monkeypatch.delenv("PYTEST_VERSION", raising=False)
-    for name, value in MEDIA_ENV.items():
+    for name, value in PRODUCTION_ENV.items():
         monkeypatch.setenv(name, value)
 
 

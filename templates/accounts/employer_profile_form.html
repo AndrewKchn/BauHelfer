@@ -11,8 +11,7 @@
       {# Two forms, one <form>: name and phone are saved on the user, the rest on the profile. #}
       <form method="post" novalidate>
         {% csrf_token %}
-        {% include "_form_fields.html" with form=user_form %}
-        {% include "_form_fields.html" with form=profile_form %}
+        {% include "accounts/_profile_form_fields.html" %}
         <button type="submit" class="btn btn-primary mt-4 w-full">{% translate "Save profile" %}</button>
       </form>
     </div>

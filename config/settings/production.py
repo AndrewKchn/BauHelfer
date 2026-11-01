@@ -55,6 +55,15 @@ STORAGES = {
     },
 }
 
+# Email (#27, docs/specs/notifications.md R15-R17): Brevo's HTTP API through django-anymail.
+# Render's free plan blocks the SMTP ports, HTTPS is open (D1). Both values are required:
+# without one the server does not start, instead of every email failing quietly (D12).
+# The key is "bauhelfer-render" in Brevo -> SMTP & API -> API Keys; the sender is the
+# project's Gmail address, confirmed in Brevo -> Senders (D2).
+EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
+ANYMAIL = {"BREVO_API_KEY": env("BREVO_API_KEY")}
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")  # "BauHelfer <…@gmail.com>"
+
 # Render terminates HTTPS in front of the app and tells Django via this header.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = True

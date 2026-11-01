@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}{% include "emails/_greeting.txt" %}
+
+{% blocktranslate with job_type=job.get_job_type_display date=job.date|date:"DATE_FORMAT" time=job.start_time|time:"TIME_FORMAT" count counter=application.workers_accepted %}The employer accepted you for {{ job_type }}, {{ date }}, start at {{ time }}: {{ counter }} worker.{% plural %}The employer accepted you for {{ job_type }}, {{ date }}, start at {{ time }}: {{ counter }} workers.{% endblocktranslate %}
+
+{% translate "The employer's contact and the address are on “My applications”:" %}
+{{ link }}
+
+{% include "emails/_footer.txt" %}
+{% endautoescape %}

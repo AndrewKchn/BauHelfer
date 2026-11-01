@@ -6,6 +6,7 @@ from django import forms
 from django.contrib.auth.forms import (
     AdminUserCreationForm,
     AuthenticationForm,
+    PasswordResetForm,
     UserChangeForm,
     UserCreationForm,
 )
@@ -44,6 +45,19 @@ class SignupForm(UserCreationForm):
         fields = ("email",)
 
 
+class ConfirmedPasswordResetForm(PasswordResetForm):
+    """Django's reset form, sending only to confirmed addresses (#27, notifications.md R21).
+
+    For any other address it does what it does for an unknown one: the same "Check your
+    email" page and no email, so the form never tells which addresses have an account.
+    """
+
+    @override
+    def get_users(self, email):
+        """The accounts Django would email, minus those with an unconfirmed address."""
+        return (user for user in super().get_users(email) if user.email_verified_at)
+
+
 class LoginForm(AuthenticationForm):
     """Django's login form with an error text that fits email login.
 
@@ -78,14 +92,18 @@ class RoleForm(forms.ModelForm):
 
 
 class NameAndPhoneForm(forms.ModelForm):
-    """The user's own name and phone, shown on the profile forms (#11).
+    """The user's own name, phone and email switch, shown on the profile forms (#11).
 
     These live on User, not on the profile, so the profile page uses two forms at once.
+    Both roles use this form, so both get the "Email notifications" checkbox (#27, D4).
     """
 
     class Meta:
         model = User
-        fields = ("name", "phone")
+        fields = ("name", "phone", "email_notifications")
+        widgets = {  # noqa: RUF012
+            "email_notifications": forms.CheckboxInput(attrs={"class": "checkbox"}),
+        }
 
     def __init__(self, *args, **kwargs):
         """Make the name required: employers need to know who applied (spec D5)."""
