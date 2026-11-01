@@ -6,6 +6,7 @@ from django import forms
 from django.contrib.auth.forms import (
     AdminUserCreationForm,
     AuthenticationForm,
+    PasswordResetForm,
     UserChangeForm,
     UserCreationForm,
 )
@@ -42,6 +43,19 @@ class SignupForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = User
         fields = ("email",)
+
+
+class ConfirmedPasswordResetForm(PasswordResetForm):
+    """Django's reset form, sending only to confirmed addresses (#27, notifications.md R21).
+
+    For any other address it does what it does for an unknown one: the same "Check your
+    email" page and no email, so the form never tells which addresses have an account.
+    """
+
+    @override
+    def get_users(self, email):
+        """The accounts Django would email, minus those with an unconfirmed address."""
+        return (user for user in super().get_users(email) if user.email_verified_at)
 
 
 class LoginForm(AuthenticationForm):

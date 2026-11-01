@@ -36,10 +36,11 @@ def notify_decision(request, application):
 def send(request, application, kind, recipient, path):
     """Render emails/<kind>_subject.txt and _body.txt for `recipient` and send them.
 
-    Nothing at all for a recipient who turned the emails off (R12). `path` is the page the
-    email points to; the links get the site's address, as the email is read outside it (R6).
+    Nothing at all to an address that is not confirmed (R20, D13), or to a recipient who
+    turned the emails off (R12). `path` is the page the email points to; the links get the
+    site's address, as the email is read outside it (R6).
     """
-    if not recipient.email_notifications:
+    if not recipient.email_verified_at or not recipient.email_notifications:
         return
     context = {
         "application": application,

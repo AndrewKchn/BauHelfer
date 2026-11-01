@@ -74,3 +74,8 @@ services:
         value: job-photos
       - key: MEDIA_PUBLIC_URL
         sync: false
+      # Email through Brevo's HTTP API (#27, docs/specs/notifications.md R16).
+      - key: BREVO_API_KEY
+        sync: false  # secret: the Brevo API key "bauhelfer-render"
+      - key: DEFAULT_FROM_EMAIL
+        sync: false  # "BauHelfer <…@gmail.com>", the sender confirmed in Brevo
