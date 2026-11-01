@@ -28,6 +28,11 @@ EMAIL_ENV = {
     "DEFAULT_FROM_EMAIL": "BauHelfer <bauhelfer.test@gmail.com>",
 }
 
+# Everything production.py requires besides SECRET_KEY and DATABASE_URL (CI sets those).
+# Every fixture that loads production settings sets these: locally .env may hide a missing
+# one, CI has no .env.
+PRODUCTION_ENV = {**MEDIA_ENV, **EMAIL_ENV}
+
 
 @pytest.fixture(autouse=True)
 def media_env(monkeypatch):
@@ -36,7 +41,7 @@ def media_env(monkeypatch):
     The photo storage (#64) and, since #27, the email ones. The name stayed from #64: other
     test files import the fixture by it.
     """
-    for name, value in {**MEDIA_ENV, **EMAIL_ENV}.items():
+    for name, value in PRODUCTION_ENV.items():
         monkeypatch.setenv(name, value)
 
 

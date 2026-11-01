@@ -13,7 +13,7 @@ import pytest
 from django.conf import settings
 from gunicorn.config import Config
 
-from tests.test_deploy import MEDIA_ENV
+from tests.test_deploy import PRODUCTION_ENV
 
 pytestmark = pytest.mark.story(137)
 
@@ -23,8 +23,8 @@ WHITENOISE = "whitenoise.middleware.WhiteNoiseMiddleware"
 
 @pytest.fixture
 def production(monkeypatch):
-    """production.py loaded fresh, with the photo storage variables Render sets (#64)."""
-    for name, value in MEDIA_ENV.items():
+    """production.py loaded fresh, with the variables Render sets (photos #64, email #27)."""
+    for name, value in PRODUCTION_ENV.items():
         monkeypatch.setenv(name, value)
     from config.settings import production
 
