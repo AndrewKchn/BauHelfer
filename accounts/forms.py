@@ -78,14 +78,18 @@ class RoleForm(forms.ModelForm):
 
 
 class NameAndPhoneForm(forms.ModelForm):
-    """The user's own name and phone, shown on the profile forms (#11).
+    """The user's own name, phone and email switch, shown on the profile forms (#11).
 
     These live on User, not on the profile, so the profile page uses two forms at once.
+    Both roles use this form, so both get the "Email notifications" checkbox (#27, D4).
     """
 
     class Meta:
         model = User
-        fields = ("name", "phone")
+        fields = ("name", "phone", "email_notifications")
+        widgets = {  # noqa: RUF012
+            "email_notifications": forms.CheckboxInput(attrs={"class": "checkbox"}),
+        }
 
     def __init__(self, *args, **kwargs):
         """Make the name required: employers need to know who applied (spec D5)."""

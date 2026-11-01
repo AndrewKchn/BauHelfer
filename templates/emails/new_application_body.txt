@@ -5,5 +5,5 @@
 {% translate "Accept or reject the application here:" %}
 {{ link }}
 
-{% translate "The BauHelfer team" %}
+{% include "emails/_footer.txt" %}
 {% endautoescape %}

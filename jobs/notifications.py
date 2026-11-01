@@ -20,29 +20,34 @@ logger = logging.getLogger(__name__)
 def notify_new_application(request, application):
     """Email the job's employer, with a link to the application on the job page (R5)."""
     url = reverse("job_detail", args=[application.job_id])
-    link = request.build_absolute_uri(f"{url}#application-{application.pk}")
-    send(application, "new_application", application.job.employer, link)
+    path = f"{url}#application-{application.pk}"
+    send(request, application, "new_application", application.job.employer, path)
 
 
 def notify_decision(request, application):
     """Email the worker whether their application was accepted or rejected (R5)."""
     if application.status == Application.Status.ACCEPTED:
-        kind, url = "application_accepted", reverse("my_applications")
+        kind, path = "application_accepted", reverse("my_applications")
     else:
-        kind, url = "application_rejected", reverse("home")
-    send(application, kind, application.worker, request.build_absolute_uri(url))
+        kind, path = "application_rejected", reverse("home")
+    send(request, application, kind, application.worker, path)
 
 
-def send(application, kind, recipient, link):
+def send(request, application, kind, recipient, path):
     """Render emails/<kind>_subject.txt and _body.txt for `recipient` and send them.
 
-    `link` is already absolute: the email is read outside the site (R6).
+    Nothing at all for a recipient who turned the emails off (R12). `path` is the page the
+    email points to; the links get the site's address, as the email is read outside it (R6).
     """
+    if not recipient.email_notifications:
+        return
     context = {
         "application": application,
         "job": application.job,
         "recipient": recipient,  # "Hello <name>," in emails/_greeting.txt
-        "link": link,
+        "link": request.build_absolute_uri(path),
+        # The recipient's own profile form, with the checkbox (R13, D4), in _footer.txt.
+        "settings_link": request.build_absolute_uri(recipient.get_profile_url()),
     }
     # The recipient's language only while rendering; the request's comes back after (R3).
     with translation.override(recipient.preferred_language):

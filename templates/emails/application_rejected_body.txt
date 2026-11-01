@@ -5,5 +5,5 @@
 {% translate "Other jobs are waiting for you:" %}
 {{ link }}
 
-{% translate "The BauHelfer team" %}
+{% include "emails/_footer.txt" %}
 {% endautoescape %}

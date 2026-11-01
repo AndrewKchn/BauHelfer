@@ -72,15 +72,15 @@ def test_old_boolean_field_is_gone():
 
 
 def test_worker_user_form_fields():
-    """The worker's user form adds a required checkbox to name and phone.
+    """The worker's user form adds a required checkbox to name, phone and email switch.
 
     1. Open an empty WorkerUserForm
-    2. Expect: fields name, phone, work_permit
+    2. Expect: fields name, phone, email_notifications (#27), work_permit
     3. Expect: work_permit is a required checkbox
     """
     form = WorkerUserForm()
 
-    assert list(form.fields) == ["name", "phone", "work_permit"]
+    assert list(form.fields) == ["name", "phone", "email_notifications", "work_permit"]
     field = form.fields["work_permit"]
     assert isinstance(field, forms.BooleanField)
     assert field.required is True

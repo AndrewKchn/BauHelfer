@@ -5,5 +5,5 @@
 {% translate "The employer's contact and the address are on “My applications”:" %}
 {{ link }}
 
-{% translate "The BauHelfer team" %}
+{% include "emails/_footer.txt" %}
 {% endautoescape %}

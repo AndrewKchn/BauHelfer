@@ -1,0 +1,4 @@
+{% load i18n %}{% translate "The BauHelfer team" %}
+
+{% translate "To turn these emails off:" %}
+{{ settings_link }}

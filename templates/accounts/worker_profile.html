@@ -30,6 +30,8 @@
         </dl>
       </div>
 
+      {% include "accounts/_email_notifications.html" %}
+
       <div class="card-actions">
         <a href="{% url 'worker_profile_edit' %}" class="btn btn-primary w-full sm:w-auto">{% translate "Edit profile" %}</a>
       </div>
