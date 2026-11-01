@@ -1,0 +1,1 @@
+{% load i18n %}{% if recipient.name %}{% blocktranslate with name=recipient.name %}Hello {{ name }},{% endblocktranslate %}{% else %}{% translate "Hello," %}{% endif %}
