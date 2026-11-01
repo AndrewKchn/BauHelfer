@@ -1,7 +1,7 @@
 """Unit tests: the three notification emails, called directly with a made-up request (#27).
 
 Spec: docs/specs/notifications.md, iteration 1 (R1-R7, D8-D10), acceptance criteria
-AC4-AC7. The views that call these functions are in test_notifications_views.py.
+AC4-AC7; iteration 2 (R12, R13, D4), AC11, AC12. The views that call these functions are in test_notifications_views.py.
 `mailoutbox` (pytest-django) is the list of emails Django's in-memory backend "sent".
 """
 
@@ -221,6 +221,76 @@ def test_names_are_not_html_escaped(request_, application, mailoutbox):
     notify_decision(request_, decide(application, Application.Status.REJECTED))
 
     assert all("Seán O'Brien" in email.body for email in mailoutbox)
+
+
+# Turned off, and the link to turn them off (R12, R13, D4; AC11, AC12)
+
+
+def test_new_application_email_links_to_the_employers_profile_form(
+    request_, application, mailoutbox
+):
+    """The employer's email ends with the way to turn these emails off.
+
+    1. Call notify_new_application
+    2. Expect: the body has "To turn these emails off:" and the absolute link to the
+       employer's profile form
+    """
+    notify_new_application(request_, application)
+
+    [email] = mailoutbox
+    assert "To turn these emails off:" in email.body
+    assert absolute("employer_profile_edit") in email.body
+
+
+@pytest.mark.parametrize(
+    "status", [Application.Status.ACCEPTED, Application.Status.REJECTED]
+)
+def test_decision_email_links_to_the_workers_profile_form(
+    request_, application, mailoutbox, status
+):
+    """The worker's emails end with the link to the worker's own profile form.
+
+    1. Accept, or reject, Ivan's application and call notify_decision
+    2. Expect: the body has "To turn these emails off:" and the absolute link to the
+       worker's profile form
+    """
+    notify_decision(request_, decide(application, status))
+
+    [email] = mailoutbox
+    assert "To turn these emails off:" in email.body
+    assert absolute("worker_profile_edit") in email.body
+
+
+def test_no_email_when_the_employer_turned_them_off(
+    request_, application, mailoutbox, caplog
+):
+    """An employer with the checkbox off gets no email, and nothing is logged (R12).
+
+    1. Turn Anna's notifications off; call notify_new_application
+    2. Expect: no email; no line from the jobs app
+    """
+    application.job.employer.email_notifications = False
+    application.job.employer.save()
+
+    with caplog.at_level("INFO"):
+        notify_new_application(request_, application)
+
+    assert mailoutbox == []
+    assert jobs_records(caplog) == []
+
+
+def test_no_email_when_the_worker_turned_them_off(request_, application, mailoutbox):
+    """A worker with the checkbox off gets no decision email (R12).
+
+    1. Turn Ivan's notifications off; accept his application and call notify_decision
+    2. Expect: no email
+    """
+    application.worker.email_notifications = False
+    application.worker.save()
+
+    notify_decision(request_, decide(application, Application.Status.ACCEPTED))
+
+    assert mailoutbox == []
 
 
 # The recipient's language (R3, D8; AC4)

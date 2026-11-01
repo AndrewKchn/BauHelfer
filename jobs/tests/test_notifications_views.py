@@ -2,7 +2,7 @@
 
 Each test goes through the whole stack: middleware, URL, view, model, notification,
 template and database. Spec: docs/specs/notifications.md, iteration 1 (R1-R3, R7, D5, D6,
-D10), acceptance criteria AC1-AC4, AC7, AC8. What each email says is in
+D10), acceptance criteria AC1-AC4, AC7, AC8; iteration 2 (R12), AC11. What each email says is in
 test_notifications.py.
 """
 
@@ -198,6 +198,45 @@ def test_withdrawing_sends_nothing(client, ivan, job, mailoutbox):
 
     application.refresh_from_db()
     assert application.status == Application.Status.WITHDRAWN
+    assert mailoutbox == []
+
+
+# Turned off (R12; AC11)
+
+
+def test_employer_who_turned_them_off_gets_no_email(
+    client, employer, ivan, job, mailoutbox
+):
+    """Applying still works when the employer turned the emails off; no email.
+
+    1. Turn Anna's notifications off
+    2. Log in as Ivan and send the apply form
+    3. Expect: the application is saved; no email
+    """
+    employer.email_notifications = False
+    employer.save()
+
+    post_as(client, ivan, "job_apply", job.pk, {"workers_offered": 1})
+
+    assert Application.objects.filter(worker=ivan).exists()
+    assert mailoutbox == []
+
+
+def test_worker_who_turned_them_off_gets_no_email(client, employer, job, mailoutbox):
+    """Accepting still works when the worker turned the emails off; no email.
+
+    1. Save Ivan's pending application; turn his notifications off
+    2. As Anna, press Accept
+    3. Expect: the application is accepted; no email
+    """
+    application = apply(job, "ivan@example.com")
+    application.worker.email_notifications = False
+    application.worker.save()
+
+    post_as(client, employer, "application_accept", application.pk)
+
+    application.refresh_from_db()
+    assert application.status == Application.Status.ACCEPTED
     assert mailoutbox == []
 
 
