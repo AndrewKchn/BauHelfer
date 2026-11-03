@@ -49,26 +49,6 @@ def test_account_pages_open_and_use_the_base_layout(client, name):
 # Registration
 
 
-def test_register_creates_user_logs_in_and_welcomes(client):
-    """After signup the user is logged in and welcomed on the role choice page.
-
-    1. Sign up as Ben@Example.com
-    2. Expect: redirect to the role choice (#10); ben@example.com is saved and logged in
-    3. Expect: "Welcome to BauHelfer!" and the email in the header
-    """
-    response = client.post(
-        reverse("register"),
-        {"email": "Ben@Example.com", "password1": PASSWORD, "password2": PASSWORD},
-        follow=True,
-    )
-
-    assertRedirects(response, reverse("role_select"))
-    assert User.objects.filter(email="ben@example.com").exists()
-    assert is_logged_in(client)
-    assertContains(response, "Welcome to BauHelfer!")
-    assertContains(response, "ben@example.com")  # shown in the header
-
-
 def test_register_with_errors_shows_them_and_saves_nothing(client):
     """Signup with mistakes shows the errors and saves nothing.
 

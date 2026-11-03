@@ -37,25 +37,8 @@ def user_with_role(role):
     )
 
 
-# AC1: after signup
-
-
-def test_signup_leads_to_the_role_choice(client):
-    """A new user goes from signup straight to the role choice.
-
-    1. Sign up as ben@example.com
-    2. Expect: redirect to the role choice page
-    3. Expect: the page asks "Who are you?" and shows the welcome message
-    """
-    response = client.post(
-        reverse("register"),
-        {"email": "ben@example.com", "password1": PASSWORD, "password2": PASSWORD},
-        follow=True,
-    )
-
-    assertRedirects(response, reverse("role_select"))
-    assertContains(response, "Who are you?")
-    assertContains(response, "Welcome to BauHelfer!")
+# AC1: since #81 the role choice comes after the confirmation link, not right after signup:
+# test_confirming_activates_the_account_and_logs_in in test_email_verification_views.py.
 
 
 # AC2, AC3: a user without a role cannot skip the choice

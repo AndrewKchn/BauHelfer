@@ -12,6 +12,7 @@ import re
 
 import pytest
 from django.contrib.auth import get_user_model
+from django.core import mail
 from django.utils import timezone
 from playwright.sync_api import expect
 
@@ -26,21 +27,30 @@ User = get_user_model()
 
 
 def sign_up(page, email):
-    """Fill in and send the registration form, starting from the home page."""
+    """Sign up from the home page and confirm the address with the link from the email (#81).
+
+    The live server runs in this process, so its emails land in Django's mail.outbox.
+    """
     page.goto("/")
     page.get_by_role("link", name="Register").click()
     page.get_by_label("Email").fill(email)
     page.get_by_label("Password", exact=True).fill(PASSWORD)
     page.get_by_label("Password confirmation").fill(PASSWORD)
     page.get_by_role("button", name="Register").click()
+    expect(page.get_by_text(email)).to_be_visible()  # the "check your email" page
+
+    link = re.search(r"https?://\S+/accounts/verify/\S+/", mail.outbox[-1].body)
+    page.goto(link.group())
+    page.get_by_role("button", name="Confirm email").click()
 
 
 def test_worker_signs_up_and_fills_in_the_profile_on_a_phone(page):
     """A new worker signs up, chooses the role and saves the profile on a phone.
 
     1. Set the browser window to a 360 x 740 phone screen
-    2. Open the home page, click "Register", sign up as ana@example.com
-    3. Expect: the role choice page with the welcome message
+    2. Open the home page, click "Register", sign up as ana@example.com, open the link
+       from the email and click "Confirm email"
+    3. Expect: the role choice page with "Your email is confirmed."
     4. Click "I am looking for work"
     5. Fill in name, phone, team size, a skill, a language, legal status, tick the permit box
     6. Click "Save profile"
@@ -53,7 +63,7 @@ def test_worker_signs_up_and_fills_in_the_profile_on_a_phone(page):
     sign_up(page, "ana@example.com")
 
     expect(page.get_by_role("heading", name="Who are you?")).to_be_visible()
-    expect(page.get_by_text("Welcome to BauHelfer!")).to_be_visible()
+    expect(page.get_by_text("Your email is confirmed.")).to_be_visible()
     assert_fits_the_screen(page)
 
     page.get_by_role("button", name="I am looking for work").click()
@@ -86,7 +96,7 @@ def test_employer_signs_up_and_fills_in_the_profile_on_a_laptop(page):
     """A new employer signs up, chooses the role and saves the company profile on a laptop.
 
     1. Set the browser window to a 1366 x 768 laptop screen
-    2. Sign up as boss@example.com, click "I need workers"
+    2. Sign up as boss@example.com, confirm with the link, click "I need workers"
     3. Fill in name, company name and a trade, click "Save profile"
     4. Expect: "Profile saved." and "My company" shows the company and the trade
     5. Open the header menu
