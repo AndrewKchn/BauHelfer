@@ -27,7 +27,9 @@ Draft — never write on your own. The student decides what goes into the docs.
 - `CLAUDE.md`: every command still runs; structure and conventions are still true.
 - `docs/SECURITY.md`: security / personal-data comments are covered; every link points to a
   file, function or test that exists (check with grep).
-- `README.md`: run instructions and links still work.
+- `README.md`: run instructions and links still work; "Status" names the milestones done and
+  the next one; "Project links" reaches every doc in `docs/` (`docs/specs/`,
+  `docs/mockups/README.md` included).
 
 ## 4. Draft, ask, wait
 
