@@ -1,10 +1,11 @@
 # Spec: email verification at signup (#81)
 
-Status: **agreed** for iterations 1 and 2. I decided D1–D4 on 2026-11-03 (my criteria: fake
+Status: **agreed** for all three iterations. I decided D1–D4 on 2026-11-03 (my criteria: fake
 accounts should not be possible where the demo does not need it, and emails must keep
 arriving: bounces and complaints harm the sender's reputation). D5–D9 are Claude's defaults,
 which I accepted on 2026-11-03, before any tests. D10 I decided and D11 accepted on
-2026-11-05, before the tests of iteration 2.
+2026-11-05, before the tests of iteration 2. D12 is mine from 2026-10-08 (in the issue); D13
+and D14 I accepted on 2026-11-05, before the tests of iteration 3.
 
 Marks: **(mine, date)** — my decision; **(Claude's default, accepted)** — Claude's default
 that I accepted.
@@ -108,10 +109,35 @@ AC14. An active unconfirmed account (made while the switch is off): one email.
 AC15. Signup sets `verification_sent_at`; a failed send at signup leaves it empty.
 AC16. The three pages of R11 link to the resend page.
 
-## Iteration 3: the demo switch (to be specified)
+## Iteration 3: the demo switch
 
-`SiteSettings` with `email_verification_required` (one row, default on), in Django admin for
-superusers only. Off: signup works as before #81 — active, logged in, no email, unconfirmed.
+### Requirements
+
+R13. `accounts.models.SiteSettings`: one row with `email_verification_required`
+     (`BooleanField`, default on) (D12). `SiteSettings.load()` returns that row and creates
+     it on first use; `save()` always writes row 1, so there is never a second one.
+R14. Signup reads the switch from the database on every request (D13):
+     - on: as iterations 1 and 2;
+     - off: the account is active and logged in at once, no email is sent, the address stays
+       unconfirmed (no email of any kind goes to it, notifications.md D13); the user sees
+       "Welcome to BauHelfer! Your account is ready." on the role choice, as before #81.
+R15. Django admin, "Site settings": only superusers see and change it (D14). Nobody can
+     add a second row or delete the row. Django admin's history records who changed it
+     and when.
+R16. Turning the switch on again changes no account: accounts made while it was off stay
+     active and unconfirmed; they can confirm with the resend page (D11).
+
+### Acceptance criteria
+
+AC17. `SiteSettings.load()` gives one row, switch on; saving a new `SiteSettings()` still
+      leaves one row.
+AC18. Switch off: signup redirects to the role choice with the welcome, the user is active,
+      logged in, unconfirmed, and no email went out.
+AC19. A superuser opens "Site settings" in admin, turns the switch off; the row is off and
+      the admin history has the change.
+AC20. A staff user who is not a superuser, even with every permission on the model, gets
+      403 on the change page and on a POST to it; the switch stays on.
+AC21. Nobody, a superuser included, can add a second row or delete the row in admin.
 
 ## Decisions
 
@@ -164,12 +190,24 @@ D11. **Unconfirmed active accounts can ask too** (Claude's default, accepted): a
      while the switch (iteration 3) is off are active but unconfirmed; without this page
      only an admin could confirm them.
 
+D12. **A one-row model in the database, not an env variable** (mine, 2026-10-08, in the
+     issue): it can be changed live during the demo, without a redeploy, and admin keeps the
+     history. Claude had recommended an env variable (only people with Render access could
+     change it); I rejected it. The model lives in `accounts`: the switch is about accounts.
+D13. **Read on every signup, no cache** (Claude's default, accepted): one small query per signup; a
+     change works at the next signup. **Revisit when** more settings are read on every page.
+D14. **Superusers only, even with permissions** (Claude's default, accepted): the issue says only
+     superusers may change it; checking `is_superuser` in the admin class does not depend
+     on how permissions are granted. A non-superuser staff user does not see it at all.
+
 ## Known limitations (→ docs/SECURITY.md)
 
 - Signup shows that an address is registered (D3).
 - An account that is never confirmed stays in the database, inactive.
 - Until #91, the resend page can still send one email every 10 minutes to an unconfirmed
   address (D10).
+- While the switch is off, new accounts are active with an unconfirmed address: they get
+  no email (no reset either) until they confirm with the resend page (D11, R16).
 - One email goes to every address typed at signup, made-up ones included; Brevo blocks an
   address after a hard bounce (to check on the contact's record in Brevo once).
 - The owner of an address someone else typed gets one email they did not ask for.
