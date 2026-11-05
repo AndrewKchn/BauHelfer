@@ -1758,7 +1758,9 @@ not documented), created #135 and posted five Docs sync comments in #96.
   a duplicate. The toolbar became #135, and I approved the dev dependency.
 - I asked about Render's limits before finishing. This led to checking the docs and to two
   decisions: no gunicorn access log (its format starts with the IP), and check the `level`
-  filter after the merge.
+  filter after the merge. *Correction (#96):* the access log was not off: Render turns it
+  on by default, which the screenshot after the deploy showed; #137 turned it off and
+  replaced it with our own request lines without the IP.
 - I accepted moving "blocked login" to #91, the `unknown account` wording and calling the
   event tests integration tests: they matched what I wanted.
 
