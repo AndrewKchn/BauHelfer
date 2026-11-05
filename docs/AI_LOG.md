@@ -2372,3 +2372,62 @@ confirmed addresses, and the `User.email_verified_at` field already exists.
 - Why opening a link (GET) must not change data: mail scanners open links too.
 - Why the order of URL patterns matters: `verify/resend/done/` would match
   `verify/<uidb64>/<token>/`.
+
+## 2026-11-05 · #28 E2E tests (Playwright) and coverage review for M4
+
+**Task given to AI:** "task 28": E2E tests of the M4 flows (apply → accept → contacts,
+reject, job filled) and a coverage review for applications. Context: the #21 ticket as the
+model, the spec items that wait for this ticket (accept-reject.md D16: the confirm dialog;
+my-jobs.md AC8: the status tabs).
+
+**AI helped:**
+- Found what only a browser can check: the CSRF tokens, the `confirm()` questions before
+  Reject, Cancel and Withdraw, and the script of the status tabs; and the 6 uncovered lines.
+- Wrote 7 E2E tests in `tests/e2e/test_application_flows.py`, all on 360 px phones: the
+  worker and the employer on two browser contexts at once, emails read from the test
+  mailbox and their links opened; the dialogs answered with "Cancel" and "OK"; a name with
+  an apostrophe for `|escapejs`; the tabs with a tap and a real finger swipe.
+- Explained the cause of the bug I found (below) with numbers from the browser, tried one
+  fix as an experiment, then showed three options with their costs.
+- Made E2E run Chromium with its scrollbars shown, so CI catches the bug; wrote 3 tests for
+  the coverage gaps (now 100 % of lines and branches without E2E).
+- Mutation-checked every new test (27 mutants, all caught in the end), posted four "Docs
+  sync — M4" comments, opened the draft PR, wrote the defense notes.
+
+**AI failed:**
+- Its tab tests passed in headless Chromium, which hides scrollbars, and AI reported "no
+  bug". I ran them with `--headed` and one failed: a real bug.
+- `Input.synthesizeScrollGesture` did not move the strip; replaced by touch events.
+- Two wrong locators (the "Contact" box, the header menu), found by the first runs.
+- Put `@override` on a pytest fixture, which is not a method override; removed before the
+  commit.
+- Once forgot `PYTHONDONTWRITEBYTECODE`: a stale `.pyc` gave a false "9 failed".
+- Committed five times without checking the branch: right after `gh issue develop` the
+  working copy had gone back to `main`, so all commits landed on local `main`. Found before
+  the push and moved to the branch; nothing reached GitHub's `main`.
+
+**My part:**
+- I asked why a test ticket needs an "Iterations" block. After the answer (size, not
+  features; as in #21) I chose to keep it: the ticket has four independent parts, better
+  split them.
+- I ran the tab tests with `--headed --slowmo 500` myself and found the bug: with a
+  classic scrollbar a tap on a shorter tab left a 15 px slice of the other group.
+- I checked production on my phone: no slice there, which matched the cause.
+- Of the three fixes I chose `scrollbar-gutter: stable` (A): the simplest code, and it fixes
+  a whole class of such jumps, not one case.
+- I asked why "another test" was needed; it was a launch setting, not a new test.
+- I rejected a separate `bug` issue: "fix it all here in a separate commit". The bug was
+  found and fixed in the ticket that found it; a separate issue would only repeat what the
+  PR already shows: the failing commit cdb11c0 and the fix 30213ca.
+- I accepted the other defaults (two browser contexts, the swipe, the coverage tests with
+  `monkeypatch`): they matched what I wanted.
+- By hand: ran every iteration locally ("all green", "100 of 100") and looked at the
+  screenshots.
+
+**Learned:**
+- Why a headless browser can hide a bug a laptop shows: it hides scrollbars, so the page
+  never changes its width.
+- How one test drives two logged-in users at once: a browser context per user, each with
+  its own cookies.
+- Why 100 % coverage is not "everything is checked": a line can run without its result being
+  checked; the mutation check shows which lines a test really guards.
