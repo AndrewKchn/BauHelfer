@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Confirm email" %} · BauHelfer{% endblock %}
+
+{% block content %}
+  <div class="card mx-auto max-w-md bg-base-100 shadow-sm">
+    <div class="card-body">
+      {% if validlink %}
+        <h1 class="card-title text-2xl">{% translate "Confirm email" %}</h1>
+        <p>{% translate "Press the button to confirm your address and activate your account." %}</p>
+        {# A button, not the link alone: mail scanners open links in emails (#81, D6). #}
+        <form method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary mt-4 w-full">{% translate "Confirm email" %}</button>
+        </form>
+      {% else %}
+        <h1 class="card-title text-2xl">{% translate "Link is not valid" %}</h1>
+        <p>{% translate "This link is invalid or has expired. It works only once: if you already confirmed your email, just log in." %}</p>
+        <a href="{% url 'login' %}" class="btn btn-primary">{% translate "Log in" %}</a>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

@@ -11,6 +11,8 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.test import Client
 from django.urls import reverse
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 from pytest_django.asserts import assertContains, assertRedirects
 
 pytestmark = [pytest.mark.django_db, pytest.mark.story(81)]
@@ -136,19 +138,19 @@ def test_link_works_only_once(client, mailoutbox):
     assert User.objects.get().email_verified_at == confirmed_at
 
 
-@pytest.mark.parametrize(
-    "path", ["/accounts/verify/MQ/wrong-token/", "/accounts/verify/xyz/abc-def/"]
-)
-def test_wrong_link_shows_the_invalid_page(client, path):
+@pytest.mark.parametrize("uid", ["real", "unknown"])
+def test_wrong_link_shows_the_invalid_page(client, uid):
     """A made-up link, for a real or an unknown user, shows the "invalid" page (R5).
 
-    1. Create an inactive user (id 1 may be theirs)
-    2. Open a link with a wrong token or an unknown user id
+    1. Create an inactive user
+    2. Open a link with their id and a wrong token, or with an id that is not base64
     3. Expect: status 200 and "This link is invalid or has expired"
     """
-    User.objects.create_user(
+    user = User.objects.create_user(
         email="ben@example.com", password=PASSWORD, is_active=False
     )
+    uidb64 = urlsafe_base64_encode(force_bytes(user.pk)) if uid == "real" else "x!"
+    path = reverse("verify_email", args=[uidb64, "abc-def"])
 
     response = client.get(path)
 

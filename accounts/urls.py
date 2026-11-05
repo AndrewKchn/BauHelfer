@@ -12,6 +12,13 @@ from .forms import ConfirmedPasswordResetForm, LoginForm
 
 urlpatterns = [
     path("register/", views.RegisterView.as_view(), name="register"),
+    path("register/done/", views.RegisterDoneView.as_view(), name="register_done"),
+    # The link from the confirmation email (#81): the user id in base64 and the token.
+    path(
+        "verify/<uidb64>/<token>/",
+        views.VerifyEmailView.as_view(),
+        name="verify_email",
+    ),
     path(
         "login/",
         # Django's LoginView with the landing page by role (#20).
