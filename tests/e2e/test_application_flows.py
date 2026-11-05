@@ -166,3 +166,141 @@ def test_worker_applies_and_the_employer_accepts_on_two_phones(new_context, mail
     expect(worker.get_by_role("link", name=EMPLOYER_PHONE)).to_be_visible()
     expect(worker.get_by_text("Accepted", exact=True)).to_be_visible()
     assert_fits_the_screen(worker)
+
+
+# The browser asks before an action that cannot be undone: onsubmit="return confirm(…)"
+# (#24 accept-reject.md D16, #26 my-applications.md D4). The test client runs no JavaScript,
+# so only these tests see the question and that "Cancel" in it sends nothing.
+
+# An apostrophe in the name: the question is inside a JavaScript string in onsubmit, so
+# |escapejs must keep it from ending the string (accept-reject.md D16).
+NAME = "Liam O'Connor"
+
+
+def click_and_answer(page, button, ok):
+    """Click `button`, answer the browser's question with OK or Cancel; return the question."""
+    questions = []
+
+    def answer(dialog):
+        questions.append(dialog.message)
+        if ok:
+            dialog.accept()
+        else:
+            dialog.dismiss()
+
+    page.once("dialog", answer)
+    button.click()
+    assert questions, "the browser asked nothing"
+    return questions[0]
+
+
+def test_employer_rejects_after_the_browser_asks(new_context, mailoutbox):
+    """ "Reject" asks first: Cancel keeps the application, OK rejects it.
+
+    1. Create a job with a pending application of Liam O'Connor; the employer logs in on
+       a 360 px phone and opens the job
+    2. Click "Reject", answer "Cancel" in the browser's question
+    3. Expect: the question "Reject Liam O'Connor? This cannot be undone.", the
+       application is still pending in the database, no email sent
+    4. Click "Reject" again, answer "OK"
+    5. Expect: "Rejected: Liam O'Connor.", the application is "Rejected" on the page and
+       in the database, Liam got "Application not accepted: …"
+    """
+    job = make_job(make_employer())
+    application = Application.objects.create(
+        job=job, worker=make_worker("liam@example.com", NAME), workers_offered=1
+    )
+    boss = phone_page(new_context, "anna@example.com")
+    boss.goto(f"/jobs/{job.pk}/")
+    reject = boss.get_by_role("button", name="Reject")
+
+    question = click_and_answer(boss, reject, ok=False)
+
+    assert question == f"Reject {NAME}? This cannot be undone."
+    application.refresh_from_db()
+    assert application.status == Application.Status.PENDING
+    assert mailoutbox == []
+
+    click_and_answer(boss, reject, ok=True)
+
+    expect(boss.get_by_text(f"Rejected: {NAME}.")).to_be_visible()
+    expect(boss.get_by_text("Rejected", exact=True)).to_be_visible()
+    application.refresh_from_db()
+    assert application.status == Application.Status.REJECTED
+    (rejected,) = mailoutbox
+    assert rejected.subject.startswith("Application not accepted: ")
+
+
+def test_employer_cancels_an_accepted_worker_after_the_browser_asks(new_context):
+    """ "Cancel" of an accepted worker asks first: Cancel keeps them, OK cancels them.
+
+    1. Create a job for 1 worker; Liam O'Connor is accepted, so the job is filled; the
+       employer logs in on a 360 px phone and opens the job
+    2. Click "Cancel" in Liam's application, answer "Cancel" in the browser's question
+    3. Expect: the question "Cancel Liam O'Connor? This cannot be undone.", Liam is still
+       accepted, the job still filled
+    4. Click "Cancel" again, answer "OK"
+    5. Expect: "Cancelled: Liam O'Connor. The job is open again.", the application is
+       "Cancelled", the job open
+    """
+    job = make_job(make_employer(), workers_needed=1)
+    application = Application.objects.create(
+        job=job, worker=make_worker("liam@example.com", NAME), workers_offered=1
+    )
+    application.accept()
+    boss = phone_page(new_context, "anna@example.com")
+    boss.goto(f"/jobs/{job.pk}/")
+    cancel = boss.get_by_role("button", name="Cancel")
+
+    question = click_and_answer(boss, cancel, ok=False)
+
+    assert question == f"Cancel {NAME}? This cannot be undone."
+    application.refresh_from_db()
+    job.refresh_from_db()
+    assert application.status == Application.Status.ACCEPTED
+    assert job.status == job.Status.FILLED
+
+    click_and_answer(boss, cancel, ok=True)
+
+    expect(
+        boss.get_by_text(f"Cancelled: {NAME}. The job is open again.")
+    ).to_be_visible()
+    application.refresh_from_db()
+    job.refresh_from_db()
+    assert application.status == Application.Status.CANCELLED
+    assert job.status == job.Status.OPEN
+
+
+def test_worker_withdraws_after_the_browser_asks(new_context):
+    """ "Withdraw" asks first: Cancel keeps the application, OK withdraws it.
+
+    1. Create a job with a pending application of Liam; Liam logs in on a 360 px phone and
+       opens "My applications" from the header menu
+    2. Click "Withdraw", answer "Cancel" in the browser's question
+    3. Expect: the question "Withdraw your application? This cannot be undone.", the
+       application is still pending
+    4. Click "Withdraw" again, answer "OK"
+    5. Expect: "Application withdrawn.", the application is "Withdrawn" in the database
+    6. Expect: the page fits the screen
+    """
+    job = make_job(make_employer())
+    application = Application.objects.create(
+        job=job, worker=make_worker("liam@example.com", NAME), workers_offered=1
+    )
+    worker = phone_page(new_context, "liam@example.com")
+    worker.get_by_label("Menu").click()
+    worker.get_by_role("link", name="My applications").click()
+    withdraw = worker.get_by_role("button", name="Withdraw")
+
+    question = click_and_answer(worker, withdraw, ok=False)
+
+    assert question == "Withdraw your application? This cannot be undone."
+    application.refresh_from_db()
+    assert application.status == Application.Status.PENDING
+
+    click_and_answer(worker, withdraw, ok=True)
+
+    expect(worker.get_by_text("Application withdrawn.")).to_be_visible()
+    application.refresh_from_db()
+    assert application.status == Application.Status.WITHDRAWN
+    assert_fits_the_screen(worker)
