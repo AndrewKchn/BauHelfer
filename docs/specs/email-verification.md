@@ -1,9 +1,10 @@
 # Spec: email verification at signup (#81)
 
-Status: **agreed** for iteration 1. I decided D1–D4 on 2026-11-03 (my criteria: fake
+Status: **agreed** for iterations 1 and 2. I decided D1–D4 on 2026-11-03 (my criteria: fake
 accounts should not be possible where the demo does not need it, and emails must keep
 arriving: bounces and complaints harm the sender's reputation). D5–D9 are Claude's defaults,
-which I accepted on 2026-11-03, before any tests.
+which I accepted on 2026-11-03, before any tests. D10 I decided and D11 accepted on
+2026-11-05, before the tests of iteration 2.
 
 Marks: **(mine, date)** — my decision; **(Claude's default, accepted)** — Claude's default
 that I accepted.
@@ -77,12 +78,35 @@ AC8. Login of an unconfirmed inactive account with the right password: the R6 hi
 AC9. Login of an inactive account with a confirmed address: "Wrong email or password."
 AC10. A failed email is logged without the address; the "done" page is shown.
 
-## Iteration 2: "Send the email again" (to be specified)
+## Iteration 2: "Send the email again"
 
-A page with an email field, the same answer for every address (as password reset), sending
-only to inactive unconfirmed accounts. Linked from the "done" page, the R6 hint and the
-"invalid link" page. Open question: how to stop it from being used to send many emails to
-one address before #91.
+### Requirements
+
+R8. `/accounts/verify/resend/`: a form with one field, the email, and a "Send the link
+    again" button. After sending it, every address gets the same page: "If an unconfirmed
+    account uses this address, we sent a new link. Check your spam folder too." (as
+    password reset, so the page does not show which addresses are registered).
+R9. The link goes to the account with that address (in any capitals) only when its address
+    is not confirmed, active or not (D11), and no link went to it in the last 10 minutes
+    (D10). Otherwise nothing is sent.
+R10. `User.verification_sent_at` (new field, empty by default): `send_verification_email`
+     sets it after a successful send, at signup and here. A failed send leaves it, so the
+     user can try again at once.
+R11. Links to the page: on the "check your email" page ("Did not get it?"), on the login
+     page under "Forgot your password?" ("Did not get the confirmation email?") and on
+     the "invalid link" page, instead of "Log in" as the main button.
+R12. An earlier link keeps working until it expires: the token does not cover
+     `verification_sent_at`; both links go to the same mailbox.
+
+### Acceptance criteria
+
+AC11. An inactive unconfirmed account with no link sent yet: one email with a link that
+      confirms (AC4 works with it); `verification_sent_at` is set.
+AC12. An unknown address and a confirmed one: no email, the same page as AC11.
+AC13. 9 minutes after the last link: no email, the same page; after 10 minutes: one email.
+AC14. An active unconfirmed account (made while the switch is off): one email.
+AC15. Signup sets `verification_sent_at`; a failed send at signup leaves it empty.
+AC16. The three pages of R11 link to the resend page.
 
 ## Iteration 3: the demo switch (to be specified)
 
@@ -129,10 +153,23 @@ D8. **The email in the page's language** (Claude's default, accepted): a new acc
 D9. **A failed send keeps the account** (Claude's default, accepted): as notifications.md D10; the
     user can ask again (iteration 2).
 
+D10. **One link per account every 10 minutes** (mine, 2026-11-05, option B; criterion as in
+     D3: emails must keep arriving). Without a limit anyone could send hundreds of emails
+     to an address someone else typed at signup; its owner marks them as spam, and that
+     harms every BauHelfer email. The page answers the same during the pause, so the
+     pause shows nothing. Rejected: no limit until #91 (A) and a pause plus at most 3 a
+     day (C: one more field and a daily reset for little gain). **Revisit when** #91 adds
+     rate limits to the whole site.
+D11. **Unconfirmed active accounts can ask too** (Claude's default, accepted): accounts made
+     while the switch (iteration 3) is off are active but unconfirmed; without this page
+     only an admin could confirm them.
+
 ## Known limitations (→ docs/SECURITY.md)
 
 - Signup shows that an address is registered (D3).
 - An account that is never confirmed stays in the database, inactive.
+- Until #91, the resend page can still send one email every 10 minutes to an unconfirmed
+  address (D10).
 - One email goes to every address typed at signup, made-up ones included; Brevo blocks an
   address after a hard bounce (to check on the contact's record in Brevo once).
 - The owner of an address someone else typed gets one email they did not ask for.
