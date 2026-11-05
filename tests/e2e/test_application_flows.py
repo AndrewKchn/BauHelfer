@@ -64,8 +64,8 @@ def make_worker(email, name, team_size=1, phone=""):
 
 
 def phone_page(new_context, email):
-    """A new 360 px phone (its own cookies), logged in as `email`."""
-    page = new_context(viewport=PHONE).new_page()
+    """A new 360 px phone with a touch screen (its own cookies), logged in as `email`."""
+    page = new_context(viewport=PHONE, has_touch=True).new_page()
     log_in(page, email)
     return page
 
@@ -304,3 +304,149 @@ def test_worker_withdraws_after_the_browser_asks(new_context):
     application.refresh_from_db()
     assert application.status == Application.Status.WITHDRAWN
     assert_fits_the_screen(worker)
+
+
+# Status tabs on "My jobs" and "My applications" (#20 my-jobs.md AC8, #26 my-applications.md
+# D2): templates/_status_tabs.html. A swipe moves the strip by itself (scroll-snap, no JS);
+# the script fills the active badge and makes the strip as tall as the group on screen.
+
+
+def swipe(page, element, to):
+    """Swipe a finger across `element`: to="next" moves to the group on the right.
+
+    Real touch events through Chromium's DevTools protocol (Playwright has no swipe): the
+    finger goes down, moves in 10 steps over 80 % of the width and lifts. The browser
+    scrolls the strip itself, scroll-snap stops it on a group, the script hears "scroll".
+    Not a scroll set by a script. (Chromium's ready-made Input.synthesizeScrollGesture
+    did not move the strip.) Needs a context with has_touch=True.
+    """
+    box = element.bounding_box()
+    cdp = page.context.new_cdp_session(page)
+    y = box["y"] + 20
+    # The finger moves left to show the next group, right to go back.
+    start, end = box["x"] + box["width"] * 0.9, box["x"] + box["width"] * 0.1
+    if to != "next":
+        start, end = end, start
+
+    def touch(kind, x=None):
+        points = [] if x is None else [{"x": x, "y": y}]
+        cdp.send("Input.dispatchTouchEvent", {"type": kind, "touchPoints": points})
+
+    touch("touchStart", start)
+    for step in range(1, 11):
+        touch("touchMove", start + (end - start) * step / 10)
+    touch("touchEnd")
+
+
+def expect_group_on_screen(page, tab, group, other_tab, other_group):
+    """`group` is on screen and as tall as the strip; its badge is filled, the other not."""
+    expect(page.locator(group)).to_be_in_viewport()
+    expect(page.locator(other_group)).not_to_be_in_viewport()
+    expect(tab).to_have_attribute("aria-selected", "true")
+    expect(other_tab).to_have_attribute("aria-selected", "false")
+    expect(tab).not_to_have_class(re.compile(r"\bbadge-outline\b"))
+    expect(other_tab).to_have_class(re.compile(r"\bbadge-outline\b"))
+    page.wait_for_function(
+        "group => document.getElementById('status-groups').offsetHeight"
+        " === document.querySelector(group).offsetHeight",
+        arg=group,
+    )
+
+
+def check_status_tabs(page, first, second):
+    """Tap the second badge, then swipe back to the first group; `first` and `second`
+    are (badge name, group id, filled class), the two groups of different height."""
+    (first_name, first_group, first_colour) = first
+    (second_name, second_group, second_colour) = second
+    first_tab = page.get_by_role("tab", name=first_name)
+    second_tab = page.get_by_role("tab", name=second_name)
+    heights = page.evaluate(
+        "ids => ids.map(id => document.querySelector(id).offsetHeight)",
+        [first_group, second_group],
+    )
+    assert heights[0] != heights[1], "groups of the same height test no height change"
+
+    expect_group_on_screen(page, first_tab, first_group, second_tab, second_group)
+    expect(first_tab).to_have_class(re.compile(rf"\b{first_colour}\b"))
+    assert_fits_the_screen(page)
+
+    second_tab.click()
+
+    expect_group_on_screen(page, second_tab, second_group, first_tab, first_group)
+    # The badge is a link to its group, so it works without JavaScript too; the script
+    # keeps the browser from jumping to it: no "#tab-…" in the address.
+    expect(page).not_to_have_url(re.compile("#tab-"))
+    expect(second_tab).to_have_class(re.compile(rf"\b{second_colour}\b"))
+    expect(first_tab).not_to_have_class(re.compile(rf"\b{first_colour}\b"))
+    assert_fits_the_screen(page)
+
+    swipe(page, page.locator("#status-groups"), to="previous")
+
+    expect_group_on_screen(page, first_tab, first_group, second_tab, second_group)
+    assert_fits_the_screen(page)
+
+    swipe(page, page.locator("#status-groups"), to="next")
+
+    expect_group_on_screen(page, second_tab, second_group, first_tab, first_group)
+
+
+def test_status_tabs_on_my_jobs_change_with_a_tap_and_a_swipe(new_context):
+    """On "My jobs" a tap on a badge and a swipe change the group, its badge and height.
+
+    1. Create an employer with 3 open jobs and 1 cancelled job; log in on a 360 px phone:
+       the employer lands on "My jobs"
+    2. Expect: "Open 3" filled green, "Cancelled 1" outlined, the open jobs on screen, the
+       strip as tall as them
+    3. Tap "Cancelled 1"
+    4. Expect: the cancelled job on screen, its badge filled red, "Open 3" outlined, the
+       strip as tall as the shorter group, no "#tab-…" in the address
+    5. Swipe right with a finger, then left
+    6. Expect: back on the open jobs, then on the cancelled one, each time with its badge
+       filled and the strip's height
+    7. Expect: the page is never wider than the screen
+    """
+    employer = make_employer()
+    for _ in range(3):
+        make_job(employer)
+    make_job(employer, status="cancelled")
+    page = phone_page(new_context, "anna@example.com")
+    expect(page.get_by_role("heading", name="My jobs")).to_be_visible()
+
+    check_status_tabs(
+        page,
+        ("Open 3", "#tab-open", "badge-success"),
+        ("Cancelled 1", "#tab-cancelled", "badge-error"),
+    )
+
+
+def test_status_tabs_on_my_applications_change_with_a_tap_and_a_swipe(new_context):
+    """On "My applications" the same tabs work: a tap and a swipe change the group.
+
+    1. Create a worker with 1 accepted and 3 pending applications; log in on a 360 px
+       phone, open "My applications" from the header menu
+    2. Expect: "Accepted 1" filled green, the accepted one on screen
+    3. Tap "Pending 3"
+    4. Expect: the pending ones on screen, their badge filled yellow, the strip as tall as
+       the longer group, no "#tab-…" in the address
+    5. Swipe right with a finger, then left
+    6. Expect: back on the accepted one, then on the pending ones
+    7. Expect: the page is never wider than the screen
+    """
+    employer = make_employer()
+    worker = make_worker("liam@example.com", NAME)
+    Application.objects.create(
+        job=make_job(employer, workers_needed=1), worker=worker, workers_offered=1
+    ).accept()
+    for _ in range(3):
+        Application.objects.create(
+            job=make_job(employer), worker=worker, workers_offered=1
+        )
+    page = phone_page(new_context, "liam@example.com")
+    page.get_by_label("Menu").click()
+    page.get_by_role("link", name="My applications").click()
+
+    check_status_tabs(
+        page,
+        ("Accepted 1", "#tab-accepted", "badge-success"),
+        ("Pending 3", "#tab-pending", "badge-warning"),
+    )

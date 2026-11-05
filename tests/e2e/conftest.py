@@ -16,6 +16,18 @@ os.environ.setdefault("DJANGO_ALLOW_ASYNC_UNSAFE", "true")
 
 
 @pytest.fixture(scope="session")
+def browser_type_launch_args(browser_type_launch_args):
+    """Chromium with its scrollbars shown, as on a Windows or Linux laptop (#28).
+
+    Replaces pytest-playwright's fixture of the same name and extends its value.
+    Playwright starts a headless Chromium with --hide-scrollbars. A scrollbar takes width
+    from the page; a page that comes and goes with it made the status tabs stop 15 px off
+    their group, and only a visible scrollbar shows that in CI.
+    """
+    return {**browser_type_launch_args, "ignore_default_args": ["--hide-scrollbars"]}
+
+
+@pytest.fixture(scope="session")
 def base_url(live_server):
     """Make page.goto("/accounts/login/") open the live server, not a fixed address."""
     return live_server.url
