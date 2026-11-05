@@ -37,6 +37,7 @@ English, Russian, Ukrainian, Polish, Romanian and Turkish.
 - PostgreSQL
 - Claude API for translation
 - Leaflet + OpenStreetMap
+- Brevo for email (through `django-anymail`); locally emails are printed to the console
 - pytest-django, ruff, GitHub Actions, Allure Report (tests grouped by level and story)
 - Hosting: Render (Frankfurt), database on Supabase (Frankfurt), both on free plans
 
@@ -114,6 +115,8 @@ Test levels, where tests live, more commands and how tests are named:
 
 - [Plan](docs/PLAN.md): stack decisions, data model, milestones
 - [Testing](docs/TESTING.md): test levels, how to run them, what CI checks
+- [Specs](docs/specs/): the decisions for complex tickets, made before the tests
+- [UI mockups](docs/mockups/README.md): the planned phone screens next to the built ones
 - [Project board](https://github.com/users/AndrewKchn/projects/1): what is in progress now
 - [Issues](https://github.com/AndrewKchn/BauHelfer/issues)
 - [AI log](docs/AI_LOG.md): how AI was used and which suggestions were changed or rejected
@@ -122,5 +125,6 @@ Test levels, where tests live, more commands and how tests are named:
 
 ## Status
 
-In development. M1 (foundation and first deploy) and M2 (accounts and profiles) are done; next
-is M3, jobs.
+In development. Done: M1 (foundation and first deploy), M2 (accounts and profiles), M3 (jobs)
+and M4 (applications, contacts after acceptance, email notifications). Next is M5,
+multilingual UI and AI translation.
