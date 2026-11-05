@@ -17,6 +17,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import (
     CreateView,
     DetailView,
+    FormView,
     TemplateView,
     UpdateView,
     View,
@@ -26,6 +27,7 @@ from .emails import send_verification_email
 from .forms import (
     EmployerProfileForm,
     NameAndPhoneForm,
+    ResendVerificationForm,
     RoleForm,
     SignupForm,
     WorkerProfileForm,
@@ -139,6 +141,30 @@ class VerifyEmailView(View):
         logger.info("Email confirmed: user_id=%s", user.pk)
         messages.success(request, _("Your email is confirmed. Welcome to BauHelfer!"))
         return redirect("role_select")  # onboarding: choose a role first (#10)
+
+
+class ResendVerificationView(FormView):
+    """ "Send the link again": the same answer for every address (#81, R8, R9).
+
+    As password reset: the next page never tells whether an email went out, so the form
+    does not show which addresses are registered, confirmed or in the 10-minute pause.
+    """
+
+    form_class = ResendVerificationForm
+    template_name = "registration/verify_email_resend.html"
+    success_url = reverse_lazy("verify_email_resend_done")
+
+    @override
+    def form_valid(self, form):
+        """Send a new link if the account may get one (R9); go on to the same page anyway."""
+        try:
+            user = User.objects.get_by_natural_key(form.cleaned_data["email"])
+        except User.DoesNotExist:
+            pass
+        else:
+            if user.can_get_verification_email():
+                send_verification_email(self.request, user)
+        return super().form_valid(form)
 
 
 class RoleSelectView(LoginRequiredMixin, UpdateView):

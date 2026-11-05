@@ -6,6 +6,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
@@ -44,3 +45,7 @@ def send_verification_email(request, user):
             user.pk,
             type(error).__name__,
         )
+    else:
+        # Only after a real send: after a failure the user may try again at once (R10).
+        user.verification_sent_at = timezone.now()
+        user.save(update_fields=["verification_sent_at"])

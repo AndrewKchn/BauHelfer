@@ -17,7 +17,8 @@
       {% else %}
         <h1 class="card-title text-2xl">{% translate "Link is not valid" %}</h1>
         <p>{% translate "This link is invalid or has expired. It works only once: if you already confirmed your email, just log in." %}</p>
-        <a href="{% url 'login' %}" class="btn btn-primary">{% translate "Log in" %}</a>
+        <a href="{% url 'verify_email_resend' %}" class="btn btn-primary">{% translate "Send the link again" %}</a>
+        <a href="{% url 'login' %}" class="link text-center">{% translate "Log in" %}</a>
       {% endif %}
     </div>
   </div>

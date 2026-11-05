@@ -6,6 +6,7 @@ No app namespace: Django's built-in auth views look these names up as plain "log
 
 from django.contrib.auth import views as auth_views
 from django.urls import path
+from django.views.generic import TemplateView
 
 from . import views
 from .forms import ConfirmedPasswordResetForm, LoginForm
@@ -13,6 +14,19 @@ from .forms import ConfirmedPasswordResetForm, LoginForm
 urlpatterns = [
     path("register/", views.RegisterView.as_view(), name="register"),
     path("register/done/", views.RegisterDoneView.as_view(), name="register_done"),
+    # Before the link below: "verify/resend/done/" would match it too (#81).
+    path(
+        "verify/resend/",
+        views.ResendVerificationView.as_view(),
+        name="verify_email_resend",
+    ),
+    path(
+        "verify/resend/done/",
+        TemplateView.as_view(
+            template_name="registration/verify_email_resend_done.html"
+        ),
+        name="verify_email_resend_done",
+    ),
     # The link from the confirmation email (#81): the user id in base64 and the token.
     path(
         "verify/<uidb64>/<token>/",

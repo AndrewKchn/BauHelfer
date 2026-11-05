@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Check your email" %} · BauHelfer{% endblock %}
+
+{% block content %}
+  <div class="card mx-auto max-w-md bg-base-100 shadow-sm">
+    <div class="card-body">
+      <h1 class="card-title text-2xl">{% translate "Check your email" %}</h1>
+      {# Same text whether an email went out or not, so nobody can test who is registered. #}
+      <p>{% translate "If an unconfirmed account uses this address, we sent a new link." %} {% translate "Check your spam folder too." %}</p>
+      <p class="text-sm">{% translate "A new link can be sent once every 10 minutes." %}</p>
+    </div>
+  </div>
+{% endblock %}

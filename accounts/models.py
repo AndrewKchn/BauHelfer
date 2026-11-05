@@ -1,5 +1,6 @@
 """User accounts: one User model for employers and workers, with email login."""
 
+from datetime import timedelta
 from typing import override
 
 from django.contrib.auth.models import AbstractUser, BaseUserManager
@@ -7,10 +8,14 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext
 
 from .validators import validate_phone
+
+# At most one confirmation link per account in this time (#81, email-verification.md D10).
+VERIFICATION_EMAIL_PAUSE = timedelta(minutes=10)
 
 
 class UserManager(BaseUserManager):
@@ -109,6 +114,10 @@ class User(AbstractUser):
     email_verified_at = models.DateTimeField(
         _("email confirmed at"), null=True, blank=True
     )
+    # When the last confirmation link went out (#81, R10), for the pause between two (D10).
+    verification_sent_at = models.DateTimeField(
+        _("confirmation link sent at"), null=True, blank=True
+    )
     # When the worker ticked "I am allowed to work in Germany" (#13); empty = not yet.
     # Their own statement, not a document check (docs/specs/work-permit.md).
     work_permit_confirmed_at = models.DateTimeField(
@@ -130,6 +139,18 @@ class User(AbstractUser):
             and hasattr(self, "worker_profile")  # False while there is no profile
             and self.work_permit_confirmed_at is not None
         )
+
+    def can_get_verification_email(self):
+        """Whether a confirmation link may go out now (#81, R9).
+
+        Only to an unconfirmed address, active or not (D11), and not again within
+        VERIFICATION_EMAIL_PAUSE: nobody can flood an address with our emails (D10).
+        """
+        if self.email_verified_at is not None:
+            return False
+        if self.verification_sent_at is None:
+            return True
+        return timezone.now() - self.verification_sent_at >= VERIFICATION_EMAIL_PAUSE
 
     def initials(self):
         """The avatar's letters (#23): first and last word, "ML" for "Maria del Carmen López".

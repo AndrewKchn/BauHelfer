@@ -14,6 +14,10 @@
         <p>{% translate "We sent a link to your email address." %}</p>
       {% endif %}
       <p>{% translate "Open it to activate your account." %} {% translate "Check your spam folder too." %}</p>
+      <p class="text-sm">
+        {% translate "Did not get it?" %}
+        <a href="{% url 'verify_email_resend' %}" class="link">{% translate "Send the link again" %}</a>
+      </p>
     </div>
   </div>
 {% endblock %}

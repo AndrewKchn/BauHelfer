@@ -18,6 +18,9 @@
         <a href="{% url 'password_reset' %}" class="link">{% translate "Forgot your password?" %}</a>
       </p>
       <p class="text-sm">
+        <a href="{% url 'verify_email_resend' %}" class="link">{% translate "Did not get the confirmation email?" %}</a>
+      </p>
+      <p class="text-sm">
         {% translate "No account yet?" %}
         <a href="{% url 'register' %}" class="link">{% translate "Register" %}</a>
       </p>

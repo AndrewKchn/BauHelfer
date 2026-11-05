@@ -100,6 +100,12 @@ class LoginForm(AuthenticationForm):
         return super().get_invalid_login_error()
 
 
+class ResendVerificationForm(forms.Form):
+    """ "Send the link again": only the email (#81, docs/specs/email-verification.md R8)."""
+
+    email = forms.EmailField(label=_("Email"), max_length=254)
+
+
 class RoleForm(forms.ModelForm):
     """Onboarding: the user picks "employer" or "worker" (#10).
 
