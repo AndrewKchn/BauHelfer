@@ -4,6 +4,8 @@ Spec: docs/specs/application.md (R1-R4, D3-D5), acceptance criteria AC1-AC3. The
 the job page are in test_application_views.py.
 """
 
+import datetime
+
 import pytest
 from django.contrib.auth import get_user_model
 from django.db import DataError, IntegrityError, transaction
@@ -113,6 +115,19 @@ def test_database_refuses_a_message_over_500_characters(job, worker):
         Application.objects.create(
             job=job, worker=worker, workers_offered=1, message="x" * 501
         )
+
+
+@pytest.mark.story(28)
+def test_str_shows_the_worker_and_the_job(employer, worker):
+    """An application is shown as its worker's email, an arrow and the job.
+
+    1. Save an application of ivan@example.com to a demolition job on 3 November 2026
+    2. Expect: "ivan@example.com → Demolition – 2026-11-03" (in the admin and the logs)
+    """
+    job = make_job(employer, date=datetime.date(2026, 11, 3))
+    application = Application.objects.create(job=job, worker=worker, workers_offered=1)
+
+    assert str(application) == "ivan@example.com → Demolition – 2026-11-03"
 
 
 # The form (spec R3, R4, D3, D4; AC2, AC3)

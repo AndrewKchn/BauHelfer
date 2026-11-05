@@ -15,7 +15,7 @@ from django.utils import dateformat, timezone
 from pytest_django.asserts import assertContains, assertNotContains, assertRedirects
 
 from accounts.models import EmployerProfile
-from jobs.models import Job
+from jobs.models import Job, JobStateError
 
 pytestmark = [pytest.mark.django_db, pytest.mark.story(16)]
 
@@ -316,6 +316,27 @@ def test_owner_cancels_a_job(employer_client, job):
     assertContains(response, "Job cancelled.")
     job.refresh_from_db()
     assert job.status == Job.Status.CANCELLED
+
+
+@pytest.mark.story(28)
+def test_job_cancelled_meanwhile_gets_404(employer_client, job, monkeypatch):
+    """A cancel that lost the race to another tab gets the same 404 as a cancelled job.
+
+    1. Make the job's cancel() raise JobStateError, as when another tab cancelled it
+       between loading the job and cancelling it
+    2. POST to its cancel URL as the owner
+    3. Expect: 404, no "Job cancelled." message on the next page
+    """
+
+    def cancelled_meanwhile(self):
+        raise JobStateError
+
+    monkeypatch.setattr(Job, "cancel", cancelled_meanwhile)
+
+    response = employer_client.post(reverse("job_cancel", args=[job.pk]))
+
+    assert response.status_code == 404
+    assertNotContains(employer_client.get(reverse("my_jobs")), "Job cancelled.")
 
 
 # My jobs (R14, AC17)

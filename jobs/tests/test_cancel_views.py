@@ -9,7 +9,7 @@ import pytest
 from django.urls import reverse
 from pytest_django.asserts import assertContains, assertNotContains
 
-from jobs.models import Application, Job
+from jobs.models import Application, ApplicationStateError, Job
 
 from .test_application import make_worker
 from .test_views import make_employer, make_job
@@ -102,6 +102,32 @@ def test_cancelling_from_a_filled_job_says_it_is_open_again(employer_client, job
     assert job.status == Job.Status.OPEN
     page = employer_client.get(detail_url(job))
     assertContains(page, "Cancelled: Ivan Petrenko. The job is open again.")
+
+
+@pytest.mark.story(28)
+def test_cancel_made_meanwhile_is_reported(employer_client, job, monkeypatch):
+    """A cancel that lost the race to another tab says so instead of failing (spec D6).
+
+    1. Save an accepted application of Ivan; make its cancel() raise
+       ApplicationStateError, as when another tab cancelled him a moment earlier
+    2. POST to its cancel URL as the job's employer
+    3. Expect: a redirect to the application on the job's page, which says "This
+       application was already decided."; the application is still accepted
+    """
+    application = accepted(job)
+
+    def cancelled_meanwhile(self):
+        raise ApplicationStateError
+
+    monkeypatch.setattr(Application, "cancel", cancelled_meanwhile)
+
+    response = employer_client.post(cancel_url(application))
+
+    assert response.url == f"{detail_url(job)}#application-{application.pk}"
+    page = employer_client.get(detail_url(job))
+    assertContains(page, "This application was already decided.")
+    application.refresh_from_db()
+    assert application.status == Application.Status.ACCEPTED
 
 
 def test_guest_is_sent_to_login(client, job):
