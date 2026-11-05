@@ -1,0 +1,12 @@
+{% load i18n %}{% autoescape off %}{% translate "Hello," %}
+
+{% translate "Someone created a BauHelfer account with this email address. Open this link to confirm the address and activate the account:" %}
+
+{{ link }}
+
+{% blocktranslate count counter=days %}The link works once and for {{ counter }} day.{% plural %}The link works once and for {{ counter }} days.{% endblocktranslate %}
+
+{% translate "If you did not create an account, ignore this email: without the link nothing happens." %}
+
+{% translate "The BauHelfer team" %}
+{% endautoescape %}

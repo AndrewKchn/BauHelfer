@@ -7,27 +7,34 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
+from django.utils.http import urlsafe_base64_decode
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import (
     CreateView,
     DetailView,
+    FormView,
     TemplateView,
     UpdateView,
     View,
 )
 
+from .emails import send_verification_email
 from .forms import (
     EmployerProfileForm,
     NameAndPhoneForm,
+    ResendVerificationForm,
     RoleForm,
     SignupForm,
     WorkerProfileForm,
     WorkerUserForm,
 )
-from .models import User
+from .models import SiteSettings, User
+from .tokens import email_verification_token
 
 # "accounts.views". Ids only, never an email or other personal data (#124).
 logger = logging.getLogger(__name__)
@@ -49,11 +56,15 @@ class LoginView(auth_views.LoginView):
 
 
 class RegisterView(CreateView):
-    """Show the signup form; on success create the user and log them in right away."""
+    """Show the signup form; on success save an inactive user and email them the link (#81).
+
+    docs/specs/email-verification.md R1. The account works after the link is opened
+    (VerifyEmailView).
+    """
 
     form_class = SignupForm
     template_name = "registration/register.html"
-    success_url = reverse_lazy("role_select")  # onboarding: choose a role first (#10)
+    success_url = reverse_lazy("register_done")
 
     @override
     def dispatch(self, request, *args, **kwargs):
@@ -64,14 +75,109 @@ class RegisterView(CreateView):
 
     @override
     def form_valid(self, form):
-        """Save the new user, start their session and show a welcome message."""
+        """Save the new user inactive, send the link, remember the address for the next page.
+
+        With the demo switch off (R14) the user is active and logged in at once, as before
+        #81, and gets no email.
+        """
+        required = (
+            SiteSettings.load().email_verification_required
+        )  # read each time (D13)
+        form.instance.is_active = not required  # inactive until the link is opened (R1)
         response = super().form_valid(form)  # saves the user into self.object
-        login(self.request, self.object)
         logger.info("User registered: user_id=%s", self.object.pk)
-        messages.success(
-            self.request, _("Welcome to BauHelfer! Your account is ready.")
-        )
+        if not required:
+            login(self.request, self.object)
+            messages.success(
+                self.request, _("Welcome to BauHelfer! Your account is ready.")
+            )
+            return redirect("role_select")  # onboarding: choose a role first (#10)
+        send_verification_email(self.request, self.object)
+        # For "We sent a link to …" on the next page (R2, D7); the session is per browser.
+        self.request.session["signup_email"] = self.object.email
         return response
+
+
+class RegisterDoneView(TemplateView):
+    """ "Check your email": names the address the link went to (#81, R2)."""
+
+    template_name = "registration/register_done.html"
+
+    @override
+    def get_context_data(self, **kwargs):
+        """The address from the signup in this browser; None if the page is opened alone."""
+        context = super().get_context_data(**kwargs)
+        context["email"] = self.request.session.get("signup_email")
+        return context
+
+
+class VerifyEmailView(View):
+    """The link from the email: GET shows a button, POST confirms and logs in (#81, R5).
+
+    The link holds the user id (base64) and the token; GET changes nothing, as mail
+    scanners open links too (D6).
+    """
+
+    template_name = "registration/verify_email.html"
+
+    def get_user(self, uidb64, token):
+        """The user the link was made for, or None for a wrong, used or expired link."""
+        try:
+            user = User.objects.get(pk=urlsafe_base64_decode(uidb64).decode())
+        # Not base64, not a number, no such user: all mean a made-up link.
+        except (
+            ValueError,
+            TypeError,
+            OverflowError,
+            ValidationError,
+            User.DoesNotExist,
+        ):
+            return None
+        if not email_verification_token.check_token(user, token):
+            return None
+        return user
+
+    def get(self, request, uidb64, token):
+        """Show the "Confirm email" button, or the "link is not valid" text."""
+        user = self.get_user(uidb64, token)
+        return render(request, self.template_name, {"validlink": user is not None})
+
+    def post(self, request, uidb64, token):
+        """Confirm the address, activate the account, log in, go to the role choice."""
+        user = self.get_user(uidb64, token)
+        if user is None:
+            return render(request, self.template_name, {"validlink": False})
+        user.is_active = True
+        user.email_verified_at = timezone.now()  # also uses the link up (tokens.py)
+        user.save(update_fields=["is_active", "email_verified_at"])
+        login(request, user)
+        logger.info("Email confirmed: user_id=%s", user.pk)
+        messages.success(request, _("Your email is confirmed. Welcome to BauHelfer!"))
+        return redirect("role_select")  # onboarding: choose a role first (#10)
+
+
+class ResendVerificationView(FormView):
+    """ "Send the link again": the same answer for every address (#81, R8, R9).
+
+    As password reset: the next page never tells whether an email went out, so the form
+    does not show which addresses are registered, confirmed or in the 10-minute pause.
+    """
+
+    form_class = ResendVerificationForm
+    template_name = "registration/verify_email_resend.html"
+    success_url = reverse_lazy("verify_email_resend_done")
+
+    @override
+    def form_valid(self, form):
+        """Send a new link if the account may get one (R9); go on to the same page anyway."""
+        try:
+            user = User.objects.get_by_natural_key(form.cleaned_data["email"])
+        except User.DoesNotExist:
+            pass
+        else:
+            if user.can_get_verification_email():
+                send_verification_email(self.request, user)
+        return super().form_valid(form)
 
 
 class RoleSelectView(LoginRequiredMixin, UpdateView):

@@ -59,19 +59,51 @@ class ConfirmedPasswordResetForm(PasswordResetForm):
 
 
 class LoginForm(AuthenticationForm):
-    """Django's login form with an error text that fits email login.
+    """Django's login form with an error text that fits email login, and a hint (#81).
 
     The default text says "both fields may be case-sensitive", but our email is not:
     UserManager.get_by_natural_key finds the user in any capitalisation.
     """
 
     def __init__(self, *args, **kwargs):
-        """Replace only the "wrong email or password" text, keep Django's other errors."""
+        """Replace the "wrong email or password" text, add the hint, keep Django's others."""
         super().__init__(*args, **kwargs)
         self.error_messages = {
             **self.error_messages,
             "invalid_login": _("Wrong email or password."),
+            "unconfirmed": _(
+                "Please confirm your email first. We sent you a link when you signed up."
+            ),
         }
+
+    @override
+    def get_invalid_login_error(self):
+        """The hint for an unconfirmed account with the right password, else the usual error.
+
+        Django's ModelBackend refuses inactive users, so authenticate() failed for them too
+        (docs/specs/email-verification.md R6, D2). The hint needs the right password, so it
+        does not show which addresses are registered; an account blocked by an admin (its
+        address confirmed) gets the usual error.
+        """
+        try:
+            user = User.objects.get_by_natural_key(self.cleaned_data.get("username"))
+        except User.DoesNotExist:
+            return super().get_invalid_login_error()
+        if (
+            not user.is_active
+            and user.email_verified_at is None
+            and user.check_password(self.cleaned_data.get("password"))
+        ):
+            return forms.ValidationError(
+                self.error_messages["unconfirmed"], code="unconfirmed"
+            )
+        return super().get_invalid_login_error()
+
+
+class ResendVerificationForm(forms.Form):
+    """ "Send the link again": only the email (#81, docs/specs/email-verification.md R8)."""
+
+    email = forms.EmailField(label=_("Email"), max_length=254)
 
 
 class RoleForm(forms.ModelForm):

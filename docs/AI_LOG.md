@@ -2298,3 +2298,77 @@ limits, EU region.
   the request, which is the clicker's, not the recipient's.
 - Why a green local run can fail in CI: my `.env` had variables that CI does not have.
 - Why "may we send there" and "do they want it" are two different fields.
+
+## 2026-11-05 · #81 Email verification at signup
+
+**Task given to AI:** make a new account inactive until its owner confirms the address with
+a link from an email, with a demo switch in Django admin. Context: the issue (written after
+my decision of 2026-10-08 for an admin switch), and #27's comment and D13: emails go only to
+confirmed addresses, and the `User.email_verified_at` field already exists.
+
+**AI helped:**
+- Asked 4 defense questions at the start; there were no screens in `docs/mockups/` to compare.
+- Explained why Django tells an inactive user "wrong password" (`ModelBackend`), how the
+  password reset token works without being stored, and what happens with a made-up address
+  (one hard bounce; Brevo then blocks the address, checked in Brevo's docs).
+- Wrote the spec `docs/specs/email-verification.md` and built it in three iterations, each
+  failing tests → code:
+  - the link: an inactive account, an email, a "Confirm email" button, login, a hint at
+    login;
+  - "Send the link again", at most once every 10 minutes (migration 0008);
+  - the `SiteSettings` switch, superusers only (migration 0009).
+- Adapted the old tests: removed two that expected login right after signup; the E2E
+  `sign_up` helper now takes the link from the email.
+- Mutation-checked every new test (about 40 mutations), took screenshots at 360 px in both
+  themes, gave steps to check each iteration locally, posted five "Docs sync — M4" comments,
+  opened the draft PR.
+- At my request, looked back at the session for what to do better next time and set up
+  local-only helpers for mutation checks and screenshots.
+
+**AI failed:**
+- The first answer gave three decisions in three lines. I asked for more detail; then all
+  three came at once, and I asked to take one at a time.
+- The "made-up link" test used user id 1, which almost never exists in the test database,
+  so the token check was never reached. Found by the mutation check; fixed.
+- The spec said the token's own salt is what keeps a reset link from confirming an address.
+  The mutation check showed no test fails without it: the signed data already differ. The
+  spec now says it is a second guard with no possible test.
+- A script that removed an outdated test also removed the next test's decorator. Found in
+  the diff before the commit.
+- Forgot the issue's "Iterations" block until the end of the ticket.
+
+**My part:**
+- For the demo I first wanted "continue without confirming". When AI showed that Gmail "+"
+  addresses plus the admin switch cover the demo, I chose required confirmation: "if the
+  demo works without it, better make it required". The "+" addresses were my idea.
+- On 2026-10-08 I rejected AI's recommendation of an env variable for the switch and chose
+  a switch in Django admin, to change it live during the demo, with a history of who
+  changed it.
+- My criterion for the email decisions: emails must keep arriving, and emails to made-up
+  addresses hurt. I asked what happens when someone signs up with an address that does not
+  exist. With that criterion I kept "this email is already taken" at signup instead of
+  "check your email" for every address: hiding it would mean emailing the owner on every
+  attempt.
+- I asked why the resend page needs a limit at all. After the example (someone sends 200
+  emails to a real person, who marks them as spam), I chose a 10-minute pause.
+- For the login hint I chose our own check in the form over `AllowAllUsersModelBackend`, so
+  that a user blocked by an admin loses their session at once.
+- Production has only test users: no migration for old accounts; I delete them by hand in
+  admin after the merge.
+- I accepted AI's defaults (the token, a button instead of the link alone, the address on
+  the "check your email" page, the email in the page's language, a failed send keeps the
+  account, resend for active accounts too, no cache, superusers only): they matched what I
+  wanted.
+- I said no (for now) to one "yes" for all the commits of an iteration.
+- I asked AI to analyse the session for efficiency. I took: one decision at a time, a
+  checklist at ticket start, CI in the background, local-check steps after each iteration,
+  helpers only on my computer.
+- By hand: checked every iteration on my local server (emails in the terminal; the admin
+  switch after resetting my local admin password) and looked at the screenshots.
+
+**Learned:**
+- How a token can work only once without being stored: it signs data that change after the
+  click.
+- Why opening a link (GET) must not change data: mail scanners open links too.
+- Why the order of URL patterns matters: `verify/resend/done/` would match
+  `verify/<uidb64>/<token>/`.

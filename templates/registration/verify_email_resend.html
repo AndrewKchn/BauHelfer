@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Send the link again" %} · BauHelfer{% endblock %}
+
+{% block content %}
+  <div class="card mx-auto max-w-md bg-base-100 shadow-sm">
+    <div class="card-body">
+      <h1 class="card-title text-2xl">{% translate "Send the link again" %}</h1>
+      <p>{% translate "Enter the email you signed up with. We send a new link to confirm it." %}</p>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% include "_form_fields.html" %}
+        <button type="submit" class="btn btn-primary mt-4 w-full">{% translate "Send the link again" %}</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}
