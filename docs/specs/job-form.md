@@ -61,7 +61,7 @@ R14. "My jobs" lists only the employer's own jobs, all statuses, by date (soones
      hours, workers and rate in one line that wraps only between its parts, and the district
      (on a phone in a line of its own, from 640 px in the same line). Open jobs have "Edit"
      and "Cancel job" links. An empty list shows a short text; the "Post a job" button is
-     always on top.
+     always on top. **Replaced by** `docs/specs/my-jobs.md` (#20).
 R14a. The job form follows the UI mockup "Post a job": no card around it; date, start time and
      hours in one row (on a phone the date gets a row of its own: the calendar icon needs the
      room); workers needed and hourly rate in one row; the submit button says
@@ -137,6 +137,7 @@ D4. **`Job.objects.open()` now, the list in #18.** The "cancelled jobs are hidde
     moving the item to #18; a bare list page now that #18 would redo.
 D5. **A simple "My jobs" page.** Without it an employer could reach edit and cancel only by
     typing the URL. #20 turns it into the dashboard. Rejected: redirect to the home page.
+    **Replaced by** `docs/specs/my-jobs.md` (#20).
 D6. **Cancel with a confirmation page** (GET asks, POST cancels), the usual Django way (like
     `DeleteView`), works without JavaScript and protects against a slip of the finger on a
     phone. Rejected: one POST button without confirmation.
