@@ -95,5 +95,13 @@
   --noise: 0;
 }
 
+/* Keep the scrollbar's place even on a short page, so the page never changes its width
+   when the scrollbar comes or goes (Windows, Linux; phones draw it over the page). The
+   status tabs stopped 15 px off their group when it did (#28). Outside any @layer, so it
+   wins over daisyUI's own scrollbar-gutter on :root. */
+:root {
+  scrollbar-gutter: stable;
+}
+
 /* Built in templates as alert-{{ message.level_tag }}, so the scanner cannot see them. */
 @source inline("alert-info alert-success alert-warning alert-error");

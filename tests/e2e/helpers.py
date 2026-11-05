@@ -25,4 +25,5 @@ def assert_fits_the_screen(page):
     overflow = page.evaluate(
         "document.documentElement.scrollWidth - document.documentElement.clientWidth"
     )
-    assert overflow == 0, f"{page.url} is {overflow}px wider than the screen"
+    # Below 0 on a laptop: the place kept for the scrollbar is not part of the page (#28).
+    assert overflow <= 0, f"{page.url} is {overflow}px wider than the screen"
