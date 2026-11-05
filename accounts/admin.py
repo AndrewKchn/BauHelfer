@@ -12,7 +12,7 @@ from .forms import (
     UserAdminCreationForm,
     WorkerProfileForm,
 )
-from .models import EmployerProfile, User, WorkerProfile
+from .models import EmployerProfile, SiteSettings, User, WorkerProfile
 
 
 class WorkerProfileInline(admin.StackedInline):
@@ -90,3 +90,33 @@ class UserAdmin(BaseUserAdmin):
             User.Role.EMPLOYER: [EmployerProfileInline],
         }
         return inlines.get(obj.role, []) if obj is not None else []
+
+
+@admin.register(SiteSettings)
+class SiteSettingsAdmin(admin.ModelAdmin):
+    """The demo switch (#81, docs/specs/email-verification.md R15, D14).
+
+    Superusers only, whatever permissions a staff user has: without view or change
+    permission admin hides the model and answers 403. One row: no adding a second one,
+    no deleting it. Admin's history records every change.
+    """
+
+    @override
+    def has_view_permission(self, request, obj=None):
+        """Only superusers see it."""
+        return request.user.is_superuser
+
+    @override
+    def has_change_permission(self, request, obj=None):
+        """Only superusers change it."""
+        return request.user.is_superuser
+
+    @override
+    def has_add_permission(self, request):
+        """Only the first row may be added; SiteSettings.load() usually creates it."""
+        return request.user.is_superuser and not SiteSettings.objects.exists()
+
+    @override
+    def has_delete_permission(self, request, obj=None):
+        """Nobody deletes it: the next load() would bring back the defaults."""
+        return False

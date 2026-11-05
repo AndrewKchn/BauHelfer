@@ -329,3 +329,37 @@ class EmployerProfile(models.Model):
     def trade_names(self):
         """The trades as names in the user's language, in the chosen order."""
         return [str(Trade(code).label) for code in self.trades]
+
+
+class SiteSettings(models.Model):
+    """Switches a superuser changes on the live site, without a redeploy (#81). One row.
+
+    docs/specs/email-verification.md R13, D12: read with SiteSettings.load().
+    """
+
+    email_verification_required = models.BooleanField(
+        _("email verification required"),
+        default=True,
+        help_text=_(
+            "Off: a new account is active and logged in at once, with no confirmation "
+            "email, e.g. for a demo. Its address stays unconfirmed, so it gets no emails."
+        ),
+    )
+
+    class Meta:
+        verbose_name = _("site settings")
+        verbose_name_plural = _("site settings")
+
+    def __str__(self):
+        return str(self._meta.verbose_name)
+
+    @override
+    def save(self, *args, **kwargs):
+        """Always row 1: saving a new object overwrites it, there is never a second row."""
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def load(cls):
+        """The one row; created with the defaults the first time it is asked for."""
+        return cls.objects.get_or_create(pk=1)[0]

@@ -33,7 +33,7 @@ from .forms import (
     WorkerProfileForm,
     WorkerUserForm,
 )
-from .models import User
+from .models import SiteSettings, User
 from .tokens import email_verification_token
 
 # "accounts.views". Ids only, never an email or other personal data (#124).
@@ -75,10 +75,23 @@ class RegisterView(CreateView):
 
     @override
     def form_valid(self, form):
-        """Save the new user inactive, send the link, remember the address for the next page."""
-        form.instance.is_active = False  # until the link in the email is opened (R1)
+        """Save the new user inactive, send the link, remember the address for the next page.
+
+        With the demo switch off (R14) the user is active and logged in at once, as before
+        #81, and gets no email.
+        """
+        required = (
+            SiteSettings.load().email_verification_required
+        )  # read each time (D13)
+        form.instance.is_active = not required  # inactive until the link is opened (R1)
         response = super().form_valid(form)  # saves the user into self.object
         logger.info("User registered: user_id=%s", self.object.pk)
+        if not required:
+            login(self.request, self.object)
+            messages.success(
+                self.request, _("Welcome to BauHelfer! Your account is ready.")
+            )
+            return redirect("role_select")  # onboarding: choose a role first (#10)
         send_verification_email(self.request, self.object)
         # For "We sent a link to …" on the next page (R2, D7); the session is per browser.
         self.request.session["signup_email"] = self.object.email
