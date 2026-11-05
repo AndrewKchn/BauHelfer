@@ -111,11 +111,14 @@ D3. **Signup with a taken address still says so** (mine, 2026-11-03; criterion: 
     limits requests.
 D4. **No migration for existing accounts** (mine, 2026-11-03): production has only test
     users. I delete them in Django admin after the merge (in the PR's "How to test").
-D5. **The token is Django's reset token with its own salt** (Claude's default, accepted): nothing is
-    stored. The hash covers the password hash, `last_login`, the email and
-    `email_verified_at`; after the click the last two change, so the link works once. The
-    own `key_salt` makes a reset link useless here and the other way round. It expires
-    after `PASSWORD_RESET_TIMEOUT` (Django's 3 days), shared with password reset.
+D5. **The token is Django's reset token with its own salt** (Claude's default, accepted):
+    nothing is stored. The hash covers the password hash, `last_login`, the email and
+    `email_verified_at`; after the click the last two change, so the link works once. A
+    reset link is useless here and the other way round, because the hashed data differ
+    (`email_verified_at` is added). The own `key_salt` is a second guard, as Django advises
+    one salt per purpose; no test can catch its removal, as the behaviour stays the same
+    (found by the mutation check, 2026-11-05). It expires after `PASSWORD_RESET_TIMEOUT`
+    (Django's 3 days), shared with password reset.
 D6. **A button, not the link alone** (Claude's default, accepted): mail scanners open links in emails;
     if GET activated and logged in, the scanner would get the session and the user a used
     link. Django's password reset works the same way. Cost: one click more.
