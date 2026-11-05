@@ -1,8 +1,8 @@
-"""Integration tests: signup, the confirmation link and the login hint (#81).
+"""Integration tests: signup, the confirmation link, the login hint and resending (#81).
 
 Each test goes through the whole stack: middleware, URL, view, form, template and database.
-Spec: docs/specs/email-verification.md, iteration 1 (R1–R6), acceptance criteria AC1–AC5,
-AC8, AC10.
+Spec: docs/specs/email-verification.md, iterations 1 (R1–R6) and 2 (R8–R11), acceptance
+criteria AC1–AC5, AC8, AC10–AC13, AC15, AC16.
 """
 
 import re
@@ -11,6 +11,7 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.test import Client
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from pytest_django.asserts import assertContains, assertRedirects
@@ -193,3 +194,98 @@ def test_failed_email_keeps_the_account_and_logs_no_address(client, settings, ca
         f"Verification email failed: user_id={user.pk} error=ConnectionError"
     ]
     assert "@example.com" not in caplog.text
+
+
+# Iteration 2: "Send the link again" (R8–R11)
+
+
+def resend(client, email="ben@example.com"):
+    """Send the resend form for `email`."""
+    return client.post(reverse("verify_email_resend"), {"email": email})
+
+
+def test_signup_records_when_the_link_was_sent(client):
+    """Signup remembers when the link went out, for the 10-minute pause (AC15).
+
+    1. Sign up as ben@example.com
+    2. Expect: verification_sent_at is set
+    """
+    sign_up(client)
+
+    assert User.objects.get().verification_sent_at is not None
+
+
+def test_resend_sends_a_link_that_confirms(client, mailoutbox):
+    """An unconfirmed account gets a new link that works (AC11).
+
+    1. Create an inactive, unconfirmed user who has had no link yet
+    2. Send the resend form with BEN@Example.com
+    3. Expect: a redirect to the "sent" page with its text
+    4. Expect: one email to ben@example.com; its link confirms the account
+    """
+    User.objects.create_user(
+        email="ben@example.com", password=PASSWORD, is_active=False
+    )
+
+    response = resend(client, "BEN@Example.com")
+
+    assertRedirects(response, reverse("verify_email_resend_done"))
+    assertContains(
+        client.get(response.url),
+        "If an unconfirmed account uses this address, we sent a new link.",
+    )
+    [email] = mailoutbox
+    assert email.to == ["ben@example.com"]
+    client.post(link_path(email))
+    assert User.objects.get().is_active
+
+
+@pytest.mark.parametrize("account", ["unknown", "confirmed"])
+def test_resend_answers_the_same_and_sends_nothing(client, mailoutbox, account):
+    """An unknown or a confirmed address gets the same answer and no email (AC12).
+
+    1. Create a confirmed user, or none
+    2. Send the resend form with ben@example.com
+    3. Expect: the same redirect to the "sent" page; no email
+    """
+    if account == "confirmed":
+        User.objects.create_user(
+            email="ben@example.com", password=PASSWORD, email_verified_at=timezone.now()
+        )
+
+    response = resend(client)
+
+    assertRedirects(response, reverse("verify_email_resend_done"))
+    assert mailoutbox == []
+
+
+def test_resend_right_after_signup_sends_nothing(client, mailoutbox):
+    """Within 10 minutes of the last link no new one goes out, the answer is the same (AC13).
+
+    1. Sign up as ben@example.com (one email)
+    2. Send the resend form for the same address at once
+    3. Expect: the same redirect to the "sent" page; still only one email
+    """
+    sign_up(client)
+
+    response = resend(client)
+
+    assertRedirects(response, reverse("verify_email_resend_done"))
+    assert len(mailoutbox) == 1
+
+
+def test_pages_link_to_the_resend_page(client, mailoutbox):
+    """ "Check your email", login and an invalid link all lead to the resend page (AC16).
+
+    1. Sign up; open the "check your email" page, the login page and a wrong link
+    2. Expect: each page links to the resend page
+    """
+    sign_up(client)
+    pages = [
+        reverse("register_done"),
+        reverse("login"),
+        reverse("verify_email", args=["x!", "abc-def"]),
+    ]
+
+    for path in pages:
+        assertContains(client.get(path), f'href="{reverse("verify_email_resend")}"')

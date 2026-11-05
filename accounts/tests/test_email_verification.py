@@ -1,7 +1,7 @@
-"""Unit tests: the confirmation link's token and the login hint (#81).
+"""Unit tests: the confirmation link's token, the login hint and who gets a new link (#81).
 
-Spec: docs/specs/email-verification.md, iteration 1 (R4, R6, D2, D5), acceptance criteria
-AC5–AC9.
+Spec: docs/specs/email-verification.md, iteration 1 (R4, R6, D2, D5) and iteration 2 (R9,
+R10, D10, D11), acceptance criteria AC5–AC9, AC13, AC15.
 """
 
 from datetime import timedelta
@@ -12,6 +12,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.utils import timezone
 
+from accounts.emails import send_verification_email
 from accounts.forms import LoginForm
 from accounts.tokens import email_verification_token
 
@@ -152,3 +153,68 @@ def test_blocked_account_with_a_confirmed_address_gets_the_usual_error():
     assert not form.is_valid()
     assert form.has_error("__all__", code="invalid_login")
     assert not form.has_error("__all__", code="unconfirmed")
+
+
+# Who may get a new link (iteration 2: R9, R10, D10, D11)
+
+
+@pytest.mark.parametrize(
+    ("minutes_ago", "allowed"), [(None, True), (9.98, False), (10.02, True)]
+)
+def test_new_link_at_most_every_10_minutes(minutes_ago, allowed):
+    """An unconfirmed account gets a new link only 10 minutes after the last one (AC13).
+
+    1. Create an unconfirmed user whose last link went out never / 9.98 / 10.02 min ago
+    2. Expect: a new link is allowed / refused / allowed
+    """
+    user = make_user()
+    if minutes_ago is not None:
+        user.verification_sent_at = timezone.now() - timedelta(minutes=minutes_ago)
+
+    assert user.can_get_verification_email() is allowed
+
+
+@pytest.mark.parametrize(
+    ("active", "confirmed", "allowed"),
+    [(False, False, True), (True, False, True), (True, True, False)],
+)
+def test_only_unconfirmed_accounts_get_a_link(active, confirmed, allowed):
+    """Any unconfirmed account, active or not, may get a link; a confirmed one not (D11).
+
+    1. Create an inactive unconfirmed / active unconfirmed / confirmed user
+    2. Expect: a link is allowed / allowed / refused
+    """
+    user = make_user(active=active, confirmed=confirmed)
+
+    assert user.can_get_verification_email() is allowed
+
+
+def test_successful_send_records_the_time(rf, mailoutbox):
+    """After the email went out, the user remembers when (R10, AC15).
+
+    1. Send the confirmation email to a new user
+    2. Expect: one email and verification_sent_at is set
+    """
+    user = make_user()
+
+    send_verification_email(rf.get("/"), user)
+
+    user.refresh_from_db()
+    assert len(mailoutbox) == 1
+    assert user.verification_sent_at is not None
+
+
+def test_failed_send_leaves_the_time_empty(rf, settings):
+    """A failed send records nothing, so the user may try again at once (R10, AC15).
+
+    1. Use an email backend that raises
+    2. Send the confirmation email to a new user
+    3. Expect: verification_sent_at stays empty
+    """
+    settings.EMAIL_BACKEND = "jobs.tests.test_notifications.FailingBackend"
+    user = make_user()
+
+    send_verification_email(rf.get("/"), user)
+
+    user.refresh_from_db()
+    assert user.verification_sent_at is None
