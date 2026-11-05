@@ -41,7 +41,9 @@ Copy `.env.example` to `.env` before the first run.
   that belong to no app (settings, layout, deploy) and `tests/e2e/` for Playwright
   (see `docs/TESTING.md`)
 - `docs/specs/` — specs for complex tickets, written and decided before the failing tests
-  (first: `onboarding.md`, #10); every decision says when to reopen it ("Revisit when …")
+  (first: `onboarding.md`, #10); every decision says when to reopen it ("Revisit when …").
+  A decision is never rewritten: when a later ticket changes it, the old one gets a pointer
+  ("Replaced by …" / "Changed by #N") to the new one (#96)
 - `docs/mockups/` — frozen phone mockups of the planned UI (PNG + `README.md`: screen → tickets),
   saved in #122; `docs/mockups/built/<screen>.png` — the same screen as built (#19)
 - Django apps (`accounts/`, `jobs/`, `chat/`, …) are added ticket by ticket, see the plan
@@ -58,6 +60,9 @@ Copy `.env.example` to `.env` before the first run.
   `django.utils.translation.override`), so framework hooks stand apart from our own methods.
   Not for `__init__` and `__str__`, and not for methods Django finds by name without a parent
   version (`get`/`post` on `View`, `clean_<field>`).
+- Texts published in the student's name — issues, comments, PR descriptions, `docs/specs/` —
+  are in the first person ("I chose…"), never "the student". Specs mark who decided:
+  "(mine, date)", "(Claude's default, accepted)", "(Claude's recommendation)".
 
 ## Testing levels
 
@@ -89,7 +94,8 @@ test: docstring = short line (the title in the Allure report) + numbered steps e
 ## Ticket workflow
 
 1. `gh issue view N`; check it is not blocked (`gh api repos/AndrewKchn/BauHelfer/issues/N/dependencies/blocked_by`).
-2. `gh issue develop N --checkout`; move the card on the "BauHelfer" board to In Progress.
+2. `gh issue develop N --checkout`; move the card on the "BauHelfer" board to In Progress
+   and set its `Kind` (Feature / Infra / Process, see `docs/PLAN.md`) if empty.
 3. A ticket with screens: compare them with `docs/mockups/` before the spec; every difference
    becomes a spec decision. Then tests → code → tests, as above. Separate commits: failing
    tests, then implementation, then
