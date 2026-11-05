@@ -1,6 +1,6 @@
 # Spec: job detail page (#19)
 
-Status: **agreed**. The student decided D1, D3 and D7 on 2026-10-18, before any tests; the
+Status: **agreed**. I decided D1, D3 and D7 on 2026-10-18, before any tests; the
 others are the defaults offered with them and accepted.
 
 ## Goal
@@ -77,9 +77,9 @@ AC9. A guest's page makes one database query: the job, its employer and the prof
      together.
 AC10. The page has no phone number or email of the employer.
 
-### Decisions (student, 2026-10-18)
+### Decisions (mine, 2026-10-18)
 
-D1. **Every job keeps its page; one that is not open shows its status** (the student: "if it
+D1. **Every job keeps its page; one that is not open shows its status** (mine: "if it
     disappears, it would be strange"). Links saved by workers, and from the applications of
     #22–#25, keep working. Everyone, guests included, sees it: the job list is public too
     (#18 D1), and the address stays hidden (D4). Rejected: 404 for jobs that are not open.
@@ -89,7 +89,7 @@ D2. **An open job that has started shows "Past", computed, not stored** (default
     job). `Job.accepts_applications` is the one rule for the badge and the "Apply" button.
     **Revisit when** a scheduled task closes started jobs.
 D3. **"Apply" posts to a stub view that says "not available yet" and comes back to the
-    page** (the student's idea: "stay on the page, a message appears"). #22 changes only the
+    page** (my idea: "stay on the page, a message appears"). #22 changes only the
     view's body; the URL, the button and the tests of who may post stay. Rejected: a disabled
     button with "Applying opens soon" (cannot be pressed); a JS message (thrown away in #22).
     **Revisit when** #22 starts: the stub becomes the real view.
@@ -109,7 +109,7 @@ D10. **"Needs 3 workers" only while the job takes applications** (found on the s
      still wanted. Also from the screenshots, layout only: the employer card has the title
      "Employer" (its name was shown twice), the badges of jobs that are not open have a
      soft fill of the text colour, `bg-base-content/10` (a grey badge was invisible on the
-     grey page; the student chose this fill over an outline, `badge-neutral` and
+     grey page; I chose this fill over an outline, `badge-neutral` and
      `bg-base-300` on screenshots of both themes), and "07:00–15:00 (8 h)" wraps as a
      whole. **Revisit when** #24 shows "1 of 3 workers found".
 
@@ -149,9 +149,9 @@ AC12. A job with 1 photo: "1 / 1", no buttons.
 AC13. A job without photos: the "No photo" placeholder, no carousel.
 AC14. A guest's page makes two queries, for 1 photo as for 3.
 
-### Decisions (student, 2026-10-18)
+### Decisions (mine, 2026-10-18)
 
-D7. **A swipe carousel with "‹ ›" buttons** (the student wanted a carousel; option 3 of 4).
+D7. **A swipe carousel with "‹ ›" buttons** (I wanted a carousel; option 3 of 4).
     Swiping is the browser's own (scroll-snap); the buttons are for a mouse on a laptop,
     where a scroll-snap carousel cannot be moved otherwise. Rejected: big photo + thumbnails
     without JS (not a carousel); scroll-snap without buttons (no way to scroll with a mouse);
@@ -161,7 +161,7 @@ D8. **The counter is in each slide, not updated by JS** (default): no code to ke
 D9. **The JS is tested in E2E only (#21)** (default): the Django test client does not run
     JS; the integration tests check that the buttons are there.
 D11. **Without photos a low strip, not a 4 : 3 box; 16 : 9 from 640 px** (found on the
-     screenshots, 2026-10-18). The student: with no photo the placeholder took the whole
+     screenshots, 2026-10-18). My finding: with no photo the placeholder took the whole
      first screen, the description was not visible and it was not clear that the page
      scrolls. Compared on screenshots: a 96 px strip with a border (chosen) and a 72 px
      square next to the title (pushed the rate out, needed a second photo place in the

@@ -1,6 +1,6 @@
 # Spec: apply to a job (#22)
 
-Status: **agreed**. The student decided D1 on 2026-10-20 (criteria: easy to use on a phone,
+Status: **agreed**. I decided D1 on 2026-10-20 (criteria: easy to use on a phone,
 less code) and accepted the defaults D2–D9 the same day, before any tests.
 
 ## Goal
@@ -81,9 +81,9 @@ AC10. The job page for a worker who can apply has the form; for one who cannot, 
       number and "Pending", and no form; for a guest and an employer, no form.
 AC11. A guest's page still makes the same number of queries as in #19 (AC9, AC14).
 
-### Decisions (student, 2026-10-20)
+### Decisions (mine, 2026-10-20)
 
-D1. **The form is on the job page, submitted by a normal POST** (the student's criteria:
+D1. **The form is on the job page, submitted by a normal POST** (my criteria:
     easy to use on a phone, less code). `JobApplyView` inherits `JobDetailView`, so a form
     with errors is shown on the same page with the same context; the form's action ends in
     `#apply`, so the browser scrolls to it. The URL, the POST-only rule and the #19 tests stay.
@@ -94,7 +94,7 @@ D1. **The form is on the job page, submitted by a normal POST** (the student's c
 D2. **Status stored as pending | accepted | rejected** (the plan). #24 changes it.
 D3. **The message is optional, at most 500 characters** (default): not every worker writes
     German or English well, a required text would stop them. The limit is checked three
-    times (the student asked for a limit in the browser and a check on the server):
+    times (I asked for a limit in the browser and a check on the server):
     `maxlength="500"` stops typing in the browser, the form refuses a longer text sent around
     it (devtools, curl), and `CharField(max_length=500)` makes the column `varchar(500)`, so
     the admin or code without the form cannot save more. A `CharField` with a `Textarea`

@@ -1,6 +1,6 @@
 # Spec: Create / edit / cancel job (#16)
 
-Status: **agreed**. The student decided the open questions on 2026-10-11, before any tests.
+Status: **agreed**. I decided the open questions on 2026-10-11, before any tests.
 
 ## Goal
 
@@ -112,9 +112,9 @@ AC16. GET on cancel shows the confirmation and changes nothing; POST sets `cance
 AC17. "My jobs" shows only the employer's own jobs; "Edit" / "Cancel" only for open ones.
 AC18. The header menu of an employer has "Post a job" and "My jobs"; a worker's has neither.
 
-## Decisions (student, 2026-10-11)
+## Decisions (mine, 2026-10-11)
 
-Each question was offered with options and a recommendation; the student took every
+Each question was offered with options and a recommendation; I took every
 recommendation.
 
 D1. **An employer profile is required before posting** (open since #12). Workers will see the
@@ -126,7 +126,7 @@ D2. **Another employer's job gives 404, not 403.** `get_queryset()` returns only
 D3. **Minimum wages as a dict in settings, #17 closed by this ticket.** The rate is now
     needed in two places (the model validator as the floor, the form for the job's date),
     and #17 asked for settings. In #15 AI had put the constant in `jobs/models.py` without
-    checking #17; the student asked why and moved it. It stays code, as decided in #15: a new
+    checking #17; I asked why and moved it. It stays code, as decided in #15: a new
     rate needs a commit and a redeploy. The 2027 rate is already in the dict, so 1 January
     2027 needs no deploy. The form checks the rate of the job's date (decided in #95 after
     #15). #17's "Done when…" items are covered here; it is closed as done in #16. Rejected:

@@ -1,6 +1,6 @@
 # Spec: Job model (#15)
 
-Status: **agreed**. The student decided the open questions on 2026-10-10, before any tests.
+Status: **agreed**. I decided the open questions on 2026-10-10, before any tests.
 
 ## Goal
 
@@ -64,7 +64,7 @@ AC9. `District` has 26 entries: 25 Stadtbezirke plus the "outside the city" entr
 AC10. The migration is in the repo and applied (`makemigrations --check` finds no changes;
       the test database is built from the migrations).
 
-## Decisions (student, 2026-10-10)
+## Decisions (mine, 2026-10-10)
 
 Each question was offered with options and a recommendation.
 

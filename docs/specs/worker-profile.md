@@ -1,6 +1,6 @@
 # Spec: worker profile (#11)
 
-Status: **agreed**. The student decided the open questions on 2026-10-07, before any tests.
+Status: **agreed**. I decided the open questions on 2026-10-07, before any tests.
 
 ## Goal
 
@@ -75,13 +75,13 @@ AC11. A worker sees "My profile" in the menu, linking to `worker_profile`.
 AC12. The admin user page shows the worker profile inline.
 AC13. The new templates extend `base.html` (already checked for all templates).
 
-## Decisions (student, 2026-10-07)
+## Decisions (mine, 2026-10-07)
 
 Each question was offered with options and a recommendation.
 
 D1. **Skills: a fixed list in code (`TextChoices`), stored as a PostgreSQL `ArrayField`.**
     The names are translated by `.po` files like the rest of the UI, and the same list can
-    become the job types in #15. While trying the form, the student split "drywall /
+    become the job types in #15. While trying the form, I split "drywall /
     plastering helper" in two (the long name did not fit one line on a phone) and added
     "bricklayer's helper" (Maurerhelfer), so the list has ten skills. Rejected: `Skill` / `Language` tables with ManyToMany. An admin
     could add skills without a deploy, but the names would sit in the database where `.po`
@@ -89,7 +89,7 @@ D1. **Skills: a fixed list in code (`TextChoices`), stored as a PostgreSQL `Arra
 D2. **Spoken languages: the 7 UI languages plus 8 common among Munich construction workers**
     (Bulgarian, Croatian, Serbian, Bosnian, Hungarian, Albanian, Arabic, Italian). The
     mechanism is the same as D1. Rejected: only the 7 UI languages.
-D3. **No district in the worker profile.** The student asked what it would be used for: a
+D3. **No district in the worker profile.** I asked what it would be used for: a
     worker who applies has already decided the trip is fine, and employers do not search for
     workers. No feature uses it, so it is not collected (GDPR data minimisation, Art. 5(1)(c)).
     This changes `docs/PLAN.md` (data model) in the M2 docs sync. Rejected: keeping it as an

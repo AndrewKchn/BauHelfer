@@ -1,6 +1,6 @@
 # Spec: role selection and onboarding (#10)
 
-Status: **agreed** — open questions decided by the student on 2026-10-06, before any tests.
+Status: **agreed** — open questions decided by me on 2026-10-06, before any tests.
 
 ## Goal
 
@@ -58,9 +58,9 @@ AC9. A worker sees "My profile" in the menu and not "My company"; an employer th
      a user without a role sees neither.
 AC10. The role selection page extends `base.html` (already checked for all templates).
 
-## Decisions (student, 2026-10-06)
+## Decisions (mine, 2026-10-06)
 
-Each question was offered with options and a recommendation; the student chose the
+Each question was offered with options and a recommendation; I chose the
 recommended option every time.
 
 D1. **Middleware, not a per-view check.** Deny by default: every page added from M3 on is
