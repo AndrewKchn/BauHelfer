@@ -24,6 +24,7 @@ written issue by issue.
 | Text translation | **Claude API** (`claude-haiku-4-5`) | Handles construction slang and context; translations are cached in the DB |
 | Map | **Leaflet + OpenStreetMap**, Nominatim geocoding | Free, no API keys |
 | Job photos | **Supabase Storage** (the same project as the database, Frankfurt) via `django-storages` S3 + `boto3`; **Pillow** for validation, resizing and EXIF stripping | The Render disk is wiped on every deploy. Decided in #64: Cloudflare R2 rejected, it needs a payment card even on the free tier. The database stores only paths, so moving later means new env values and copying the files. Production needs six env variables (`MEDIA_S3_*`, `MEDIA_PUBLIC_URL`) and does not start without them; the app stays stateless (can run several instances) |
+| Email | **Brevo** (France, EU; free plan 300 emails a day, no card) through its HTTP API with `django-anymail` | Decided in #27. Not SMTP: Render's free plan blocks the ports 25, 465 and 587 since 2025-09-26. Without our own domain the sender is the project's Gmail address, shown "via brevosend.com". Locally and in tests the console backend: nothing leaves the computer |
 | Chat | HTMX polling every 3–5 s | Simpler than WebSockets, enough for the MVP |
 | Tests / quality | **pytest-django**, **ruff**, **Allure Report 3** | Decided in #89: an Allure report (GitHub Pages) groups tests by level and by story, with a readable title and steps from each test's docstring, like test cases in Jira. Issue titles come from GitHub at CI time |
 | CI | **GitHub Actions**: ruff, pytest, coverage on every PR; required to merge into `main` | |
@@ -37,7 +38,12 @@ written issue by issue.
 - **User** (custom): email, name, phone (optional; `+` and a country code or `0` and a German
   area code, 10–15 digits, stored as entered, #109), `role` = employer | worker,
   `preferred_language`, `work_permit_confirmed_at` (when the worker confirmed "I am allowed to
-  work in Germany"; empty = not confirmed, #13).
+  work in Germany"; empty = not confirmed, #13), `email_notifications` (one switch for the
+  notification emails, default on, #27), `email_verified_at` (empty = not confirmed: no email
+  goes there, #27; filled by the confirmation link, #81), `verification_sent_at` (when the
+  last confirmation link went out, #81).
+- **SiteSettings** (#81): one row with `email_verification_required` (default on), changed in
+  Django admin by superusers only, e.g. off for the defense demo.
 - **WorkerProfile**: `team_size` 1–10 (1 = individual, >1 = crew), skills (demolition, cleanup,
   carrying…) and languages from fixed lists, `legal_status` = Gewerbe | Minijob | employed. No
   district: no feature needs it (GDPR data minimisation, #11).
@@ -52,7 +58,11 @@ written issue by issue.
   `created_at`.
 - **JobPhoto** (#64): job, `image` (max 1600 px, EXIF removed), `thumbnail` (300 × 300, for the
   job list), uploaded_at; random file names, up to 5 per job.
-- **Application**: job, worker, message, `workers_offered`, status pending | accepted | rejected.
+- **Application** (#22, `docs/specs/application.md`): job, worker, message (optional,
+  ≤ 500 characters), `workers_offered` (1 to the smaller of the team size and the workers
+  needed), `workers_accepted` (how many of the crew were taken, #24), status pending |
+  accepted | rejected | closed ("Job filled", #24) | cancelled (#24) | withdrawn (#26),
+  `created_at`; one per worker and job.
 - **Translation**: translation cache (source text hash + language → translated text).
 - **Message**: chat within an accepted application.
 - **Review**: rating 1–5 + text, after status done, in both directions.
@@ -83,7 +93,7 @@ BauHelfer/
 `backend`, `frontend`, `database`, `i18n`, `ai`, `legal`, `devops`, `testing`, `docs`, `stretch`
 (+ default `bug` and `enhancement`; other default labels are removed).
 
-## Milestones and issues (91)
+## Milestones and issues (94)
 
 Each issue has a **Description** and a **Done when…** checklist. Numbers are GitHub issue numbers;
 the status of each issue lives on the board, not here.
@@ -146,9 +156,9 @@ the status of each issue lives on the board, not here.
 - #81 Email verification at signup (`backend`) — after #27, needs real email sending
 - #124 Application logging: key events in Render's logs, without personal data (`backend`,
   `devops`)
-- #121 Allure report: history between runs, clearer labels and links, tags (`devops`,
-  `testing`)
-- #133 Test section comments name their spec; one shared `frozen_now` fixture (`testing`)
+- #137 Gunicorn access log on Render: decide what request lines show (`backend`, `devops`) —
+  before #27
+- #135 Django Debug Toolbar for local development (`devops`)
 - #28 E2E tests (Playwright) and coverage review for M4 (`testing`)
 - #96 Docs sync — M4 (`docs`)
 
@@ -188,6 +198,10 @@ the status of each issue lives on the board, not here.
 - #50 Final docs: architecture diagram, AI_LOG summary (`docs`)
 - #51 Defense presentation and demo script (`docs`)
 - #132 Own 404 and 500 pages on `base.html` (`frontend`)
+- #121 Allure report: history between runs, clearer labels and links, tags (`devops`,
+  `testing`) — moved from M4
+- #133 Test section comments name their spec; one shared `frozen_now` fixture (`testing`) —
+  moved from M4
 - #100 Docs sync — M8 (`docs`)
 
 ### Stretch (no due date)
@@ -202,6 +216,7 @@ the status of each issue lives on the board, not here.
 - #82 Sign in with Google (`backend`, `legal`, `stretch`) — only if time is left; new dependency
 - #114 `/accounts/profile/` redirects to the user's own profile page (`frontend`, `stretch`)
 - #115 Let users suggest a missing trade (`backend`, `stretch`)
+- #143 Choose how many workers of a crew to accept (`backend`, `stretch`)
 
 ## Testing approach
 
@@ -243,6 +258,10 @@ Board: [BauHelfer](https://github.com/users/AndrewKchn/projects/1), columns Todo
 
 - **Sprints:** Iteration field "Sprint", one iteration per milestone with the same dates. The
   Roadmap view uses it as the timeline. New issues get a Sprint too.
+- **Kind:** single-select field for the burn-up charts in Insights, one chart per kind:
+  `Feature` (what a user of the app sees), `Infra` (deploy, CI, tests, logging, dev tools),
+  `Process` (how we work: CLAUDE.md, skills, AI_LOG, Docs sync, docs, defense). A bug gets the
+  kind of what it fixes. Set when the card moves to In Progress, if empty.
 - **Dependencies:** issues are linked with "blocked by". The filter `-is:blocked` shows what can
   be started now.
 - **Ticket workflow** (details in `CLAUDE.md`): branch linked to the issue → In Progress →
@@ -262,7 +281,7 @@ Board: [BauHelfer](https://github.com/users/AndrewKchn/projects/1), columns Todo
 ## Verification
 
 - `gh label list` — 12 labels; `gh api repos/AndrewKchn/BauHelfer/milestones --jq '.[].title'` — 9 milestones.
-- `gh issue list --state all --limit 100 --json number --jq length` → 91; every issue has a
+- `gh issue list --state all --limit 100 --json number --jq length` → 94; every issue has a
   milestone and a label.
 - `gh project item-list 1 --owner AndrewKchn` — all issues are on the board, each non-Stretch
   issue has a Sprint.
