@@ -1,6 +1,6 @@
 # Spec: Create / edit / cancel job (#16)
 
-Status: **agreed**. The student decided the open questions on 2026-10-11, before any tests.
+Status: **agreed**. I decided the open questions on 2026-10-11, before any tests.
 
 ## Goal
 
@@ -61,7 +61,7 @@ R14. "My jobs" lists only the employer's own jobs, all statuses, by date (soones
      hours, workers and rate in one line that wraps only between its parts, and the district
      (on a phone in a line of its own, from 640 px in the same line). Open jobs have "Edit"
      and "Cancel job" links. An empty list shows a short text; the "Post a job" button is
-     always on top.
+     always on top. **Replaced by** `docs/specs/my-jobs.md` (#20).
 R14a. The job form follows the UI mockup "Post a job": no card around it; date, start time and
      hours in one row (on a phone the date gets a row of its own: the calendar icon needs the
      room); workers needed and hourly rate in one row; the submit button says
@@ -112,9 +112,9 @@ AC16. GET on cancel shows the confirmation and changes nothing; POST sets `cance
 AC17. "My jobs" shows only the employer's own jobs; "Edit" / "Cancel" only for open ones.
 AC18. The header menu of an employer has "Post a job" and "My jobs"; a worker's has neither.
 
-## Decisions (student, 2026-10-11)
+## Decisions (mine, 2026-10-11)
 
-Each question was offered with options and a recommendation; the student took every
+Each question was offered with options and a recommendation; I took every
 recommendation.
 
 D1. **An employer profile is required before posting** (open since #12). Workers will see the
@@ -126,7 +126,7 @@ D2. **Another employer's job gives 404, not 403.** `get_queryset()` returns only
 D3. **Minimum wages as a dict in settings, #17 closed by this ticket.** The rate is now
     needed in two places (the model validator as the floor, the form for the job's date),
     and #17 asked for settings. In #15 AI had put the constant in `jobs/models.py` without
-    checking #17; the student asked why and moved it. It stays code, as decided in #15: a new
+    checking #17; I asked why and moved it. It stays code, as decided in #15: a new
     rate needs a commit and a redeploy. The 2027 rate is already in the dict, so 1 January
     2027 needs no deploy. The form checks the rate of the job's date (decided in #95 after
     #15). #17's "Done when…" items are covered here; it is closed as done in #16. Rejected:
@@ -137,6 +137,7 @@ D4. **`Job.objects.open()` now, the list in #18.** The "cancelled jobs are hidde
     moving the item to #18; a bare list page now that #18 would redo.
 D5. **A simple "My jobs" page.** Without it an employer could reach edit and cancel only by
     typing the URL. #20 turns it into the dashboard. Rejected: redirect to the home page.
+    **Replaced by** `docs/specs/my-jobs.md` (#20).
 D6. **Cancel with a confirmation page** (GET asks, POST cancels), the usual Django way (like
     `DeleteView`), works without JavaScript and protects against a slip of the finger on a
     phone. Rejected: one POST button without confirmation.

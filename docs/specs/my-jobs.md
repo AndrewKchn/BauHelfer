@@ -146,6 +146,13 @@ D15. **All applications counted** (Claude's default, accepted): until #24 they a
 D16. **The photo square is shared** (Claude's default, accepted): moved out of
      `_job_card.html` into `_job_thumbnail.html`, so the job list and "My jobs" show it with
      the same code.
+D17. **The scrollbar keeps its place** (mine, #28, 2026-11-05): `:root { scrollbar-gutter:
+     stable; }` in `tailwind/input.css`. With a classic scrollbar (Windows, Linux) a tap on a
+     shorter status tab left a 15 px slice of the previous group: the scrollbar disappeared
+     and the strip got wider. I chose it over JavaScript in `_status_tabs.html` or leaving it:
+     one line, and it fixes every such jump. Cost: on a laptop a short page keeps an empty
+     15 px strip for the scrollbar; phones and macOS draw the scrollbar over the page.
+     **Revisit when** a design needs content up to the right edge on a laptop.
 
 ## Differences from the mockup (docs/mockups/my-jobs.png)
 

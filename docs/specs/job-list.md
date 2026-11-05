@@ -1,6 +1,6 @@
 # Spec: job list on the home page (#18)
 
-Status: **agreed**. Iteration 1: the student decided D1–D7 on 2026-10-14, before any tests,
+Status: **agreed**. Iteration 1: I decided D1–D7 on 2026-10-14, before any tests,
 and D8 on 2026-10-16. Iteration 2: D9–D12 on 2026-10-16, before its tests, and D13 after
 looking at the page on a laptop.
 
@@ -64,9 +64,9 @@ AC10. No jobs: "No open jobs right now."
 AC11. A logged-in user without a role is still redirected to the role choice (existing test,
       must stay green).
 
-## Decisions (student, 2026-10-14)
+## Decisions (mine, 2026-10-14)
 
-Each question was offered with options and a recommendation, or the student answered first.
+Each question was offered with options and a recommendation, or I answered first.
 
 D1. **Everyone sees the list, guests included.** A worker sees real jobs and rates before
     signing up; search engines find the page. The card shows only the district, never the
@@ -74,11 +74,11 @@ D1. **Everyone sees the list, guests included.** A worker sees real jobs and rat
     only (the site looks empty to a newcomer, and the rates are not secret).
 D2. **A job that has started disappears from the list by a filter, not by a status change.**
     Changing the status needs a scheduled task (cron), which is paid on Render; the filter
-    needs nothing and is always exact. The student's answer: "it becomes inactive".
+    needs nothing and is always exact. My answer: "it becomes inactive".
 D3. **20 jobs per page, soonest first.** About 5 cards fit on a 360 px phone screen, so both
     10 and 20 need scrolling; scrolling is easy on a phone, hitting a small "Next" button is
     not, and a text-only page is light. Rejected: 10.
-D4. **The list is the home page** (the student's idea). Most visitors are workers; the mockups
+D4. **The list is the home page** (my idea). Most visitors are workers; the mockups
     have no landing page, their first worker screen is "Jobs in Munich". Employers get the
     line "Need workers? Post a job". Rejected: a landing page with a "Find jobs" button (one
     more page to write and translate, one more click); a "Jobs" link in the header (too
@@ -92,7 +92,7 @@ D6. **A new card for the list, as in the mockup; "My jobs" keeps its own.** The 
 D7. **The end time is shown ("07:00–15:00"), computed from start time + hours** (`Job.end_time`):
     a worker needs to know when the shift ends. Not stored, so it cannot disagree with hours.
 D8. **The district has a line of its own and is cut with "…" if it is too long; date and time
-    are on the next line** (the student's change after looking at the page in the browser,
+    are on the next line** (my change after looking at the page in the browser,
     2026-10-16). With district, date and time on one line, long district names wrapped
     differently in every card. The full name is on the job page (#19). Rejected: one line that
     wraps (the first version, as in the mockup); the "Needs 3 workers" badge on the right of
@@ -163,34 +163,34 @@ AC18. No match: "No jobs match these filters." and a "Reset filters" link to `/`
 AC19. The form uses GET (no CSRF token needed, the address can be shared) and has a "Show"
       button.
 
-### Decisions (student, 2026-10-16)
+### Decisions (mine, 2026-10-16)
 
 D9. **A plain GET form with a "Show" button; the whole page reloads (option 1), no HTMX.**
     Three options were compared: 1) GET form + reload; 2) HTMX swaps only the list, no
-    button; 3) GET form + HTMX on top. The student's criteria: 1) simple code, 2) the map
+    button; 3) GET form + HTMX on top. My criteria: 1) simple code, 2) the map
     (#42) coming later, 3) the browser's "Back" button. An experiment with option 2 (district
     only, not committed) showed the cost: the template split into page + part, a second
     template in the view (`get_template_names`), the count moved into the part, and a bug:
     after "Back" the list showed Laim but the drop-down "All districts", because HTMX restores
     a saved copy of the HTML without the chosen `<select>` value. Leaflet (#42) draws the map
     with JavaScript, which conflicts with swapping parts of the page; with a reload the map
-    is simply drawn again. The student also corrected my assumption that workers search on
+    is simply drawn again. I also corrected Claude's assumption that workers search on
     the building site with a slow connection ("people work there, they do not look for jobs").
     This changes the ticket's "Filters update the list via HTMX". Rejected: options 2 and 3.
     **Revisit when** building the map (#42), or if users find the reload annoying: HTMX can
     be added on top of the GET form without changing the view's filter.
-D10. **The filter lives in one place, `JobFilterForm`** (the student's condition for D9). A
+D10. **The filter lives in one place, `JobFilterForm`** (my condition for D9). A
      Django form checks the values against the lists and draws the drop-downs. Rejected:
      reading `request.GET` in the view (no check, the map would need a copy).
-D11. **Layout A: the button next to the district** (the student's idea, compared at 360 px with
+D11. **Layout A: the button next to the district** (my idea, compared at 360 px with
      a full-width button under the form). One row shorter; a very long district is cut in the
      drop-down. Rejected: layout B (full-width button).
 D12. **"Next 7 / 30 days" counted from today**, not "this week / this month" by the calendar:
      on a Sunday "this week" would be one day. "Any day" is the default. Rejected: calendar
      week and month; a date picker.
-D13. **On laptops the filters are a column on the left that stays in place** (the student's
-     idea, 2026-10-16, after the prototype at 1280 px). From `lg` (1024 px), not `md`: the
-     student does not expect workers to use tablets. Sticky, so a filter can be changed
+D13. **On laptops the filters are a column on the left that stays in place** (my
+     idea, 2026-10-16, after the prototype at 1280 px). From `lg` (1024 px), not `md`: I
+     do not expect workers to use tablets. Sticky, so a filter can be changed
      without scrolling back up through 20 cards. The page is made wider only here, through a
      new `main_width` block in `base.html`; other pages keep 768 px. Rejected: filters above
      the list on every screen; switching from `md`; two cards per row on laptops (offered,

@@ -1758,7 +1758,9 @@ not documented), created #135 and posted five Docs sync comments in #96.
   a duplicate. The toolbar became #135, and I approved the dev dependency.
 - I asked about Render's limits before finishing. This led to checking the docs and to two
   decisions: no gunicorn access log (its format starts with the IP), and check the `level`
-  filter after the merge.
+  filter after the merge. *Correction (#96):* the access log was not off: Render turns it
+  on by default, which the screenshot after the deploy showed; #137 turned it off and
+  replaced it with our own request lines without the IP.
 - I accepted moving "blocked login" to #91, the `unknown account` wording and calling the
   event tests integration tests: they matched what I wanted.
 
@@ -2431,3 +2433,50 @@ my-jobs.md AC8: the status tabs).
   its own cookies.
 - Why 100 % coverage is not "everything is checked": a line can run without its result being
   checked; the mutation check shows which lines a test really guards.
+
+## 2026-11-06 · #96 Docs sync — M4
+
+**Task given to AI:** run `/sprint-docs` for M4: handle the 62 comments collected in #96 and
+check `docs/PLAN.md`, `CLAUDE.md`, `docs/SECURITY.md`, `docs/TESTING.md`,
+`docs/mockups/README.md`, the specs and `README.md` against the board and the code.
+
+**AI helped:** drafted a table "comment → proposal → why" and the changes per doc, then made
+10 doc commits after my answers. SECURITY.md got three new sections (Applications and
+contacts, Email and address confirmation, Logs); a script checked that every linked file and
+every test name in it exists. Checking against the board found what no comment said: #143 was
+not on the board and had no Kind or `stretch` label, #121 and #133 had moved to M8, and PLAN
+counted 91 issues instead of 94. Three SECURITY rows had become false during the sprint ("Apply
+posts to a stub", "Emails go to the console", "decided in #24"). It rewrote 35 places in 10
+older specs in the first person and noticed two where "my" meant Claude. It posted 6 comments
+into later tickets (#35, #37, #46, #48, #73, #84) and one reply per #96 comment.
+
+**AI failed:**
+- It counted 56 comments in the draft; there were 62, found when matching replies to comments.
+- In the SECURITY draft it wrote `templates/jobs/email/` for the email templates; the link
+  check script caught it before the commit (`templates/emails/`).
+- In the mockups rows it first copied decision numbers from a #24 comment; one (D9) pointed to
+  the wrong decision, found by checking the spec itself.
+- The first-person rewrite missed phrases split over two lines and the "(student, date)"
+  headings; a grep for "student" afterwards found them.
+
+**My part:**
+- AI proposed to reject five polish ideas (sticky tabs, button colours, status badge on cards,
+  message out of view, favicon) as "features first". I asked: "if we just ignore them, why were
+  they written?" They went to #48 and #84 as candidates instead, with no new tickets.
+- I asked whether specs should be edited at all. Of three options (frozen like mockups,
+  pointers only, rewrite) I chose pointers only: a decision is never rewritten, a later ticket
+  adds "Replaced by / Changed by #N". Now a rule in `CLAUDE.md`.
+- Specs in the first person was my idea from #23; I chose to rewrite the older ones too, not
+  only add the rule, so that all specs read the same at the defense.
+- From #23: I had rejected a test for links between docs ("too many tests already") and chose
+  a checklist item in `/sprint-docs` instead; added here with the README links.
+- I accepted leaving "filled job cannot be cancelled" and "work permit cleared by an admin" as
+  known limitations, and asked for the first one to go to #37 as a comment.
+- I approved every GitHub post in two steps: the 6 comments in full, then the replies as one
+  table.
+
+**Learned:**
+- Why a decision record gets a pointer instead of an edit, like an ADR: the old text proves
+  what was decided before the tests, the pointer shows it is no longer current.
+- Why docs are checked against the board and the code, not only against the notes: the
+  missing #143, the moved #121 / #133 and three stale SECURITY rows were in no comment.

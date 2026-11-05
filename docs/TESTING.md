@@ -98,8 +98,15 @@ check blocks the merge:
   POST saved 6 photos (fixed with `validate_max`); in #19 removing `prefetch_related` changed
   nothing, so it was not needed. Pitfalls we hit:
   - Undo only the file you broke, never a whole folder (in #18 that wiped uncommitted tests).
-  - Break only a file without uncommitted changes, or undo the mutation with the reverse
-    edit: `git checkout -- <file>` also undoes your own work in it (#21).
+  - Copy the file before breaking it and put it back from that copy (`cp`), never from git
+    while the work is uncommitted: `git checkout -- <file>` also undoes your own work in it
+    (#21, and again in #124, where it wiped the implementation in five files).
+  - A database constraint is broken in its migration, not in the model: the test database is
+    built from the migrations (#22).
+  - A second guard that does not change behaviour cannot be caught by any test (#81: removing
+    the token's own `key_salt` broke nothing, because the hashed data already differ). Keep
+    such a guard and write in the spec why it has no test, instead of a test that cannot
+    fail.
   - A broken build input (`tailwind/input.css`): after undoing it, **rebuild
     `static/css/app.css`**, or the next run still reads the broken build (#113).
   - A mutant of the same size in the same second can reuse the cached `.pyc`: run with
@@ -112,7 +119,8 @@ check blocks the merge:
   screenshot that must show photos returns a picture with `page.route("**/media/**", …)`;
   E2E checks of the carousel do not need it (#21).
 - **Tailwind sees only the files in `@source`** (`tailwind/input.css`), incl. `*/forms.py`
-  since #64: a class used only in a widget would otherwise be missing from `app.css`.
+  since #64 and `*/views.py` since #26 (the tab colours of the dashboards): a class used only
+  there would otherwise be missing from `app.css`.
 - **A fresh database for every test.** pytest-django creates a test database once per run
   and rolls back every test's changes, so tests do not depend on each other or on order.
   E2E tests use `live_server`, which empties the tables after each test instead.
@@ -125,8 +133,27 @@ check blocks the merge:
   rounds (~0.7 s each), slow on purpose against stolen hashes. The root `conftest.py`
   switches the tests to one MD5 round: the whole run went from ~2 min to ~30 s. A test in
   `tests/test_deploy.py` checks that production still uses PBKDF2.
+- **pytest runs without Django Debug Toolbar.** pytest uses `config.settings.local`, like
+  `runserver`, but `local.py` skips the toolbar when `PYTEST_VERSION` is set (pytest sets it at
+  start). Tests that need the toolbar switch it on themselves with `override_settings` and
+  reload `config/urls.py` (`tests/test_debug_toolbar_page.py`, #135).
+- **Two users at once in E2E** (#28): each gets its own
+  `browser.new_context(viewport=PHONE, has_touch=True)` with its own cookies, so the worker and
+  the employer stay logged in side by side.
+- **A finger swipe in E2E** (#28): Playwright has none; `swipe()` in
+  `tests/e2e/test_application_flows.py` sends touch events through Chromium's DevTools protocol
+  (`Input.dispatchTouchEvent`). `Input.synthesizeScrollGesture` did not move the strip.
+- **Scrollbars shown in E2E** (#28): `browser_type_launch_args` in `tests/e2e/conftest.py` drops
+  `--hide-scrollbars`, so Chromium shows them as on a Windows or Linux laptop: headless
+  Chromium hid a bug where a tap on a short status tab left a 15 px slice of the previous
+  group. `assert_fits_the_screen` checks `<= 0`, because the place kept for the scrollbar makes
+  the difference −15. Pitfall: `page.screenshot(full_page=True)` resizes the window for a
+  moment and moves a horizontal scroll strip, so review shots of the tabs are taken of the
+  viewport.
 - **Screen sizes in E2E.** The worker flow and the employer job flow
-  ([test_job_flows.py](../tests/e2e/test_job_flows.py), #21) run on a 360 px phone and check
+  ([test_job_flows.py](../tests/e2e/test_job_flows.py), #21) and all application flows
+  ([test_application_flows.py](../tests/e2e/test_application_flows.py), #28) run on a 360 px
+  phone and check
   that no page scrolls sideways; only the employer signup runs on a laptop screen. The
   mockups in `docs/mockups/` are 390 px wide, and so are the built screenshots next to them;
   checks stay at 360 px.
@@ -143,10 +170,13 @@ check blocks the merge:
 - **Non-text contrast.** `tests/test_theme_contrast.py` checks text colours on their
   backgrounds (WCAG AA, 4.5:1), not input borders or the focus outline (WCAG 1.4.11, 3:1).
   Pages were checked by hand; an automatic check is a candidate for #48.
-- **JavaScript coverage.** Coverage measures Python only. The scripts in
-  `templates/jobs/job_form.html` and `templates/jobs/job_detail.html` are checked only by the
-  E2E tests, and nothing warns when a new script has none. Revisit when the apply form (#22)
-  adds JavaScript.
+- **JavaScript coverage.** Coverage measures Python only, and nothing warns when a new script
+  has no E2E test. The scripts and their E2E tests:
+  `templates/jobs/job_form.html` and `templates/jobs/job_detail.html`
+  ([test_job_flows.py](../tests/e2e/test_job_flows.py), #21); the status tabs in
+  `templates/_status_tabs.html` (tap, finger swipe, height) and the `onsubmit="return
+  confirm(…)"` questions before Reject, Cancel and Withdraw
+  ([test_application_flows.py](../tests/e2e/test_application_flows.py), #28).
 - **The `@override` rule** (`CLAUDE.md`). A one-time script found all 20 overriding methods
   in #125; no test checks new ones. Revisit when we add a type checker (it would flag
   `@override` on mixin methods) or the rule is broken in review.

@@ -219,7 +219,9 @@ D17. **No admin changes** (Claude's default): a status changed in the admin skip
      (no filling, no closing); the admin is for fixing data by hand.
 D18. **Cancelling a job with accepted workers stays as it is** (Claude's default; job-form.md
      D7 left it to M4): only open jobs can be cancelled, filled ones not; the accepted
-     workers are not told until #27. Raised in "Docs sync — M4" (#96).
+     workers are not told until #27. Raised in "Docs sync — M4" (#96). **Changed by #25**
+     (`docs/specs/contacts.md` D3): cancelling a job now cancels its accepted applications.
+     A filled job still cannot be cancelled: revisit in #37.
 D19. **No bar on "My jobs"** (Claude's default): features before polish.
 D20. **Existing data is not migrated** (Claude's default): `workers_accepted` starts at 0;
      before this ticket nothing could accept an application except the admin.

@@ -1,6 +1,6 @@
 # Spec: work-permit confirmation (#13)
 
-Status: **agreed**. The student decided all questions on 2026-10-08, before any tests.
+Status: **agreed**. I decided all questions on 2026-10-08, before any tests.
 
 ## Goal
 
@@ -61,7 +61,7 @@ AC10. The migration gives users who had `work_permit_confirmed = True` a date an
 - Employers stay responsible for checking documents before hiring (SchwarzArbG,
   AufenthG § 4a). BauHelfer does not tell them otherwise.
 
-## Decisions (student, 2026-10-08)
+## Decisions (mine, 2026-10-08)
 
 Each question was offered with options and a recommendation.
 

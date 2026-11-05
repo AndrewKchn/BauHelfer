@@ -1,6 +1,6 @@
 # Spec: employer profile (#12)
 
-Status: **agreed**. The student decided the open questions on 2026-10-07, before any tests.
+Status: **agreed**. I decided the open questions on 2026-10-07, before any tests.
 
 ## Goal
 
@@ -70,7 +70,7 @@ AC9. An employer sees "My company" in the menu, linking to `employer_profile`.
 AC10. The admin user page shows the employer profile inline.
 AC11. The new templates extend `base.html` (already checked for all templates).
 
-## Decisions (student, 2026-10-07)
+## Decisions (mine, 2026-10-07)
 
 Each question was offered with options and a recommendation.
 
@@ -80,14 +80,14 @@ D1. **Trades: a fixed list in code (`TextChoices`), several can be chosen, store
     business, and "other" without a text field: the trade is information only,
     no logic depends on it, so combinations are not checked. Rejected: free text (cannot be
     translated, typos); a list plus a free-text field for "other"; a single trade (many firms
-    do two things, e.g. drywall and painting — the student chose several). The student wants
+    do two things, e.g. drywall and painting — I chose several). I want
     users to be able to extend the list later (through support or another way): recorded as
-    an idea for #94, not built here. While trying the profile page on a phone, the student
+    an idea for #94, not built here. While trying the profile page on a phone, I
     shortened "private person / own renovation" to "private person": the long name did not
     fit its badge. Long names in other languages are revisited with the translations (M5).
 D2. **Company name optional, contact name required.** A private person renovating a flat has
     no company. Rejected: company required; one combined name field.
 D3. **Two pages: a read-only profile page and an edit form**, the same pattern as the worker
-    profile. Rejected: a single page with only the form. After comparing both profiles, the
-    student also made the page title fixed ("My company") instead of the company name, as on
+    profile. Rejected: a single page with only the form. After comparing both profiles, I
+    also made the page title fixed ("My company") instead of the company name, as on
     the worker page: the name was shown twice, and a long name broke the title on a phone.

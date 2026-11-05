@@ -1,12 +1,12 @@
 # Spec: job photos (#64)
 
-Status: **iterations 1 and 2 agreed and built**. D1 and D2 decided by the
-student on 2026-10-16; the iteration 1 defaults (D3–D9) accepted by the student the same day,
-before any tests. Iteration 2: D10–D13 decided by the student on 2026-10-17; defaults
-D14–D19 accepted by the student the same day, before any tests; D20–D24 after looking at the
-built edit page the same day. Iteration 3: D25–D28 decided by the student on 2026-10-17
+Status: **iterations 1 and 2 agreed and built**. D1 and D2 decided by me
+on 2026-10-16; the iteration 1 defaults (D3–D9) accepted by me the same day,
+before any tests. Iteration 2: D10–D13 decided by me on 2026-10-17; defaults
+D14–D19 accepted by me the same day, before any tests; D20–D24 after looking at the
+built edit page the same day. Iteration 3: D25–D28 decided by me on 2026-10-17
 after an experiment with three placeholder icons at 360 px; defaults D29 accepted.
-Iteration 4: D30–D32 decided by the student on 2026-10-17; defaults D33 accepted.
+Iteration 4: D30–D32 decided by me on 2026-10-17; defaults D33 accepted.
 
 ## Goal
 
@@ -24,16 +24,16 @@ tests:
 3. **Thumbnail on the job list.**
 4. **Production storage:** Supabase Storage.
 
-## Decisions taken before the spec (student, 2026-10-16)
+## Decisions taken before the spec (mine, 2026-10-16)
 
 D1. **The job detail page is not built here; showing photos on it moves to #19.** The
-    ticket's "Photos shown on the job detail page" assumed #19 was done; it is not. The
-    student's criterion: "first the photo support, the page comes later". #19 gets a
+    ticket's "Photos shown on the job detail page" assumed #19 was done; it is not. My
+    criterion: "first the photo support, the page comes later". #19 gets a
     "Done when" line for the photos (drafted at the end of this ticket, posted after "yes").
     Rejected: building a small detail page here (it is #19's work, and #19 decides who sees
     the address). **Revisit when** #19 starts: the photos go on its page. Done in #19: the
     photos are on the job page as a carousel (`docs/specs/job-detail.md`).
-D2. **Production photos go to Supabase Storage, not Cloudflare R2.** The student checked R2:
+D2. **Production photos go to Supabase Storage, not Cloudflare R2.** I checked R2:
     it needs a payment card even for the free tier, and the project runs on free tiers with
     no card. Supabase is free without a card, the project already has a Supabase account
     (the database, Frankfurt), so the data stays in the EU in a place that is already listed.
@@ -230,18 +230,18 @@ AC23. `JobPhotosForm` unit tests: a list of valid files gives prepared JPEGs; th
 AC24. The edit page contains the unsaved-changes script (its behaviour is checked in the M3
       E2E ticket #21, not here: only E2E runs JavaScript).
 
-### Decisions (student, 2026-10-17)
+### Decisions (mine, 2026-10-17)
 
 D10. **Photos are added on the job's edit page, after the job is saved; "Publish" opens that
      page** (option C2). Options compared with their cost: A) one `multiple` field in the job
      form (as in the mockup; chosen files are lost when another field has an error, and a
      preview needs JS); B) five file fields (clumsy on a phone); C1) a separate "Photos" page
      after publishing; C2) the same, but the photo block is drawn under the job form on its
-     edit page; C3) C2 without a reload, via HTMX (the "Back" problems of #18). The
-     student's criteria: simple code, photos are never lost, ease of use; the mockups are
+     edit page; C3) C2 without a reload, via HTMX (the "Back" problems of #18). My
+     criteria: simple code, photos are never lost, ease of use; the mockups are
      drafts, small JS is fine, a job may have no photos. C2 needs no new page, only two small
      views that come back to the edit page; the job form and the photo form never share a
-     request, so the "files lost on an error" problem cannot happen. The student's own
+     request, so the "files lost on an error" problem cannot happen. My own
      idea: "after Save the add-photo part appears below". Rejected: A, B, C1, C3.
      **Revisit when** employers ask for photos on the first screen, or a preview before
      publishing.
@@ -252,7 +252,7 @@ D11. **The browser warns about unsaved changes** (option ii). Two forms on one p
 D12. **Several photos in one go** (`multiple`). Picking 3 photos once in the phone gallery is
      easier than three times. Costs a small `MultipleFileField` from the Django docs (Django
      has no field for several files). Rejected: one photo per upload.
-D13. **A line on "Post a job" that photos come after publishing** (the student's idea), so
+D13. **A line on "Post a job" that photos come after publishing** (my idea), so
      the employer does not look for the photo field in vain.
 
 ### Defaults for iteration 2 (object to any line)
@@ -262,14 +262,14 @@ D13. **A line on "Post a job" that photos come after publishing** (the student's
 | D14 | Upload by choosing the files **and pressing "Add photos"**; no auto-upload on choose | Works without JS; the employer sees what was chosen before it goes | `onchange="this.form.submit()"` (one line of JS, one tap less) | employers forget to press the button |
 | D15 | The edit page shows 
 
-### Changes after looking at the edit page (student, 2026-10-17)
+### Changes after looking at the edit page (mine, 2026-10-17)
 
 On a 360 px phone the photo block starts below the first screen; what the employer sees
-after "Publish job" is the job form ending in a big "Save job" button. The student found it
+after "Publish job" is the job form ending in a big "Save job" button. I found it
 confusing (does it save the photos? must I press it?), and the "Add photos" button had a
 third colour. Options offered with their cost: a) rename the button, b) headings for the two
 parts, c) jump to the photos after publishing, d) the save button inactive until something
-changes, e) photos above the form. The student chose a, b, c and d, and then dropped the
+changes, e) photos above the form. I chose a, b, c and d, and then dropped the
 "Edit job" title (D24).
 
 R20. On the edit page the job form has the heading "Job details" and its button says "Save
@@ -301,9 +301,9 @@ D21. **After publishing, the page opens at the photos** (option c): a `#photos` 
 D22. **"Save changes" is inactive until something changes** (option d). An inactive button is
      not pressed "to be sure". Two lines added to the existing script; a page without
      JavaScript keeps the button active, so nothing breaks.
-D23. **"Add photos" in the same colour as "Save changes"** (the student's choice over an
+D23. **"Add photos" in the same colour as "Save changes"** (my choice over an
      outlined button): with D22 only one of the two looks active at a time.
-D24. **No "Edit job" title on the edit page** (the student's idea): with "Job details" and
+D24. **No "Edit job" title on the edit page** (my idea): with "Job details" and
      "Photos" the page explains itself, and the form starts higher on a phone. "Job details"
      takes over the `<h1>` (one per page, for screen readers) in the size of "Photos".
 
@@ -357,14 +357,14 @@ AC34. The list card of a job without photos shows "No photo" and the placeholder
 AC35. The home page with 2 jobs with photos and with 5 jobs with photos makes the same number
       of database queries.
 
-### Decisions (student, 2026-10-17)
+### Decisions (mine, 2026-10-17)
 
 D25. **A small copy is made at upload** (option B). Options with their cost: A) the browser
      shrinks the 1600 px photo (up to 6–8 MB for 20 cards on mobile data); B) a 300 px copy
      at upload (~0.5 MB for 20 cards, most code: second field, migration, both files
      deleted); C) A with `loading="lazy"` (one attribute, ~1.5 MB at first). Rejected: A, C.
-D26. **The placeholder is a hard hat** (the student asked for "something from construction"
-     instead of my landscape). An experiment, not committed, showed a hard hat, a brick wall
+D26. **The placeholder is a hard hat** (I asked for "something from construction"
+     instead of Claude's landscape). An experiment, not committed, showed a hard hat, a brick wall
      and a traffic cone on the real list at 360 px in both themes; the brick wall read like a
      table, the cone like road works. Rejected: an icon per job type (8+ icons to keep), the
      BauHelfer initials (say nothing), a plain empty square.
@@ -432,7 +432,7 @@ AC39. `.env.example` and `render.yaml` name all six variables; `render.yaml` mar
       secret ones `sync: false`.
 AC40. Local settings still store uploads on disk in `media/` (FileSystemStorage).
 
-### Decisions (student, 2026-10-17)
+### Decisions (mine, 2026-10-17)
 
 D30. **Public bucket.** Options with their cost: a public bucket gives every photo a fixed
      address the browser caches (2 settings); a private one gives a signed link that
@@ -443,7 +443,7 @@ D30. **Public bucket.** Options with their cost: a public bucket gives every pho
 D31. **Missing storage variables stop the server**, like a missing `DATABASE_URL`. The
      other option, falling back to the Render disk, would work until the next deploy and
      then lose every photo silently. Rejected: the fallback.
-D32. **The "house number or face on a photo" question waits** (the student's choice): noted
+D32. **The "house number or face on a photo" question waits** (my choice): noted
      for Docs sync — M3 and `docs/SECURITY.md`. A one-line hint at the upload ("Avoid house
      numbers and faces.") was offered and not taken now.
      **Revisit when** #19 hides the address: a photo of the facade would show it anyway.
