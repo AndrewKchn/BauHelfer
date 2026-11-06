@@ -43,6 +43,8 @@ urlpatterns = [
     ),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),  # POST only
     path("onboarding/", views.RoleSelectView.as_view(), name="role_select"),
+    # The header's language switcher (#29); POST only.
+    path("language/", views.LanguageView.as_view(), name="set_language"),
     path("profile/worker/", views.WorkerProfileView.as_view(), name="worker_profile"),
     path(
         "profile/worker/edit/",

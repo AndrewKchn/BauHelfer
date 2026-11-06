@@ -3,6 +3,7 @@
 import logging
 from typing import override
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth import views as auth_views
@@ -11,9 +12,10 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
-from django.utils import timezone
+from django.utils import timezone, translation
 from django.utils.http import urlsafe_base64_decode
 from django.utils.translation import gettext_lazy as _
+from django.views import i18n
 from django.views.generic import (
     CreateView,
     DetailView,
@@ -84,6 +86,8 @@ class RegisterView(CreateView):
             SiteSettings.load().email_verification_required
         )  # read each time (D13)
         form.instance.is_active = not required  # inactive until the link is opened (R1)
+        # The language the guest is using now, so the first login keeps it (#29, D9).
+        form.instance.preferred_language = translation.get_language()
         response = super().form_valid(form)  # saves the user into self.object
         logger.info("User registered: user_id=%s", self.object.pk)
         if not required:
@@ -372,3 +376,21 @@ class EmployerProfileEditView(ProfileEditView):
     profile_form_class = EmployerProfileForm
     profile_name = "employer_profile"
     success_url_name = "employer_profile"
+
+
+class LanguageView(View):
+    """The header's language switcher: cookie for everyone, the profile when logged in (#29).
+
+    Django's set_language does the work: it checks the code, sets the language cookie and
+    redirects to `next` only if it is on our site. We only add saving the choice in
+    preferred_language (i18n.md R4, D8). A GET gets 405: only post() is defined.
+    """
+
+    def post(self, request):
+        """Remember the chosen language and go back to the page the user came from."""
+        response = i18n.set_language(request)
+        code = request.POST.get("language")
+        if request.user.is_authenticated and code in dict(settings.LANGUAGES):
+            request.user.preferred_language = code
+            request.user.save(update_fields=["preferred_language"])
+        return response

@@ -1,0 +1,27 @@
+{% load i18n %}
+{# The header's language switcher (#29, docs/specs/i18n.md R7): one POST form, one button per #}
+{# language. The button names the language that is sent, so no JavaScript is needed. #}
+{% get_current_language as LANGUAGE_CODE %}
+{% get_available_languages as LANGUAGES %}
+<form method="post" action="{% url 'set_language' %}" aria-label="{% translate 'Change language' %}">
+  {% csrf_token %}
+  {# Back to this page with its filters; Django's set_language refuses other sites. #}
+  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+  <details class="dropdown dropdown-end">
+    <summary class="btn btn-ghost btn-sm">{{ LANGUAGE_CODE|upper }}</summary>
+    <ul class="menu dropdown-content z-10 mt-2 w-40 rounded-box bg-base-100 p-2 shadow">
+      {% for code, translated_name in LANGUAGES %}
+        {# Each language in its own language (D6), so anyone finds theirs. Not the name from #}
+        {# LANGUAGES: this tag translates it, and Django's Russian makes "English" "Английский". #}
+        {# capfirst: Django writes "polski" in lower case. #}
+        {% get_language_info for code as info %}
+        <li>
+          <button type="submit" name="language" value="{{ code }}" lang="{{ code }}"
+                  {% if code == LANGUAGE_CODE %}aria-current="true" class="menu-active"{% endif %}>
+            {{ info.name_local|capfirst }}{% if code == LANGUAGE_CODE %} ✓{% endif %}
+          </button>
+        </li>
+      {% endfor %}
+    </ul>
+  </details>
+</form>

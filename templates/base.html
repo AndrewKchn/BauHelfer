@@ -14,13 +14,16 @@
     <div class="flex-1">
       <a href="{% url 'home' %}" class="btn btn-ghost text-xl">BauHelfer</a>
     </div>
-    {# Language switcher comes in M5. #}
-    <nav class="flex-none" aria-label="{% translate 'Main navigation' %}">
+    {# For guests and logged-in users alike, as on the mockup (#29, D7). #}
+    <div class="flex-none">{% include "_language_switcher.html" %}</div>
+    {# min-w-0 here, on the div and on the email: the email may shrink to the space that is left #}
+    {# (cut with "…"), so the logo, the language and the menu button always fit (#29). #}
+    <nav class="min-w-0" aria-label="{% translate 'Main navigation' %}">
       {% block nav %}
         {% if user.is_authenticated %}
-          <div class="flex items-center gap-1">
+          <div class="flex min-w-0 items-center gap-1">
             {# Shown on phones too, shortened if it does not fit. #}
-            <span class="max-w-36 truncate text-sm sm:max-w-none">{{ user.email }}</span>
+            <span class="min-w-0 truncate text-sm">{{ user.email }}</span>
             {# One menu button on every screen width, so the header fits in 360px and looks the same everywhere. #}
             <details class="dropdown dropdown-end">
               <summary class="btn btn-ghost btn-sm" aria-label="{% translate 'Menu' %}">

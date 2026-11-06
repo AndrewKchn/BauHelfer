@@ -71,8 +71,12 @@ def form_data(**fields):
 
 @pytest.fixture
 def employer():
-    """An employer with a company profile."""
-    return make_employer("anna@example.com", preferred_language="ru")
+    """An employer with a company profile.
+
+    English in the profile: since #29 a logged-in user sees the site in that language, and
+    the tests read English texts. A test that needs another language sets it itself.
+    """
+    return make_employer("anna@example.com")
 
 
 @pytest.fixture
@@ -156,7 +160,7 @@ def test_employer_without_profile_is_sent_to_the_profile_form(client):
     assertContains(response, "company profile")
 
 
-def test_job_gets_the_employers_language(employer_client):
+def test_job_gets_the_employers_language(employer_client, employer):
     """A posted job is written in the employer's own language; the form does not ask.
 
     1. Log in as an employer whose preferred language is Russian
@@ -164,6 +168,8 @@ def test_job_gets_the_employers_language(employer_client):
     3. Send a correctly filled job form
     4. Expect: the job's original language is Russian
     """
+    employer.preferred_language = "ru"
+    employer.save()
     # Translation (#32) starts from this language and corrects it if Claude finds another.
     response = employer_client.get(reverse("job_create"))
     assertNotContains(response, 'name="original_language"')
@@ -248,7 +254,7 @@ def test_owner_edits_an_open_job(employer_client, employer, job):
     assert job.address == "Marienplatz 8"
     assert job.employer == employer
     assert job.status == Job.Status.OPEN
-    assert job.original_language == "de"  # kept, not replaced by the employer's "ru"
+    assert job.original_language == "de"  # kept, not replaced by the employer's "en"
 
 
 @pytest.mark.parametrize("name", ["job_edit", "job_cancel"])
@@ -470,9 +476,10 @@ def test_job_form_pages_carry_the_csrf_token(employer_client, job, name):
 
     response = employer_client.get(url)
 
-    # One token in the logout form of the header menu, one in this page's form; the edit
-    # page also has the photo upload form (#64, job-photos.md R15).
-    tokens = 3 if name == "job_edit" else 2
+    # One token in the header's language switcher (#29), one in the logout form of the
+    # header menu, one in this page's form; the edit page also has the photo upload form
+    # (#64, job-photos.md R15).
+    tokens = 4 if name == "job_edit" else 3
     assertContains(response, 'name="csrfmiddlewaretoken"', count=tokens)
 
 

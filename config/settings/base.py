@@ -37,9 +37,15 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",  # serves CSS/JS when DEBUG is off
     "django.contrib.sessions.middleware.SessionMiddleware",
+    # Picks the language: cookie, then the browser's Accept-Language, then LANGUAGE_CODE
+    # (#29). Where Django's docs put it: after sessions, before CommonMiddleware.
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    # A logged-in user's profile language wins over the cookie (#29, i18n.md D3).
+    # Needs request.user, so it comes after AuthenticationMiddleware.
+    "accounts.middleware.UserLanguageMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     # Needs request.user, so it comes after AuthenticationMiddleware.
     "accounts.middleware.OnboardingMiddleware",
@@ -102,7 +108,24 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+# English when the browser asks for none of our languages (#29, i18n.md D5).
+LANGUAGE_CODE = "en"
+
+# The 7 site languages, each named in its own language (D6). The same list as
+# accounts.models.User.Language: settings cannot import a model, so a test keeps them equal.
+LANGUAGES = [
+    ("de", "Deutsch"),
+    ("en", "English"),
+    ("ru", "Русский"),
+    ("uk", "Українська"),
+    ("pl", "Polski"),
+    ("ro", "Română"),
+    ("tr", "Türkçe"),
+]
+
+# Our translations: locale/<code>/LC_MESSAGES/django.po and the compiled .mo, both in git
+# (D4). No folder for English: the strings in the code are English (D10).
+LOCALE_PATHS = [BASE_DIR / "locale"]
 
 TIME_ZONE = "Europe/Berlin"
 
