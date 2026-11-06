@@ -10,12 +10,17 @@ code, the student reviews it, decides and defends it. Plan, data model and miles
 uv sync                                  # install dependencies
 uv run pre-commit install                # once per clone: ruff runs before every commit
 uv run playwright install chromium       # once per clone: browser for the E2E tests
+sudo apt install gettext                 # once per machine: makemessages / compilemessages
 docker compose up -d                     # start PostgreSQL (needed for runserver and tests)
 uv run tailwindcss -i tailwind/input.css -o static/css/app.css --watch   # rebuild CSS on change
 uv run python manage.py runserver        # dev server (settings: config.settings.local), with
                                          # Django Debug Toolbar on every page (DEBUG on)
 uv run python manage.py makemigrations   # after model changes
 uv run python manage.py migrate          # after makemigrations and after pulling main
+uv run python manage.py makemessages -a --add-location file --ignore "tests/*" \
+  --ignore "*/tests/*" --ignore "static/*" --ignore "media/*"  # after changing UI strings
+uv run python manage.py compilemessages --ignore .venv   # after editing locale/*/django.po;
+                                         # commit .po and .mo together (tests check both)
 uv run pytest                            # all tests, E2E included
 uv run ruff check . && uv run ruff format .
 ```
@@ -30,6 +35,9 @@ Copy `.env.example` to `.env` before the first run.
 - `tailwind/` — `input.css` (with our light/dark themes) + `daisyui.mjs` + `daisyui-theme.mjs`,
   built into `static/css/app.css` (not in git)
 - `static/` — `js/htmx.min.js` (downloaded, served by WhiteNoise, no CDN)
+- `locale/<lang>/LC_MESSAGES/` — `django.po` (translations, edited) and `django.mo` (compiled,
+  also in git, so Render needs no gettext) for DE, RU, UK, PL, RO, TR; none for English,
+  the language of the code (`docs/specs/i18n.md`)
 - Downloaded third-party files, never edited by hand: `tailwind/daisyui.mjs` and
   `tailwind/daisyui-theme.mjs` (daisyUI 5.7.47, both from the same release, used only while
   building CSS) and `static/js/htmx.min.js` (HTMX 2.0.10). Marked
