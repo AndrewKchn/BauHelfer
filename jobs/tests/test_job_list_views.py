@@ -7,6 +7,7 @@ the role choice from the home page).
 """
 
 import datetime
+import re
 
 import pytest
 from django.contrib.auth import get_user_model
@@ -404,15 +405,17 @@ def test_filter_form_is_a_get_form_with_a_show_button(client):
 
     1. Open the home page as a guest
     2. Expect: a form with method="get", the three drop-downs, a "Show" button, and no
-       CSRF token on the page (a guest has no logout form either)
+       CSRF token in that form (the header's language switcher is a POST form with its
+       own token since #29)
     """
     response = client.get(reverse("home"))
 
-    assertContains(response, '<form method="get"')
+    filters = re.search(r'<form method="get".*?</form>', response.text, re.DOTALL)
+    assert filters, "no GET form on the page"
     for name in ("date", "job_type", "district"):
-        assertContains(response, f'<select name="{name}"')
-    assertContains(response, ">Show</button>")
-    assertNotContains(response, "csrfmiddlewaretoken")
+        assert f'<select name="{name}"' in filters.group(0)
+    assert ">Show</button>" in filters.group(0)
+    assert "csrfmiddlewaretoken" not in filters.group(0)
 
 
 def test_home_page_is_wider_than_other_pages(client):

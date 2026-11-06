@@ -61,6 +61,11 @@ jobs:
       - name: Build CSS  # app.css is not in git; the layout tests need it
         run: uv run tailwindcss -i tailwind/input.css -o static/css/app.css --minify
 
+      - name: Install gettext for the translation checks  # tests/test_translations.py (#29)
+        # msgfmt counts untranslated strings and compiles .po files; a program, not a
+        # Python package, so uv cannot install it.
+        run: sudo apt-get install -y --no-install-recommends gettext
+
       - name: Install Chromium for the E2E tests  # tests/e2e/, Playwright (#14)
         # --with-deps: system libraries. --only-shell: only the headless browser; CI has no
         # window, so the full Chrome would be downloaded for nothing.

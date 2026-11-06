@@ -2480,3 +2480,55 @@ into later tickets (#35, #37, #46, #48, #73, #84) and one reply per #96 comment.
   what was decided before the tests, the pointer shows it is no longer current.
 - Why docs are checked against the board and the code, not only against the notes: the
   missing #143, the moved #121 / #133 and three stale SECURITY rows were in no comment.
+
+## 2026-11-06 · #29 Django i18n setup + language switcher (DE, EN, RU, UK, PL, RO, TR)
+
+**Task given to AI:** set up Django i18n for the 7 languages, add a language switcher to the
+header and store a logged-in user's choice in `preferred_language`, following the ticket
+workflow: spec, failing tests, code, then the CI check for untranslated strings.
+
+**AI helped:** found before the spec that the issue's CI check would turn this PR red, because
+the ~390 M2–M4 strings are translated only in #30, and that `gettext` was not installed. It
+also noticed that `preferred_language` could be set only in the admin. It wrote
+`docs/specs/i18n.md` (D1–D14), 21 + 18 tests, the settings, `UserLanguageMiddleware`, the
+`LanguageView` around Django's `set_language`, the switcher template and the `.po` / `.mo`
+files for 6 languages. It also wrote the check in `tests/translations.py` (`msgfmt
+--statistics`, `.mo` compared by content), the CI step and the `CLAUDE.md` commands. It
+explained the request path through the two middlewares and what `.po` and `.mo` are.
+
+**AI failed:**
+- The switcher showed "Английский" instead of "English" on a Russian page:
+  `{% get_available_languages %}` translates the names. Found in a page dump of a failing old
+  test; fixed with `name_local|capfirst`, plus a test.
+- The logged-in header was 10–29 px wider than a 360 px screen. 8 E2E tests caught it.
+- In the first defense question it took for granted that `.mo` files stay out of git, without
+  checking whether Render can compile them. My question changed that (D4).
+- The first `xfail` marker also swallowed a `ModuleNotFoundError`; seen on the first run,
+  fixed with `raises=AssertionError`.
+- No test covered a broken `.po`: the `check=True` mutant survived until a test was added.
+- `makemessages` marked every new `.po` header `#, fuzzy`; found before the first compile.
+- The spec first planned `msgattrib`; a quick try showed `msgfmt --statistics` is simpler.
+
+**My part:**
+- Before choosing cookie vs URL prefix I asked what the cost of the cheaper option is. After
+  the list (one language for search engines, one URL with different HTML, a costly change
+  later) I kept the cookie: less code, and a shared link opens in each reader's own language.
+- I asked where `preferred_language` is chosen on the site: nowhere, only in the admin. So the
+  switcher became the place where it is set.
+- I asked whether `gettext` should be needed only locally. That question turned into D4: the
+  `.mo` files go into git, so Render needs no `gettext`.
+- I asked whether `gettext` goes into the project dependencies: no, it is a system program;
+  it went into `CLAUDE.md` and the CI workflow instead.
+- For the xfail test until #30 and the profile winning over the cookie, the recommendations
+  matched what I wanted.
+- I answered the four defense questions myself before the cheat sheet; two answers had the
+  language in the session instead of the cookie.
+- I ran the site locally and went through the check steps (switching as a guest, switching
+  when logged in, logging in again), and looked at what is in the translation files now.
+
+**Learned:**
+- How a page gets its language: LocaleMiddleware reads the cookie, then the browser's
+  Accept-Language, then LANGUAGE_CODE; our middleware runs after authentication, because it
+  needs request.user to switch to the profile language.
+- What a strict xfail is for: a known failure that turns CI red once it is fixed, so the
+  marker cannot be forgotten; `raises` keeps unrelated errors visible.
