@@ -239,6 +239,22 @@ def test_header_has_the_switcher(client, worker, logged_in):
     assert 'value="en"' in current[0]
 
 
+def test_switcher_names_languages_in_their_own_language(client):
+    """On a Russian page "English" is still "English", not "Английский" (D6).
+
+    1. As a guest, open the home page in Russian
+    2. Expect: the switcher lists every language with its own name; the button shows "RU"
+    """
+    client.cookies[COOKIE] = "ru"
+
+    form = switcher(client.get("/"))
+
+    assert ">RU<" in form
+    for _code, name in settings.LANGUAGES:
+        assert name in form
+    assert "Английский" not in form
+
+
 def test_switcher_comes_back_to_the_same_page(client):
     """After switching the user is on the page they were on, with its filters.
 
