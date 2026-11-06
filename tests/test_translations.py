@@ -82,6 +82,18 @@ def test_translated_file_has_nothing_to_report(tmp_path, check):
     assert check.statistics(po) == {"translated": 1, "fuzzy": 0, "untranslated": 0}
 
 
+def test_broken_file_is_an_error(tmp_path, check):
+    """A .po that msgfmt cannot read stops the check instead of counting as translated.
+
+    1. Write a .po with one untranslated string and a line msgfmt cannot read
+    2. Expect: the check raises CalledProcessError
+    """
+    po = write_po(tmp_path, 'msgid "Log in"\nmsgstr ""\nmsgstr "twice"\n')
+
+    with pytest.raises(subprocess.CalledProcessError):
+        check.statistics(po)
+
+
 def test_every_language_but_english_has_a_po_file():
     """locale/ has a .po file for each of the 6 languages, and none for English (D10).
 
