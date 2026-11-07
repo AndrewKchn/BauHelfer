@@ -65,7 +65,12 @@ R5. `locale/ru` and `locale/uk`: every string translated, polite address (D5), G
 R6. The `xfail` marker of `test_every_string_is_translated` no longer covers `ru` and `uk`
     (D7): the failing-tests commit removes it for them, the translations make it pass.
 
+R6a. `tests/translations.py` also runs `msgfmt --check-header` (D14): a plural string with
+     fewer forms than the language's `nplurals` is an error.
+
 AC4. `test_every_string_is_translated[ru]` and `[uk]` pass without `xfail`.
+AC4a. A sample `.po` for a language with 4 plural forms whose plural string has only 2 is
+      reported by the check.
 
 ## Iteration 3: German, Polish, Romanian, Turkish
 
@@ -85,7 +90,10 @@ AC6. In every one of the 7 languages the job list has `<html lang="…">` and it
 
 R10. Screenshots at 360 px, light and dark, in German and Romanian (the longest), of: job
      list, job detail (guest, worker, employer with applications), job form, My jobs, My
-     applications, both profiles, role page, log in, sign up.
+     applications, both profiles, role page, log in, sign up. The header in all 7
+     languages: in iteration 2 the Russian guest header ("RU · Войти · Регистрация") was
+     already 359 px wide, its buttons 8 px out of the menu; a job card with a long word
+     ("Подсобник гипсокартонщика") pushed the rate 12 px out of the card.
 R11. Only what runs out of its box or makes the page scroll sideways is fixed (D2); a badge
      gets `h-auto whitespace-normal` (D2, option A). Each fix is listed in the iteration's
      summary with its before / after screenshot.
@@ -161,13 +169,22 @@ D10. **German legal words stay German** (Claude's default): "Gewerbe", "Minijob"
      Münih).
 D11. **RU / UK reviewed by me in the `.po` diff** (Claude's default): Claude writes the
      `.po` files, I read the diff in VS Code, Claude applies my corrections; no
-     back-translation for them.
+     back-translation for them. I read all 335 strings side by side (EN | RU | UK) on
+     2026-11-07 and changed nothing.
 D12. **Back-translation sees only the translations** (Claude's default): the agent gets no
      English original, so it cannot copy it; it gets the glossary's English words, so it
      does not invent synonyms.
 D13. **Four iterations** (Claude's default): the gaps first, so all translations are checked
      with `--check-format`; RU / UK before the rest, so the glossary is fixed by the
      languages I can read.
+
+D14. **`msgfmt --check-header`: every plural string has all the language's forms**
+     (Claude's default, accepted 2026-11-07; added in iteration 2). Found on a screenshot:
+     the Russian job list said "16 open". `makemessages` writes 2 empty forms (`msgstr[0]`, `msgstr[1]`) even for
+     languages with more (RU, UK, PL: 4; RO: 3); a translation that fills only those 2
+     passed `--check-format` and the "every string translated" test, and Django fell back
+     to English for 5–20. Its other header warnings (empty `Last-Translator`…) are not
+     errors, so the files need no other change.
 
 ## Known limitations
 
