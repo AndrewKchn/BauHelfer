@@ -123,6 +123,29 @@ def test_two_requests_at_once_keep_one_translation(settings):
     assert Translation.objects.count() == 1
 
 
+class FailingBackend:
+    """A translator that fails, as Claude does when its answer is cut off or refused."""
+
+    def translate(self, text, target_lang):
+        """Raise instead of answering."""
+        raise RuntimeError("the answer was cut off")
+
+
+def test_failed_translation_is_not_cached(settings):
+    """When the translator fails, the error reaches the caller and nothing is saved (D10).
+
+    1. Use a translator that raises
+    2. Translate the job text into Polish
+    3. Expect: the error is raised; no row, so the next call asks the translator again
+    """
+    settings.TRANSLATION_BACKEND = f"{__name__}.FailingBackend"
+
+    with pytest.raises(RuntimeError):
+        translate(JOB_TEXT, "pl")
+
+    assert not Translation.objects.exists()
+
+
 # What is not translated (D7, D8; AC4, AC5)
 
 

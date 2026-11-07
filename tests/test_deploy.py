@@ -28,18 +28,22 @@ EMAIL_ENV = {
     "DEFAULT_FROM_EMAIL": "BauHelfer <bauhelfer.test@gmail.com>",
 }
 
+# The Claude API key for translating user texts (#31, docs/specs/ai-translation.md R9).
+# Made-up; a real one starts with "sk-ant-" too.
+TRANSLATION_ENV = {"ANTHROPIC_API_KEY": "sk-ant-test-key"}
+
 # Everything production.py requires besides SECRET_KEY and DATABASE_URL (CI sets those).
 # Every fixture that loads production settings sets these: locally .env may hide a missing
 # one, CI has no .env.
-PRODUCTION_ENV = {**MEDIA_ENV, **EMAIL_ENV}
+PRODUCTION_ENV = {**MEDIA_ENV, **EMAIL_ENV, **TRANSLATION_ENV}
 
 
 @pytest.fixture(autouse=True)
 def media_env(monkeypatch):
     """Set the variables production.py requires, as Render does, so it can load.
 
-    The photo storage (#64) and, since #27, the email ones. The name stayed from #64: other
-    test files import the fixture by it.
+    The photo storage (#64), since #27 the email ones, since #31 the Claude API key. The
+    name stayed from #64: other test files import the fixture by it.
     """
     for name, value in PRODUCTION_ENV.items():
         monkeypatch.setenv(name, value)
