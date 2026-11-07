@@ -1,1003 +1,977 @@
 # BauHelfer translations (#29). Edit msgstr here, then run compilemessages.
 msgid ""
-msgstr ""
-"Project-Id-Version: BauHelfer\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-07 02:18+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: ro\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?"
-"2:1));\n"
+msgstr "Project-Id-Version: BauHelfer\nReport-Msgid-Bugs-To: \nPOT-Creation-Date: 2026-11-07 02:18+0100\nPO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\nLast-Translator: FULL NAME <EMAIL@ADDRESS>\nLanguage-Team: LANGUAGE <LL@li.org>\nLanguage: ro\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));\n"
 
 #: accounts/admin.py
 msgid "Profile"
-msgstr ""
+msgstr "Profil"
 
 #: accounts/admin.py
 msgid "Emails"
-msgstr ""
+msgstr "E-mailuri"
 
 #: accounts/admin.py
 msgid "Permissions"
-msgstr ""
+msgstr "Permisiuni"
 
 #: accounts/admin.py
 msgid "Important dates"
-msgstr ""
+msgstr "Date importante"
 
 #: accounts/forms.py
 msgid "Wrong email or password."
-msgstr ""
+msgstr "E-mail sau parolă greșită."
 
 #: accounts/forms.py
 msgid "Please confirm your email first. We sent you a link when you signed up."
-msgstr ""
+msgstr "Confirmați mai întâi adresa de e-mail. V-am trimis un link la înregistrare."
 
 #: accounts/forms.py templates/accounts/employer_profile.html
 #: templates/accounts/worker_profile.html
 msgid "Email"
-msgstr ""
+msgstr "E-mail"
 
 #: accounts/forms.py
-msgid ""
-"Optional. Shown only to the people you work with, until the day of the job "
-"is over."
-msgstr ""
+msgid "Optional. Shown only to the people you work with, until the day of the job is over."
+msgstr "Opțional. Vizibil doar pentru persoanele cu care lucrați, până la sfârșitul zilei de lucru."
 
 #: accounts/forms.py
 msgid "I am allowed to work in Germany"
-msgstr ""
+msgstr "Am dreptul să lucrez în Germania"
 
 #: accounts/forms.py
-msgid ""
-"For example as an EU citizen, or with a residence permit that allows work."
-msgstr ""
+msgid "For example as an EU citizen, or with a residence permit that allows work."
+msgstr "De exemplu, ca cetățean UE sau cu un permis de ședere care permite munca."
 
 #: accounts/forms.py templates/accounts/_worker_profile_card.html
 msgid "Skills"
-msgstr ""
+msgstr "Competențe"
 
 #: accounts/forms.py
 msgid "Languages you speak"
-msgstr ""
+msgstr "Limbi pe care le vorbiți"
 
 #: accounts/forms.py templates/accounts/_worker_profile_card.html
 msgid "Legal status"
-msgstr ""
+msgstr "Statut juridic"
 
 #: accounts/forms.py templates/accounts/_employer_profile_card.html
 msgid "Trades"
-msgstr ""
+msgstr "Domenii de lucru"
 
 #: accounts/models.py templates/jobs/job_detail.html
 msgid "Employer"
-msgstr ""
+msgstr "Angajator"
 
 #: accounts/models.py
 msgid "Worker"
-msgstr ""
+msgstr "Muncitor"
 
 #: accounts/models.py
 msgid "email"
-msgstr ""
+msgstr "e-mail"
 
 #: accounts/models.py
 msgid "name"
-msgstr ""
+msgstr "nume"
 
 #: accounts/models.py
 msgid "phone"
-msgstr ""
+msgstr "telefon"
 
 #: accounts/models.py
 msgid "For example +49 151 12345678 or 0151 12345678."
-msgstr ""
+msgstr "De exemplu +49 151 12345678 sau 0151 12345678."
 
 #: accounts/models.py
 msgid "role"
-msgstr ""
+msgstr "rol"
 
 #: accounts/models.py
 msgid "preferred language"
-msgstr ""
+msgstr "limba preferată"
 
 #: accounts/models.py
 msgid "email notifications"
-msgstr ""
+msgstr "notificări prin e-mail"
 
 #: accounts/models.py
-msgid ""
-"New applications and decisions on applications. Emails about your password "
-"are always sent."
-msgstr ""
+msgid "New applications and decisions on applications. Emails about your password are always sent."
+msgstr "Candidaturi noi și decizii privind candidaturile. E-mailurile despre parolă se trimit întotdeauna."
 
 #: accounts/models.py
 msgid "email confirmed at"
-msgstr ""
+msgstr "e-mail confirmat la"
 
 #: accounts/models.py
 msgid "confirmation link sent at"
-msgstr ""
+msgstr "link de confirmare trimis la"
 
 #: accounts/models.py
 msgid "work permit confirmed at"
-msgstr ""
+msgstr "dreptul de muncă confirmat la"
 
 #: accounts/models.py
 msgid "Demolition"
-msgstr ""
+msgstr "Demolări"
 
 #: accounts/models.py
 msgid "Debris clearing"
-msgstr ""
+msgstr "Evacuare moloz"
 
 #: accounts/models.py
 msgid "Carrying materials"
-msgstr ""
+msgstr "Transport materiale"
 
 #: accounts/models.py
 msgid "Earthworks / digging"
-msgstr ""
+msgstr "Terasamente / săpături"
 
 #: accounts/models.py
 msgid "Site cleaning"
-msgstr ""
+msgstr "Curățenie de șantier"
 
 #: accounts/models.py
 msgid "Scaffolding helper"
-msgstr ""
+msgstr "Ajutor la schele"
 
 #: accounts/models.py
 msgid "Bricklayer's helper"
-msgstr ""
+msgstr "Ajutor de zidar"
 
 #: accounts/models.py
 msgid "Drywall helper"
-msgstr ""
+msgstr "Ajutor la rigips"
 
 #: accounts/models.py
 msgid "Plastering helper"
-msgstr ""
+msgstr "Ajutor de tencuitor"
 
 #: accounts/models.py
 msgid "Painting helper"
-msgstr ""
+msgstr "Ajutor de zugrav"
 
 #: accounts/models.py
 msgid "German"
-msgstr ""
+msgstr "Germană"
 
 #: accounts/models.py
 msgid "English"
-msgstr ""
+msgstr "Engleză"
 
 #: accounts/models.py
 msgid "Russian"
-msgstr ""
+msgstr "Rusă"
 
 #: accounts/models.py
 msgid "Ukrainian"
-msgstr ""
+msgstr "Ucraineană"
 
 #: accounts/models.py
 msgid "Polish"
-msgstr ""
+msgstr "Poloneză"
 
 #: accounts/models.py
 msgid "Romanian"
-msgstr ""
+msgstr "Română"
 
 #: accounts/models.py
 msgid "Turkish"
-msgstr ""
+msgstr "Turcă"
 
 #: accounts/models.py
 msgid "Bulgarian"
-msgstr ""
+msgstr "Bulgară"
 
 #: accounts/models.py
 msgid "Croatian"
-msgstr ""
+msgstr "Croată"
 
 #: accounts/models.py
 msgid "Serbian"
-msgstr ""
+msgstr "Sârbă"
 
 #: accounts/models.py
 msgid "Bosnian"
-msgstr ""
+msgstr "Bosniacă"
 
 #: accounts/models.py
 msgid "Hungarian"
-msgstr ""
+msgstr "Maghiară"
 
 #: accounts/models.py
 msgid "Albanian"
-msgstr ""
+msgstr "Albaneză"
 
 #: accounts/models.py
 msgid "Arabic"
-msgstr ""
+msgstr "Arabă"
 
 #: accounts/models.py
 msgid "Italian"
-msgstr ""
+msgstr "Italiană"
 
 #: accounts/models.py
 msgid "Self-employed (Gewerbe)"
-msgstr ""
+msgstr "Persoană fizică autorizată (Gewerbe)"
 
 #: accounts/models.py
 msgid "Minijob"
-msgstr ""
+msgstr "Minijob"
 
 #: accounts/models.py
 msgid "Employed"
-msgstr ""
+msgstr "Angajat"
 
 #: accounts/models.py
 msgid "user"
-msgstr ""
+msgstr "utilizator"
 
 #: accounts/models.py
 msgid "team size"
-msgstr ""
+msgstr "mărimea echipei"
 
 #: accounts/models.py
 msgid "1 = only you. 2-10 = your crew, including you."
-msgstr ""
+msgstr "1 = doar dumneavoastră. 2–10 = echipa dumneavoastră, inclusiv dumneavoastră."
 
 #: accounts/models.py
 msgid "skills"
-msgstr ""
+msgstr "competențe"
 
 #: accounts/models.py
 msgid "spoken languages"
-msgstr ""
+msgstr "limbi vorbite"
 
 #: accounts/models.py
 msgid "legal status"
-msgstr ""
+msgstr "statut juridic"
 
 #: accounts/models.py
 msgid "worker profile"
-msgstr ""
+msgstr "profil de muncitor"
 
 #: accounts/models.py
 msgid "worker profiles"
-msgstr ""
+msgstr "profiluri de muncitori"
 
 #: accounts/models.py
 msgid "Individual"
-msgstr ""
+msgstr "Individual"
 
 #: accounts/models.py
 #, python-format
 msgid "Crew of %(count)d"
 msgid_plural "Crew of %(count)d"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Echipă de %(count)d persoană"
+msgstr[1] "Echipă de %(count)d persoane"
+msgstr[2] "Echipă de %(count)d de persoane"
 
 #: accounts/models.py
 msgid "Window fitting"
-msgstr ""
+msgstr "Montaj ferestre"
 
 #: accounts/models.py
 msgid "Drywall"
-msgstr ""
+msgstr "Rigips"
 
 #: accounts/models.py
 msgid "Plastering"
-msgstr ""
+msgstr "Tencuieli"
 
 #: accounts/models.py
 msgid "Painting"
-msgstr ""
+msgstr "Zugrăveli"
 
 #: accounts/models.py
 msgid "Tiling"
-msgstr ""
+msgstr "Faianță și gresie"
 
 #: accounts/models.py
 msgid "Roofing"
-msgstr ""
+msgstr "Acoperișuri"
 
 #: accounts/models.py
 msgid "Bricklaying"
-msgstr ""
+msgstr "Zidărie"
 
 #: accounts/models.py
 msgid "Carpentry"
-msgstr ""
+msgstr "Dulgherie"
 
 #: accounts/models.py
 msgid "Electrical"
-msgstr ""
+msgstr "Instalații electrice"
 
 #: accounts/models.py
 msgid "Plumbing & heating"
-msgstr ""
+msgstr "Instalații sanitare și termice"
 
 #: accounts/models.py
 msgid "Landscaping"
-msgstr ""
+msgstr "Amenajări peisagistice"
 
 #: accounts/models.py
 msgid "General contractor"
-msgstr ""
+msgstr "Antreprenor general"
 
 #: accounts/models.py
 msgid "Private person"
-msgstr ""
+msgstr "Persoană fizică"
 
 #: accounts/models.py
 msgid "Other"
-msgstr ""
+msgstr "Altele"
 
 #: accounts/models.py
 msgid "company name"
-msgstr ""
+msgstr "numele firmei"
 
 #: accounts/models.py
 msgid "Leave empty if you hire as a private person."
-msgstr ""
+msgstr "Lăsați gol dacă angajați ca persoană fizică."
 
 #: accounts/models.py
 msgid "trades"
-msgstr ""
+msgstr "domenii de lucru"
 
 #: accounts/models.py
 msgid "employer profile"
-msgstr ""
+msgstr "profil de angajator"
 
 #: accounts/models.py
 msgid "employer profiles"
-msgstr ""
+msgstr "profiluri de angajatori"
 
 #: accounts/models.py
 msgid "email verification required"
-msgstr ""
+msgstr "confirmarea e-mailului este obligatorie"
 
 #: accounts/models.py
-msgid ""
-"Off: a new account is active and logged in at once, with no confirmation "
-"email, e.g. for a demo. Its address stays unconfirmed, so it gets no emails."
-msgstr ""
+msgid "Off: a new account is active and logged in at once, with no confirmation email, e.g. for a demo. Its address stays unconfirmed, so it gets no emails."
+msgstr "Dezactivat: un cont nou este activ și autentificat imediat, fără e-mail de confirmare, de exemplu pentru o demonstrație. Adresa lui rămâne neconfirmată, deci nu primește e-mailuri."
 
 #: accounts/models.py
 msgid "site settings"
-msgstr ""
+msgstr "setările site-ului"
 
 #: accounts/validators.py
-msgid ""
-"Enter the number with a country code, e.g. +49 151 12345678, or with an area "
-"code, e.g. 0151 12345678."
-msgstr ""
+msgid "Enter the number with a country code, e.g. +49 151 12345678, or with an area code, e.g. 0151 12345678."
+msgstr "Introduceți numărul cu prefixul țării, de ex. +49 151 12345678, sau cu prefixul zonei, de ex. 0151 12345678."
 
 #: accounts/views.py
 msgid "Welcome to BauHelfer! Your account is ready."
-msgstr ""
+msgstr "Bun venit la BauHelfer! Contul dumneavoastră este gata."
 
 #: accounts/views.py
 msgid "Your email is confirmed. Welcome to BauHelfer!"
-msgstr ""
+msgstr "Adresa de e-mail este confirmată. Bun venit la BauHelfer!"
 
 #: accounts/views.py
 msgid "Profile saved."
-msgstr ""
+msgstr "Profil salvat."
 
 #: jobs/forms.py
 msgid "Hourly rate, €"
-msgstr ""
+msgstr "Tarif orar, €"
 
 #: jobs/forms.py
 msgid "Write in your language. Workers read it in theirs."
-msgstr ""
+msgstr "Scrieți în limba dumneavoastră. Muncitorii citesc în limba lor."
 
 #: jobs/forms.py
 msgid "The date cannot be in the past."
-msgstr ""
+msgstr "Data nu poate fi în trecut."
 
 #: jobs/forms.py
 #, python-format
 msgid "At least %(wage)s € on this date (German minimum wage)."
-msgstr ""
+msgstr "Cel puțin %(wage)s € la această dată (salariul minim din Germania)."
 
 #: jobs/forms.py
 msgid "Any day"
-msgstr ""
+msgstr "Orice zi"
 
 #: jobs/forms.py
 msgid "Next 7 days"
-msgstr ""
+msgstr "Următoarele 7 zile"
 
 #: jobs/forms.py
 msgid "Next 30 days"
-msgstr ""
+msgstr "Următoarele 30 de zile"
 
 #: jobs/forms.py
 msgid "Date"
-msgstr ""
+msgstr "Data"
 
 #: jobs/forms.py
 msgid "All types"
-msgstr ""
+msgstr "Toate tipurile"
 
 #: jobs/forms.py
 msgid "Job type"
-msgstr ""
+msgstr "Tipul lucrării"
 
 #: jobs/forms.py
 msgid "All districts"
-msgstr ""
+msgstr "Toate cartierele"
 
 #: jobs/forms.py
 msgid "District"
-msgstr ""
+msgstr "Cartier"
 
 #: jobs/forms.py
 msgid "Photos"
-msgstr ""
+msgstr "Fotografii"
 
 #: jobs/forms.py
 msgid "Choose at least one photo."
-msgstr ""
+msgstr "Alegeți cel puțin o fotografie."
 
 #: jobs/forms.py
 #, python-format
 msgid "You can add %(count)d more photo."
 msgid_plural "You can add %(count)d more photos."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Mai puteți adăuga %(count)d fotografie."
+msgstr[1] "Mai puteți adăuga %(count)d fotografii."
+msgstr[2] "Mai puteți adăuga %(count)d de fotografii."
 
 #: jobs/forms.py
 #, python-format
 msgid "%(name)s: %(error)s"
-msgstr ""
+msgstr "%(name)s: %(error)s"
 
 #: jobs/forms.py
 msgid "Message to the employer"
-msgstr ""
+msgstr "Mesaj pentru angajator"
 
 #: jobs/forms.py
 msgid "Workers I bring"
-msgstr ""
+msgstr "Muncitori aduși de mine"
 
 #: jobs/models.py
 msgid "Munich area (outside the city)"
-msgstr ""
+msgstr "Zona München (în afara orașului)"
 
 #: jobs/models.py
 msgid "Open"
-msgstr ""
+msgstr "Deschisă"
 
 #: jobs/models.py
 msgid "Filled"
-msgstr ""
+msgstr "Ocupată"
 
 #: jobs/models.py
 msgid "Done"
-msgstr ""
+msgstr "Finalizată"
 
 #: jobs/models.py
 msgid "Cancelled"
-msgstr ""
+msgstr "Anulată"
 
 #: jobs/models.py
 msgid "employer"
-msgstr ""
+msgstr "angajator"
 
 #: jobs/models.py
 msgid "job type"
-msgstr ""
+msgstr "tipul lucrării"
 
 #: jobs/models.py
 msgid "description"
-msgstr ""
+msgstr "descriere"
 
 #: jobs/models.py
 msgid "original language"
-msgstr ""
+msgstr "limba originală"
 
 #: jobs/models.py
 msgid "address"
-msgstr ""
+msgstr "adresă"
 
 #: jobs/models.py
 msgid "district"
-msgstr ""
+msgstr "cartier"
 
 #: jobs/models.py
 msgid "latitude"
-msgstr ""
+msgstr "latitudine"
 
 #: jobs/models.py
 msgid "longitude"
-msgstr ""
+msgstr "longitudine"
 
 #: jobs/models.py
 msgid "date"
-msgstr ""
+msgstr "dată"
 
 #: jobs/models.py
 msgid "start time"
-msgstr ""
+msgstr "ora de începere"
 
 #: jobs/models.py
 msgid "hours"
-msgstr ""
+msgstr "ore"
 
 #: jobs/models.py
 msgid "workers needed"
-msgstr ""
+msgstr "muncitori necesari"
 
 #: jobs/models.py
 msgid "hourly rate (€)"
-msgstr ""
+msgstr "tarif orar (€)"
 
 #: jobs/models.py
 msgid "status"
-msgstr ""
+msgstr "stare"
 
 #: jobs/models.py
 msgid "created at"
-msgstr ""
+msgstr "creată la"
 
 #: jobs/models.py
 msgid "job"
-msgstr ""
+msgstr "lucrare"
 
 #: jobs/models.py
 msgid "jobs"
-msgstr ""
+msgstr "lucrări"
 
 #: jobs/models.py
 msgid "photo"
-msgstr ""
+msgstr "fotografie"
 
 #: jobs/models.py
 msgid "thumbnail"
-msgstr ""
+msgstr "miniatură"
 
 #: jobs/models.py
 msgid "uploaded at"
-msgstr ""
+msgstr "încărcată la"
 
 #: jobs/models.py
 msgid "job photo"
-msgstr ""
+msgstr "fotografie a lucrării"
 
 #: jobs/models.py
 msgid "job photos"
-msgstr ""
+msgstr "fotografii ale lucrărilor"
 
 #: jobs/models.py
 msgid "Pending"
-msgstr ""
+msgstr "În așteptare"
 
 #: jobs/models.py
 msgid "Accepted"
-msgstr ""
+msgstr "Acceptată"
 
 #: jobs/models.py
 msgid "Rejected"
-msgstr ""
+msgstr "Respinsă"
 
 #: jobs/models.py
 msgid "Job filled"
-msgstr ""
+msgstr "Lucrare ocupată"
 
 #: jobs/models.py
 msgid "Withdrawn"
-msgstr ""
+msgstr "Retrasă"
 
 #: jobs/models.py
 msgid "worker"
-msgstr ""
+msgstr "muncitor"
 
 #: jobs/models.py
 msgid "message"
-msgstr ""
+msgstr "mesaj"
 
 #: jobs/models.py
 msgid "workers offered"
-msgstr ""
+msgstr "muncitori oferiți"
 
 #: jobs/models.py
 msgid "workers accepted"
-msgstr ""
+msgstr "muncitori acceptați"
 
 #: jobs/models.py
 msgid "application"
-msgstr ""
+msgstr "candidatură"
 
 #: jobs/models.py
 msgid "applications"
-msgstr ""
+msgstr "candidaturi"
 
 #: jobs/photos.py
 msgid "Upload a photo in JPEG, PNG or WebP format."
-msgstr ""
+msgstr "Încărcați o fotografie în format JPEG, PNG sau WebP."
 
 #: jobs/photos.py
 msgid "This picture has too many pixels. Please upload a normal photo."
-msgstr ""
+msgstr "Această imagine are prea mulți pixeli. Încărcați o fotografie obișnuită."
 
 #: jobs/photos.py
 msgid "A photo can be at most 5 MB."
-msgstr ""
+msgstr "O fotografie poate avea cel mult 5 MB."
 
 #: jobs/views.py
 msgid "Please fill in your company profile before posting a job."
-msgstr ""
+msgstr "Completați profilul firmei înainte de a publica o lucrare."
 
 #: jobs/views.py
 msgid "Job posted. You can add photos below."
-msgstr ""
+msgstr "Lucrarea a fost publicată. Puteți adăuga fotografii mai jos."
 
 #: jobs/views.py templates/jobs/job_detail.html
 msgid "Past"
-msgstr ""
+msgstr "Trecută"
 
 #: jobs/views.py
 msgid "Job saved."
-msgstr ""
+msgstr "Lucrarea a fost salvată."
 
 #: jobs/views.py
 #, python-format
 msgid "%(count)d photo added."
 msgid_plural "%(count)d photos added."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(count)d fotografie adăugată."
+msgstr[1] "%(count)d fotografii adăugate."
+msgstr[2] "%(count)d de fotografii adăugate."
 
 #: jobs/views.py
 msgid "Photo deleted."
-msgstr ""
+msgstr "Fotografia a fost ștearsă."
 
 #: jobs/views.py
 msgid "Job cancelled."
-msgstr ""
+msgstr "Lucrarea a fost anulată."
 
 #: jobs/views.py
 msgid "Complete your profile to apply."
-msgstr ""
+msgstr "Completați profilul pentru a candida."
 
 #: jobs/views.py
 msgid "This job no longer takes applications."
-msgstr ""
+msgstr "Această lucrare nu mai primește candidaturi."
 
 #: jobs/views.py
 msgid "You have already applied to this job."
-msgstr ""
+msgstr "Ați candidat deja la această lucrare."
 
 #: jobs/views.py
 msgid "Application sent."
-msgstr ""
+msgstr "Candidatura a fost trimisă."
 
 #: jobs/views.py
 msgid "This application was already decided."
-msgstr ""
+msgstr "S-a luat deja o decizie pentru această candidatură."
 
 #: jobs/views.py
 #, python-format
 msgid "Accepted: %(count)d worker from %(name)s."
 msgid_plural "Accepted: %(count)d workers from %(name)s."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Acceptat: %(count)d muncitor de la %(name)s."
+msgstr[1] "Acceptați: %(count)d muncitori de la %(name)s."
+msgstr[2] "Acceptați: %(count)d de muncitori de la %(name)s."
 
 #: jobs/views.py
 msgid "The job is filled. The other pending applications were closed."
-msgstr ""
+msgstr "Lucrarea este ocupată. Celelalte candidaturi în așteptare au fost închise."
 
 #: jobs/views.py
 #, python-format
 msgid "Rejected: %(name)s."
-msgstr ""
+msgstr "Respins: %(name)s."
 
 #: jobs/views.py
 #, python-format
 msgid "Cancelled: %(name)s. The job is open again."
-msgstr ""
+msgstr "Anulat: %(name)s. Lucrarea este din nou deschisă."
 
 #: jobs/views.py
 #, python-format
 msgid "Cancelled: %(name)s."
-msgstr ""
+msgstr "Anulat: %(name)s."
 
 #: jobs/views.py
 msgid "This application can no longer be withdrawn."
-msgstr ""
+msgstr "Această candidatură nu mai poate fi retrasă."
 
 #: jobs/views.py
 msgid "Application withdrawn."
-msgstr ""
+msgstr "Candidatura a fost retrasă."
 
 #: templates/_language_switcher.html
 msgid "Change language"
-msgstr "Schimbă limba"
+msgstr "Schimbați limba"
 
 #: templates/accounts/_email_notifications.html
 msgid "Email notifications"
-msgstr ""
+msgstr "Notificări prin e-mail"
 
 #: templates/accounts/_email_notifications.html
 msgid "On"
-msgstr ""
+msgstr "Pornit"
 
 #: templates/accounts/_email_notifications.html
 msgid "Off"
-msgstr ""
+msgstr "Oprit"
 
 #: templates/accounts/_employer_profile_card.html
 msgid "Company"
-msgstr ""
+msgstr "Firmă"
 
 #: templates/accounts/_employer_profile_card.html
 msgid "Contact person"
-msgstr ""
+msgstr "Persoană de contact"
 
 #: templates/accounts/_employer_profile_card.html
 #: templates/accounts/employer_profile.html
 #: templates/accounts/worker_profile.html templates/jobs/job_detail.html
 msgid "Phone"
-msgstr ""
+msgstr "Telefon"
 
 #: templates/accounts/_phone.html templates/accounts/employer_profile.html
 #: templates/accounts/worker_profile.html
 msgid "not given"
-msgstr ""
+msgstr "nespecificat"
 
 #: templates/accounts/_worker_profile_card.html
 msgid "Name"
-msgstr ""
+msgstr "Nume"
 
 #: templates/accounts/_worker_profile_card.html
 msgid "Team"
-msgstr ""
+msgstr "Echipă"
 
 #: templates/accounts/_worker_profile_card.html
 msgid "Languages"
-msgstr ""
+msgstr "Limbi"
 
 #: templates/accounts/_worker_profile_card.html
 msgid "Work permit"
-msgstr ""
+msgstr "Permis de muncă"
 
 #: templates/accounts/_worker_profile_card.html
 msgid "Confirmed by the worker"
-msgstr ""
+msgstr "Confirmat de muncitor"
 
 #: templates/accounts/_worker_profile_card.html
 msgid "Not confirmed"
-msgstr ""
+msgstr "Neconfirmat"
 
 #: templates/accounts/employer_profile.html
 #: templates/accounts/employer_profile_form.html templates/base.html
 msgid "My company"
-msgstr ""
+msgstr "Firma mea"
 
 #: templates/accounts/employer_profile.html
 #: templates/accounts/worker_profile.html
 msgid "Contact details"
-msgstr ""
+msgstr "Date de contact"
 
 #: templates/accounts/employer_profile.html
 msgid "Workers see these only after you accept their application."
-msgstr ""
+msgstr "Muncitorii le văd doar după ce le acceptați candidatura."
 
 #: templates/accounts/employer_profile.html
 #: templates/accounts/employer_profile_form.html
 #: templates/accounts/worker_profile.html
 #: templates/accounts/worker_profile_form.html
 msgid "Edit profile"
-msgstr ""
+msgstr "Editați profilul"
 
 #: templates/accounts/employer_profile_form.html
 msgid "Workers read this on your jobs."
-msgstr ""
+msgstr "Muncitorii văd acest text la lucrările dumneavoastră."
 
 #: templates/accounts/employer_profile_form.html
 #: templates/accounts/worker_profile_form.html
 msgid "Save profile"
-msgstr ""
+msgstr "Salvați profilul"
 
 #: templates/accounts/role_select.html
 msgid "Who are you?"
-msgstr ""
+msgstr "Cine sunteți?"
 
 #: templates/accounts/role_select.html
 msgid "Choose once. You cannot change it later."
-msgstr ""
+msgstr "Alegeți o singură dată. Nu se poate schimba ulterior."
 
 #: templates/accounts/role_select.html
 msgid "I need workers"
-msgstr ""
+msgstr "Am nevoie de muncitori"
 
 #: templates/accounts/role_select.html
 msgid "I am looking for work"
-msgstr ""
+msgstr "Caut de lucru"
 
 #: templates/accounts/worker_detail.html
 msgid "Worker profile"
-msgstr ""
+msgstr "Profil de muncitor"
 
 #: templates/accounts/worker_profile.html
 #: templates/accounts/worker_profile_form.html templates/base.html
 msgid "My profile"
-msgstr ""
+msgstr "Profilul meu"
 
 #: templates/accounts/worker_profile.html
 #, python-format
 msgid "Allowed to work in Germany — confirmed on %(date)s."
-msgstr ""
+msgstr "Drept de muncă în Germania — confirmat la %(date)s."
 
 #: templates/accounts/worker_profile.html
 msgid "Employers see these only after they accept your application."
-msgstr ""
+msgstr "Angajatorii le văd doar după ce vă acceptă candidatura."
 
 #: templates/accounts/worker_profile_form.html
 msgid "Employers read this when you apply for a job."
-msgstr ""
+msgstr "Angajatorii văd acest text când candidați la o lucrare."
 
 #: templates/base.html
 msgid "Main navigation"
-msgstr ""
+msgstr "Navigare principală"
 
 #: templates/base.html
 msgid "Menu"
-msgstr ""
+msgstr "Meniu"
 
 #: templates/base.html templates/jobs/my_applications.html
 msgid "My applications"
-msgstr ""
+msgstr "Candidaturile mele"
 
 #: templates/base.html templates/jobs/job_form.html
 #: templates/jobs/job_list.html templates/jobs/my_jobs.html
 msgid "Post a job"
-msgstr ""
+msgstr "Publicați o lucrare"
 
 #: templates/base.html templates/jobs/job_detail.html
 #: templates/jobs/my_jobs.html
 msgid "My jobs"
-msgstr ""
+msgstr "Lucrările mele"
 
 #: templates/base.html
 msgid "Log out"
-msgstr ""
+msgstr "Deconectare"
 
 #: templates/base.html templates/registration/login.html
 #: templates/registration/password_reset_complete.html
 #: templates/registration/register.html
 #: templates/registration/verify_email.html
 msgid "Log in"
-msgstr ""
+msgstr "Autentificare"
 
 #: templates/base.html templates/registration/login.html
 #: templates/registration/register.html
 msgid "Register"
-msgstr ""
+msgstr "Înregistrare"
 
 #: templates/base.html
 msgid "Munich"
-msgstr ""
+msgstr "München"
 
 #: templates/emails/_footer.txt templates/emails/verify_email_body.txt
 #: templates/registration/password_reset_email.txt
 msgid "The BauHelfer team"
-msgstr ""
+msgstr "Echipa BauHelfer"
 
 #: templates/emails/_footer.txt
 msgid "To turn these emails off:"
-msgstr ""
+msgstr "Pentru a dezactiva aceste e-mailuri:"
 
 #: templates/emails/_greeting.txt
 #, python-format
 msgid "Hello %(name)s,"
-msgstr ""
+msgstr "Bună ziua, %(name)s,"
 
 #: templates/emails/_greeting.txt templates/emails/verify_email_body.txt
 #: templates/registration/password_reset_email.txt
 msgid "Hello,"
-msgstr ""
+msgstr "Bună ziua,"
 
 #: templates/emails/application_accepted_body.txt
 #, python-format
-msgid ""
-"The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: "
-"%(counter)s worker."
-msgid_plural ""
-"The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: "
-"%(counter)s workers."
-msgstr[0] ""
-msgstr[1] ""
+msgid "The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: %(counter)s worker."
+msgid_plural "The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: %(counter)s workers."
+msgstr[0] "Angajatorul v-a acceptat pentru %(job_type)s, %(date)s, începere la %(time)s: %(counter)s muncitor."
+msgstr[1] "Angajatorul v-a acceptat pentru %(job_type)s, %(date)s, începere la %(time)s: %(counter)s muncitori."
+msgstr[2] "Angajatorul v-a acceptat pentru %(job_type)s, %(date)s, începere la %(time)s: %(counter)s de muncitori."
 
 #: templates/emails/application_accepted_body.txt
 msgid "The employer's contact and the address are on “My applications”:"
-msgstr ""
+msgstr "Datele de contact ale angajatorului și adresa sunt la „Candidaturile mele”:"
 
 #: templates/emails/application_accepted_subject.txt
 #, python-format
 msgid "You are accepted: %(job_type)s, %(date)s"
-msgstr ""
+msgstr "Ați fost acceptat: %(job_type)s, %(date)s"
 
 #: templates/emails/application_rejected_body.txt
 #, python-format
-msgid ""
-"The employer did not accept your application for %(job_type)s, %(date)s."
-msgstr ""
+msgid "The employer did not accept your application for %(job_type)s, %(date)s."
+msgstr "Angajatorul nu v-a acceptat candidatura pentru %(job_type)s, %(date)s."
 
 #: templates/emails/application_rejected_body.txt
 msgid "Other jobs are waiting for you:"
-msgstr ""
+msgstr "Alte lucrări vă așteaptă:"
 
 #: templates/emails/application_rejected_subject.txt
 #, python-format
 msgid "Application not accepted: %(job_type)s, %(date)s"
-msgstr ""
+msgstr "Candidatură neacceptată: %(job_type)s, %(date)s"
 
 #: templates/emails/new_application_body.txt
 #, python-format
-msgid ""
-"%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s "
-"worker."
-msgid_plural ""
-"%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s "
-"workers."
-msgstr[0] ""
-msgstr[1] ""
+msgid "%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s worker."
+msgid_plural "%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s workers."
+msgstr[0] "%(name)s a candidat la lucrarea dumneavoastră %(job_type)s, %(date)s, cu %(counter)s muncitor."
+msgstr[1] "%(name)s a candidat la lucrarea dumneavoastră %(job_type)s, %(date)s, cu %(counter)s muncitori."
+msgstr[2] "%(name)s a candidat la lucrarea dumneavoastră %(job_type)s, %(date)s, cu %(counter)s de muncitori."
 
 #: templates/emails/new_application_body.txt
 msgid "Accept or reject the application here:"
-msgstr ""
+msgstr "Acceptați sau respingeți candidatura aici:"
 
 #: templates/emails/new_application_subject.txt
 #, python-format
 msgid "New application: %(job_type)s, %(date)s"
-msgstr ""
+msgstr "Candidatură nouă: %(job_type)s, %(date)s"
 
 #: templates/emails/verify_email_body.txt
-msgid ""
-"Someone created a BauHelfer account with this email address. Open this link "
-"to confirm the address and activate the account:"
-msgstr ""
+msgid "Someone created a BauHelfer account with this email address. Open this link to confirm the address and activate the account:"
+msgstr "Cineva a creat un cont BauHelfer cu această adresă de e-mail. Deschideți acest link pentru a confirma adresa și a activa contul:"
 
 #: templates/emails/verify_email_body.txt
 #, python-format
 msgid "The link works once and for %(counter)s day."
 msgid_plural "The link works once and for %(counter)s days."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Linkul funcționează o singură dată, timp de %(counter)s zi."
+msgstr[1] "Linkul funcționează o singură dată, timp de %(counter)s zile."
+msgstr[2] "Linkul funcționează o singură dată, timp de %(counter)s de zile."
 
 #: templates/emails/verify_email_body.txt
-msgid ""
-"If you did not create an account, ignore this email: without the link "
-"nothing happens."
-msgstr ""
+msgid "If you did not create an account, ignore this email: without the link nothing happens."
+msgstr "Dacă nu ați creat un cont, ignorați acest e-mail: fără link nu se întâmplă nimic."
 
 #: templates/emails/verify_email_subject.txt
 msgid "Confirm your email for BauHelfer"
-msgstr ""
+msgstr "Confirmați adresa de e-mail pentru BauHelfer"
 
 #: templates/jobs/_application_status_badge.html
 msgid "Job cancelled"
-msgstr ""
+msgstr "Lucrare anulată"
 
 #: templates/jobs/_crew.html
 #, python-format
 msgid "%(taken)s of %(offered)s workers"
-msgstr ""
+msgstr "%(taken)s din %(offered)s muncitori"
 
 #: templates/jobs/_crew.html templates/jobs/_job_summary.html
 #, python-format
 msgid "%(workers)s worker"
 msgid_plural "%(workers)s workers"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(workers)s muncitor"
+msgstr[1] "%(workers)s muncitori"
+msgstr[2] "%(workers)s de muncitori"
 
 #: templates/jobs/_job_card.html templates/jobs/_job_summary.html
 #: templates/jobs/job_detail.html
@@ -1009,474 +983,471 @@ msgstr "%(rate)s €/oră"
 #, python-format
 msgid "Needs %(workers)s worker"
 msgid_plural "Needs %(workers)s workers"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Necesar: %(workers)s muncitor"
+msgstr[1] "Necesari: %(workers)s muncitori"
+msgstr[2] "Necesari: %(workers)s de muncitori"
 
 #: templates/jobs/_job_photos.html
 #, python-format
 msgid "Photos (%(count)s of %(max)s)"
-msgstr ""
+msgstr "Fotografii (%(count)s din %(max)s)"
 
 #: templates/jobs/_job_photos.html templates/jobs/_job_thumbnail.html
 #: templates/jobs/job_detail.html
 msgid "Job photo"
-msgstr ""
+msgstr "Fotografia lucrării"
 
 #: templates/jobs/_job_photos.html
 msgid "Delete photo"
-msgstr ""
+msgstr "Ștergeți fotografia"
 
 #: templates/jobs/_job_photos.html
 msgid "No photos yet."
-msgstr ""
+msgstr "Nicio fotografie încă."
 
 #: templates/jobs/_job_photos.html
 msgid "Location data is removed from photos."
-msgstr ""
+msgstr "Datele de localizare sunt eliminate din fotografii."
 
 #: templates/jobs/_job_photos.html
 msgid "Add photos"
-msgstr ""
+msgstr "Adăugați fotografii"
 
 #: templates/jobs/_job_photos.html
 #, python-format
 msgid "That is the maximum of %(max)s photos."
-msgstr ""
+msgstr "Acesta este maximul de %(max)s fotografii."
 
 #: templates/jobs/_job_summary.html
 #, python-format
 msgid "%(hours)s h"
-msgstr ""
+msgstr "%(hours)s h"
 
 #: templates/jobs/_job_thumbnail.html
 #, python-format
 msgid "%(photos)s photo"
 msgid_plural "%(photos)s photos"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(photos)s fotografie"
+msgstr[1] "%(photos)s fotografii"
+msgstr[2] "%(photos)s de fotografii"
 
 #: templates/jobs/_my_application_card.html
 msgid "Your crew:"
-msgstr ""
+msgstr "Echipa dumneavoastră:"
 
 #: templates/jobs/_my_application_card.html
 msgid "Withdraw your application? This cannot be undone."
-msgstr ""
+msgstr "Retrageți candidatura? Acțiunea nu poate fi anulată."
 
 #: templates/jobs/_my_application_card.html
 msgid "Withdraw"
-msgstr ""
+msgstr "Retrageți"
 
 #: templates/jobs/_my_application_card.html
 msgid "Contact"
-msgstr ""
+msgstr "Contact"
 
 #: templates/jobs/_my_application_card.html
 msgid "Your message:"
-msgstr ""
+msgstr "Mesajul dumneavoastră:"
 
 #: templates/jobs/_my_application_card.html
 msgid "The job is over."
-msgstr ""
+msgstr "Lucrarea s-a încheiat."
 
 #: templates/jobs/_my_application_card.html
 msgid "You withdrew this application."
-msgstr ""
+msgstr "Ați retras această candidatură."
 
 #: templates/jobs/_my_application_card.html
 msgid "The employer chose other workers."
-msgstr ""
+msgstr "Angajatorul a ales alți muncitori."
 
 #: templates/jobs/_my_application_card.html
 msgid "The job was filled by other workers."
-msgstr ""
+msgstr "Lucrarea a fost ocupată de alți muncitori."
 
 #: templates/jobs/_my_application_card.html
 msgid "The employer cancelled the job."
-msgstr ""
+msgstr "Angajatorul a anulat lucrarea."
 
 #: templates/jobs/_my_application_card.html
 msgid "The employer cancelled your place."
-msgstr ""
+msgstr "Angajatorul v-a anulat locul."
 
 #: templates/jobs/_my_application_card.html
 msgid "The job is over. The contacts are no longer shown."
-msgstr ""
+msgstr "Lucrarea s-a încheiat. Datele de contact nu mai sunt afișate."
 
 #: templates/jobs/_my_job_card.html
 #, python-format
 msgid "%(applications)s application"
 msgid_plural "%(applications)s applications"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(applications)s candidatură"
+msgstr[1] "%(applications)s candidaturi"
+msgstr[2] "%(applications)s de candidaturi"
 
 #: templates/jobs/_my_job_card.html
 msgid "No applications yet"
-msgstr ""
+msgstr "Nicio candidatură încă"
 
 #: templates/jobs/_my_job_card.html templates/jobs/job_detail.html
 msgid "Edit"
-msgstr ""
+msgstr "Editați"
 
 #: templates/jobs/_my_job_card.html templates/jobs/job_confirm_cancel.html
 msgid "Cancel job"
-msgstr ""
+msgstr "Anulați lucrarea"
 
 #: templates/jobs/_photo_placeholder.html
 msgid "No photo"
-msgstr ""
+msgstr "Fără fotografie"
 
 #: templates/jobs/job_confirm_cancel.html
 msgid "Cancel this job?"
-msgstr ""
+msgstr "Anulați această lucrare?"
 
 #: templates/jobs/job_confirm_cancel.html
 msgid "Workers will no longer see it. This cannot be undone."
-msgstr ""
+msgstr "Muncitorii nu o vor mai vedea. Acțiunea nu poate fi anulată."
 
 #: templates/jobs/job_confirm_cancel.html
 msgid "Yes, cancel the job"
-msgstr ""
+msgstr "Da, anulați lucrarea"
 
 #: templates/jobs/job_confirm_cancel.html
 msgid "No, keep it"
-msgstr ""
+msgstr "Nu, păstrați-o"
 
 #: templates/jobs/job_detail.html
 msgid "Jobs"
-msgstr ""
+msgstr "Lucrări"
 
 #: templates/jobs/job_detail.html
 msgid "Previous photo"
-msgstr ""
+msgstr "Fotografia anterioară"
 
 #: templates/jobs/job_detail.html
 msgid "Next photo"
-msgstr ""
+msgstr "Fotografia următoare"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "(%(hours)s h)"
-msgstr ""
+msgstr "(%(hours)s h)"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "%(found)s of %(needed)s workers found"
-msgstr ""
+msgstr "%(found)s din %(needed)s muncitori găsiți"
 
 #: templates/jobs/job_detail.html
 msgid "Address"
-msgstr ""
+msgstr "Adresă"
 
 #: templates/jobs/job_detail.html
 msgid "The exact address is shown after the employer accepts you."
-msgstr ""
+msgstr "Adresa exactă apare după ce angajatorul vă acceptă."
 
 #: templates/jobs/job_detail.html
 msgid "Workers found"
-msgstr ""
+msgstr "Muncitori găsiți"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "Applications (%(count)s)"
-msgstr ""
+msgstr "Candidaturi (%(count)s)"
 
 #: templates/jobs/job_detail.html
 msgid "No skill:"
-msgstr ""
+msgstr "Fără competența:"
 
 #: templates/jobs/job_detail.html
 msgid "Work permit not confirmed"
-msgstr ""
+msgstr "Permis de muncă neconfirmat"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "Sent %(date)s"
-msgstr ""
+msgstr "Trimisă %(date)s"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "Cancel %(name)s? This cannot be undone."
-msgstr ""
+msgstr "Anulați participarea lui %(name)s? Acțiunea nu poate fi anulată."
 
 #: templates/jobs/job_detail.html
 msgid "Cancel"
-msgstr ""
+msgstr "Anulați"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "Accept %(taken)s of %(offered)s"
-msgstr ""
+msgstr "Acceptați %(taken)s din %(offered)s"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "Accept %(count)s"
-msgstr ""
+msgstr "Acceptați %(count)s"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "Reject %(name)s? This cannot be undone."
-msgstr ""
+msgstr "Respingeți candidatura lui %(name)s? Acțiunea nu poate fi anulată."
 
 #: templates/jobs/job_detail.html
 msgid "Reject"
-msgstr ""
+msgstr "Respingeți"
 
 #: templates/jobs/job_detail.html
 msgid "Accepting fills the job: the other pending applications will be closed."
-msgstr ""
+msgstr "Dacă acceptați, lucrarea devine ocupată: celelalte candidaturi în așteptare vor fi închise."
 
 #: templates/jobs/job_detail.html
 msgid "No applications yet."
-msgstr ""
+msgstr "Nicio candidatură încă."
 
 #: templates/jobs/job_detail.html
 msgid "You applied"
-msgstr ""
+msgstr "Ați candidat"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "%(counter)s worker"
 msgid_plural "%(counter)s workers"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(counter)s muncitor"
+msgstr[1] "%(counter)s muncitori"
+msgstr[2] "%(counter)s de muncitori"
 
 #: templates/jobs/job_detail.html
 msgid "Apply"
-msgstr ""
+msgstr "Candidați"
 
 #: templates/jobs/job_detail.html
 msgid "Send application"
-msgstr ""
+msgstr "Trimiteți candidatura"
 
 #: templates/jobs/job_detail.html
 msgid "Complete your profile to apply"
-msgstr ""
+msgstr "Completați profilul pentru a candida"
 
 #: templates/jobs/job_detail.html
 msgid "Log in to apply"
-msgstr ""
+msgstr "Autentificați-vă pentru a candida"
 
 #: templates/jobs/job_form.html
 msgid "Edit job"
-msgstr ""
+msgstr "Editați lucrarea"
 
 #: templates/jobs/job_form.html
 msgid "Job details"
-msgstr ""
+msgstr "Detaliile lucrării"
 
 #: templates/jobs/job_form.html
 msgid "You can add photos after you publish the job."
-msgstr ""
+msgstr "Puteți adăuga fotografii după ce publicați lucrarea."
 
 #: templates/jobs/job_form.html
 msgid "Save changes"
-msgstr ""
+msgstr "Salvați modificările"
 
 #: templates/jobs/job_form.html
 msgid "Publish job"
-msgstr ""
+msgstr "Publicați lucrarea"
 
 #: templates/jobs/job_form.html
 msgid "Back to my jobs"
-msgstr ""
+msgstr "Înapoi la lucrările mele"
 
 #: templates/jobs/job_list.html
 msgid "Jobs in Munich"
-msgstr ""
+msgstr "Lucrări în München"
 
 #: templates/jobs/job_list.html
 #, python-format
 msgid "%(counter)s open"
 msgid_plural "%(counter)s open"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(counter)s deschisă"
+msgstr[1] "%(counter)s deschise"
+msgstr[2] "%(counter)s de lucrări deschise"
 
 #: templates/jobs/job_list.html
 msgid "Show"
-msgstr ""
+msgstr "Afișați"
 
 #: templates/jobs/job_list.html
 msgid "Reset filters"
-msgstr ""
+msgstr "Resetați filtrele"
 
 #: templates/jobs/job_list.html
 msgid "Need workers?"
-msgstr ""
+msgstr "Aveți nevoie de muncitori?"
 
 #: templates/jobs/job_list.html
 msgid "No jobs match these filters."
-msgstr ""
+msgstr "Nicio lucrare nu corespunde acestor filtre."
 
 #: templates/jobs/job_list.html
 msgid "No open jobs right now."
-msgstr ""
+msgstr "Momentan nu există lucrări deschise."
 
 #: templates/jobs/job_list.html
 msgid "Pages"
-msgstr ""
+msgstr "Pagini"
 
 #: templates/jobs/job_list.html
 msgid "Previous"
-msgstr ""
+msgstr "Înapoi"
 
 #: templates/jobs/job_list.html
 #, python-format
 msgid "Page %(number)s of %(total)s"
-msgstr ""
+msgstr "Pagina %(number)s din %(total)s"
 
 #: templates/jobs/job_list.html
 msgid "Next"
-msgstr ""
+msgstr "Înainte"
 
 #: templates/jobs/my_applications.html
 msgid "You have not applied to any job yet."
-msgstr ""
+msgstr "Nu ați candidat încă la nicio lucrare."
 
 #: templates/jobs/my_applications.html
 msgid "Find a job"
-msgstr ""
+msgstr "Găsiți o lucrare"
 
 #: templates/jobs/my_jobs.html
 msgid "You have not posted any jobs yet."
-msgstr ""
+msgstr "Nu ați publicat încă nicio lucrare."
 
 #: templates/registration/login.html
 msgid "Forgot your password?"
-msgstr ""
+msgstr "Ați uitat parola?"
 
 #: templates/registration/login.html
 msgid "Did not get the confirmation email?"
-msgstr ""
+msgstr "Nu ați primit e-mailul de confirmare?"
 
 #: templates/registration/login.html
 msgid "No account yet?"
-msgstr ""
+msgstr "Nu aveți încă un cont?"
 
 #: templates/registration/password_reset_complete.html
 msgid "Password changed"
-msgstr ""
+msgstr "Parola a fost schimbată"
 
 #: templates/registration/password_reset_complete.html
 msgid "Your new password is saved. You can log in now."
-msgstr ""
+msgstr "Noua parolă a fost salvată. Acum vă puteți autentifica."
 
 #: templates/registration/password_reset_confirm.html
 msgid "Set a new password"
-msgstr ""
+msgstr "Setați o parolă nouă"
 
 #: templates/registration/password_reset_confirm.html
 msgid "Save password"
-msgstr ""
+msgstr "Salvați parola"
 
 #: templates/registration/password_reset_confirm.html
 #: templates/registration/verify_email.html
 msgid "Link is not valid"
-msgstr ""
+msgstr "Linkul nu este valid"
 
 #: templates/registration/password_reset_confirm.html
 msgid "This link was already used or has expired. Please ask for a new one."
-msgstr ""
+msgstr "Acest link a fost deja folosit sau a expirat. Cereți unul nou."
 
 #: templates/registration/password_reset_confirm.html
 #: templates/registration/password_reset_form.html
 msgid "Reset password"
-msgstr ""
+msgstr "Resetați parola"
 
 #: templates/registration/password_reset_done.html
 #: templates/registration/register_done.html
 #: templates/registration/verify_email_resend_done.html
 msgid "Check your email"
-msgstr ""
+msgstr "Verificați e-mailul"
 
 #: templates/registration/password_reset_done.html
-msgid ""
-"If an account with this email exists, we have sent a link to set a new "
-"password. Check your spam folder too."
-msgstr ""
+msgid "If an account with this email exists, we have sent a link to set a new password. Check your spam folder too."
+msgstr "Dacă există un cont cu această adresă, am trimis un link pentru o parolă nouă. Verificați și dosarul de spam."
 
 #: templates/registration/password_reset_email.txt
-msgid ""
-"Someone asked to reset the password for your BauHelfer account. Open this "
-"link to set a new password:"
-msgstr ""
+msgid "Someone asked to reset the password for your BauHelfer account. Open this link to set a new password:"
+msgstr "Cineva a cerut resetarea parolei contului dumneavoastră BauHelfer. Deschideți acest link pentru a seta o parolă nouă:"
 
 #: templates/registration/password_reset_email.txt
 msgid "If it was not you, ignore this email: your password stays the same."
-msgstr ""
+msgstr "Dacă nu ați fost dumneavoastră, ignorați acest e-mail: parola rămâne aceeași."
 
 #: templates/registration/password_reset_form.html
-msgid ""
-"Enter the email of your account. We will send you a link to set a new "
-"password."
-msgstr ""
+msgid "Enter the email of your account. We will send you a link to set a new password."
+msgstr "Introduceți adresa de e-mail a contului. Vă vom trimite un link pentru o parolă nouă."
 
 #: templates/registration/password_reset_form.html
 msgid "Send link"
-msgstr ""
+msgstr "Trimiteți linkul"
 
 #: templates/registration/password_reset_subject.txt
 msgid "Reset your BauHelfer password"
-msgstr ""
+msgstr "Resetarea parolei BauHelfer"
 
 #: templates/registration/register.html
 msgid "Create an account"
-msgstr ""
+msgstr "Creați un cont"
 
 #: templates/registration/register.html
 msgid "Already have an account?"
-msgstr ""
+msgstr "Aveți deja un cont?"
 
 #: templates/registration/register_done.html
 #, python-format
 msgid "We sent a link to <strong class=\"break-all\">%(email)s</strong>."
-msgstr ""
+msgstr "Am trimis un link la <strong class=\"break-all\">%(email)s</strong>."
 
 #: templates/registration/register_done.html
 msgid "We sent a link to your email address."
-msgstr ""
+msgstr "Am trimis un link la adresa dumneavoastră de e-mail."
 
 #: templates/registration/register_done.html
 msgid "Open it to activate your account."
-msgstr ""
+msgstr "Deschideți-l pentru a vă activa contul."
 
 #: templates/registration/register_done.html
 #: templates/registration/verify_email_resend_done.html
 msgid "Check your spam folder too."
-msgstr ""
+msgstr "Verificați și dosarul de spam."
 
 #: templates/registration/register_done.html
 msgid "Did not get it?"
-msgstr ""
+msgstr "Nu l-ați primit?"
 
 #: templates/registration/register_done.html
 #: templates/registration/verify_email.html
 #: templates/registration/verify_email_resend.html
 msgid "Send the link again"
-msgstr ""
+msgstr "Retrimiteți linkul"
 
 #: templates/registration/verify_email.html
 msgid "Confirm email"
-msgstr ""
+msgstr "Confirmați e-mailul"
 
 #: templates/registration/verify_email.html
 msgid "Press the button to confirm your address and activate your account."
-msgstr ""
+msgstr "Apăsați butonul pentru a confirma adresa și a activa contul."
 
 #: templates/registration/verify_email.html
-msgid ""
-"This link is invalid or has expired. It works only once: if you already "
-"confirmed your email, just log in."
-msgstr ""
+msgid "This link is invalid or has expired. It works only once: if you already confirmed your email, just log in."
+msgstr "Acest link nu este valid sau a expirat. Funcționează o singură dată: dacă ați confirmat deja adresa, autentificați-vă."
 
 #: templates/registration/verify_email_resend.html
 msgid "Enter the email you signed up with. We send a new link to confirm it."
-msgstr ""
+msgstr "Introduceți adresa de e-mail cu care v-ați înregistrat. Vă trimitem un link nou pentru confirmare."
 
 #: templates/registration/verify_email_resend_done.html
 msgid "If an unconfirmed account uses this address, we sent a new link."
-msgstr ""
+msgstr "Dacă un cont neconfirmat folosește această adresă, am trimis un link nou."
 
 #: templates/registration/verify_email_resend_done.html
 msgid "A new link can be sent once every 10 minutes."
-msgstr ""
+msgstr "Un link nou poate fi trimis o dată la 10 minute."

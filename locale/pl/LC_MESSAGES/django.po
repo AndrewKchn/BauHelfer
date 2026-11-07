@@ -1,722 +1,708 @@
 # BauHelfer translations (#29). Edit msgstr here, then run compilemessages.
 msgid ""
-msgstr ""
-"Project-Id-Version: BauHelfer\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-07 02:18+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: pl\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && "
-"(n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && "
-"n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
+msgstr "Project-Id-Version: BauHelfer\nReport-Msgid-Bugs-To: \nPOT-Creation-Date: 2026-11-07 02:18+0100\nPO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\nLast-Translator: FULL NAME <EMAIL@ADDRESS>\nLanguage-Team: LANGUAGE <LL@li.org>\nLanguage: pl\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
 
 #: accounts/admin.py
 msgid "Profile"
-msgstr ""
+msgstr "Profil"
 
 #: accounts/admin.py
 msgid "Emails"
-msgstr ""
+msgstr "E-maile"
 
 #: accounts/admin.py
 msgid "Permissions"
-msgstr ""
+msgstr "Uprawnienia"
 
 #: accounts/admin.py
 msgid "Important dates"
-msgstr ""
+msgstr "Ważne daty"
 
 #: accounts/forms.py
 msgid "Wrong email or password."
-msgstr ""
+msgstr "Nieprawidłowy e-mail lub hasło."
 
 #: accounts/forms.py
 msgid "Please confirm your email first. We sent you a link when you signed up."
-msgstr ""
+msgstr "Najpierw proszę potwierdzić e-mail. Link wysłaliśmy przy rejestracji."
 
 #: accounts/forms.py templates/accounts/employer_profile.html
 #: templates/accounts/worker_profile.html
 msgid "Email"
-msgstr ""
+msgstr "E-mail"
 
 #: accounts/forms.py
-msgid ""
-"Optional. Shown only to the people you work with, until the day of the job "
-"is over."
-msgstr ""
+msgid "Optional. Shown only to the people you work with, until the day of the job is over."
+msgstr "Opcjonalnie. Widoczny tylko dla osób, z którymi Pan/Pani pracuje, do końca dnia pracy."
 
 #: accounts/forms.py
 msgid "I am allowed to work in Germany"
-msgstr ""
+msgstr "Mam prawo do pracy w Niemczech"
 
 #: accounts/forms.py
-msgid ""
-"For example as an EU citizen, or with a residence permit that allows work."
-msgstr ""
+msgid "For example as an EU citizen, or with a residence permit that allows work."
+msgstr "Na przykład jako obywatel UE lub z dokumentem pobytowym, który pozwala na pracę."
 
 #: accounts/forms.py templates/accounts/_worker_profile_card.html
 msgid "Skills"
-msgstr ""
+msgstr "Umiejętności"
 
 #: accounts/forms.py
 msgid "Languages you speak"
-msgstr ""
+msgstr "Znane języki"
 
 #: accounts/forms.py templates/accounts/_worker_profile_card.html
 msgid "Legal status"
-msgstr ""
+msgstr "Status prawny"
 
 #: accounts/forms.py templates/accounts/_employer_profile_card.html
 msgid "Trades"
-msgstr ""
+msgstr "Branże"
 
 #: accounts/models.py templates/jobs/job_detail.html
 msgid "Employer"
-msgstr ""
+msgstr "Zleceniodawca"
 
 #: accounts/models.py
 msgid "Worker"
-msgstr ""
+msgstr "Pracownik"
 
 #: accounts/models.py
 msgid "email"
-msgstr ""
+msgstr "e-mail"
 
 #: accounts/models.py
 msgid "name"
-msgstr ""
+msgstr "imię i nazwisko"
 
 #: accounts/models.py
 msgid "phone"
-msgstr ""
+msgstr "telefon"
 
 #: accounts/models.py
 msgid "For example +49 151 12345678 or 0151 12345678."
-msgstr ""
+msgstr "Na przykład +49 151 12345678 lub 0151 12345678."
 
 #: accounts/models.py
 msgid "role"
-msgstr ""
+msgstr "rola"
 
 #: accounts/models.py
 msgid "preferred language"
-msgstr ""
+msgstr "preferowany język"
 
 #: accounts/models.py
 msgid "email notifications"
-msgstr ""
+msgstr "powiadomienia e-mail"
 
 #: accounts/models.py
-msgid ""
-"New applications and decisions on applications. Emails about your password "
-"are always sent."
-msgstr ""
+msgid "New applications and decisions on applications. Emails about your password are always sent."
+msgstr "Nowe zgłoszenia i decyzje w sprawie zgłoszeń. E-maile dotyczące hasła są wysyłane zawsze."
 
 #: accounts/models.py
 msgid "email confirmed at"
-msgstr ""
+msgstr "e-mail potwierdzony"
 
 #: accounts/models.py
 msgid "confirmation link sent at"
-msgstr ""
+msgstr "link potwierdzający wysłany"
 
 #: accounts/models.py
 msgid "work permit confirmed at"
-msgstr ""
+msgstr "prawo do pracy potwierdzone"
 
 #: accounts/models.py
 msgid "Demolition"
-msgstr ""
+msgstr "Rozbiórka"
 
 #: accounts/models.py
 msgid "Debris clearing"
-msgstr ""
+msgstr "Wywóz gruzu"
 
 #: accounts/models.py
 msgid "Carrying materials"
-msgstr ""
+msgstr "Noszenie materiałów"
 
 #: accounts/models.py
 msgid "Earthworks / digging"
-msgstr ""
+msgstr "Roboty ziemne / kopanie"
 
 #: accounts/models.py
 msgid "Site cleaning"
-msgstr ""
+msgstr "Sprzątanie budowy"
 
 #: accounts/models.py
 msgid "Scaffolding helper"
-msgstr ""
+msgstr "Pomocnik przy rusztowaniach"
 
 #: accounts/models.py
 msgid "Bricklayer's helper"
-msgstr ""
+msgstr "Pomocnik murarza"
 
 #: accounts/models.py
 msgid "Drywall helper"
-msgstr ""
+msgstr "Pomocnik przy suchej zabudowie"
 
 #: accounts/models.py
 msgid "Plastering helper"
-msgstr ""
+msgstr "Pomocnik tynkarza"
 
 #: accounts/models.py
 msgid "Painting helper"
-msgstr ""
+msgstr "Pomocnik malarza"
 
 #: accounts/models.py
 msgid "German"
-msgstr ""
+msgstr "Niemiecki"
 
 #: accounts/models.py
 msgid "English"
-msgstr ""
+msgstr "Angielski"
 
 #: accounts/models.py
 msgid "Russian"
-msgstr ""
+msgstr "Rosyjski"
 
 #: accounts/models.py
 msgid "Ukrainian"
-msgstr ""
+msgstr "Ukraiński"
 
 #: accounts/models.py
 msgid "Polish"
-msgstr ""
+msgstr "Polski"
 
 #: accounts/models.py
 msgid "Romanian"
-msgstr ""
+msgstr "Rumuński"
 
 #: accounts/models.py
 msgid "Turkish"
-msgstr ""
+msgstr "Turecki"
 
 #: accounts/models.py
 msgid "Bulgarian"
-msgstr ""
+msgstr "Bułgarski"
 
 #: accounts/models.py
 msgid "Croatian"
-msgstr ""
+msgstr "Chorwacki"
 
 #: accounts/models.py
 msgid "Serbian"
-msgstr ""
+msgstr "Serbski"
 
 #: accounts/models.py
 msgid "Bosnian"
-msgstr ""
+msgstr "Bośniacki"
 
 #: accounts/models.py
 msgid "Hungarian"
-msgstr ""
+msgstr "Węgierski"
 
 #: accounts/models.py
 msgid "Albanian"
-msgstr ""
+msgstr "Albański"
 
 #: accounts/models.py
 msgid "Arabic"
-msgstr ""
+msgstr "Arabski"
 
 #: accounts/models.py
 msgid "Italian"
-msgstr ""
+msgstr "Włoski"
 
 #: accounts/models.py
 msgid "Self-employed (Gewerbe)"
-msgstr ""
+msgstr "Działalność gospodarcza (Gewerbe)"
 
 #: accounts/models.py
 msgid "Minijob"
-msgstr ""
+msgstr "Minijob"
 
 #: accounts/models.py
 msgid "Employed"
-msgstr ""
+msgstr "Zatrudniony na etacie"
 
 #: accounts/models.py
 msgid "user"
-msgstr ""
+msgstr "użytkownik"
 
 #: accounts/models.py
 msgid "team size"
-msgstr ""
+msgstr "wielkość ekipy"
 
 #: accounts/models.py
 msgid "1 = only you. 2-10 = your crew, including you."
-msgstr ""
+msgstr "1 = tylko Pan/Pani. 2–10 = ekipa, łącznie z Panem/Panią."
 
 #: accounts/models.py
 msgid "skills"
-msgstr ""
+msgstr "umiejętności"
 
 #: accounts/models.py
 msgid "spoken languages"
-msgstr ""
+msgstr "znane języki"
 
 #: accounts/models.py
 msgid "legal status"
-msgstr ""
+msgstr "status prawny"
 
 #: accounts/models.py
 msgid "worker profile"
-msgstr ""
+msgstr "profil pracownika"
 
 #: accounts/models.py
 msgid "worker profiles"
-msgstr ""
+msgstr "profile pracowników"
 
 #: accounts/models.py
 msgid "Individual"
-msgstr ""
+msgstr "Bez ekipy"
 
 #: accounts/models.py
 #, python-format
 msgid "Crew of %(count)d"
 msgid_plural "Crew of %(count)d"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Ekipa %(count)d-osobowa"
+msgstr[1] "Ekipa %(count)d-osobowa"
+msgstr[2] "Ekipa %(count)d-osobowa"
+msgstr[3] "Ekipa %(count)d-osobowa"
 
 #: accounts/models.py
 msgid "Window fitting"
-msgstr ""
+msgstr "Montaż okien"
 
 #: accounts/models.py
 msgid "Drywall"
-msgstr ""
+msgstr "Sucha zabudowa"
 
 #: accounts/models.py
 msgid "Plastering"
-msgstr ""
+msgstr "Tynkowanie"
 
 #: accounts/models.py
 msgid "Painting"
-msgstr ""
+msgstr "Malowanie"
 
 #: accounts/models.py
 msgid "Tiling"
-msgstr ""
+msgstr "Glazurnictwo"
 
 #: accounts/models.py
 msgid "Roofing"
-msgstr ""
+msgstr "Dekarstwo"
 
 #: accounts/models.py
 msgid "Bricklaying"
-msgstr ""
+msgstr "Murarstwo"
 
 #: accounts/models.py
 msgid "Carpentry"
-msgstr ""
+msgstr "Ciesielstwo"
 
 #: accounts/models.py
 msgid "Electrical"
-msgstr ""
+msgstr "Instalacje elektryczne"
 
 #: accounts/models.py
 msgid "Plumbing & heating"
-msgstr ""
+msgstr "Hydraulika i ogrzewanie"
 
 #: accounts/models.py
 msgid "Landscaping"
-msgstr ""
+msgstr "Prace ogrodowe"
 
 #: accounts/models.py
 msgid "General contractor"
-msgstr ""
+msgstr "Generalny wykonawca"
 
 #: accounts/models.py
 msgid "Private person"
-msgstr ""
+msgstr "Osoba prywatna"
 
 #: accounts/models.py
 msgid "Other"
-msgstr ""
+msgstr "Inne"
 
 #: accounts/models.py
 msgid "company name"
-msgstr ""
+msgstr "nazwa firmy"
 
 #: accounts/models.py
 msgid "Leave empty if you hire as a private person."
-msgstr ""
+msgstr "Proszę zostawić puste, jeśli zatrudnia Pan/Pani jako osoba prywatna."
 
 #: accounts/models.py
 msgid "trades"
-msgstr ""
+msgstr "branże"
 
 #: accounts/models.py
 msgid "employer profile"
-msgstr ""
+msgstr "profil zleceniodawcy"
 
 #: accounts/models.py
 msgid "employer profiles"
-msgstr ""
+msgstr "profile zleceniodawców"
 
 #: accounts/models.py
 msgid "email verification required"
-msgstr ""
+msgstr "wymagane potwierdzenie e-maila"
 
 #: accounts/models.py
-msgid ""
-"Off: a new account is active and logged in at once, with no confirmation "
-"email, e.g. for a demo. Its address stays unconfirmed, so it gets no emails."
-msgstr ""
+msgid "Off: a new account is active and logged in at once, with no confirmation email, e.g. for a demo. Its address stays unconfirmed, so it gets no emails."
+msgstr "Wyłączone: nowe konto jest od razu aktywne i zalogowane, bez e-maila potwierdzającego, np. do prezentacji. Jego adres pozostaje niepotwierdzony, więc nie otrzymuje e-maili."
 
 #: accounts/models.py
 msgid "site settings"
-msgstr ""
+msgstr "ustawienia strony"
 
 #: accounts/validators.py
-msgid ""
-"Enter the number with a country code, e.g. +49 151 12345678, or with an area "
-"code, e.g. 0151 12345678."
-msgstr ""
+msgid "Enter the number with a country code, e.g. +49 151 12345678, or with an area code, e.g. 0151 12345678."
+msgstr "Proszę podać numer z kodem kraju, np. +49 151 12345678, lub z numerem kierunkowym, np. 0151 12345678."
 
 #: accounts/views.py
 msgid "Welcome to BauHelfer! Your account is ready."
-msgstr ""
+msgstr "Witamy w BauHelfer! Konto jest gotowe."
 
 #: accounts/views.py
 msgid "Your email is confirmed. Welcome to BauHelfer!"
-msgstr ""
+msgstr "E-mail potwierdzony. Witamy w BauHelfer!"
 
 #: accounts/views.py
 msgid "Profile saved."
-msgstr ""
+msgstr "Profil zapisany."
 
 #: jobs/forms.py
 msgid "Hourly rate, €"
-msgstr ""
+msgstr "Stawka godzinowa, €"
 
 #: jobs/forms.py
 msgid "Write in your language. Workers read it in theirs."
-msgstr ""
+msgstr "Proszę pisać we własnym języku. Pracownicy przeczytają to w swoim."
 
 #: jobs/forms.py
 msgid "The date cannot be in the past."
-msgstr ""
+msgstr "Data nie może być w przeszłości."
 
 #: jobs/forms.py
 #, python-format
 msgid "At least %(wage)s € on this date (German minimum wage)."
-msgstr ""
+msgstr "Co najmniej %(wage)s € w tym dniu (płaca minimalna w Niemczech)."
 
 #: jobs/forms.py
 msgid "Any day"
-msgstr ""
+msgstr "Dowolny dzień"
 
 #: jobs/forms.py
 msgid "Next 7 days"
-msgstr ""
+msgstr "Najbliższe 7 dni"
 
 #: jobs/forms.py
 msgid "Next 30 days"
-msgstr ""
+msgstr "Najbliższe 30 dni"
 
 #: jobs/forms.py
 msgid "Date"
-msgstr ""
+msgstr "Data"
 
 #: jobs/forms.py
 msgid "All types"
-msgstr ""
+msgstr "Wszystkie rodzaje"
 
 #: jobs/forms.py
 msgid "Job type"
-msgstr ""
+msgstr "Rodzaj pracy"
 
 #: jobs/forms.py
 msgid "All districts"
-msgstr ""
+msgstr "Wszystkie dzielnice"
 
 #: jobs/forms.py
 msgid "District"
-msgstr ""
+msgstr "Dzielnica"
 
 #: jobs/forms.py
 msgid "Photos"
-msgstr ""
+msgstr "Zdjęcia"
 
 #: jobs/forms.py
 msgid "Choose at least one photo."
-msgstr ""
+msgstr "Proszę wybrać co najmniej jedno zdjęcie."
 
 #: jobs/forms.py
 #, python-format
 msgid "You can add %(count)d more photo."
 msgid_plural "You can add %(count)d more photos."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Można dodać jeszcze %(count)d zdjęcie."
+msgstr[1] "Można dodać jeszcze %(count)d zdjęcia."
+msgstr[2] "Można dodać jeszcze %(count)d zdjęć."
+msgstr[3] "Można dodać jeszcze %(count)d zdjęcia."
 
 #: jobs/forms.py
 #, python-format
 msgid "%(name)s: %(error)s"
-msgstr ""
+msgstr "%(name)s: %(error)s"
 
 #: jobs/forms.py
 msgid "Message to the employer"
-msgstr ""
+msgstr "Wiadomość do zleceniodawcy"
 
 #: jobs/forms.py
 msgid "Workers I bring"
-msgstr ""
+msgstr "Liczba pracowników, których przyprowadzam"
 
 #: jobs/models.py
 msgid "Munich area (outside the city)"
-msgstr ""
+msgstr "Okolice Monachium (poza miastem)"
 
 #: jobs/models.py
 msgid "Open"
-msgstr ""
+msgstr "Otwarte"
 
 #: jobs/models.py
 msgid "Filled"
-msgstr ""
+msgstr "Obsadzone"
 
 #: jobs/models.py
 msgid "Done"
-msgstr ""
+msgstr "Zakończone"
 
 #: jobs/models.py
 msgid "Cancelled"
-msgstr ""
+msgstr "Anulowane"
 
 #: jobs/models.py
 msgid "employer"
-msgstr ""
+msgstr "zleceniodawca"
 
 #: jobs/models.py
 msgid "job type"
-msgstr ""
+msgstr "rodzaj pracy"
 
 #: jobs/models.py
 msgid "description"
-msgstr ""
+msgstr "opis"
 
 #: jobs/models.py
 msgid "original language"
-msgstr ""
+msgstr "język oryginału"
 
 #: jobs/models.py
 msgid "address"
-msgstr ""
+msgstr "adres"
 
 #: jobs/models.py
 msgid "district"
-msgstr ""
+msgstr "dzielnica"
 
 #: jobs/models.py
 msgid "latitude"
-msgstr ""
+msgstr "szerokość geograficzna"
 
 #: jobs/models.py
 msgid "longitude"
-msgstr ""
+msgstr "długość geograficzna"
 
 #: jobs/models.py
 msgid "date"
-msgstr ""
+msgstr "data"
 
 #: jobs/models.py
 msgid "start time"
-msgstr ""
+msgstr "godzina rozpoczęcia"
 
 #: jobs/models.py
 msgid "hours"
-msgstr ""
+msgstr "godziny"
 
 #: jobs/models.py
 msgid "workers needed"
-msgstr ""
+msgstr "potrzebni pracownicy"
 
 #: jobs/models.py
 msgid "hourly rate (€)"
-msgstr ""
+msgstr "stawka godzinowa (€)"
 
 #: jobs/models.py
 msgid "status"
-msgstr ""
+msgstr "status"
 
 #: jobs/models.py
 msgid "created at"
-msgstr ""
+msgstr "utworzono"
 
 #: jobs/models.py
 msgid "job"
-msgstr ""
+msgstr "zlecenie"
 
 #: jobs/models.py
 msgid "jobs"
-msgstr ""
+msgstr "zlecenia"
 
 #: jobs/models.py
 msgid "photo"
-msgstr ""
+msgstr "zdjęcie"
 
 #: jobs/models.py
 msgid "thumbnail"
-msgstr ""
+msgstr "miniatura"
 
 #: jobs/models.py
 msgid "uploaded at"
-msgstr ""
+msgstr "przesłano"
 
 #: jobs/models.py
 msgid "job photo"
-msgstr ""
+msgstr "zdjęcie zlecenia"
 
 #: jobs/models.py
 msgid "job photos"
-msgstr ""
+msgstr "zdjęcia zleceń"
 
 #: jobs/models.py
 msgid "Pending"
-msgstr ""
+msgstr "Oczekujące"
 
 #: jobs/models.py
 msgid "Accepted"
-msgstr ""
+msgstr "Przyjęte"
 
 #: jobs/models.py
 msgid "Rejected"
-msgstr ""
+msgstr "Odrzucone"
 
 #: jobs/models.py
 msgid "Job filled"
-msgstr ""
+msgstr "Zlecenie obsadzone"
 
 #: jobs/models.py
 msgid "Withdrawn"
-msgstr ""
+msgstr "Wycofane"
 
 #: jobs/models.py
 msgid "worker"
-msgstr ""
+msgstr "pracownik"
 
 #: jobs/models.py
 msgid "message"
-msgstr ""
+msgstr "wiadomość"
 
 #: jobs/models.py
 msgid "workers offered"
-msgstr ""
+msgstr "zaoferowani pracownicy"
 
 #: jobs/models.py
 msgid "workers accepted"
-msgstr ""
+msgstr "przyjęci pracownicy"
 
 #: jobs/models.py
 msgid "application"
-msgstr ""
+msgstr "zgłoszenie"
 
 #: jobs/models.py
 msgid "applications"
-msgstr ""
+msgstr "zgłoszenia"
 
 #: jobs/photos.py
 msgid "Upload a photo in JPEG, PNG or WebP format."
-msgstr ""
+msgstr "Proszę przesłać zdjęcie w formacie JPEG, PNG lub WebP."
 
 #: jobs/photos.py
 msgid "This picture has too many pixels. Please upload a normal photo."
-msgstr ""
+msgstr "To zdjęcie ma za dużo pikseli. Proszę przesłać zwykłe zdjęcie."
 
 #: jobs/photos.py
 msgid "A photo can be at most 5 MB."
-msgstr ""
+msgstr "Zdjęcie może mieć najwyżej 5 MB."
 
 #: jobs/views.py
 msgid "Please fill in your company profile before posting a job."
-msgstr ""
+msgstr "Przed dodaniem zlecenia proszę uzupełnić profil firmy."
 
 #: jobs/views.py
 msgid "Job posted. You can add photos below."
-msgstr ""
+msgstr "Zlecenie dodane. Poniżej można dodać zdjęcia."
 
 #: jobs/views.py templates/jobs/job_detail.html
 msgid "Past"
-msgstr ""
+msgstr "Minione"
 
 #: jobs/views.py
 msgid "Job saved."
-msgstr ""
+msgstr "Zlecenie zapisane."
 
 #: jobs/views.py
 #, python-format
 msgid "%(count)d photo added."
 msgid_plural "%(count)d photos added."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Dodano %(count)d zdjęcie."
+msgstr[1] "Dodano %(count)d zdjęcia."
+msgstr[2] "Dodano %(count)d zdjęć."
+msgstr[3] "Dodano %(count)d zdjęcia."
 
 #: jobs/views.py
 msgid "Photo deleted."
-msgstr ""
+msgstr "Zdjęcie usunięte."
 
 #: jobs/views.py
 msgid "Job cancelled."
-msgstr ""
+msgstr "Zlecenie anulowane."
 
 #: jobs/views.py
 msgid "Complete your profile to apply."
-msgstr ""
+msgstr "Aby wysłać zgłoszenie, proszę uzupełnić profil."
 
 #: jobs/views.py
 msgid "This job no longer takes applications."
-msgstr ""
+msgstr "To zlecenie nie przyjmuje już zgłoszeń."
 
 #: jobs/views.py
 msgid "You have already applied to this job."
-msgstr ""
+msgstr "Zgłoszenie do tego zlecenia zostało już wysłane."
 
 #: jobs/views.py
 msgid "Application sent."
-msgstr ""
+msgstr "Zgłoszenie wysłane."
 
 #: jobs/views.py
 msgid "This application was already decided."
-msgstr ""
+msgstr "W sprawie tego zgłoszenia już podjęto decyzję."
 
 #: jobs/views.py
 #, python-format
 msgid "Accepted: %(count)d worker from %(name)s."
 msgid_plural "Accepted: %(count)d workers from %(name)s."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Przyjęto: %(count)d pracownik od %(name)s."
+msgstr[1] "Przyjęto: %(count)d pracowników od %(name)s."
+msgstr[2] "Przyjęto: %(count)d pracowników od %(name)s."
+msgstr[3] "Przyjęto: %(count)d pracownika od %(name)s."
 
 #: jobs/views.py
 msgid "The job is filled. The other pending applications were closed."
-msgstr ""
+msgstr "Zlecenie obsadzone. Pozostałe oczekujące zgłoszenia zostały zamknięte."
 
 #: jobs/views.py
 #, python-format
 msgid "Rejected: %(name)s."
-msgstr ""
+msgstr "Odrzucono: %(name)s."
 
 #: jobs/views.py
 #, python-format
 msgid "Cancelled: %(name)s. The job is open again."
-msgstr ""
+msgstr "Anulowano: %(name)s. Zlecenie jest znowu otwarte."
 
 #: jobs/views.py
 #, python-format
 msgid "Cancelled: %(name)s."
-msgstr ""
+msgstr "Anulowano: %(name)s."
 
 #: jobs/views.py
 msgid "This application can no longer be withdrawn."
-msgstr ""
+msgstr "Tego zgłoszenia nie można już wycofać."
 
 #: jobs/views.py
 msgid "Application withdrawn."
-msgstr ""
+msgstr "Zgłoszenie wycofane."
 
 #: templates/_language_switcher.html
 msgid "Change language"
@@ -724,281 +710,276 @@ msgstr "Zmień język"
 
 #: templates/accounts/_email_notifications.html
 msgid "Email notifications"
-msgstr ""
+msgstr "Powiadomienia e-mail"
 
 #: templates/accounts/_email_notifications.html
 msgid "On"
-msgstr ""
+msgstr "Wł."
 
 #: templates/accounts/_email_notifications.html
 msgid "Off"
-msgstr ""
+msgstr "Wył."
 
 #: templates/accounts/_employer_profile_card.html
 msgid "Company"
-msgstr ""
+msgstr "Firma"
 
 #: templates/accounts/_employer_profile_card.html
 msgid "Contact person"
-msgstr ""
+msgstr "Osoba kontaktowa"
 
 #: templates/accounts/_employer_profile_card.html
 #: templates/accounts/employer_profile.html
 #: templates/accounts/worker_profile.html templates/jobs/job_detail.html
 msgid "Phone"
-msgstr ""
+msgstr "Telefon"
 
 #: templates/accounts/_phone.html templates/accounts/employer_profile.html
 #: templates/accounts/worker_profile.html
 msgid "not given"
-msgstr ""
+msgstr "nie podano"
 
 #: templates/accounts/_worker_profile_card.html
 msgid "Name"
-msgstr ""
+msgstr "Imię i nazwisko"
 
 #: templates/accounts/_worker_profile_card.html
 msgid "Team"
-msgstr ""
+msgstr "Ekipa"
 
 #: templates/accounts/_worker_profile_card.html
 msgid "Languages"
-msgstr ""
+msgstr "Języki"
 
 #: templates/accounts/_worker_profile_card.html
 msgid "Work permit"
-msgstr ""
+msgstr "Pozwolenie na pracę"
 
 #: templates/accounts/_worker_profile_card.html
 msgid "Confirmed by the worker"
-msgstr ""
+msgstr "Potwierdzone przez pracownika"
 
 #: templates/accounts/_worker_profile_card.html
 msgid "Not confirmed"
-msgstr ""
+msgstr "Niepotwierdzone"
 
 #: templates/accounts/employer_profile.html
 #: templates/accounts/employer_profile_form.html templates/base.html
 msgid "My company"
-msgstr ""
+msgstr "Moja firma"
 
 #: templates/accounts/employer_profile.html
 #: templates/accounts/worker_profile.html
 msgid "Contact details"
-msgstr ""
+msgstr "Dane kontaktowe"
 
 #: templates/accounts/employer_profile.html
 msgid "Workers see these only after you accept their application."
-msgstr ""
+msgstr "Pracownicy widzą je dopiero po przyjęciu ich zgłoszenia."
 
 #: templates/accounts/employer_profile.html
 #: templates/accounts/employer_profile_form.html
 #: templates/accounts/worker_profile.html
 #: templates/accounts/worker_profile_form.html
 msgid "Edit profile"
-msgstr ""
+msgstr "Edytuj profil"
 
 #: templates/accounts/employer_profile_form.html
 msgid "Workers read this on your jobs."
-msgstr ""
+msgstr "Pracownicy widzą to przy Pana/Pani zleceniach."
 
 #: templates/accounts/employer_profile_form.html
 #: templates/accounts/worker_profile_form.html
 msgid "Save profile"
-msgstr ""
+msgstr "Zapisz profil"
 
 #: templates/accounts/role_select.html
 msgid "Who are you?"
-msgstr ""
+msgstr "Kim Pan/Pani jest?"
 
 #: templates/accounts/role_select.html
 msgid "Choose once. You cannot change it later."
-msgstr ""
+msgstr "Wybór jest jednorazowy. Później nie można go zmienić."
 
 #: templates/accounts/role_select.html
 msgid "I need workers"
-msgstr ""
+msgstr "Szukam pracowników"
 
 #: templates/accounts/role_select.html
 msgid "I am looking for work"
-msgstr ""
+msgstr "Szukam pracy"
 
 #: templates/accounts/worker_detail.html
 msgid "Worker profile"
-msgstr ""
+msgstr "Profil pracownika"
 
 #: templates/accounts/worker_profile.html
 #: templates/accounts/worker_profile_form.html templates/base.html
 msgid "My profile"
-msgstr ""
+msgstr "Mój profil"
 
 #: templates/accounts/worker_profile.html
 #, python-format
 msgid "Allowed to work in Germany — confirmed on %(date)s."
-msgstr ""
+msgstr "Prawo do pracy w Niemczech — potwierdzone %(date)s."
 
 #: templates/accounts/worker_profile.html
 msgid "Employers see these only after they accept your application."
-msgstr ""
+msgstr "Zleceniodawcy widzą je dopiero po przyjęciu zgłoszenia."
 
 #: templates/accounts/worker_profile_form.html
 msgid "Employers read this when you apply for a job."
-msgstr ""
+msgstr "Zleceniodawcy widzą to po otrzymaniu zgłoszenia."
 
 #: templates/base.html
 msgid "Main navigation"
-msgstr ""
+msgstr "Menu główne"
 
 #: templates/base.html
 msgid "Menu"
-msgstr ""
+msgstr "Menu"
 
 #: templates/base.html templates/jobs/my_applications.html
 msgid "My applications"
-msgstr ""
+msgstr "Moje zgłoszenia"
 
 #: templates/base.html templates/jobs/job_form.html
 #: templates/jobs/job_list.html templates/jobs/my_jobs.html
 msgid "Post a job"
-msgstr ""
+msgstr "Dodaj zlecenie"
 
 #: templates/base.html templates/jobs/job_detail.html
 #: templates/jobs/my_jobs.html
 msgid "My jobs"
-msgstr ""
+msgstr "Moje zlecenia"
 
 #: templates/base.html
 msgid "Log out"
-msgstr ""
+msgstr "Wyloguj"
 
 #: templates/base.html templates/registration/login.html
 #: templates/registration/password_reset_complete.html
 #: templates/registration/register.html
 #: templates/registration/verify_email.html
 msgid "Log in"
-msgstr ""
+msgstr "Zaloguj"
 
 #: templates/base.html templates/registration/login.html
 #: templates/registration/register.html
 msgid "Register"
-msgstr ""
+msgstr "Rejestracja"
 
 #: templates/base.html
 msgid "Munich"
-msgstr ""
+msgstr "Monachium"
 
 #: templates/emails/_footer.txt templates/emails/verify_email_body.txt
 #: templates/registration/password_reset_email.txt
 msgid "The BauHelfer team"
-msgstr ""
+msgstr "Zespół BauHelfer"
 
 #: templates/emails/_footer.txt
 msgid "To turn these emails off:"
-msgstr ""
+msgstr "Aby wyłączyć te e-maile:"
 
 #: templates/emails/_greeting.txt
 #, python-format
 msgid "Hello %(name)s,"
-msgstr ""
+msgstr "Dzień dobry, %(name)s,"
 
 #: templates/emails/_greeting.txt templates/emails/verify_email_body.txt
 #: templates/registration/password_reset_email.txt
 msgid "Hello,"
-msgstr ""
+msgstr "Dzień dobry,"
 
 #: templates/emails/application_accepted_body.txt
 #, python-format
-msgid ""
-"The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: "
-"%(counter)s worker."
-msgid_plural ""
-"The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: "
-"%(counter)s workers."
-msgstr[0] ""
-msgstr[1] ""
+msgid "The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: %(counter)s worker."
+msgid_plural "The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: %(counter)s workers."
+msgstr[0] "Zleceniodawca przyjął Pana/Panią do pracy: %(job_type)s, %(date)s, początek o %(time)s: %(counter)s pracownik."
+msgstr[1] "Zleceniodawca przyjął Pana/Panią do pracy: %(job_type)s, %(date)s, początek o %(time)s: %(counter)s pracowników."
+msgstr[2] "Zleceniodawca przyjął Pana/Panią do pracy: %(job_type)s, %(date)s, początek o %(time)s: %(counter)s pracowników."
+msgstr[3] "Zleceniodawca przyjął Pana/Panią do pracy: %(job_type)s, %(date)s, początek o %(time)s: %(counter)s pracownika."
 
 #: templates/emails/application_accepted_body.txt
 msgid "The employer's contact and the address are on “My applications”:"
-msgstr ""
+msgstr "Kontakt do zleceniodawcy i adres są na stronie „Moje zgłoszenia”:"
 
 #: templates/emails/application_accepted_subject.txt
 #, python-format
 msgid "You are accepted: %(job_type)s, %(date)s"
-msgstr ""
+msgstr "Zgłoszenie przyjęte: %(job_type)s, %(date)s"
 
 #: templates/emails/application_rejected_body.txt
 #, python-format
-msgid ""
-"The employer did not accept your application for %(job_type)s, %(date)s."
-msgstr ""
+msgid "The employer did not accept your application for %(job_type)s, %(date)s."
+msgstr "Zleceniodawca nie przyjął zgłoszenia: %(job_type)s, %(date)s."
 
 #: templates/emails/application_rejected_body.txt
 msgid "Other jobs are waiting for you:"
-msgstr ""
+msgstr "Czekają inne zlecenia:"
 
 #: templates/emails/application_rejected_subject.txt
 #, python-format
 msgid "Application not accepted: %(job_type)s, %(date)s"
-msgstr ""
+msgstr "Zgłoszenie nieprzyjęte: %(job_type)s, %(date)s"
 
 #: templates/emails/new_application_body.txt
 #, python-format
-msgid ""
-"%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s "
-"worker."
-msgid_plural ""
-"%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s "
-"workers."
-msgstr[0] ""
-msgstr[1] ""
+msgid "%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s worker."
+msgid_plural "%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s workers."
+msgstr[0] "Nowe zgłoszenie od %(name)s do zlecenia %(job_type)s, %(date)s: %(counter)s pracownik."
+msgstr[1] "Nowe zgłoszenie od %(name)s do zlecenia %(job_type)s, %(date)s: %(counter)s pracowników."
+msgstr[2] "Nowe zgłoszenie od %(name)s do zlecenia %(job_type)s, %(date)s: %(counter)s pracowników."
+msgstr[3] "Nowe zgłoszenie od %(name)s do zlecenia %(job_type)s, %(date)s: %(counter)s pracownika."
 
 #: templates/emails/new_application_body.txt
 msgid "Accept or reject the application here:"
-msgstr ""
+msgstr "Zgłoszenie można przyjąć lub odrzucić tutaj:"
 
 #: templates/emails/new_application_subject.txt
 #, python-format
 msgid "New application: %(job_type)s, %(date)s"
-msgstr ""
+msgstr "Nowe zgłoszenie: %(job_type)s, %(date)s"
 
 #: templates/emails/verify_email_body.txt
-msgid ""
-"Someone created a BauHelfer account with this email address. Open this link "
-"to confirm the address and activate the account:"
-msgstr ""
+msgid "Someone created a BauHelfer account with this email address. Open this link to confirm the address and activate the account:"
+msgstr "Ktoś założył konto BauHelfer z tym adresem e-mail. Proszę otworzyć link, aby potwierdzić adres i aktywować konto:"
 
 #: templates/emails/verify_email_body.txt
 #, python-format
 msgid "The link works once and for %(counter)s day."
 msgid_plural "The link works once and for %(counter)s days."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Link działa jeden raz przez %(counter)s dzień."
+msgstr[1] "Link działa jeden raz przez %(counter)s dni."
+msgstr[2] "Link działa jeden raz przez %(counter)s dni."
+msgstr[3] "Link działa jeden raz przez %(counter)s dnia."
 
 #: templates/emails/verify_email_body.txt
-msgid ""
-"If you did not create an account, ignore this email: without the link "
-"nothing happens."
-msgstr ""
+msgid "If you did not create an account, ignore this email: without the link nothing happens."
+msgstr "Jeśli to nie Pan/Pani zakładał(a) konto, proszę zignorować ten e-mail: bez kliknięcia w link nic się nie stanie."
 
 #: templates/emails/verify_email_subject.txt
 msgid "Confirm your email for BauHelfer"
-msgstr ""
+msgstr "Potwierdzenie e-maila w BauHelfer"
 
 #: templates/jobs/_application_status_badge.html
 msgid "Job cancelled"
-msgstr ""
+msgstr "Zlecenie anulowane"
 
 #: templates/jobs/_crew.html
 #, python-format
 msgid "%(taken)s of %(offered)s workers"
-msgstr ""
+msgstr "%(taken)s z %(offered)s pracowników"
 
 #: templates/jobs/_crew.html templates/jobs/_job_summary.html
 #, python-format
 msgid "%(workers)s worker"
 msgid_plural "%(workers)s workers"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(workers)s pracownik"
+msgstr[1] "%(workers)s pracowników"
+msgstr[2] "%(workers)s pracowników"
+msgstr[3] "%(workers)s pracownika"
 
 #: templates/jobs/_job_card.html templates/jobs/_job_summary.html
 #: templates/jobs/job_detail.html
@@ -1010,474 +991,476 @@ msgstr "%(rate)s €/godz."
 #, python-format
 msgid "Needs %(workers)s worker"
 msgid_plural "Needs %(workers)s workers"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Potrzebny %(workers)s pracownik"
+msgstr[1] "Potrzeba %(workers)s pracowników"
+msgstr[2] "Potrzeba %(workers)s pracowników"
+msgstr[3] "Potrzeba %(workers)s pracownika"
 
 #: templates/jobs/_job_photos.html
 #, python-format
 msgid "Photos (%(count)s of %(max)s)"
-msgstr ""
+msgstr "Zdjęcia (%(count)s z %(max)s)"
 
 #: templates/jobs/_job_photos.html templates/jobs/_job_thumbnail.html
 #: templates/jobs/job_detail.html
 msgid "Job photo"
-msgstr ""
+msgstr "Zdjęcie zlecenia"
 
 #: templates/jobs/_job_photos.html
 msgid "Delete photo"
-msgstr ""
+msgstr "Usuń zdjęcie"
 
 #: templates/jobs/_job_photos.html
 msgid "No photos yet."
-msgstr ""
+msgstr "Brak zdjęć."
 
 #: templates/jobs/_job_photos.html
 msgid "Location data is removed from photos."
-msgstr ""
+msgstr "Dane o lokalizacji są usuwane ze zdjęć."
 
 #: templates/jobs/_job_photos.html
 msgid "Add photos"
-msgstr ""
+msgstr "Dodaj zdjęcia"
 
 #: templates/jobs/_job_photos.html
 #, python-format
 msgid "That is the maximum of %(max)s photos."
-msgstr ""
+msgstr "To maksimum: %(max)s zdjęć."
 
 #: templates/jobs/_job_summary.html
 #, python-format
 msgid "%(hours)s h"
-msgstr ""
+msgstr "%(hours)s godz."
 
 #: templates/jobs/_job_thumbnail.html
 #, python-format
 msgid "%(photos)s photo"
 msgid_plural "%(photos)s photos"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(photos)s zdjęcie"
+msgstr[1] "%(photos)s zdjęcia"
+msgstr[2] "%(photos)s zdjęć"
+msgstr[3] "%(photos)s zdjęcia"
 
 #: templates/jobs/_my_application_card.html
 msgid "Your crew:"
-msgstr ""
+msgstr "Pana/Pani ekipa:"
 
 #: templates/jobs/_my_application_card.html
 msgid "Withdraw your application? This cannot be undone."
-msgstr ""
+msgstr "Wycofać zgłoszenie? Tej operacji nie można cofnąć."
 
 #: templates/jobs/_my_application_card.html
 msgid "Withdraw"
-msgstr ""
+msgstr "Wycofaj"
 
 #: templates/jobs/_my_application_card.html
 msgid "Contact"
-msgstr ""
+msgstr "Kontakt"
 
 #: templates/jobs/_my_application_card.html
 msgid "Your message:"
-msgstr ""
+msgstr "Pana/Pani wiadomość:"
 
 #: templates/jobs/_my_application_card.html
 msgid "The job is over."
-msgstr ""
+msgstr "Praca zakończona."
 
 #: templates/jobs/_my_application_card.html
 msgid "You withdrew this application."
-msgstr ""
+msgstr "Zgłoszenie zostało wycofane."
 
 #: templates/jobs/_my_application_card.html
 msgid "The employer chose other workers."
-msgstr ""
+msgstr "Zleceniodawca wybrał innych pracowników."
 
 #: templates/jobs/_my_application_card.html
 msgid "The job was filled by other workers."
-msgstr ""
+msgstr "Zlecenie obsadzili inni pracownicy."
 
 #: templates/jobs/_my_application_card.html
 msgid "The employer cancelled the job."
-msgstr ""
+msgstr "Zleceniodawca anulował zlecenie."
 
 #: templates/jobs/_my_application_card.html
 msgid "The employer cancelled your place."
-msgstr ""
+msgstr "Zleceniodawca anulował Pana/Pani miejsce."
 
 #: templates/jobs/_my_application_card.html
 msgid "The job is over. The contacts are no longer shown."
-msgstr ""
+msgstr "Praca zakończona. Dane kontaktowe nie są już wyświetlane."
 
 #: templates/jobs/_my_job_card.html
 #, python-format
 msgid "%(applications)s application"
 msgid_plural "%(applications)s applications"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(applications)s zgłoszenie"
+msgstr[1] "%(applications)s zgłoszenia"
+msgstr[2] "%(applications)s zgłoszeń"
+msgstr[3] "%(applications)s zgłoszenia"
 
 #: templates/jobs/_my_job_card.html
 msgid "No applications yet"
-msgstr ""
+msgstr "Brak zgłoszeń"
 
 #: templates/jobs/_my_job_card.html templates/jobs/job_detail.html
 msgid "Edit"
-msgstr ""
+msgstr "Edytuj"
 
 #: templates/jobs/_my_job_card.html templates/jobs/job_confirm_cancel.html
 msgid "Cancel job"
-msgstr ""
+msgstr "Anuluj zlecenie"
 
 #: templates/jobs/_photo_placeholder.html
 msgid "No photo"
-msgstr ""
+msgstr "Brak zdjęcia"
 
 #: templates/jobs/job_confirm_cancel.html
 msgid "Cancel this job?"
-msgstr ""
+msgstr "Anulować to zlecenie?"
 
 #: templates/jobs/job_confirm_cancel.html
 msgid "Workers will no longer see it. This cannot be undone."
-msgstr ""
+msgstr "Pracownicy nie będą go już widzieć. Tej operacji nie można cofnąć."
 
 #: templates/jobs/job_confirm_cancel.html
 msgid "Yes, cancel the job"
-msgstr ""
+msgstr "Tak, anuluj zlecenie"
 
 #: templates/jobs/job_confirm_cancel.html
 msgid "No, keep it"
-msgstr ""
+msgstr "Nie, zostaw"
 
 #: templates/jobs/job_detail.html
 msgid "Jobs"
-msgstr ""
+msgstr "Zlecenia"
 
 #: templates/jobs/job_detail.html
 msgid "Previous photo"
-msgstr ""
+msgstr "Poprzednie zdjęcie"
 
 #: templates/jobs/job_detail.html
 msgid "Next photo"
-msgstr ""
+msgstr "Następne zdjęcie"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "(%(hours)s h)"
-msgstr ""
+msgstr "(%(hours)s godz.)"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "%(found)s of %(needed)s workers found"
-msgstr ""
+msgstr "Znaleziono pracowników: %(found)s z %(needed)s"
 
 #: templates/jobs/job_detail.html
 msgid "Address"
-msgstr ""
+msgstr "Adres"
 
 #: templates/jobs/job_detail.html
 msgid "The exact address is shown after the employer accepts you."
-msgstr ""
+msgstr "Dokładny adres pojawi się po przyjęciu przez zleceniodawcę."
 
 #: templates/jobs/job_detail.html
 msgid "Workers found"
-msgstr ""
+msgstr "Znalezieni pracownicy"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "Applications (%(count)s)"
-msgstr ""
+msgstr "Zgłoszenia (%(count)s)"
 
 #: templates/jobs/job_detail.html
 msgid "No skill:"
-msgstr ""
+msgstr "Brak umiejętności:"
 
 #: templates/jobs/job_detail.html
 msgid "Work permit not confirmed"
-msgstr ""
+msgstr "Pozwolenie na pracę niepotwierdzone"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "Sent %(date)s"
-msgstr ""
+msgstr "Wysłano %(date)s"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "Cancel %(name)s? This cannot be undone."
-msgstr ""
+msgstr "Anulować udział: %(name)s? Tej operacji nie można cofnąć."
 
 #: templates/jobs/job_detail.html
 msgid "Cancel"
-msgstr ""
+msgstr "Anuluj"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "Accept %(taken)s of %(offered)s"
-msgstr ""
+msgstr "Przyjmij %(taken)s z %(offered)s"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "Accept %(count)s"
-msgstr ""
+msgstr "Przyjmij %(count)s"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "Reject %(name)s? This cannot be undone."
-msgstr ""
+msgstr "Odrzucić zgłoszenie: %(name)s? Tej operacji nie można cofnąć."
 
 #: templates/jobs/job_detail.html
 msgid "Reject"
-msgstr ""
+msgstr "Odrzuć"
 
 #: templates/jobs/job_detail.html
 msgid "Accepting fills the job: the other pending applications will be closed."
-msgstr ""
+msgstr "Przyjęcie obsadza zlecenie: pozostałe oczekujące zgłoszenia zostaną zamknięte."
 
 #: templates/jobs/job_detail.html
 msgid "No applications yet."
-msgstr ""
+msgstr "Brak zgłoszeń."
 
 #: templates/jobs/job_detail.html
 msgid "You applied"
-msgstr ""
+msgstr "Zgłoszenie wysłane"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "%(counter)s worker"
 msgid_plural "%(counter)s workers"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(counter)s pracownik"
+msgstr[1] "%(counter)s pracowników"
+msgstr[2] "%(counter)s pracowników"
+msgstr[3] "%(counter)s pracownika"
 
 #: templates/jobs/job_detail.html
 msgid "Apply"
-msgstr ""
+msgstr "Zgłoś się"
 
 #: templates/jobs/job_detail.html
 msgid "Send application"
-msgstr ""
+msgstr "Wyślij zgłoszenie"
 
 #: templates/jobs/job_detail.html
 msgid "Complete your profile to apply"
-msgstr ""
+msgstr "Uzupełnij profil, aby się zgłosić"
 
 #: templates/jobs/job_detail.html
 msgid "Log in to apply"
-msgstr ""
+msgstr "Zaloguj się, aby się zgłosić"
 
 #: templates/jobs/job_form.html
 msgid "Edit job"
-msgstr ""
+msgstr "Edytuj zlecenie"
 
 #: templates/jobs/job_form.html
 msgid "Job details"
-msgstr ""
+msgstr "Szczegóły zlecenia"
 
 #: templates/jobs/job_form.html
 msgid "You can add photos after you publish the job."
-msgstr ""
+msgstr "Zdjęcia można dodać po opublikowaniu zlecenia."
 
 #: templates/jobs/job_form.html
 msgid "Save changes"
-msgstr ""
+msgstr "Zapisz zmiany"
 
 #: templates/jobs/job_form.html
 msgid "Publish job"
-msgstr ""
+msgstr "Opublikuj zlecenie"
 
 #: templates/jobs/job_form.html
 msgid "Back to my jobs"
-msgstr ""
+msgstr "Wróć do moich zleceń"
 
 #: templates/jobs/job_list.html
 msgid "Jobs in Munich"
-msgstr ""
+msgstr "Zlecenia w Monachium"
 
 #: templates/jobs/job_list.html
 #, python-format
 msgid "%(counter)s open"
 msgid_plural "%(counter)s open"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Otwarte: %(counter)s"
+msgstr[1] "Otwarte: %(counter)s"
+msgstr[2] "Otwarte: %(counter)s"
+msgstr[3] "Otwarte: %(counter)s"
 
 #: templates/jobs/job_list.html
 msgid "Show"
-msgstr ""
+msgstr "Pokaż"
 
 #: templates/jobs/job_list.html
 msgid "Reset filters"
-msgstr ""
+msgstr "Wyczyść filtry"
 
 #: templates/jobs/job_list.html
 msgid "Need workers?"
-msgstr ""
+msgstr "Potrzebni pracownicy?"
 
 #: templates/jobs/job_list.html
 msgid "No jobs match these filters."
-msgstr ""
+msgstr "Brak zleceń dla tych filtrów."
 
 #: templates/jobs/job_list.html
 msgid "No open jobs right now."
-msgstr ""
+msgstr "Obecnie brak otwartych zleceń."
 
 #: templates/jobs/job_list.html
 msgid "Pages"
-msgstr ""
+msgstr "Strony"
 
 #: templates/jobs/job_list.html
 msgid "Previous"
-msgstr ""
+msgstr "Poprzednia"
 
 #: templates/jobs/job_list.html
 #, python-format
 msgid "Page %(number)s of %(total)s"
-msgstr ""
+msgstr "Strona %(number)s z %(total)s"
 
 #: templates/jobs/job_list.html
 msgid "Next"
-msgstr ""
+msgstr "Następna"
 
 #: templates/jobs/my_applications.html
 msgid "You have not applied to any job yet."
-msgstr ""
+msgstr "Nie wysłano jeszcze żadnego zgłoszenia."
 
 #: templates/jobs/my_applications.html
 msgid "Find a job"
-msgstr ""
+msgstr "Znajdź pracę"
 
 #: templates/jobs/my_jobs.html
 msgid "You have not posted any jobs yet."
-msgstr ""
+msgstr "Nie dodano jeszcze żadnego zlecenia."
 
 #: templates/registration/login.html
 msgid "Forgot your password?"
-msgstr ""
+msgstr "Zapomniane hasło?"
 
 #: templates/registration/login.html
 msgid "Did not get the confirmation email?"
-msgstr ""
+msgstr "Nie dotarł e-mail potwierdzający?"
 
 #: templates/registration/login.html
 msgid "No account yet?"
-msgstr ""
+msgstr "Brak konta?"
 
 #: templates/registration/password_reset_complete.html
 msgid "Password changed"
-msgstr ""
+msgstr "Hasło zmienione"
 
 #: templates/registration/password_reset_complete.html
 msgid "Your new password is saved. You can log in now."
-msgstr ""
+msgstr "Nowe hasło zostało zapisane. Można się teraz zalogować."
 
 #: templates/registration/password_reset_confirm.html
 msgid "Set a new password"
-msgstr ""
+msgstr "Ustaw nowe hasło"
 
 #: templates/registration/password_reset_confirm.html
 msgid "Save password"
-msgstr ""
+msgstr "Zapisz hasło"
 
 #: templates/registration/password_reset_confirm.html
 #: templates/registration/verify_email.html
 msgid "Link is not valid"
-msgstr ""
+msgstr "Link jest nieważny"
 
 #: templates/registration/password_reset_confirm.html
 msgid "This link was already used or has expired. Please ask for a new one."
-msgstr ""
+msgstr "Ten link został już użyty lub wygasł. Proszę poprosić o nowy."
 
 #: templates/registration/password_reset_confirm.html
 #: templates/registration/password_reset_form.html
 msgid "Reset password"
-msgstr ""
+msgstr "Zresetuj hasło"
 
 #: templates/registration/password_reset_done.html
 #: templates/registration/register_done.html
 #: templates/registration/verify_email_resend_done.html
 msgid "Check your email"
-msgstr ""
+msgstr "Proszę sprawdzić skrzynkę e-mail"
 
 #: templates/registration/password_reset_done.html
-msgid ""
-"If an account with this email exists, we have sent a link to set a new "
-"password. Check your spam folder too."
-msgstr ""
+msgid "If an account with this email exists, we have sent a link to set a new password. Check your spam folder too."
+msgstr "Jeśli konto z tym e-mailem istnieje, wysłaliśmy link do ustawienia nowego hasła. Proszę sprawdzić też folder spam."
 
 #: templates/registration/password_reset_email.txt
-msgid ""
-"Someone asked to reset the password for your BauHelfer account. Open this "
-"link to set a new password:"
-msgstr ""
+msgid "Someone asked to reset the password for your BauHelfer account. Open this link to set a new password:"
+msgstr "Ktoś poprosił o zresetowanie hasła do konta BauHelfer. Proszę otworzyć link, aby ustawić nowe hasło:"
 
 #: templates/registration/password_reset_email.txt
 msgid "If it was not you, ignore this email: your password stays the same."
-msgstr ""
+msgstr "Jeśli to nie Pan/Pani, proszę zignorować ten e-mail: hasło się nie zmieni."
 
 #: templates/registration/password_reset_form.html
-msgid ""
-"Enter the email of your account. We will send you a link to set a new "
-"password."
-msgstr ""
+msgid "Enter the email of your account. We will send you a link to set a new password."
+msgstr "Proszę podać e-mail konta. Wyślemy link do ustawienia nowego hasła."
 
 #: templates/registration/password_reset_form.html
 msgid "Send link"
-msgstr ""
+msgstr "Wyślij link"
 
 #: templates/registration/password_reset_subject.txt
 msgid "Reset your BauHelfer password"
-msgstr ""
+msgstr "Reset hasła w BauHelfer"
 
 #: templates/registration/register.html
 msgid "Create an account"
-msgstr ""
+msgstr "Załóż konto"
 
 #: templates/registration/register.html
 msgid "Already have an account?"
-msgstr ""
+msgstr "Konto już założone?"
 
 #: templates/registration/register_done.html
 #, python-format
 msgid "We sent a link to <strong class=\"break-all\">%(email)s</strong>."
-msgstr ""
+msgstr "Wysłaliśmy link na adres <strong class=\"break-all\">%(email)s</strong>."
 
 #: templates/registration/register_done.html
 msgid "We sent a link to your email address."
-msgstr ""
+msgstr "Wysłaliśmy link na podany adres e-mail."
 
 #: templates/registration/register_done.html
 msgid "Open it to activate your account."
-msgstr ""
+msgstr "Proszę go otworzyć, aby aktywować konto."
 
 #: templates/registration/register_done.html
 #: templates/registration/verify_email_resend_done.html
 msgid "Check your spam folder too."
-msgstr ""
+msgstr "Proszę sprawdzić też folder spam."
 
 #: templates/registration/register_done.html
 msgid "Did not get it?"
-msgstr ""
+msgstr "Nie dotarł?"
 
 #: templates/registration/register_done.html
 #: templates/registration/verify_email.html
 #: templates/registration/verify_email_resend.html
 msgid "Send the link again"
-msgstr ""
+msgstr "Wyślij link ponownie"
 
 #: templates/registration/verify_email.html
 msgid "Confirm email"
-msgstr ""
+msgstr "Potwierdź e-mail"
 
 #: templates/registration/verify_email.html
 msgid "Press the button to confirm your address and activate your account."
-msgstr ""
+msgstr "Proszę kliknąć przycisk, aby potwierdzić adres i aktywować konto."
 
 #: templates/registration/verify_email.html
-msgid ""
-"This link is invalid or has expired. It works only once: if you already "
-"confirmed your email, just log in."
-msgstr ""
+msgid "This link is invalid or has expired. It works only once: if you already confirmed your email, just log in."
+msgstr "Ten link jest nieważny lub wygasł. Działa tylko raz: jeśli e-mail jest już potwierdzony, wystarczy się zalogować."
 
 #: templates/registration/verify_email_resend.html
 msgid "Enter the email you signed up with. We send a new link to confirm it."
-msgstr ""
+msgstr "Proszę podać e-mail użyty przy rejestracji. Wyślemy nowy link do potwierdzenia."
 
 #: templates/registration/verify_email_resend_done.html
 msgid "If an unconfirmed account uses this address, we sent a new link."
-msgstr ""
+msgstr "Jeśli ten adres należy do niepotwierdzonego konta, wysłaliśmy nowy link."
 
 #: templates/registration/verify_email_resend_done.html
 msgid "A new link can be sent once every 10 minutes."
-msgstr ""
+msgstr "Nowy link można wysłać raz na 10 minut."
