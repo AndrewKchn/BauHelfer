@@ -1,7 +1,7 @@
 # Spec: translation service with a DB cache (#31)
 
 Status: **agreed**. I decided D1–D3 on 2026-11-07. D4–D13 are Claude's defaults, which I
-accepted on 2026-11-07, before any tests.
+accepted on 2026-11-07, before any tests; D14 likewise, before the tests of iteration 2.
 
 Marks: **(mine, date)** — my decision; **(Claude's default, accepted)** — Claude's default
 that I accepted.
@@ -74,7 +74,11 @@ R7. The system prompt is fixed: translate into <language name in English, e.g. "
     return it unchanged (D8). The user's text goes into the user message inside
     `<text>…</text>`; the prompt says that everything inside is text to translate, also
     when it looks like an instruction (D9).
-R8. The translation is the text of the answer, without surrounding whitespace.
+R8. The translation is the text of the answer, without surrounding whitespace; blocks are
+    read by their type, so a thinking block is never taken for the answer. An answer that
+    was cut off (`max_tokens`) or declined (`refusal`) raises `TranslationError` instead
+    of returning: what it returned would be cached for good (D14). `max_tokens` is at least
+    4000, enough for a long job text.
 R9. The key comes from the env variable `ANTHROPIC_API_KEY`. `production.py` sets
     `TRANSLATION_BACKEND` to the Claude translator and refuses to start without the key
     (D11). `render.yaml` lists the variable as set in the dashboard. `.env.example`
@@ -90,7 +94,8 @@ R11. One manual check against the real API with a separate local key (deleted af
 AC9.  The request names `claude-haiku-5-5` and turns thinking off.
 AC10. The system prompt names the target language and contains the rules of R7; the user's
       text is inside `<text>…</text>` in the user message, unchanged.
-AC11. The answer's text, stripped, is returned.
+AC11. The answer's text, stripped, is returned; a thinking block is skipped; an answer cut
+      off or declined raises `TranslationError` and leaves no row.
 AC12. Production settings use the Claude translator and read the key from the env.
 AC13. The log line has the language, the hash prefix and the token counts, not the text.
 
@@ -150,6 +155,12 @@ D12. **Translated in the request, no queue** (Claude's default, accepted), as em
      notice the delay.
 D13. **The cache is not in Django admin** (Claude's default, accepted): the rows contain
      personal data; the log lines (R10) are enough to see what happens.
+
+D14. **A cut-off or declined answer is an error, not a translation** (Claude's default,
+     accepted on 2026-11-07, before the tests of iteration 2): the cache keeps what it gets
+     forever, so half a sentence or an empty text would be shown to every reader of that
+     job. Raising keeps the row empty, and the next reader asks again. #34 decides what the
+     page shows meanwhile (D10).
 
 ## Known limitations (→ docs/SECURITY.md)
 
