@@ -94,6 +94,48 @@ def test_broken_file_is_an_error(tmp_path, check):
         check.statistics(po)
 
 
+@pytest.mark.story(30)
+@pytest.mark.parametrize(
+    "translation", ["Привет, %(nmae)s,", "Привет,"], ids=["renamed", "dropped"]
+)
+def test_broken_placeholder_is_an_error(tmp_path, check, translation):
+    """A translation whose placeholder differs from the English one stops the check.
+
+    1. Write a .po whose "Hello %(name)s," is translated with a misspelt placeholder
+       (KeyError in Python code) or a missing one (the name is lost)
+    2. Expect: the check raises CalledProcessError
+    """
+    po = write_po(
+        tmp_path,
+        f'#, python-format\nmsgid "Hello %(name)s,"\nmsgstr "{translation}"\n',
+    )
+
+    with pytest.raises(subprocess.CalledProcessError):
+        check.statistics(po)
+
+
+@pytest.mark.story(30)
+def test_missing_plural_form_is_an_error(tmp_path, check):
+    """A plural string with fewer forms than the language has stops the check.
+
+    1. Write a .po for a language with 4 plural forms (Russian) whose plural string has
+       only 2 (Django would show English for 5-20, e.g. "16 open")
+    2. Expect: the check raises CalledProcessError
+    """
+    po = tmp_path / "django.po"
+    po.write_text(
+        'msgid ""\nmsgstr ""\n"Content-Type: text/plain; charset=UTF-8\\n"\n'
+        '"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : '
+        'n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\\n"\n\n'
+        '#, python-format\nmsgid "%(counter)s open"\nmsgid_plural "%(counter)s open"\n'
+        'msgstr[0] "Открыто: %(counter)s"\nmsgstr[1] "Открыто: %(counter)s"\n',
+        encoding="utf-8",
+    )
+
+    with pytest.raises(subprocess.CalledProcessError):
+        check.statistics(po)
+
+
 def test_every_language_but_english_has_a_po_file():
     """locale/ has a .po file for each of the 6 languages, and none for English (D10).
 
@@ -107,17 +149,11 @@ def test_every_language_but_english_has_a_po_file():
         assert (LOCALE / code / "LC_MESSAGES" / "django.po").is_file()
 
 
-# AC12: our own files; expected to fail until #30 translates the M2-M4 strings (D2)
+# AC12: our own files (i18n.md D2). Every language fully translated since #30
+# (translations.md AC5, R9).
 
 
-# strict: once every string is translated the test passes, and a passing xfail turns the run
-# red, so #30 has to remove the marker. raises: only the failed assert is expected; any
-# other error (gettext not installed, a broken .po) still turns the run red.
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="#30 translates the M2-M4 strings; then remove this marker (i18n.md D2)",
-)
+@pytest.mark.story(30)
 @pytest.mark.parametrize("code", TRANSLATED)
 def test_every_string_is_translated(check, code):
     """Every string of the site is translated into this language, none is fuzzy.

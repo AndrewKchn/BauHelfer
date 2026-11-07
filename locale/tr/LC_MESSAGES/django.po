@@ -1,720 +1,700 @@
 # BauHelfer translations (#29). Edit msgstr here, then run compilemessages.
 msgid ""
-msgstr ""
-"Project-Id-Version: BauHelfer\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-06 09:01+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: tr\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+msgstr "Project-Id-Version: BauHelfer\nReport-Msgid-Bugs-To: \nPOT-Creation-Date: 2026-11-07 02:18+0100\nPO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\nLast-Translator: FULL NAME <EMAIL@ADDRESS>\nLanguage-Team: LANGUAGE <LL@li.org>\nLanguage: tr\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: accounts/admin.py
 msgid "Profile"
-msgstr ""
+msgstr "Profil"
 
 #: accounts/admin.py
 msgid "Emails"
-msgstr ""
+msgstr "E-postalar"
 
 #: accounts/admin.py
 msgid "Permissions"
-msgstr ""
+msgstr "İzinler"
 
 #: accounts/admin.py
 msgid "Important dates"
-msgstr ""
+msgstr "Önemli tarihler"
 
 #: accounts/forms.py
 msgid "Wrong email or password."
-msgstr ""
+msgstr "E-posta veya şifre yanlış."
 
 #: accounts/forms.py
 msgid "Please confirm your email first. We sent you a link when you signed up."
-msgstr ""
+msgstr "Lütfen önce e-postanızı onaylayın. Kayıt olduğunuzda size bir bağlantı gönderdik."
 
 #: accounts/forms.py templates/accounts/employer_profile.html
 #: templates/accounts/worker_profile.html
 msgid "Email"
-msgstr ""
+msgstr "E-posta"
 
 #: accounts/forms.py
-msgid ""
-"Optional. Shown only to the people you work with, until the day of the job "
-"is over."
-msgstr ""
+msgid "Optional. Shown only to the people you work with, until the day of the job is over."
+msgstr "İsteğe bağlı. Yalnızca birlikte çalıştığınız kişilere, iş günü bitene kadar gösterilir."
 
 #: accounts/forms.py
 msgid "I am allowed to work in Germany"
-msgstr ""
+msgstr "Almanya'da çalışma hakkım var"
 
 #: accounts/forms.py
-msgid ""
-"For example as an EU citizen, or with a residence permit that allows work."
-msgstr ""
+msgid "For example as an EU citizen, or with a residence permit that allows work."
+msgstr "Örneğin AB vatandaşı olarak veya çalışmaya izin veren bir oturma izniyle."
 
 #: accounts/forms.py templates/accounts/_worker_profile_card.html
 msgid "Skills"
-msgstr ""
+msgstr "Beceriler"
 
 #: accounts/forms.py
 msgid "Languages you speak"
-msgstr ""
+msgstr "Konuştuğunuz diller"
 
 #: accounts/forms.py templates/accounts/_worker_profile_card.html
 msgid "Legal status"
-msgstr ""
+msgstr "Yasal durum"
 
 #: accounts/forms.py templates/accounts/_employer_profile_card.html
 msgid "Trades"
-msgstr ""
+msgstr "İş alanları"
 
 #: accounts/models.py templates/jobs/job_detail.html
 msgid "Employer"
-msgstr ""
+msgstr "İşveren"
 
 #: accounts/models.py
 msgid "Worker"
-msgstr ""
+msgstr "İşçi"
 
 #: accounts/models.py
 msgid "email"
-msgstr ""
+msgstr "e-posta"
 
 #: accounts/models.py
 msgid "name"
-msgstr ""
+msgstr "ad"
 
 #: accounts/models.py
 msgid "phone"
-msgstr ""
+msgstr "telefon"
 
 #: accounts/models.py
 msgid "For example +49 151 12345678 or 0151 12345678."
-msgstr ""
+msgstr "Örneğin +49 151 12345678 veya 0151 12345678."
 
 #: accounts/models.py
 msgid "role"
-msgstr ""
+msgstr "rol"
 
 #: accounts/models.py
 msgid "preferred language"
-msgstr ""
+msgstr "tercih edilen dil"
 
 #: accounts/models.py
 msgid "email notifications"
-msgstr ""
+msgstr "e-posta bildirimleri"
 
 #: accounts/models.py
-msgid ""
-"New applications and decisions on applications. Emails about your password "
-"are always sent."
-msgstr ""
+msgid "New applications and decisions on applications. Emails about your password are always sent."
+msgstr "Yeni başvurular ve başvurularla ilgili kararlar. Şifrenizle ilgili e-postalar her zaman gönderilir."
 
 #: accounts/models.py
 msgid "email confirmed at"
-msgstr ""
+msgstr "e-posta onay tarihi"
 
 #: accounts/models.py
 msgid "confirmation link sent at"
-msgstr ""
+msgstr "onay bağlantısı gönderim tarihi"
 
 #: accounts/models.py
 msgid "work permit confirmed at"
-msgstr ""
+msgstr "çalışma izni onay tarihi"
 
 #: accounts/models.py
 msgid "Demolition"
-msgstr ""
+msgstr "Yıkım"
 
 #: accounts/models.py
 msgid "Debris clearing"
-msgstr ""
+msgstr "Moloz temizliği"
 
 #: accounts/models.py
 msgid "Carrying materials"
-msgstr ""
+msgstr "Malzeme taşıma"
 
 #: accounts/models.py
 msgid "Earthworks / digging"
-msgstr ""
+msgstr "Toprak işleri / kazı"
 
 #: accounts/models.py
 msgid "Site cleaning"
-msgstr ""
+msgstr "Şantiye temizliği"
 
 #: accounts/models.py
 msgid "Scaffolding helper"
-msgstr ""
+msgstr "İskele yardımcısı"
 
 #: accounts/models.py
 msgid "Bricklayer's helper"
-msgstr ""
+msgstr "Duvarcı yardımcısı"
 
 #: accounts/models.py
 msgid "Drywall helper"
-msgstr ""
+msgstr "Alçıpan yardımcısı"
 
 #: accounts/models.py
 msgid "Plastering helper"
-msgstr ""
+msgstr "Sıvacı yardımcısı"
 
 #: accounts/models.py
 msgid "Painting helper"
-msgstr ""
+msgstr "Boyacı yardımcısı"
 
 #: accounts/models.py
 msgid "German"
-msgstr ""
+msgstr "Almanca"
 
 #: accounts/models.py
 msgid "English"
-msgstr ""
+msgstr "İngilizce"
 
 #: accounts/models.py
 msgid "Russian"
-msgstr ""
+msgstr "Rusça"
 
 #: accounts/models.py
 msgid "Ukrainian"
-msgstr ""
+msgstr "Ukraynaca"
 
 #: accounts/models.py
 msgid "Polish"
-msgstr ""
+msgstr "Lehçe"
 
 #: accounts/models.py
 msgid "Romanian"
-msgstr ""
+msgstr "Rumence"
 
 #: accounts/models.py
 msgid "Turkish"
-msgstr ""
+msgstr "Türkçe"
 
 #: accounts/models.py
 msgid "Bulgarian"
-msgstr ""
+msgstr "Bulgarca"
 
 #: accounts/models.py
 msgid "Croatian"
-msgstr ""
+msgstr "Hırvatça"
 
 #: accounts/models.py
 msgid "Serbian"
-msgstr ""
+msgstr "Sırpça"
 
 #: accounts/models.py
 msgid "Bosnian"
-msgstr ""
+msgstr "Boşnakça"
 
 #: accounts/models.py
 msgid "Hungarian"
-msgstr ""
+msgstr "Macarca"
 
 #: accounts/models.py
 msgid "Albanian"
-msgstr ""
+msgstr "Arnavutça"
 
 #: accounts/models.py
 msgid "Arabic"
-msgstr ""
+msgstr "Arapça"
 
 #: accounts/models.py
 msgid "Italian"
-msgstr ""
+msgstr "İtalyanca"
 
 #: accounts/models.py
 msgid "Self-employed (Gewerbe)"
-msgstr ""
+msgstr "Serbest çalışan (Gewerbe)"
 
 #: accounts/models.py
 msgid "Minijob"
-msgstr ""
+msgstr "Minijob"
 
 #: accounts/models.py
 msgid "Employed"
-msgstr ""
+msgstr "Sigortalı çalışan"
 
 #: accounts/models.py
 msgid "user"
-msgstr ""
+msgstr "kullanıcı"
 
 #: accounts/models.py
 msgid "team size"
-msgstr ""
+msgstr "ekip büyüklüğü"
 
 #: accounts/models.py
 msgid "1 = only you. 2-10 = your crew, including you."
-msgstr ""
+msgstr "1 = yalnızca siz. 2–10 = siz dahil ekibiniz."
 
 #: accounts/models.py
 msgid "skills"
-msgstr ""
+msgstr "beceriler"
 
 #: accounts/models.py
 msgid "spoken languages"
-msgstr ""
+msgstr "konuşulan diller"
 
 #: accounts/models.py
 msgid "legal status"
-msgstr ""
+msgstr "yasal durum"
 
 #: accounts/models.py
 msgid "worker profile"
-msgstr ""
+msgstr "işçi profili"
 
 #: accounts/models.py
 msgid "worker profiles"
-msgstr ""
+msgstr "işçi profilleri"
 
 #: accounts/models.py
 msgid "Individual"
-msgstr ""
+msgstr "Tek kişi"
 
 #: accounts/models.py
 #, python-format
 msgid "Crew of %(count)d"
 msgid_plural "Crew of %(count)d"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(count)d kişilik ekip"
+msgstr[1] "%(count)d kişilik ekip"
 
 #: accounts/models.py
 msgid "Window fitting"
-msgstr ""
+msgstr "Pencere montajı"
 
 #: accounts/models.py
 msgid "Drywall"
-msgstr ""
+msgstr "Alçıpan"
 
 #: accounts/models.py
 msgid "Plastering"
-msgstr ""
+msgstr "Sıva"
 
 #: accounts/models.py
 msgid "Painting"
-msgstr ""
+msgstr "Boya"
 
 #: accounts/models.py
 msgid "Tiling"
-msgstr ""
+msgstr "Fayans"
 
 #: accounts/models.py
 msgid "Roofing"
-msgstr ""
+msgstr "Çatı"
 
 #: accounts/models.py
 msgid "Bricklaying"
-msgstr ""
+msgstr "Duvar örme"
 
 #: accounts/models.py
 msgid "Carpentry"
-msgstr ""
+msgstr "Marangozluk"
 
 #: accounts/models.py
 msgid "Electrical"
-msgstr ""
+msgstr "Elektrik"
 
 #: accounts/models.py
 msgid "Plumbing & heating"
-msgstr ""
+msgstr "Tesisat ve ısıtma"
 
 #: accounts/models.py
 msgid "Landscaping"
-msgstr ""
+msgstr "Peyzaj"
 
 #: accounts/models.py
 msgid "General contractor"
-msgstr ""
+msgstr "Genel yüklenici"
 
 #: accounts/models.py
 msgid "Private person"
-msgstr ""
+msgstr "Özel kişi"
 
 #: accounts/models.py
 msgid "Other"
-msgstr ""
+msgstr "Diğer"
 
 #: accounts/models.py
 msgid "company name"
-msgstr ""
+msgstr "şirket adı"
 
 #: accounts/models.py
 msgid "Leave empty if you hire as a private person."
-msgstr ""
+msgstr "Özel kişi olarak işe alıyorsanız boş bırakın."
 
 #: accounts/models.py
 msgid "trades"
-msgstr ""
+msgstr "iş alanları"
 
 #: accounts/models.py
 msgid "employer profile"
-msgstr ""
+msgstr "işveren profili"
 
 #: accounts/models.py
 msgid "employer profiles"
-msgstr ""
+msgstr "işveren profilleri"
 
 #: accounts/models.py
 msgid "email verification required"
-msgstr ""
+msgstr "e-posta doğrulaması gerekli"
 
 #: accounts/models.py
-msgid ""
-"Off: a new account is active and logged in at once, with no confirmation "
-"email, e.g. for a demo. Its address stays unconfirmed, so it gets no emails."
-msgstr ""
+msgid "Off: a new account is active and logged in at once, with no confirmation email, e.g. for a demo. Its address stays unconfirmed, so it gets no emails."
+msgstr "Kapalı: yeni hesap onay e-postası olmadan hemen etkinleşir ve oturum açılır, örneğin bir demo için. Adresi onaylanmamış kalır, bu yüzden e-posta almaz."
 
 #: accounts/models.py
 msgid "site settings"
-msgstr ""
+msgstr "site ayarları"
 
 #: accounts/validators.py
-msgid ""
-"Enter the number with a country code, e.g. +49 151 12345678, or with an area "
-"code, e.g. 0151 12345678."
-msgstr ""
+msgid "Enter the number with a country code, e.g. +49 151 12345678, or with an area code, e.g. 0151 12345678."
+msgstr "Numarayı ülke koduyla, örneğin +49 151 12345678, veya alan koduyla, örneğin 0151 12345678, girin."
 
 #: accounts/views.py
 msgid "Welcome to BauHelfer! Your account is ready."
-msgstr ""
+msgstr "BauHelfer'e hoş geldiniz! Hesabınız hazır."
 
 #: accounts/views.py
 msgid "Your email is confirmed. Welcome to BauHelfer!"
-msgstr ""
+msgstr "E-postanız onaylandı. BauHelfer'e hoş geldiniz!"
 
 #: accounts/views.py
 msgid "Profile saved."
-msgstr ""
+msgstr "Profil kaydedildi."
 
 #: jobs/forms.py
 msgid "Hourly rate, €"
-msgstr ""
+msgstr "Saatlik ücret, €"
 
 #: jobs/forms.py
 msgid "Write in your language. Workers read it in theirs."
-msgstr ""
+msgstr "Kendi dilinizde yazın. İşçiler kendi dillerinde okur."
 
 #: jobs/forms.py
 msgid "The date cannot be in the past."
-msgstr ""
+msgstr "Tarih geçmişte olamaz."
 
 #: jobs/forms.py
 #, python-format
 msgid "At least %(wage)s € on this date (German minimum wage)."
-msgstr ""
+msgstr "Bu tarihte en az %(wage)s € (Almanya asgari ücreti)."
 
 #: jobs/forms.py
 msgid "Any day"
-msgstr ""
+msgstr "Herhangi bir gün"
 
 #: jobs/forms.py
 msgid "Next 7 days"
-msgstr ""
+msgstr "Önümüzdeki 7 gün"
 
 #: jobs/forms.py
 msgid "Next 30 days"
-msgstr ""
+msgstr "Önümüzdeki 30 gün"
 
 #: jobs/forms.py
 msgid "Date"
-msgstr ""
+msgstr "Tarih"
 
 #: jobs/forms.py
 msgid "All types"
-msgstr ""
+msgstr "Tüm türler"
 
 #: jobs/forms.py
 msgid "Job type"
-msgstr ""
+msgstr "İş türü"
 
 #: jobs/forms.py
 msgid "All districts"
-msgstr ""
+msgstr "Tüm semtler"
 
 #: jobs/forms.py
 msgid "District"
-msgstr ""
+msgstr "Semt"
 
 #: jobs/forms.py
 msgid "Photos"
-msgstr ""
+msgstr "Fotoğraflar"
 
 #: jobs/forms.py
 msgid "Choose at least one photo."
-msgstr ""
+msgstr "En az bir fotoğraf seçin."
 
 #: jobs/forms.py
 #, python-format
 msgid "You can add %(count)d more photo."
 msgid_plural "You can add %(count)d more photos."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(count)d fotoğraf daha ekleyebilirsiniz."
+msgstr[1] "%(count)d fotoğraf daha ekleyebilirsiniz."
 
 #: jobs/forms.py
 #, python-format
 msgid "%(name)s: %(error)s"
-msgstr ""
+msgstr "%(name)s: %(error)s"
 
 #: jobs/forms.py
 msgid "Message to the employer"
-msgstr ""
+msgstr "İşverene mesaj"
 
 #: jobs/forms.py
 msgid "Workers I bring"
-msgstr ""
+msgstr "Getirdiğim işçi sayısı"
 
 #: jobs/models.py
 msgid "Munich area (outside the city)"
-msgstr ""
+msgstr "Münih çevresi (şehir dışı)"
 
 #: jobs/models.py
 msgid "Open"
-msgstr ""
+msgstr "Açık"
 
 #: jobs/models.py
 msgid "Filled"
-msgstr ""
+msgstr "Dolu"
 
 #: jobs/models.py
 msgid "Done"
-msgstr ""
+msgstr "Tamamlandı"
 
 #: jobs/models.py
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #: jobs/models.py
 msgid "employer"
-msgstr ""
+msgstr "işveren"
 
 #: jobs/models.py
 msgid "job type"
-msgstr ""
+msgstr "iş türü"
 
 #: jobs/models.py
 msgid "description"
-msgstr ""
+msgstr "açıklama"
 
 #: jobs/models.py
 msgid "original language"
-msgstr ""
+msgstr "orijinal dil"
 
 #: jobs/models.py
 msgid "address"
-msgstr ""
+msgstr "adres"
 
 #: jobs/models.py
 msgid "district"
-msgstr ""
+msgstr "semt"
 
 #: jobs/models.py
 msgid "latitude"
-msgstr ""
+msgstr "enlem"
 
 #: jobs/models.py
 msgid "longitude"
-msgstr ""
+msgstr "boylam"
 
 #: jobs/models.py
 msgid "date"
-msgstr ""
+msgstr "tarih"
 
 #: jobs/models.py
 msgid "start time"
-msgstr ""
+msgstr "başlangıç saati"
 
 #: jobs/models.py
 msgid "hours"
-msgstr ""
+msgstr "saat"
 
 #: jobs/models.py
 msgid "workers needed"
-msgstr ""
+msgstr "gereken işçi sayısı"
 
 #: jobs/models.py
 msgid "hourly rate (€)"
-msgstr ""
+msgstr "saatlik ücret (€)"
 
 #: jobs/models.py
 msgid "status"
-msgstr ""
+msgstr "durum"
 
 #: jobs/models.py
 msgid "created at"
-msgstr ""
+msgstr "oluşturulma tarihi"
 
 #: jobs/models.py
 msgid "job"
-msgstr ""
+msgstr "iş"
 
 #: jobs/models.py
 msgid "jobs"
-msgstr ""
+msgstr "işler"
 
 #: jobs/models.py
 msgid "photo"
-msgstr ""
+msgstr "fotoğraf"
 
 #: jobs/models.py
 msgid "thumbnail"
-msgstr ""
+msgstr "küçük resim"
 
 #: jobs/models.py
 msgid "uploaded at"
-msgstr ""
+msgstr "yüklenme tarihi"
 
 #: jobs/models.py
 msgid "job photo"
-msgstr ""
+msgstr "iş fotoğrafı"
 
 #: jobs/models.py
 msgid "job photos"
-msgstr ""
+msgstr "iş fotoğrafları"
 
 #: jobs/models.py
 msgid "Pending"
-msgstr ""
+msgstr "Beklemede"
 
 #: jobs/models.py
 msgid "Accepted"
-msgstr ""
+msgstr "Kabul edildi"
 
 #: jobs/models.py
 msgid "Rejected"
-msgstr ""
+msgstr "Reddedildi"
 
 #: jobs/models.py
 msgid "Job filled"
-msgstr ""
+msgstr "İş doldu"
 
 #: jobs/models.py
 msgid "Withdrawn"
-msgstr ""
+msgstr "Geri çekildi"
 
 #: jobs/models.py
 msgid "worker"
-msgstr ""
+msgstr "işçi"
 
 #: jobs/models.py
 msgid "message"
-msgstr ""
+msgstr "mesaj"
 
 #: jobs/models.py
 msgid "workers offered"
-msgstr ""
+msgstr "önerilen işçi sayısı"
 
 #: jobs/models.py
 msgid "workers accepted"
-msgstr ""
+msgstr "kabul edilen işçi sayısı"
 
 #: jobs/models.py
 msgid "application"
-msgstr ""
+msgstr "başvuru"
 
 #: jobs/models.py
 msgid "applications"
-msgstr ""
+msgstr "başvurular"
 
 #: jobs/photos.py
 msgid "Upload a photo in JPEG, PNG or WebP format."
-msgstr ""
+msgstr "JPEG, PNG veya WebP biçiminde bir fotoğraf yükleyin."
 
 #: jobs/photos.py
 msgid "This picture has too many pixels. Please upload a normal photo."
-msgstr ""
+msgstr "Bu resimde çok fazla piksel var. Lütfen normal bir fotoğraf yükleyin."
 
 #: jobs/photos.py
 msgid "A photo can be at most 5 MB."
-msgstr ""
+msgstr "Bir fotoğraf en fazla 5 MB olabilir."
 
 #: jobs/views.py
 msgid "Please fill in your company profile before posting a job."
-msgstr ""
+msgstr "İş ilanı vermeden önce lütfen şirket profilinizi doldurun."
 
 #: jobs/views.py
 msgid "Job posted. You can add photos below."
-msgstr ""
+msgstr "İş ilanı yayınlandı. Aşağıdan fotoğraf ekleyebilirsiniz."
 
 #: jobs/views.py templates/jobs/job_detail.html
 msgid "Past"
-msgstr ""
+msgstr "Geçmiş"
 
 #: jobs/views.py
 msgid "Job saved."
-msgstr ""
+msgstr "İş kaydedildi."
 
 #: jobs/views.py
 #, python-format
 msgid "%(count)d photo added."
 msgid_plural "%(count)d photos added."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(count)d fotoğraf eklendi."
+msgstr[1] "%(count)d fotoğraf eklendi."
 
 #: jobs/views.py
 msgid "Photo deleted."
-msgstr ""
+msgstr "Fotoğraf silindi."
 
 #: jobs/views.py
 msgid "Job cancelled."
-msgstr ""
+msgstr "İş iptal edildi."
 
 #: jobs/views.py
 msgid "Complete your profile to apply."
-msgstr ""
+msgstr "Başvurmak için profilinizi tamamlayın."
 
 #: jobs/views.py
 msgid "This job no longer takes applications."
-msgstr ""
+msgstr "Bu iş artık başvuru kabul etmiyor."
 
 #: jobs/views.py
 msgid "You have already applied to this job."
-msgstr ""
+msgstr "Bu işe zaten başvurdunuz."
 
 #: jobs/views.py
 msgid "Application sent."
-msgstr ""
+msgstr "Başvuru gönderildi."
 
 #: jobs/views.py
 msgid "This application was already decided."
-msgstr ""
+msgstr "Bu başvuru hakkında zaten karar verildi."
 
 #: jobs/views.py
 #, python-format
 msgid "Accepted: %(count)d worker from %(name)s."
 msgid_plural "Accepted: %(count)d workers from %(name)s."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Kabul edildi: %(name)s, %(count)d işçi."
+msgstr[1] "Kabul edildi: %(name)s, %(count)d işçi."
 
 #: jobs/views.py
 msgid "The job is filled. The other pending applications were closed."
-msgstr ""
+msgstr "İş doldu. Bekleyen diğer başvurular kapatıldı."
 
 #: jobs/views.py
 #, python-format
 msgid "Rejected: %(name)s."
-msgstr ""
+msgstr "Reddedildi: %(name)s."
 
 #: jobs/views.py
 #, python-format
 msgid "Cancelled: %(name)s. The job is open again."
-msgstr ""
+msgstr "İptal edildi: %(name)s. İş yeniden açık."
 
 #: jobs/views.py
 #, python-format
 msgid "Cancelled: %(name)s."
-msgstr ""
+msgstr "İptal edildi: %(name)s."
 
 #: jobs/views.py
 msgid "This application can no longer be withdrawn."
-msgstr ""
+msgstr "Bu başvuru artık geri çekilemez."
 
 #: jobs/views.py
 msgid "Application withdrawn."
-msgstr ""
+msgstr "Başvuru geri çekildi."
 
 #: templates/_language_switcher.html
 msgid "Change language"
@@ -722,754 +702,739 @@ msgstr "Dili değiştir"
 
 #: templates/accounts/_email_notifications.html
 msgid "Email notifications"
-msgstr ""
+msgstr "E-posta bildirimleri"
 
 #: templates/accounts/_email_notifications.html
 msgid "On"
-msgstr ""
+msgstr "Açık"
 
 #: templates/accounts/_email_notifications.html
 msgid "Off"
-msgstr ""
+msgstr "Kapalı"
 
 #: templates/accounts/_employer_profile_card.html
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #: templates/accounts/_employer_profile_card.html
 msgid "Contact person"
-msgstr ""
+msgstr "İletişim kişisi"
 
 #: templates/accounts/_employer_profile_card.html
 #: templates/accounts/employer_profile.html
 #: templates/accounts/worker_profile.html templates/jobs/job_detail.html
 msgid "Phone"
-msgstr ""
+msgstr "Telefon"
 
 #: templates/accounts/_phone.html templates/accounts/employer_profile.html
 #: templates/accounts/worker_profile.html
 msgid "not given"
-msgstr ""
+msgstr "belirtilmedi"
 
 #: templates/accounts/_worker_profile_card.html
 msgid "Name"
-msgstr ""
+msgstr "Ad"
 
 #: templates/accounts/_worker_profile_card.html
 msgid "Team"
-msgstr ""
+msgstr "Ekip"
 
 #: templates/accounts/_worker_profile_card.html
 msgid "Languages"
-msgstr ""
+msgstr "Diller"
 
 #: templates/accounts/_worker_profile_card.html
 msgid "Work permit"
-msgstr ""
+msgstr "Çalışma izni"
 
 #: templates/accounts/_worker_profile_card.html
 msgid "Confirmed by the worker"
-msgstr ""
+msgstr "İşçi tarafından onaylandı"
 
 #: templates/accounts/_worker_profile_card.html
 msgid "Not confirmed"
-msgstr ""
+msgstr "Onaylanmadı"
 
 #: templates/accounts/employer_profile.html
 #: templates/accounts/employer_profile_form.html templates/base.html
 msgid "My company"
-msgstr ""
+msgstr "Şirketim"
 
 #: templates/accounts/employer_profile.html
 #: templates/accounts/worker_profile.html
 msgid "Contact details"
-msgstr ""
+msgstr "İletişim bilgileri"
 
 #: templates/accounts/employer_profile.html
 msgid "Workers see these only after you accept their application."
-msgstr ""
+msgstr "İşçiler bunları ancak başvurularını kabul ettiğinizde görür."
 
 #: templates/accounts/employer_profile.html
 #: templates/accounts/employer_profile_form.html
 #: templates/accounts/worker_profile.html
 #: templates/accounts/worker_profile_form.html
 msgid "Edit profile"
-msgstr ""
+msgstr "Profili düzenle"
 
 #: templates/accounts/employer_profile_form.html
 msgid "Workers read this on your jobs."
-msgstr ""
+msgstr "İşçiler bunu ilanlarınızda okur."
 
 #: templates/accounts/employer_profile_form.html
 #: templates/accounts/worker_profile_form.html
 msgid "Save profile"
-msgstr ""
+msgstr "Profili kaydet"
 
 #: templates/accounts/role_select.html
 msgid "Who are you?"
-msgstr ""
+msgstr "Siz kimsiniz?"
 
 #: templates/accounts/role_select.html
 msgid "Choose once. You cannot change it later."
-msgstr ""
+msgstr "Bir kez seçin. Daha sonra değiştiremezsiniz."
 
 #: templates/accounts/role_select.html
 msgid "I need workers"
-msgstr ""
+msgstr "İşçiye ihtiyacım var"
 
 #: templates/accounts/role_select.html
 msgid "I am looking for work"
-msgstr ""
+msgstr "İş arıyorum"
 
 #: templates/accounts/worker_detail.html
 msgid "Worker profile"
-msgstr ""
+msgstr "İşçi profili"
 
 #: templates/accounts/worker_profile.html
 #: templates/accounts/worker_profile_form.html templates/base.html
 msgid "My profile"
-msgstr ""
+msgstr "Profilim"
 
 #: templates/accounts/worker_profile.html
 #, python-format
 msgid "Allowed to work in Germany — confirmed on %(date)s."
-msgstr ""
+msgstr "Almanya'da çalışma hakkı — onay tarihi: %(date)s."
 
 #: templates/accounts/worker_profile.html
 msgid "Employers see these only after they accept your application."
-msgstr ""
+msgstr "İşverenler bunları ancak başvurunuzu kabul ettiklerinde görür."
 
 #: templates/accounts/worker_profile_form.html
 msgid "Employers read this when you apply for a job."
-msgstr ""
+msgstr "Bir işe başvurduğunuzda işverenler bunu okur."
 
 #: templates/base.html
 msgid "Main navigation"
-msgstr ""
+msgstr "Ana menü"
 
 #: templates/base.html
 msgid "Menu"
-msgstr ""
+msgstr "Menü"
 
 #: templates/base.html templates/jobs/my_applications.html
 msgid "My applications"
-msgstr ""
+msgstr "Başvurularım"
 
 #: templates/base.html templates/jobs/job_form.html
 #: templates/jobs/job_list.html templates/jobs/my_jobs.html
 msgid "Post a job"
-msgstr ""
+msgstr "İş ilanı ver"
 
 #: templates/base.html templates/jobs/job_detail.html
 #: templates/jobs/my_jobs.html
 msgid "My jobs"
-msgstr ""
+msgstr "İlanlarım"
 
 #: templates/base.html
 msgid "Log out"
-msgstr ""
+msgstr "Çıkış yap"
 
 #: templates/base.html templates/registration/login.html
 #: templates/registration/password_reset_complete.html
 #: templates/registration/register.html
 #: templates/registration/verify_email.html
 msgid "Log in"
-msgstr ""
+msgstr "Giriş yap"
 
 #: templates/base.html templates/registration/login.html
 #: templates/registration/register.html
 msgid "Register"
-msgstr ""
+msgstr "Kayıt ol"
 
 #: templates/base.html
 msgid "Munich"
-msgstr ""
+msgstr "Münih"
 
 #: templates/emails/_footer.txt templates/emails/verify_email_body.txt
 #: templates/registration/password_reset_email.txt
 msgid "The BauHelfer team"
-msgstr ""
+msgstr "BauHelfer ekibi"
 
 #: templates/emails/_footer.txt
 msgid "To turn these emails off:"
-msgstr ""
+msgstr "Bu e-postaları kapatmak için:"
 
 #: templates/emails/_greeting.txt
 #, python-format
 msgid "Hello %(name)s,"
-msgstr ""
+msgstr "Merhaba %(name)s,"
 
 #: templates/emails/_greeting.txt templates/emails/verify_email_body.txt
 #: templates/registration/password_reset_email.txt
 msgid "Hello,"
-msgstr ""
+msgstr "Merhaba,"
 
 #: templates/emails/application_accepted_body.txt
 #, python-format
-msgid ""
-"The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: "
-"%(counter)s worker."
-msgid_plural ""
-"The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: "
-"%(counter)s workers."
-msgstr[0] ""
-msgstr[1] ""
+msgid "The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: %(counter)s worker."
+msgid_plural "The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: %(counter)s workers."
+msgstr[0] "İşveren sizi kabul etti. İş: %(job_type)s, %(date)s, başlangıç saati %(time)s, %(counter)s işçi."
+msgstr[1] "İşveren sizi kabul etti. İş: %(job_type)s, %(date)s, başlangıç saati %(time)s, %(counter)s işçi."
 
 #: templates/emails/application_accepted_body.txt
 msgid "The employer's contact and the address are on “My applications”:"
-msgstr ""
+msgstr "İşverenin iletişim bilgileri ve adres “Başvurularım” sayfasında:"
 
 #: templates/emails/application_accepted_subject.txt
 #, python-format
 msgid "You are accepted: %(job_type)s, %(date)s"
-msgstr ""
+msgstr "Kabul edildiniz: %(job_type)s, %(date)s"
 
 #: templates/emails/application_rejected_body.txt
 #, python-format
-msgid ""
-"The employer did not accept your application for %(job_type)s, %(date)s."
-msgstr ""
+msgid "The employer did not accept your application for %(job_type)s, %(date)s."
+msgstr "İşveren başvurunuzu kabul etmedi. İş: %(job_type)s, %(date)s."
 
 #: templates/emails/application_rejected_body.txt
 msgid "Other jobs are waiting for you:"
-msgstr ""
+msgstr "Sizi başka işler bekliyor:"
 
 #: templates/emails/application_rejected_subject.txt
 #, python-format
 msgid "Application not accepted: %(job_type)s, %(date)s"
-msgstr ""
+msgstr "Başvuru kabul edilmedi: %(job_type)s, %(date)s"
 
 #: templates/emails/new_application_body.txt
 #, python-format
-msgid ""
-"%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s "
-"worker."
-msgid_plural ""
-"%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s "
-"workers."
-msgstr[0] ""
-msgstr[1] ""
+msgid "%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s worker."
+msgid_plural "%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s workers."
+msgstr[0] "Yeni başvuru: %(name)s. İlanınız: %(job_type)s, %(date)s, %(counter)s işçi."
+msgstr[1] "Yeni başvuru: %(name)s. İlanınız: %(job_type)s, %(date)s, %(counter)s işçi."
 
 #: templates/emails/new_application_body.txt
 msgid "Accept or reject the application here:"
-msgstr ""
+msgstr "Başvuruyu buradan kabul edin veya reddedin:"
 
 #: templates/emails/new_application_subject.txt
 #, python-format
 msgid "New application: %(job_type)s, %(date)s"
-msgstr ""
+msgstr "Yeni başvuru: %(job_type)s, %(date)s"
 
 #: templates/emails/verify_email_body.txt
-msgid ""
-"Someone created a BauHelfer account with this email address. Open this link "
-"to confirm the address and activate the account:"
-msgstr ""
+msgid "Someone created a BauHelfer account with this email address. Open this link to confirm the address and activate the account:"
+msgstr "Birisi bu e-posta adresiyle bir BauHelfer hesabı oluşturdu. Adresi onaylamak ve hesabı etkinleştirmek için bu bağlantıyı açın:"
 
 #: templates/emails/verify_email_body.txt
 #, python-format
 msgid "The link works once and for %(counter)s day."
 msgid_plural "The link works once and for %(counter)s days."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Bağlantı bir kez ve %(counter)s gün geçerlidir."
+msgstr[1] "Bağlantı bir kez ve %(counter)s gün geçerlidir."
 
 #: templates/emails/verify_email_body.txt
-msgid ""
-"If you did not create an account, ignore this email: without the link "
-"nothing happens."
-msgstr ""
+msgid "If you did not create an account, ignore this email: without the link nothing happens."
+msgstr "Bir hesap oluşturmadıysanız bu e-postayı dikkate almayın: bağlantı açılmazsa hiçbir şey olmaz."
 
 #: templates/emails/verify_email_subject.txt
 msgid "Confirm your email for BauHelfer"
-msgstr ""
+msgstr "BauHelfer için e-postanızı onaylayın"
 
 #: templates/jobs/_application_status_badge.html
 msgid "Job cancelled"
-msgstr ""
+msgstr "İş iptal edildi"
 
 #: templates/jobs/_crew.html
 #, python-format
 msgid "%(taken)s of %(offered)s workers"
-msgstr ""
+msgstr "%(offered)s işçiden %(taken)s"
 
 #: templates/jobs/_crew.html templates/jobs/_job_summary.html
 #, python-format
 msgid "%(workers)s worker"
 msgid_plural "%(workers)s workers"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(workers)s işçi"
+msgstr[1] "%(workers)s işçi"
+
+#: templates/jobs/_job_card.html templates/jobs/_job_summary.html
+#: templates/jobs/job_detail.html
+#, python-format
+msgid "%(rate)s €/h"
+msgstr "%(rate)s €/saat"
 
 #: templates/jobs/_job_card.html templates/jobs/job_detail.html
 #, python-format
 msgid "Needs %(workers)s worker"
 msgid_plural "Needs %(workers)s workers"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(workers)s işçi gerekli"
+msgstr[1] "%(workers)s işçi gerekli"
 
 #: templates/jobs/_job_photos.html
 #, python-format
 msgid "Photos (%(count)s of %(max)s)"
-msgstr ""
+msgstr "Fotoğraflar (%(count)s / %(max)s)"
 
 #: templates/jobs/_job_photos.html templates/jobs/_job_thumbnail.html
 #: templates/jobs/job_detail.html
 msgid "Job photo"
-msgstr ""
+msgstr "İş fotoğrafı"
 
 #: templates/jobs/_job_photos.html
 msgid "Delete photo"
-msgstr ""
+msgstr "Fotoğrafı sil"
 
 #: templates/jobs/_job_photos.html
 msgid "No photos yet."
-msgstr ""
+msgstr "Henüz fotoğraf yok."
 
 #: templates/jobs/_job_photos.html
 msgid "Location data is removed from photos."
-msgstr ""
+msgstr "Konum bilgileri fotoğraflardan silinir."
 
 #: templates/jobs/_job_photos.html
 msgid "Add photos"
-msgstr ""
+msgstr "Fotoğraf ekle"
 
 #: templates/jobs/_job_photos.html
 #, python-format
 msgid "That is the maximum of %(max)s photos."
-msgstr ""
+msgstr "En fazla %(max)s fotoğraf eklenebilir."
 
 #: templates/jobs/_job_summary.html
 #, python-format
 msgid "%(hours)s h"
-msgstr ""
+msgstr "%(hours)s sa"
 
 #: templates/jobs/_job_thumbnail.html
 #, python-format
 msgid "%(photos)s photo"
 msgid_plural "%(photos)s photos"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(photos)s fotoğraf"
+msgstr[1] "%(photos)s fotoğraf"
 
 #: templates/jobs/_my_application_card.html
 msgid "Your crew:"
-msgstr ""
+msgstr "Ekibiniz:"
 
 #: templates/jobs/_my_application_card.html
 msgid "Withdraw your application? This cannot be undone."
-msgstr ""
+msgstr "Başvurunuz geri çekilsin mi? Bu işlem geri alınamaz."
 
 #: templates/jobs/_my_application_card.html
 msgid "Withdraw"
-msgstr ""
+msgstr "Geri çek"
 
 #: templates/jobs/_my_application_card.html
 msgid "Contact"
-msgstr ""
+msgstr "İletişim"
 
 #: templates/jobs/_my_application_card.html
 msgid "Your message:"
-msgstr ""
+msgstr "Mesajınız:"
 
 #: templates/jobs/_my_application_card.html
 msgid "The job is over."
-msgstr ""
+msgstr "İş sona erdi."
 
 #: templates/jobs/_my_application_card.html
 msgid "You withdrew this application."
-msgstr ""
+msgstr "Bu başvuruyu geri çektiniz."
 
 #: templates/jobs/_my_application_card.html
 msgid "The employer chose other workers."
-msgstr ""
+msgstr "İşveren başka işçileri seçti."
 
 #: templates/jobs/_my_application_card.html
 msgid "The job was filled by other workers."
-msgstr ""
+msgstr "İş başka işçilerle doldu."
 
 #: templates/jobs/_my_application_card.html
 msgid "The employer cancelled the job."
-msgstr ""
+msgstr "İşveren işi iptal etti."
 
 #: templates/jobs/_my_application_card.html
 msgid "The employer cancelled your place."
-msgstr ""
+msgstr "İşveren yerinizi iptal etti."
 
 #: templates/jobs/_my_application_card.html
 msgid "The job is over. The contacts are no longer shown."
-msgstr ""
+msgstr "İş sona erdi. İletişim bilgileri artık gösterilmiyor."
 
 #: templates/jobs/_my_job_card.html
 #, python-format
 msgid "%(applications)s application"
 msgid_plural "%(applications)s applications"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(applications)s başvuru"
+msgstr[1] "%(applications)s başvuru"
 
 #: templates/jobs/_my_job_card.html
 msgid "No applications yet"
-msgstr ""
+msgstr "Henüz başvuru yok"
 
 #: templates/jobs/_my_job_card.html templates/jobs/job_detail.html
 msgid "Edit"
-msgstr ""
+msgstr "Düzenle"
 
 #: templates/jobs/_my_job_card.html templates/jobs/job_confirm_cancel.html
 msgid "Cancel job"
-msgstr ""
+msgstr "İşi iptal et"
 
 #: templates/jobs/_photo_placeholder.html
 msgid "No photo"
-msgstr ""
+msgstr "Fotoğraf yok"
 
 #: templates/jobs/job_confirm_cancel.html
 msgid "Cancel this job?"
-msgstr ""
+msgstr "Bu iş iptal edilsin mi?"
 
 #: templates/jobs/job_confirm_cancel.html
 msgid "Workers will no longer see it. This cannot be undone."
-msgstr ""
+msgstr "İşçiler artık bu işi görmeyecek. Bu işlem geri alınamaz."
 
 #: templates/jobs/job_confirm_cancel.html
 msgid "Yes, cancel the job"
-msgstr ""
+msgstr "Evet, işi iptal et"
 
 #: templates/jobs/job_confirm_cancel.html
 msgid "No, keep it"
-msgstr ""
+msgstr "Hayır, kalsın"
 
 #: templates/jobs/job_detail.html
 msgid "Jobs"
-msgstr ""
+msgstr "İşler"
 
 #: templates/jobs/job_detail.html
 msgid "Previous photo"
-msgstr ""
+msgstr "Önceki fotoğraf"
 
 #: templates/jobs/job_detail.html
 msgid "Next photo"
-msgstr ""
+msgstr "Sonraki fotoğraf"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "(%(hours)s h)"
-msgstr ""
+msgstr "(%(hours)s sa)"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "%(found)s of %(needed)s workers found"
-msgstr ""
+msgstr "Bulunan işçi: %(found)s / %(needed)s"
 
 #: templates/jobs/job_detail.html
 msgid "Address"
-msgstr ""
+msgstr "Adres"
 
 #: templates/jobs/job_detail.html
 msgid "The exact address is shown after the employer accepts you."
-msgstr ""
+msgstr "Tam adres, işveren sizi kabul ettikten sonra gösterilir."
 
 #: templates/jobs/job_detail.html
 msgid "Workers found"
-msgstr ""
+msgstr "Bulunan işçiler"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "Applications (%(count)s)"
-msgstr ""
+msgstr "Başvurular (%(count)s)"
 
 #: templates/jobs/job_detail.html
 msgid "No skill:"
-msgstr ""
+msgstr "Beceri yok:"
 
 #: templates/jobs/job_detail.html
 msgid "Work permit not confirmed"
-msgstr ""
+msgstr "Çalışma izni onaylanmadı"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "Sent %(date)s"
-msgstr ""
+msgstr "Gönderim: %(date)s"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "Cancel %(name)s? This cannot be undone."
-msgstr ""
+msgstr "İptal edilsin mi: %(name)s? Bu işlem geri alınamaz."
 
 #: templates/jobs/job_detail.html
 msgid "Cancel"
-msgstr ""
+msgstr "İptal et"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "Accept %(taken)s of %(offered)s"
-msgstr ""
+msgstr "%(offered)s kişiden %(taken)s kişiyi kabul et"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "Accept %(count)s"
-msgstr ""
+msgstr "Kabul et (%(count)s)"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "Reject %(name)s? This cannot be undone."
-msgstr ""
+msgstr "Reddedilsin mi: %(name)s? Bu işlem geri alınamaz."
 
 #: templates/jobs/job_detail.html
 msgid "Reject"
-msgstr ""
+msgstr "Reddet"
 
 #: templates/jobs/job_detail.html
 msgid "Accepting fills the job: the other pending applications will be closed."
-msgstr ""
+msgstr "Kabul ederseniz iş dolar: bekleyen diğer başvurular kapatılır."
 
 #: templates/jobs/job_detail.html
 msgid "No applications yet."
-msgstr ""
+msgstr "Henüz başvuru yok."
 
 #: templates/jobs/job_detail.html
 msgid "You applied"
-msgstr ""
+msgstr "Başvurdunuz"
 
 #: templates/jobs/job_detail.html
 #, python-format
 msgid "%(counter)s worker"
 msgid_plural "%(counter)s workers"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(counter)s işçi"
+msgstr[1] "%(counter)s işçi"
 
 #: templates/jobs/job_detail.html
 msgid "Apply"
-msgstr ""
+msgstr "Başvur"
 
 #: templates/jobs/job_detail.html
 msgid "Send application"
-msgstr ""
+msgstr "Başvuruyu gönder"
 
 #: templates/jobs/job_detail.html
 msgid "Complete your profile to apply"
-msgstr ""
+msgstr "Başvurmak için profilinizi tamamlayın"
 
 #: templates/jobs/job_detail.html
 msgid "Log in to apply"
-msgstr ""
+msgstr "Başvurmak için giriş yapın"
 
 #: templates/jobs/job_form.html
 msgid "Edit job"
-msgstr ""
+msgstr "İşi düzenle"
 
 #: templates/jobs/job_form.html
 msgid "Job details"
-msgstr ""
+msgstr "İş ayrıntıları"
 
 #: templates/jobs/job_form.html
 msgid "You can add photos after you publish the job."
-msgstr ""
+msgstr "İşi yayınladıktan sonra fotoğraf ekleyebilirsiniz."
 
 #: templates/jobs/job_form.html
 msgid "Save changes"
-msgstr ""
+msgstr "Değişiklikleri kaydet"
 
 #: templates/jobs/job_form.html
 msgid "Publish job"
-msgstr ""
+msgstr "İşi yayınla"
 
 #: templates/jobs/job_form.html
 msgid "Back to my jobs"
-msgstr ""
+msgstr "İlanlarıma dön"
 
 #: templates/jobs/job_list.html
 msgid "Jobs in Munich"
-msgstr ""
+msgstr "Münih'te işler"
 
 #: templates/jobs/job_list.html
 #, python-format
 msgid "%(counter)s open"
 msgid_plural "%(counter)s open"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(counter)s açık"
+msgstr[1] "%(counter)s açık"
 
 #: templates/jobs/job_list.html
 msgid "Show"
-msgstr ""
+msgstr "Göster"
 
 #: templates/jobs/job_list.html
 msgid "Reset filters"
-msgstr ""
+msgstr "Filtreleri sıfırla"
 
 #: templates/jobs/job_list.html
 msgid "Need workers?"
-msgstr ""
+msgstr "İşçi mi lazım?"
 
 #: templates/jobs/job_list.html
 msgid "No jobs match these filters."
-msgstr ""
+msgstr "Bu filtrelere uyan iş yok."
 
 #: templates/jobs/job_list.html
 msgid "No open jobs right now."
-msgstr ""
+msgstr "Şu anda açık iş yok."
 
 #: templates/jobs/job_list.html
 msgid "Pages"
-msgstr ""
+msgstr "Sayfalar"
 
 #: templates/jobs/job_list.html
 msgid "Previous"
-msgstr ""
+msgstr "Önceki"
 
 #: templates/jobs/job_list.html
 #, python-format
 msgid "Page %(number)s of %(total)s"
-msgstr ""
+msgstr "Sayfa %(number)s / %(total)s"
 
 #: templates/jobs/job_list.html
 msgid "Next"
-msgstr ""
+msgstr "Sonraki"
 
 #: templates/jobs/my_applications.html
 msgid "You have not applied to any job yet."
-msgstr ""
+msgstr "Henüz hiçbir işe başvurmadınız."
 
 #: templates/jobs/my_applications.html
 msgid "Find a job"
-msgstr ""
+msgstr "İş bul"
 
 #: templates/jobs/my_jobs.html
 msgid "You have not posted any jobs yet."
-msgstr ""
+msgstr "Henüz hiç iş ilanı vermediniz."
 
 #: templates/registration/login.html
 msgid "Forgot your password?"
-msgstr ""
+msgstr "Şifrenizi mi unuttunuz?"
 
 #: templates/registration/login.html
 msgid "Did not get the confirmation email?"
-msgstr ""
+msgstr "Onay e-postası gelmedi mi?"
 
 #: templates/registration/login.html
 msgid "No account yet?"
-msgstr ""
+msgstr "Henüz hesabınız yok mu?"
 
 #: templates/registration/password_reset_complete.html
 msgid "Password changed"
-msgstr ""
+msgstr "Şifre değiştirildi"
 
 #: templates/registration/password_reset_complete.html
 msgid "Your new password is saved. You can log in now."
-msgstr ""
+msgstr "Yeni şifreniz kaydedildi. Artık giriş yapabilirsiniz."
 
 #: templates/registration/password_reset_confirm.html
 msgid "Set a new password"
-msgstr ""
+msgstr "Yeni şifre belirleyin"
 
 #: templates/registration/password_reset_confirm.html
 msgid "Save password"
-msgstr ""
+msgstr "Şifreyi kaydet"
 
 #: templates/registration/password_reset_confirm.html
 #: templates/registration/verify_email.html
 msgid "Link is not valid"
-msgstr ""
+msgstr "Bağlantı geçersiz"
 
 #: templates/registration/password_reset_confirm.html
 msgid "This link was already used or has expired. Please ask for a new one."
-msgstr ""
+msgstr "Bu bağlantı zaten kullanılmış veya süresi dolmuş. Lütfen yeni bir bağlantı isteyin."
 
 #: templates/registration/password_reset_confirm.html
 #: templates/registration/password_reset_form.html
 msgid "Reset password"
-msgstr ""
+msgstr "Şifreyi sıfırla"
 
 #: templates/registration/password_reset_done.html
 #: templates/registration/register_done.html
 #: templates/registration/verify_email_resend_done.html
 msgid "Check your email"
-msgstr ""
+msgstr "E-postanızı kontrol edin"
 
 #: templates/registration/password_reset_done.html
-msgid ""
-"If an account with this email exists, we have sent a link to set a new "
-"password. Check your spam folder too."
-msgstr ""
+msgid "If an account with this email exists, we have sent a link to set a new password. Check your spam folder too."
+msgstr "Bu e-postayla bir hesap varsa, yeni şifre belirlemek için bir bağlantı gönderdik. İstenmeyen e-posta klasörünü de kontrol edin."
 
 #: templates/registration/password_reset_email.txt
-msgid ""
-"Someone asked to reset the password for your BauHelfer account. Open this "
-"link to set a new password:"
-msgstr ""
+msgid "Someone asked to reset the password for your BauHelfer account. Open this link to set a new password:"
+msgstr "Birisi BauHelfer hesabınızın şifresini sıfırlamak istedi. Yeni şifre belirlemek için bu bağlantıyı açın:"
 
 #: templates/registration/password_reset_email.txt
 msgid "If it was not you, ignore this email: your password stays the same."
-msgstr ""
+msgstr "Bu siz değilseniz bu e-postayı dikkate almayın: şifreniz aynı kalır."
 
 #: templates/registration/password_reset_form.html
-msgid ""
-"Enter the email of your account. We will send you a link to set a new "
-"password."
-msgstr ""
+msgid "Enter the email of your account. We will send you a link to set a new password."
+msgstr "Hesabınızın e-postasını girin. Yeni şifre belirlemeniz için size bir bağlantı göndereceğiz."
 
 #: templates/registration/password_reset_form.html
 msgid "Send link"
-msgstr ""
+msgstr "Bağlantı gönder"
 
 #: templates/registration/password_reset_subject.txt
 msgid "Reset your BauHelfer password"
-msgstr ""
+msgstr "BauHelfer şifrenizi sıfırlayın"
 
 #: templates/registration/register.html
 msgid "Create an account"
-msgstr ""
+msgstr "Hesap oluşturun"
 
 #: templates/registration/register.html
 msgid "Already have an account?"
-msgstr ""
+msgstr "Zaten hesabınız var mı?"
 
 #: templates/registration/register_done.html
 #, python-format
 msgid "We sent a link to <strong class=\"break-all\">%(email)s</strong>."
-msgstr ""
+msgstr "Bağlantıyı şu adrese gönderdik: <strong class=\"break-all\">%(email)s</strong>."
 
 #: templates/registration/register_done.html
 msgid "We sent a link to your email address."
-msgstr ""
+msgstr "E-posta adresinize bir bağlantı gönderdik."
 
 #: templates/registration/register_done.html
 msgid "Open it to activate your account."
-msgstr ""
+msgstr "Hesabınızı etkinleştirmek için bağlantıyı açın."
 
 #: templates/registration/register_done.html
 #: templates/registration/verify_email_resend_done.html
 msgid "Check your spam folder too."
-msgstr ""
+msgstr "İstenmeyen e-posta klasörünü de kontrol edin."
 
 #: templates/registration/register_done.html
 msgid "Did not get it?"
-msgstr ""
+msgstr "Gelmedi mi?"
 
 #: templates/registration/register_done.html
 #: templates/registration/verify_email.html
 #: templates/registration/verify_email_resend.html
 msgid "Send the link again"
-msgstr ""
+msgstr "Bağlantıyı yeniden gönder"
 
 #: templates/registration/verify_email.html
 msgid "Confirm email"
-msgstr ""
+msgstr "E-postayı onayla"
 
 #: templates/registration/verify_email.html
 msgid "Press the button to confirm your address and activate your account."
-msgstr ""
+msgstr "Adresinizi onaylamak ve hesabınızı etkinleştirmek için düğmeye basın."
 
 #: templates/registration/verify_email.html
-msgid ""
-"This link is invalid or has expired. It works only once: if you already "
-"confirmed your email, just log in."
-msgstr ""
+msgid "This link is invalid or has expired. It works only once: if you already confirmed your email, just log in."
+msgstr "Bu bağlantı geçersiz veya süresi dolmuş. Yalnızca bir kez çalışır: e-postanızı zaten onayladıysanız giriş yapmanız yeterli."
 
 #: templates/registration/verify_email_resend.html
 msgid "Enter the email you signed up with. We send a new link to confirm it."
-msgstr ""
+msgstr "Kayıt olduğunuz e-postayı girin. Onaylamanız için yeni bir bağlantı göndeririz."
 
 #: templates/registration/verify_email_resend_done.html
 msgid "If an unconfirmed account uses this address, we sent a new link."
-msgstr ""
+msgstr "Bu adresi onaylanmamış bir hesap kullanıyorsa yeni bir bağlantı gönderdik."
 
 #: templates/registration/verify_email_resend_done.html
 msgid "A new link can be sent once every 10 minutes."
-msgstr ""
+msgstr "Yeni bağlantı 10 dakikada bir gönderilebilir."

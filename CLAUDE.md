@@ -18,7 +18,8 @@ uv run python manage.py runserver        # dev server (settings: config.settings
 uv run python manage.py makemigrations   # after model changes
 uv run python manage.py migrate          # after makemigrations and after pulling main
 uv run python manage.py makemessages -a --add-location file --ignore "tests/*" \
-  --ignore "*/tests/*" --ignore "static/*" --ignore "media/*"  # after changing UI strings
+  --ignore "*/tests/*" --ignore "static/*" --ignore "media/*"  # after changing UI strings;
+                                         # CI runs it too and fails if locale/ changes
 uv run python manage.py compilemessages --ignore .venv   # after editing locale/*/django.po;
                                          # commit .po and .mo together (tests check both)
 uv run pytest                            # all tests, E2E included

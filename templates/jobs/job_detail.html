@@ -59,8 +59,8 @@
   {% endwith %}
 
   <div class="mt-4 flex items-start justify-between gap-4">
-    <h1 class="text-2xl font-bold">{{ job.get_job_type_display }}</h1>
-    <p class="shrink-0 text-2xl font-bold">{{ job.hourly_rate }} €/h</p>
+    <h1 class="min-w-0 text-2xl font-bold break-words hyphens-auto">{{ job.get_job_type_display }}</h1>
+    <p class="shrink-0 text-2xl font-bold">{% blocktranslate with rate=job.hourly_rate %}{{ rate }} €/h{% endblocktranslate %}</p>
   </div>
   {# The district may wrap: the longest name has 52 characters. The time and the hours #}
   {# stay together, so "(8 h)" never starts a line of its own. #}

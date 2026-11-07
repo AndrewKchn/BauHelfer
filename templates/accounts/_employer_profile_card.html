@@ -5,21 +5,23 @@
   for an accepted worker until the day of the job is over (#25, contacts.md R3, D7).
   Needs `profile` (an EmployerProfile).
 {% endcomment %}
-<dl class="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-4 sm:gap-x-6">
+{# Phone: each label above its value, so the badges get the whole width (#30, D17); #}
+{# from sm the labels sit in a column on the left. #}
+<dl class="grid grid-cols-1 gap-y-1 sm:grid-cols-[max-content_1fr] sm:gap-x-6 sm:gap-y-4">
   {% if profile.company_name %}
-    <dt class="font-semibold">{% translate "Company" %}</dt>
+    <dt class="mt-3 font-semibold first:mt-0 sm:mt-0">{% translate "Company" %}</dt>
     <dd class="min-w-0 break-words">{{ profile.company_name }}</dd>
   {% endif %}
 
-  <dt class="font-semibold">{% translate "Contact person" %}</dt>
+  <dt class="mt-3 font-semibold first:mt-0 sm:mt-0">{% translate "Contact person" %}</dt>
   <dd class="min-w-0 break-words">{{ profile.user.name }}</dd>
 
   {% if show_phone %}
-    <dt class="font-semibold">{% translate "Phone" %}</dt>
+    <dt class="mt-3 font-semibold first:mt-0 sm:mt-0">{% translate "Phone" %}</dt>
     <dd class="min-w-0 break-words">{% include "accounts/_phone.html" with phone=profile.user.phone %}</dd>
   {% endif %}
 
-  <dt class="font-semibold">{% translate "Trades" %}</dt>
+  <dt class="mt-3 font-semibold first:mt-0 sm:mt-0">{% translate "Trades" %}</dt>
   <dd class="flex min-w-0 flex-wrap gap-2">
     {% for name in profile.trade_names %}<span class="badge badge-outline">{{ name }}</span>{% endfor %}
   </dd>

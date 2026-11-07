@@ -66,6 +66,18 @@ jobs:
         # Python package, so uv cannot install it.
         run: sudo apt-get install -y --no-install-recommends gettext
 
+      - name: Check that the .po files hold every UI string  # translations.md R2, D4 (#30)
+        # makemessages with the flags from CLAUDE.md. If it changes locale/, a string was
+        # added to or removed from the code without updating the .po files: no test would
+        # see it, and users would get it in English.
+        run: |
+          uv run python manage.py makemessages -a --add-location file --ignore "tests/*" \
+            --ignore "*/tests/*" --ignore "static/*" --ignore "media/*"
+          git diff --exit-code locale/ || {
+            echo "::error::Run makemessages and commit locale/ (see CLAUDE.md)"
+            exit 1
+          }
+
       - name: Install Chromium for the E2E tests  # tests/e2e/, Playwright (#14)
         # --with-deps: system libraries. --only-shell: only the headless browser; CI has no
         # window, so the full Chrome would be downloaded for nothing.

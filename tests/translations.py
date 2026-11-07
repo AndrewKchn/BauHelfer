@@ -22,9 +22,22 @@ def statistics(po):
     msgfmt --statistics prints one line such as
     "1 translated message, 2 fuzzy translations, 334 untranslated messages."
     (a kind with 0 strings is left out). Obsolete #~ entries are not counted.
+    --check-format: a translation whose placeholders differ from the English string
+    (%(name)s misspelt or left out) is an error, as in compilemessages (#30, D8).
+    --check-header: a plural string with fewer forms than the header's nplurals is an
+    error; Django would show English for the missing ones (D14). Its warnings about
+    empty header fields are not errors.
     """
     result = subprocess.run(
-        ["msgfmt", "--statistics", "-o", os.devnull, str(po)],
+        [
+            "msgfmt",
+            "--statistics",
+            "--check-format",
+            "--check-header",
+            "-o",
+            os.devnull,
+            str(po),
+        ],
         capture_output=True,
         text=True,
         check=True,  # a broken .po raises here instead of looking translated

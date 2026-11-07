@@ -2532,3 +2532,53 @@ explained the request path through the two middlewares and what `.po` and `.mo` 
   needs request.user to switch to the profile language.
 - What a strict xfail is for: a known failure that turns CI red once it is fixed, so the
   marker cannot be forgotten; `raises` keeps unrelated errors visible.
+
+## 2026-11-07 · #30 Translate all existing UI strings from M2–M4
+
+**Task given to AI:** translate the ~336 UI strings of M2–M4 into DE, RU, UK, PL, RO, TR,
+remove the `xfail` marker left by #29, fix the untranslated "€/h" and check the layouts that
+longer translations might break (notes in the issue), following the ticket workflow.
+
+**AI helped:** wrote `docs/specs/translations.md` (D1–D17, a 12-word glossary in 6
+languages) and split the ticket into four iterations. It drafted RU / UK itself and ran four
+translator agents for DE / PL / RO / TR, then four back-translation agents that saw only the
+translations, and compared the 1344 pairs. It added `--check-format` and `--check-header` to
+the translation check, a CI step that fails when `makemessages` would change `locale/`, and
+tests for the rate, placeholders, plural forms and the page language. It wrote a temporary
+Playwright probe that opened 20 pages × 7 languages at 360 px and listed every element sticking
+out, and fixed what it found (header paddings, hyphenation, badges, profile cards).
+
+**AI failed:**
+- It filled only 2 of the 4 Russian / Ukrainian plural forms (`makemessages` writes 2), so
+  5–20 showed English ("16 open"). No test caught it; seen on a screenshot. Fixed with
+  `msgfmt --check-header` and a test (D14).
+- The RU / UK review table it gave me missed the first string ("Profile"): an off-by-one in
+  its script, found while preparing the back-translation.
+- The spec first said a broken placeholder always gives error 500; a template falls back to
+  English instead. Corrected before the commit.
+- `hyphens-auto` alone did not help Polish (Chromium has no Polish dictionary); the probe
+  showed it, `break-words` was added.
+- The first screenshots were covered by the Debug Toolbar; the probe also reported the
+  swipe carousel's hidden tabs as overflow, checked on screenshots and ignored.
+
+**My part:**
+- I chose back-translation for DE / PL / RO / TR (D1), screenshots before fixing long words
+  (D2), moving my E2E idea from #16 to #40 (D3), a CI step for `makemessages` (D4) and the
+  polite address everywhere (D5). The recommendations matched my criteria: simple code and
+  usability first, new ideas go to an existing ticket.
+- I reviewed all RU / UK strings side by side and changed nothing; I accepted the glossary
+  ("вакансия", "заявка") and all four back-translation fixes.
+- I noticed myself that some words ran out of their boxes in Russian.
+- On the RU profile I saw half the screen empty and asked to fix it; I chose labels above
+  values on phones (D17).
+- My idea to build the profile like the mockup, so it looks the way an employer sees it, I
+  moved to #39, where the rating will be added to the same header.
+- I checked everything on the local server, in DevTools on my laptop at phone width: the
+  rate, the language switch and the pages in each language.
+
+**Learned:**
+- Why a missing plural form shows English without any error: gettext picks the form by a
+  formula in the `.po` header, and an empty form falls back to the English msgid, so only a
+  check like `msgfmt --check-header` can see it.
+- What back-translation can and cannot prove: it catches a wrong meaning (a "work permit"
+  instead of "the right to work"), not clumsy style; a native speaker is still the real check.
