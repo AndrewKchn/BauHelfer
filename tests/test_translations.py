@@ -94,6 +94,26 @@ def test_broken_file_is_an_error(tmp_path, check):
         check.statistics(po)
 
 
+@pytest.mark.story(30)
+@pytest.mark.parametrize(
+    "translation", ["Привет, %(nmae)s,", "Привет,"], ids=["renamed", "dropped"]
+)
+def test_broken_placeholder_is_an_error(tmp_path, check, translation):
+    """A translation whose placeholder differs from the English one stops the check.
+
+    1. Write a .po whose "Hello %(name)s," is translated with a misspelt placeholder
+       (KeyError in Python code) or a missing one (the name is lost)
+    2. Expect: the check raises CalledProcessError
+    """
+    po = write_po(
+        tmp_path,
+        f'#, python-format\nmsgid "Hello %(name)s,"\nmsgstr "{translation}"\n',
+    )
+
+    with pytest.raises(subprocess.CalledProcessError):
+        check.statistics(po)
+
+
 def test_every_language_but_english_has_a_po_file():
     """locale/ has a .po file for each of the 6 languages, and none for English (D10).
 
