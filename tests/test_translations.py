@@ -127,18 +127,29 @@ def test_every_language_but_english_has_a_po_file():
         assert (LOCALE / code / "LC_MESSAGES" / "django.po").is_file()
 
 
-# AC12: our own files; expected to fail until #30 translates the M2-M4 strings (D2)
+# AC12: our own files (i18n.md D2). #30 translates the M2-M4 strings one group of
+# languages at a time and removes a language from NOT_YET when its strings are translated
+# (translations.md D7, AC4, AC5).
+NOT_YET = {"de", "pl", "ro", "tr"}
 
-
-# strict: once every string is translated the test passes, and a passing xfail turns the run
-# red, so #30 has to remove the marker. raises: only the failed assert is expected; any
-# other error (gettext not installed, a broken .po) still turns the run red.
-@pytest.mark.xfail(
+# strict: once a language is translated its test passes, and a passing xfail turns the run
+# red, so the language has to leave NOT_YET. raises: only the failed assert is expected;
+# any other error (gettext not installed, a broken .po) still turns the run red.
+NOT_YET_TRANSLATED = pytest.mark.xfail(
     strict=True,
     raises=AssertionError,
-    reason="#30 translates the M2-M4 strings; then remove this marker (i18n.md D2)",
+    reason="#30 translates it in iteration 3; then remove it from NOT_YET",
 )
-@pytest.mark.parametrize("code", TRANSLATED)
+
+
+@pytest.mark.story(30)
+@pytest.mark.parametrize(
+    "code",
+    [
+        pytest.param(code, marks=NOT_YET_TRANSLATED) if code in NOT_YET else code
+        for code in TRANSLATED
+    ],
+)
 def test_every_string_is_translated(check, code):
     """Every string of the site is translated into this language, none is fuzzy.
 
