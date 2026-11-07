@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "accounts",
     "jobs",
+    "translations",
 ]
 
 MIDDLEWARE = [
@@ -148,6 +149,12 @@ MINIMUM_WAGES = {
 # (#27). Tests replace this with Django's in-memory backend.
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL = "BauHelfer <noreply@bauhelfer.local>"
+
+
+# Translating user texts (#31)
+# Who translates jobs and messages, chosen like EMAIL_BACKEND: here a fake translator that
+# answers "[pl] <text>" without a key or network; production.py uses Claude.
+TRANSLATION_BACKEND = "translations.backends.fake.FakeBackend"
 
 
 # Logging (#124)
