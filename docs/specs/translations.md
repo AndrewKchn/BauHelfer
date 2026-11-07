@@ -92,22 +92,26 @@ R11. Only what runs out of its box or makes the page scroll sideways is fixed (D
 
 ## Glossary (D6)
 
-Filled in iteration 2; RU and UK reviewed by me.
+Claude's draft; I reviewed RU and UK on 2026-11-07 and kept it as it is. I chose between the
+alternatives: "вакансия" (not "заказ", "подработка") and "заявка" / "подать заявку" (not
+"отклик" / "откликнуться"), the words we already use; the other columns are checked by
+back-translation (D1). DE "Helfer": what a helper on a building site is called, and the
+"Helfer" of BauHelfer.
 
 | English | DE | RU | UK | PL | RO | TR |
 |---|---|---|---|---|---|---|
-| job | | | | | | |
-| application | | | | | | |
-| apply | | | | | | |
-| worker | | | | | | |
-| employer | | | | | | |
-| crew | | | | | | |
-| accept / reject | | | | | | |
-| withdraw | | | | | | |
-| work permit | | | | | | |
-| hourly rate, €/h | | | | | | |
-| post a job | | | | | | |
-| Munich | | | | | | |
+| job | Job | вакансия | вакансія | zlecenie | lucrare | iş |
+| application | Bewerbung | заявка | заявка | zgłoszenie | candidatură | başvuru |
+| apply | sich bewerben | подать заявку | подати заявку | zgłosić się | a candida | başvurmak |
+| worker | Helfer | рабочий | робітник | pracownik | muncitor | işçi |
+| employer | Auftraggeber | работодатель | роботодавець | zleceniodawca | angajator | işveren |
+| crew | Team | бригада | бригада | ekipa | echipă | ekip |
+| accept / reject | annehmen / ablehnen | принять / отклонить | прийняти / відхилити | przyjąć / odrzucić | a accepta / a respinge | kabul etmek / reddetmek |
+| withdraw | zurückziehen | отозвать | відкликати | wycofać | a retrage | geri çekmek |
+| work permit | Arbeitserlaubnis | разрешение на работу | дозвіл на роботу | pozwolenie na pracę | permis de muncă | çalışma izni |
+| hourly rate, €/h | Stundenlohn, €/Std. | ставка в час, €/ч | погодинна ставка, €/год | stawka godzinowa, €/godz. | tarif orar, €/oră | saatlik ücret, €/saat |
+| post a job | Job einstellen | разместить вакансию | розмістити вакансію | dodać zlecenie | publicați o lucrare | iş ilanı vermek |
+| Munich | München | Мюнхен | Мюнхен | Monachium | München | Münih |
 
 ## Decisions
 
