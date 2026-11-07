@@ -155,6 +155,8 @@ DEFAULT_FROM_EMAIL = "BauHelfer <noreply@bauhelfer.local>"
 # Who translates jobs and messages, chosen like EMAIL_BACKEND: here a fake translator that
 # answers "[pl] <text>" without a key or network; production.py uses Claude.
 TRANSLATION_BACKEND = "translations.backends.fake.FakeBackend"
+# Read by translations.backends.claude; empty locally, so only the manual check uses one.
+ANTHROPIC_API_KEY = env("ANTHROPIC_API_KEY", default="")
 
 
 # Logging (#124)
@@ -185,6 +187,7 @@ LOGGING = {
     "loggers": {
         "accounts": {"level": "INFO"},  # also accounts.views, accounts.signals, …
         "jobs": {"level": "INFO"},
+        "translations": {"level": "INFO"},  # one line per call to Claude (#31)
         "config": {"level": "INFO"},  # the request log in production (#137)
         "django": {"level": "INFO"},
     },

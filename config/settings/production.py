@@ -64,6 +64,12 @@ EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
 ANYMAIL = {"BREVO_API_KEY": env("BREVO_API_KEY")}
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")  # "BauHelfer <…@gmail.com>"
 
+# Translating user texts (#31, docs/specs/ai-translation.md R9): Claude instead of the fake
+# translator. The key is required: without it the server does not start, instead of every
+# translation failing quietly (D11). It is "bauhelfer-render" in the Claude Console.
+TRANSLATION_BACKEND = "translations.backends.claude.ClaudeBackend"
+ANTHROPIC_API_KEY = env("ANTHROPIC_API_KEY")
+
 # Render terminates HTTPS in front of the app and tells Django via this header.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = True
