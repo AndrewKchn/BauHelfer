@@ -98,6 +98,23 @@ R11. Only what runs out of its box or makes the page scroll sideways is fixed (D
      gets `h-auto whitespace-normal` (D2, option A). Each fix is listed in the iteration's
      summary with its before / after screenshot.
 
+What the check found (2026-11-07): a temporary Playwright probe opened 20 pages at 360 px in
+all 7 languages as a guest, a worker and an employer, with the longest words in the data,
+and listed every element that stuck out of its card or the screen. Five real problems:
+
+| Where | Languages | Before | Fix |
+|---|---|---|---|
+| guest header ("Log in", "Register") | DE, RO | page 30 px wider than the screen | smaller paddings on phones (D16) |
+| job page: title next to the rate | DE, RU, UK, PL | rate 7–22 px out, page scrolls sideways | the title may hyphenate (D15) |
+| job card: title next to the rate | DE, UK | rate 4 px out of the card | the same (D15) |
+| skill / trade badges on profiles | RU, DE | 47 px / 16 px out ("Подсобник гипсокартонщика", "Generalunternehmer") | badges wrap and hyphenate (D2) |
+| skill checkboxes in the profile form | RU | page 1 px wider | the label may hyphenate (D15) |
+
+After the fixes the probe found nothing on these pages. Left as it is: the status tabs of My
+jobs / My applications may run past the right edge (RU "Отклонена 1": 17 px); the strip
+scrolls sideways by design (#20), so every tab stays reachable. No automated test guards
+these fixes: layout needs a browser, and that test belongs to #40 (D3).
+
 ## Glossary (D6)
 
 Claude's draft; I reviewed RU and UK on 2026-11-07 and kept it as it is. I chose between the
@@ -185,6 +202,26 @@ D14. **`msgfmt --check-header`: every plural string has all the language's forms
      passed `--check-format` and the "every string translated" test, and Django fell back
      to English for 5–20. Its other header warnings (empty `Last-Translator`…) are not
      errors, so the files need no other change.
+
+D15. **A long word may hyphenate: `min-w-0 break-words hyphens-auto`** (Claude's default,
+     tried in iteration 4): on the job title, the job card title and the checkbox labels.
+     The browser splits a word at a syllable of the page's language (`<html lang>`, e.g.
+     "Trockenbau-helfer"); where it has no dictionary (Polish in Chromium), `break-words`
+     splits it anyway. Rejected: shorter translations (D2, option B).
+D16. **Smaller header paddings on phones** (Claude's default, tried in iteration 4): the
+     logo `px-2` and the guest buttons `px-2`, `gap-1`, back to the old sizes from `sm`
+     (640 px). Gains ~40 px, enough for RO "Autentificare · Înregistrare". Rejected: hiding
+     "Register" on phones (a worker who wants to sign up looks for it in the header).
+
+D17. **Profile cards: on a phone each label above its value** (mine, 2026-11-07; option A).
+     In Russian the label column ("Разрешение на работу") took half of a 360 px screen and
+     left ~100 px for the values: ten skill badges in one column, words split by hyphens.
+     Now the worker and employer cards are one column below 640 px (label, then value; 4 px
+     between them, 16 px between pairs), as on the worker profile mockup, and two columns
+     from `sm` as before. Rejected: a label column of at most 8rem (B: values get ~190 px,
+     still one long badge per line); a shorter Russian label (C: German and Romanian have
+     the same problem). The short "Contacts" and "Email notifications" lists keep two
+     columns.
 
 ## Known limitations
 

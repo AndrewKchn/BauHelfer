@@ -4,28 +4,30 @@
   employers, so no contact details here (phone and email are revealed only after acceptance, #25).
   Needs `profile` (a WorkerProfile).
 {% endcomment %}
-<dl class="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-4 sm:gap-x-6">
-  <dt class="font-semibold">{% translate "Name" %}</dt>
+{# Phone: each label above its value, so the badges get the whole width (#30, D17); #}
+{# from sm the labels sit in a column on the left. #}
+<dl class="grid grid-cols-1 gap-y-1 sm:grid-cols-[max-content_1fr] sm:gap-x-6 sm:gap-y-4">
+  <dt class="mt-3 font-semibold first:mt-0 sm:mt-0">{% translate "Name" %}</dt>
   <dd class="min-w-0 break-words">{{ profile.user.name }}</dd>
 
-  <dt class="font-semibold">{% translate "Team" %}</dt>
+  <dt class="mt-3 font-semibold first:mt-0 sm:mt-0">{% translate "Team" %}</dt>
   <dd class="min-w-0 break-words">{{ profile.team_label }}</dd>
 
-  <dt class="font-semibold">{% translate "Skills" %}</dt>
+  <dt class="mt-3 font-semibold first:mt-0 sm:mt-0">{% translate "Skills" %}</dt>
   <dd class="flex min-w-0 flex-wrap gap-2">
     {% for name in profile.skill_names %}<span class="badge badge-outline">{{ name }}</span>{% endfor %}
   </dd>
 
-  <dt class="font-semibold">{% translate "Languages" %}</dt>
+  <dt class="mt-3 font-semibold first:mt-0 sm:mt-0">{% translate "Languages" %}</dt>
   <dd class="flex min-w-0 flex-wrap gap-2">
     {% for name in profile.language_names %}<span class="badge badge-outline">{{ name }}</span>{% endfor %}
   </dd>
 
-  <dt class="font-semibold">{% translate "Legal status" %}</dt>
+  <dt class="mt-3 font-semibold first:mt-0 sm:mt-0">{% translate "Legal status" %}</dt>
   <dd class="min-w-0 break-words">{{ profile.get_legal_status_display }}</dd>
 
   {# Only that the worker said so, not when: the date is on the worker's own page (spec D6). #}
-  <dt class="font-semibold">{% translate "Work permit" %}</dt>
+  <dt class="mt-3 font-semibold first:mt-0 sm:mt-0">{% translate "Work permit" %}</dt>
   <dd class="min-w-0 break-words">
     {% if profile.user.work_permit_confirmed_at %}{% translate "Confirmed by the worker" %}{% else %}{% translate "Not confirmed" %}{% endif %}
   </dd>
