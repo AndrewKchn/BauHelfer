@@ -97,6 +97,32 @@ def test_another_language_is_a_new_translation(recording_backend):
     assert Translation.objects.count() == 2
 
 
+class RacingBackend:
+    """A translator during whose call another request saves the same translation first."""
+
+    def translate(self, text, target_lang):
+        """Save "first" as the other request would, then answer "second"."""
+        Translation.objects.create(
+            source_hash=hashlib.sha256(text.encode()).hexdigest(),
+            target_language=target_lang,
+            text="first",
+        )
+        return "second"
+
+
+def test_two_requests_at_once_keep_one_translation(settings):
+    """Two requests translate the same text at the same instant: both see one row (R1).
+
+    1. Use a translator during whose call another request saves "first"
+    2. Translate the job text into Polish
+    3. Expect: "first", the saved row, not this call's "second"; one row, no error
+    """
+    settings.TRANSLATION_BACKEND = f"{__name__}.RacingBackend"
+
+    assert translate(JOB_TEXT, "pl") == "first"
+    assert Translation.objects.count() == 1
+
+
 # What is not translated (D7, D8; AC4, AC5)
 
 
