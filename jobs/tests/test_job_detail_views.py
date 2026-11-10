@@ -444,10 +444,14 @@ def test_job_page_links_back_to_the_list(client, job):
 def test_page_needs_two_queries(client, job, django_assert_num_queries, photos):
     """The job with its employer and profile in one query, all photos in a second one.
 
-    1. Give the job 0, 1 or 3 photos
+    1. Give the job 0, 1 or 3 photos; its description is in English, the guest's
+       language, so nothing is translated (since #32: test_job_translation_views.py
+       counts the page with a translation)
     2. Open the job's page as a guest (no session, so no session query)
     3. Expect: exactly 2 database queries, whatever the number of photos
     """
+    job.original_language = "en"
+    job.save()
     add_photos(job, photos)
 
     with django_assert_num_queries(2):

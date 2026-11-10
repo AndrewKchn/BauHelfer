@@ -1,8 +1,9 @@
 """Translate user texts once per language and keep the result (#31, #34).
 
 Views of #32, #33 and #36 call translate() to show a job or message in the reader's
-language, and forget() when that job or message is deleted or edited.
-Spec: docs/specs/ai-translation.md.
+language, and forget() when that job or message is deleted or edited. The job form calls
+detect_language() to know which language a description is in (#32).
+Specs: docs/specs/ai-translation.md, docs/specs/job-translation.md.
 """
 
 import hashlib
@@ -93,6 +94,29 @@ def _original(text, target_lang, key, event, tail=""):
         "Translation %s lang=%s hash=%s%s", event, target_lang, key[:12], tail
     )
     return Translated(text, ok=False)
+
+
+def detect_language(text):
+    """The language `text` is written in: one of our 7 codes, "" for another, or None.
+
+    None means "cannot tell": empty text, a text too long to send (D16), or a translator
+    that failed. The caller then keeps the language it had (job-translation.md R2, D11),
+    so saving a job never depends on the API. Nothing is cached: a job asks once per save
+    of a new or changed description.
+    """
+    if not text.strip() or len(text) > settings.TRANSLATION_MAX_LENGTH:
+        return None
+    translator = import_string(settings.TRANSLATION_BACKEND)()
+    try:
+        return translator.detect_language(text)
+    except TranslationError as error:
+        # As in translate(): the class name only, never the text (D20).
+        logger.warning(
+            "Language detection failed: hash=%s error=%s",
+            source_hash(text)[:12],
+            type(error).__name__,
+        )
+        return None
 
 
 def forget(text):

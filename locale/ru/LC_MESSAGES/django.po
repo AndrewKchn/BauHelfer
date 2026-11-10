@@ -372,6 +372,38 @@ msgstr "Ваш email подтверждён. Добро пожаловать в 
 msgid "Profile saved."
 msgstr "Профиль сохранён."
 
+#: jobs/descriptions.py
+msgid "Translated from German by AI"
+msgstr "Переведено ИИ с немецкого"
+
+#: jobs/descriptions.py
+msgid "Translated from English by AI"
+msgstr "Переведено ИИ с английского"
+
+#: jobs/descriptions.py
+msgid "Translated from Russian by AI"
+msgstr "Переведено ИИ с русского"
+
+#: jobs/descriptions.py
+msgid "Translated from Ukrainian by AI"
+msgstr "Переведено ИИ с украинского"
+
+#: jobs/descriptions.py
+msgid "Translated from Polish by AI"
+msgstr "Переведено ИИ с польского"
+
+#: jobs/descriptions.py
+msgid "Translated from Romanian by AI"
+msgstr "Переведено ИИ с румынского"
+
+#: jobs/descriptions.py
+msgid "Translated from Turkish by AI"
+msgstr "Переведено ИИ с турецкого"
+
+#: jobs/descriptions.py
+msgid "Translated by AI"
+msgstr "Переведено ИИ"
+
 #: jobs/forms.py
 msgid "Hourly rate, €"
 msgstr "Ставка в час, €"
@@ -995,6 +1027,10 @@ msgstr[0] "Нужен %(workers)s рабочий"
 msgstr[1] "Нужны %(workers)s рабочих"
 msgstr[2] "Нужно %(workers)s рабочих"
 msgstr[3] "Нужно %(workers)s рабочего"
+
+#: templates/jobs/_job_description.html
+msgid "Translation is not available right now."
+msgstr "Перевод сейчас недоступен."
 
 #: templates/jobs/_job_photos.html
 #, python-format

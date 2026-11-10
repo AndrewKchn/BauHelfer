@@ -16,6 +16,7 @@ from django.db.models import Count
 from django.http import Http404
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
+from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext
 from django.views.generic import (
@@ -30,7 +31,9 @@ from django.views.generic.detail import SingleObjectMixin
 
 from accounts.models import User
 from accounts.views import RoleRequiredMixin
+from translations.services import detect_language, forget
 
+from .descriptions import description_for
 from .forms import ApplicationForm, JobFilterForm, JobForm, JobPhotosForm
 from .models import Application, ApplicationStateError, Job, JobPhoto, JobStateError
 from .notifications import notify_decision, notify_new_application
@@ -93,8 +96,12 @@ class JobCreateView(EmployerRequiredMixin, EmployerProfileRequiredMixin, CreateV
     def form_valid(self, form):
         """Owner and language come from the login, never from the form (spec R6, D8)."""
         form.instance.employer = self.request.user
-        # Translation (#32) starts from it and corrects it if the text is in another one.
-        form.instance.original_language = self.request.user.preferred_language
+        # The language Claude finds in the description (#32, job-translation.md R5, D2);
+        # when it cannot tell (an error, the fake translator), the employer's language.
+        language = detect_language(form.instance.description)
+        if language is None:
+            language = self.request.user.preferred_language
+        form.instance.original_language = language
         messages.success(self.request, _("Job posted. You can add photos below."))
         response = super().form_valid(form)  # saves the job and redirects
         logger.info(
@@ -223,7 +230,16 @@ class JobEditView(OwnOpenJobMixin, UpdateView):
 
     @override
     def form_valid(self, form):
-        """Save the changes and say so."""
+        """Save the changes and say so; a new description gets its language found again.
+
+        Only a changed description (job-translation.md R5, R6, D11): no call for a new rate
+        or date. Its old translations are forgotten, they contain the old text (D12).
+        """
+        if "description" in form.changed_data:
+            forget(form.initial["description"])
+            language = detect_language(form.instance.description)
+            if language is not None:  # None: cannot tell, keep the language it had
+                form.instance.original_language = language
         messages.success(self.request, _("Job saved."))
         return super().form_valid(form)
 
@@ -400,6 +416,10 @@ class JobDetailView(DetailView):
         context["show_address"] = show_address
         # "Shown after the employer accepts you" only to someone who can still be accepted
         # (R6, D8): not to a rejected or cancelled worker, nor after the job.
+        # The original or the translation, by who reads in which language (#32, R7, R8).
+        context["description"] = description_for(
+            job, translation.get_language(), is_owner=is_owner
+        )
         context["address_hint"] = not show_address and (
             application is None
             or application.status

@@ -1,4 +1,8 @@
-"""Translators for TRANSLATION_BACKEND: each has translate(text, target_lang) -> str."""
+"""Translators for TRANSLATION_BACKEND.
+
+Each has translate(text, target_lang) -> str and, since #32, detect_language(text) ->
+one of our 7 codes, "" for another language, or None when it cannot tell.
+"""
 
 
 class TranslationError(Exception):
