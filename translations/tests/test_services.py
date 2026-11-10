@@ -50,7 +50,7 @@ def test_translate_returns_the_translators_answer(recording_backend):
     2. Expect: the translator's answer "pl: <text>"
     3. Expect: the translator was called once, with the text and "pl"
     """
-    assert translate(JOB_TEXT, "pl") == f"pl: {JOB_TEXT}"
+    assert translate(JOB_TEXT, "pl").text == f"pl: {JOB_TEXT}"
     assert recording_backend.calls == [(JOB_TEXT, "pl")]
 
 
@@ -61,8 +61,8 @@ def test_second_translation_comes_from_the_cache(recording_backend):
     2. Expect: both answers are the same
     3. Expect: one translator call and one row in the database
     """
-    first = translate(JOB_TEXT, "pl")
-    second = translate(JOB_TEXT, "pl")
+    first = translate(JOB_TEXT, "pl").text
+    second = translate(JOB_TEXT, "pl").text
 
     assert first == second == f"pl: {JOB_TEXT}"
     assert len(recording_backend.calls) == 1
@@ -80,7 +80,7 @@ def test_cache_answers_without_the_translator(recording_backend):
     translate(JOB_TEXT, "de")
     Translation.objects.update(text="Aus dem Cache")
 
-    assert translate(JOB_TEXT, "de") == "Aus dem Cache"
+    assert translate(JOB_TEXT, "de").text == "Aus dem Cache"
     assert len(recording_backend.calls) == 1
 
 
@@ -119,26 +119,29 @@ def test_two_requests_at_once_keep_one_translation(settings):
     """
     settings.TRANSLATION_BACKEND = f"{__name__}.RacingBackend"
 
-    assert translate(JOB_TEXT, "pl") == "first"
+    assert translate(JOB_TEXT, "pl").text == "first"
     assert Translation.objects.count() == 1
 
 
-class FailingBackend:
-    """A translator that fails, as Claude does when its answer is cut off or refused."""
+class BrokenBackend:
+    """A translator with a bug: it raises something that is not a TranslationError."""
 
     def translate(self, text, target_lang):
         """Raise instead of answering."""
-        raise RuntimeError("the answer was cut off")
+        raise RuntimeError("a bug in the translator")
 
 
-def test_failed_translation_is_not_cached(settings):
-    """When the translator fails, the error reaches the caller and nothing is saved (D10).
+def test_bug_in_the_translator_is_raised_not_cached(settings):
+    """A bug in the translator reaches the caller and nothing is saved (D20).
 
-    1. Use a translator that raises
+    Changed by #34: a TranslationError gives the original (test_errors_and_limits.py);
+    any other error is a bug and stays visible.
+
+    1. Use a translator that raises RuntimeError
     2. Translate the job text into Polish
     3. Expect: the error is raised; no row, so the next call asks the translator again
     """
-    settings.TRANSLATION_BACKEND = f"{__name__}.FailingBackend"
+    settings.TRANSLATION_BACKEND = f"{__name__}.BrokenBackend"
 
     with pytest.raises(RuntimeError):
         translate(JOB_TEXT, "pl")
@@ -157,7 +160,7 @@ def test_empty_text_is_returned_unchanged(recording_backend, text):
     2. Expect: the same text back
     3. Expect: no translator call, no row
     """
-    assert translate(text, "pl") == text
+    assert translate(text, "pl").text == text
     assert recording_backend.calls == []
     assert not Translation.objects.exists()
 
@@ -184,7 +187,7 @@ def test_each_of_our_languages_is_accepted(recording_backend, lang):
     1. Translate the job text into one of the 7 languages
     2. Expect: the translator's answer for that language
     """
-    assert translate(JOB_TEXT, lang) == f"{lang}: {JOB_TEXT}"
+    assert translate(JOB_TEXT, lang).text == f"{lang}: {JOB_TEXT}"
 
 
 # What is stored (R1, D6; AC7)
