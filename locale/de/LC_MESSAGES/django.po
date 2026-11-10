@@ -375,8 +375,8 @@ msgid "Hourly rate, €"
 msgstr "Stundenlohn, €"
 
 #: jobs/forms.py
-msgid "Write in your language. Workers read it in theirs."
-msgstr "Schreiben Sie in Ihrer Sprache. Helfer lesen es in ihrer."
+msgid "Write in your language, up to 1000 characters. Workers read it in theirs."
+msgstr "Schreiben Sie in Ihrer Sprache, bis zu 1000 Zeichen. Helfer lesen es in ihrer."
 
 #: jobs/forms.py
 msgid "The date cannot be in the past."

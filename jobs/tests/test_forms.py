@@ -211,14 +211,17 @@ def test_rate_input_has_cents_and_the_lowest_minimum_wage():
 # Wording of the UI mockup (R9, R14a)
 
 
+@pytest.mark.story(34)
 def test_description_says_workers_read_it_in_their_language():
-    """The description tells the employer to write in their own language.
+    """The description tells the employer to write in their own language, and the limit.
+
+    Changed by #34 (ai-translation.md D22): the mockup's text plus "up to 1000 characters".
 
     1. Open an empty job form
-    2. Expect: the help text of the UI mockup under the description
+    2. Expect: the help text under the description, with the limit
     """
     assert JobForm()["description"].help_text == (
-        "Write in your language. Workers read it in theirs."
+        "Write in your language, up to 1000 characters. Workers read it in theirs."
     )
 
 

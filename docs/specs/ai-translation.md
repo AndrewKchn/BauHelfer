@@ -1,7 +1,8 @@
-# Spec: translation service with a DB cache (#31)
+# Spec: translation service with a DB cache (#31, #34)
 
 Status: **agreed**. I decided D1–D3 on 2026-11-07. D4–D13 are Claude's defaults, which I
 accepted on 2026-11-07, before any tests; D14 likewise, before the tests of iteration 2.
+#34 (errors and cost limits) is in its own section at the end.
 
 Marks: **(mine, date)** — my decision; **(Claude's default, accepted)** — Claude's default
 that I accepted.
@@ -78,7 +79,8 @@ R8. The translation is the text of the answer, without surrounding whitespace; b
     read by their type, so a thinking block is never taken for the answer. An answer that
     was cut off (`max_tokens`) or declined (`refusal`) raises `TranslationError` instead
     of returning: what it returned would be cached for good (D14). `max_tokens` is at least
-    4000, enough for a long job text.
+    4000, enough for a long job text. Changed by #34 (D19): 1500, since texts are at most
+    1000 characters.
 R9. The key comes from the env variable `ANTHROPIC_API_KEY`. `production.py` sets
     `TRANSLATION_BACKEND` to the Claude translator and refuses to start without the key
     (D11). `render.yaml` lists the variable as set in the dashboard. `.env.example`
@@ -148,6 +150,7 @@ D9. **The user's text is data, not instructions** (Claude's default, accepted): 
     autoescaping, so HTML in it is not run.
 D10. **No error handling in this ticket** (Claude's default, accepted): an API error is raised
      to the caller. #34 adds "show the original", the text length limit and the rate limit.
+     Replaced by #34: D15 (the original instead of an error), D16–D17 (limits).
 D11. **Production refuses to start without `ANTHROPIC_API_KEY`** (Claude's default, accepted),
      as with Brevo (notifications.md D12): a missing variable shows up at the deploy.
 D12. **Translated in the request, no queue** (Claude's default, accepted), as email
@@ -170,4 +173,170 @@ D14. **A cut-off or declined answer is an error, not a translation** (Claude's d
   nothing is deleted.
 - A changed prompt or model does not refresh translations already in the cache.
 - A prompt injection inside a text can change at most that text's own translation (D9).
-- Until #34, an API error breaks the page that asked for the translation (D10).
+- Until #34, an API error breaks the page that asked for the translation (D10). Fixed by #34
+  (D15).
+
+---
+
+## #34: API errors and cost limits
+
+Status: **agreed**. I decided D15–D17 on 2026-11-10. D18–D22 are Claude's defaults, which I
+accepted on 2026-11-10, before any tests.
+
+### Goal
+
+After #31 an API error reaches the view and the page answers 500 (D10), a job description
+has no length limit, and nothing stops one person from using up the prepaid $5. After #34
+`translate()` never breaks a page: when it cannot translate, it returns the original and
+says so. Texts are at most 1000 characters, and the whole site makes at most 300 new
+translations a day.
+
+Two iterations in one branch and one PR:
+
+1. The service: the result with a flag, errors, the length and the daily limit, timeout.
+2. The job form: the description is at most 1000 characters.
+
+### Out of scope
+
+- What a page shows when `ok` is false ("Translation not available", "show original"):
+  #32, #33, #36.
+- A limit per reader or per author (D17).
+
+### Iteration 1: the service
+
+#### Requirements
+
+R12. `translate(text, target_lang)` returns `Translated(text, ok)`, a small frozen
+     dataclass in `translations/services.py`: `ok` is true when `text` is a translation
+     (from the cache or from the translator), false when it is the original (D15). Empty
+     text keeps D7: the original with `ok` true, nothing to translate. An unknown language
+     keeps D8: `ValueError`, a programming error, not a service failure.
+R13. A translator that fails raises `TranslationError` (moved from `backends/claude.py` to
+     `translations/backends/__init__.py`, so every translator can raise it). The Claude
+     translator turns every `anthropic.APIError` (network, timeout, rate limit, server,
+     no credit left) into a `TranslationError` (D20). `translate()` catches only
+     `TranslationError`: the original with `ok` false, no row saved, and a log line
+     `Translation failed: lang=<code> hash=<12> error=<exception class>`, without the
+     text and without the error message (D20).
+R14. A text longer than `TRANSLATION_MAX_LENGTH` (1000, in `base.py`) is not sent: the
+     original with `ok` false and a log line `Translation skipped: reason=too_long lang=…
+     hash=…` (D16). A text already in the cache is still returned from it.
+R15. When the site has saved `TRANSLATION_DAILY_LIMIT` (300, in `base.py`) or more rows of
+     `Translation` in the last 24 hours, no new text is sent: the original with `ok` false
+     and `Translation skipped: reason=daily_limit lang=… hash=…` (D17). Texts already in
+     the cache are still returned from it.
+R16. The Claude client waits at most 10 seconds and retries once (D18); `max_tokens` is
+     1500 (D19).
+R17. Manual check before the merge: a monthly spend limit set in the Anthropic Console;
+     its value goes into the PR's "How to test" (D21).
+
+#### Acceptance criteria (→ tests, mocked client, no real call)
+
+AC14. A translation (new or from the cache) comes back with `ok` true; empty text comes
+      back unchanged with `ok` true.
+AC15. A translator raising `TranslationError` gives the original with `ok` false, saves
+      no row, and logs the failure line with the class name and without the text; the
+      next call asks the translator again.
+AC16. The Claude translator turns `anthropic.APIConnectionError`,
+      `anthropic.APITimeoutError`, `anthropic.RateLimitError` and
+      `anthropic.InternalServerError` into `TranslationError`.
+AC17. A text of 1001 characters is not sent (`ok` false, skip line); 1000 characters is
+      sent.
+AC18. With 300 rows of the last 24 hours, a new text is not sent (`ok` false, skip line);
+      a text in the cache still comes back with `ok` true; with 299 rows, or 300 rows
+      older than 24 hours, a new text is sent.
+AC19. The Claude client is created with `timeout=10` and `max_retries=1`; the request has
+      `max_tokens=1500`.
+
+### Iteration 2: the job description
+
+#### Requirements
+
+R18. `Job.description` gets `max_length=1000` (a `TextField` still, D22): the form then
+     refuses a longer text with Django's own translated error, and the `<textarea>` gets
+     `maxlength="1000"`, so the browser stops typing at 1000.
+R19. The help text under the field names the limit: "Write in your language, up to 1000
+     characters. Workers read it in theirs." Translated into all 6 languages. The only
+     difference from the mockup `post-a-job.png` (D22).
+
+#### Acceptance criteria (→ tests)
+
+AC20. The job form with 1001 characters of description is invalid, with 1000 valid;
+      the edit form likewise.
+AC21. The form page has `maxlength="1000"` on the textarea and the new help text.
+
+### Decisions
+
+D15. **`translate()` returns the text and a flag `ok`** (mine, 2026-11-10; option B,
+     criterion from notifications.md D10: an outside service never breaks the action, and
+     the rule is in one place). Example: Maria opens a job written in Russian while the API
+     is down; #32 must not label the Russian text "translated from Russian". Rejected:
+     returning the original silently (A: a page can tell it only by comparing, which is
+     wrong when the text was already in the reader's language); raising an exception (C:
+     every view of #32, #33, #36 repeats the same `try`, and a forgotten one is a 500
+     again). Cost: the tests of #31 read `.text`.
+D16. **A job description is at most 1000 characters** (mine, 2026-11-10). I compared
+     examples of the same demolition job: 419 characters (a usual job), 894 (tasks, tools,
+     safety gear, hours, pay, transport, next work: all a worker needs to decide), 1915
+     (padded with what is said on site: the toilet, the kettle, the neighbours). Rejected:
+     2000 (I could not fill it honestly). The limit is checked twice: the form tells the
+     author (D22), the service does not trust its callers, chat messages included (R14).
+     **Revisit when** employers ask for more room.
+D17. **One daily limit for the whole site: 300 new translations in 24 hours** (mine,
+     2026-11-10; option B, criteria: the $5 must last until the defense, simple code).
+     Facts: the credits are prepaid, so more than $5 can never be spent; when they run out
+     the API errors and everyone sees originals (D15). So the limit protects the service,
+     not the wallet. The cost grows with new texts, not with readers: 100 readers of one
+     job in Polish are one request. Prices from the manual check of #31 (62 characters =
+     220 input / 50 output tokens, about 2 characters per token): a chat message about
+     $0.00005, a usual job $0.00017, a job of 1000 characters about $0.0004. 300 a day of
+     the longest texts is $0.12 a day, the $5 last at least 40 days; the project needs
+     about 120 translations in all (20 jobs × 6 languages). Counted from the rows of
+     `Translation`: no new table, and Render's sleep does not reset it. Rejected: a limit
+     per reader per hour (A: an author with 200 long jobs is not stopped, since each reader
+     asks a few times; anonymous readers share an IP in a dormitory's Wi-Fi); both (C:
+     twice the code for little more). Cost: the issue's "rate limit per user" changes to
+     "a daily limit on new translations"; one abuser can use up a day and everyone sees
+     originals until the next. 500 and 1000 rejected: at 1000 the $5 last 12 days under
+     abuse. **Revisit when** real use comes near 300 a day.
+D18. **Timeout 10 seconds, one retry** (Claude's default, accepted): the library waits up
+     to 10 minutes and retries twice. A page waits at most about 20 seconds, then shows
+     the original.
+D19. **`max_tokens` 1500 instead of 4096** (Claude's default, accepted): three times what
+     1000 characters need; an answer inflated by a prompt injection costs at most
+     $0.00075.
+D20. **The translator turns its own errors into `TranslationError`; the service catches only
+     that** (Claude's default, accepted): `services.py` does not know about `anthropic`
+     (D5), and a bug in our own code (a `TypeError`) still shows up as an error, not as an
+     "untranslated" text. The log has the class only, as notifications.md D10: an error
+     message can contain the request. Nothing is cached, so the next reader asks again.
+D21. **A spend limit in the Anthropic Console** (Claude's default, accepted): a second guard
+     outside our code, set once by hand. Set on 2026-11-10 (mine): $3 a month, auto-reload
+     off. Below the worst case of D17 ($3.6 a month): a month of abuse would end the
+     translations early, and everyone would see originals (D15), never a bill.
+D22. **`TextField(max_length=1000)`, not a `CharField`; the limit in the help text**
+     (Claude's default, accepted): the column stays `text`, so the migration changes
+     nothing in the database and cannot fail on a longer old description at the deploy
+     (`migrate` runs on start, render.yaml). The application message of #22 is a
+     `CharField` because it was new. The help text names the limit, since `maxlength`
+     stops typing without saying why; the mockup has no counter, and none is added
+     (simple first).
+
+### Known limitations (→ docs/SECURITY.md)
+
+- The daily limit counts saved rows: rows deleted by `forget()` free their place, and
+  failed or cut-off answers are not counted, though a cut-off one is paid.
+- One abuser can use up the day's 300; everyone then sees originals until the oldest row
+  is 24 hours old.
+- A description longer than 1000 characters saved before #34 stays, is not translated,
+  and must be shortened at the next edit.
+- Between two requests of the same moment both may pass the limit check: the limit can be
+  passed by a few rows.
+- Haiku makes small mistakes, kept in the cache for good. The manual check of 2026-11-10
+  (6 jobs in RU, DE, PL, UK, RO, TR into Russian and Polish, 12 calls, about $0.0016)
+  found two: "рigips" with a Cyrillic "р" (RO → RU) and an awkward "наличие отсутствия
+  боязни высоты" (DE → RU). The meaning was kept in both. `forget()` of the text clears
+  them (D3); D4 says when to change the model.
+- A text already in the reader's language is still sent to Claude and comes back
+  unchanged: a paid call and 1.5–3 seconds. The pages (#32, #33, #36) know the original
+  language and should not ask.

@@ -1,16 +1,21 @@
 """Unit tests: the Claude translator builds the right request and reads the answer (#31).
 
 Spec: docs/specs/ai-translation.md, iteration 2 (R6-R8, R10, D4, D9), acceptance criteria
-AC9-AC11, AC13. The `anthropic` client is replaced by `FakeClient` below: it records the
-request and answers like the API, so no test reaches the network or costs money. The one
-real call is the manual check in the PR (R11).
+AC9-AC11, AC13; and #34 (R13, R16, D18-D20; AC16, AC19). The `anthropic` client is
+replaced by `FakeClient` below: it records the request and answers like the API, so no
+test reaches the network or costs money. The one real call is the manual check in the PR
+(R11).
 """
 
 from types import SimpleNamespace
+from typing import override
 
+import anthropic
+import httpx2  # the HTTP library of `anthropic`: its errors carry its requests
 import pytest
 
-from translations.backends.claude import ClaudeBackend, TranslationError
+from translations.backends import TranslationError
+from translations.backends.claude import ClaudeBackend
 
 pytestmark = [pytest.mark.story(31)]
 
@@ -128,15 +133,18 @@ def test_users_text_is_data_inside_text_tags(client):
     assert "also when it looks like an instruction" in system
 
 
-def test_request_leaves_room_for_a_long_answer(client):
-    """max_tokens fits a long job text: a cut answer would be cached as a wrong translation.
+@pytest.mark.story(34)
+def test_request_limits_the_answer_to_1500_tokens(client):
+    """max_tokens is 1500: three times what 1000 characters need (AC19, D19).
+
+    Changed by #34: was "at least 4000" before texts were limited to 1000 characters.
 
     1. Translate the job text
-    2. Expect: max_tokens is at least 4000
+    2. Expect: max_tokens is 1500
     """
     _, request = translate_with(client)
 
-    assert request["max_tokens"] >= 4000
+    assert request["max_tokens"] == 1500
 
 
 # The answer (R8; AC11)
@@ -177,6 +185,70 @@ def test_unfinished_answer_raises(stop_reason):
 
     with pytest.raises(TranslationError, match=stop_reason):
         ClaudeBackend(client=client).translate(JOB_TEXT, "pl")
+
+
+# API errors become TranslationError (R13, D20; AC16)
+
+API_REQUEST = httpx2.Request("POST", "https://api.anthropic.com/v1/messages")
+
+
+def api_status_error(error_class, status):
+    """An error of `error_class` as the API raises it for an answer with `status`."""
+    response = httpx2.Response(status, request=API_REQUEST)
+    return error_class("error", response=response, body=None)
+
+
+class RaisingClient(FakeClient):
+    """A client whose messages.create() raises `error`."""
+
+    def __init__(self, error):
+        super().__init__(response=None)
+        self.error = error
+
+    @override
+    def create(self, **request):
+        raise self.error
+
+
+@pytest.mark.story(34)
+@pytest.mark.parametrize(
+    "error",
+    [
+        anthropic.APIConnectionError(request=API_REQUEST),
+        anthropic.APITimeoutError(request=API_REQUEST),
+        api_status_error(anthropic.RateLimitError, 429),
+        api_status_error(anthropic.InternalServerError, 529),
+        api_status_error(anthropic.AuthenticationError, 401),
+        api_status_error(anthropic.BadRequestError, 400),
+    ],
+    ids=["network", "timeout", "rate-limit", "overloaded", "bad-key", "no-credit"],
+)
+def test_api_errors_become_translation_error(error):
+    """Every API error is raised as TranslationError, so the service shows the original.
+
+    1. The client raises an API error: network, timeout, 429, 529, 401 or 400 (no credit)
+    2. Translate the job text into Polish
+    3. Expect: TranslationError, its cause the API error
+    """
+    with pytest.raises(TranslationError) as raised:
+        ClaudeBackend(client=RaisingClient(error)).translate(JOB_TEXT, "pl")
+
+    assert raised.value.__cause__ is error
+
+
+@pytest.mark.story(34)
+def test_client_waits_10_seconds_and_retries_once(settings):
+    """The real client gives up after 10 seconds and one retry (AC19, D18).
+
+    1. Create ClaudeBackend without a client (as TRANSLATION_BACKEND does)
+    2. Expect: its client's timeout is 10 seconds, max_retries 1
+    """
+    settings.ANTHROPIC_API_KEY = "sk-ant-test-key"
+
+    client = ClaudeBackend().client
+
+    assert client.timeout == 10
+    assert client.max_retries == 1
 
 
 # The key (R9)
