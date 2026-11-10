@@ -157,6 +157,10 @@ DEFAULT_FROM_EMAIL = "BauHelfer <noreply@bauhelfer.local>"
 TRANSLATION_BACKEND = "translations.backends.fake.FakeBackend"
 # Read by translations.backends.claude; empty locally, so only the manual check uses one.
 ANTHROPIC_API_KEY = env("ANTHROPIC_API_KEY", default="")
+# Cost limits (#34): longer texts and texts above the daily limit are shown in the original
+# (docs/specs/ai-translation.md D16, D17). 300 of the longest texts cost about $0.12.
+TRANSLATION_MAX_LENGTH = 1000  # characters; also the limit of a job description
+TRANSLATION_DAILY_LIMIT = 300  # new translations in the last 24 hours, whole site
 
 
 # Logging (#124)
