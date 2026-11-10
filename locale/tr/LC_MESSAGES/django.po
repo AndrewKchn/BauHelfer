@@ -1011,6 +1011,18 @@ msgstr[0] "%(workers)s işçi gerekli"
 msgstr[1] "%(workers)s işçi gerekli"
 
 #: templates/jobs/_job_description.html
+msgid "Show original"
+msgstr "Orijinali göster"
+
+#: templates/jobs/_job_description.html
+msgid "Original"
+msgstr "Orijinal"
+
+#: templates/jobs/_job_description.html
+msgid "Show translation"
+msgstr "Çeviriyi göster"
+
+#: templates/jobs/_job_description.html
 msgid "Translation is not available right now."
 msgstr "Çeviri şu anda kullanılamıyor."
 

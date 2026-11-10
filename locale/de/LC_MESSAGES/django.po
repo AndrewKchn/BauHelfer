@@ -1011,6 +1011,18 @@ msgstr[0] "%(workers)s Helfer gesucht"
 msgstr[1] "%(workers)s Helfer gesucht"
 
 #: templates/jobs/_job_description.html
+msgid "Show original"
+msgstr "Original anzeigen"
+
+#: templates/jobs/_job_description.html
+msgid "Original"
+msgstr "Original"
+
+#: templates/jobs/_job_description.html
+msgid "Show translation"
+msgstr "Übersetzung anzeigen"
+
+#: templates/jobs/_job_description.html
 msgid "Translation is not available right now."
 msgstr "Die Übersetzung ist gerade nicht verfügbar."
 

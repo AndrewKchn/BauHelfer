@@ -414,12 +414,16 @@ class JobDetailView(DetailView):
         # worker until the day of the job is over (contacts.md R3, D5).
         show_address = is_owner or bool(application and application.shows_contacts)
         context["show_address"] = show_address
+        # The original or the translation, by who reads in which language (#32, R7, R8);
+        # ?original=1 is the "Show original" link (R12).
+        context["description"] = description_for(
+            job,
+            translation.get_language(),
+            is_owner=is_owner,
+            show_original="original" in self.request.GET,
+        )
         # "Shown after the employer accepts you" only to someone who can still be accepted
         # (R6, D8): not to a rejected or cancelled worker, nor after the job.
-        # The original or the translation, by who reads in which language (#32, R7, R8).
-        context["description"] = description_for(
-            job, translation.get_language(), is_owner=is_owner
-        )
         context["address_hint"] = not show_address and (
             application is None
             or application.status

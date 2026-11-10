@@ -1029,6 +1029,18 @@ msgstr[2] "Потрібно %(workers)s робітників"
 msgstr[3] "Потрібно %(workers)s робітника"
 
 #: templates/jobs/_job_description.html
+msgid "Show original"
+msgstr "Показати оригінал"
+
+#: templates/jobs/_job_description.html
+msgid "Original"
+msgstr "Оригінал"
+
+#: templates/jobs/_job_description.html
+msgid "Show translation"
+msgstr "Показати переклад"
+
+#: templates/jobs/_job_description.html
 msgid "Translation is not available right now."
 msgstr "Переклад зараз недоступний."
 

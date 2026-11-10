@@ -1020,6 +1020,18 @@ msgstr[1] "Necesari: %(workers)s muncitori"
 msgstr[2] "Necesari: %(workers)s de muncitori"
 
 #: templates/jobs/_job_description.html
+msgid "Show original"
+msgstr "Arată originalul"
+
+#: templates/jobs/_job_description.html
+msgid "Original"
+msgstr "Original"
+
+#: templates/jobs/_job_description.html
+msgid "Show translation"
+msgstr "Arată traducerea"
+
+#: templates/jobs/_job_description.html
 msgid "Translation is not available right now."
 msgstr "Traducerea nu este disponibilă acum."
 

@@ -30,7 +30,8 @@ class Description:
     """The text to show and why it is that one.
 
     `state`: "translated"; "own" (the owner reads their text, D7); "same" (written in the
-    reader's language, D8); "unavailable" (the translation failed, the original, D10).
+    reader's language, D8); "unavailable" (the translation failed, the original, D10);
+    "original" (the reader asked for the original with "Show original", R12).
     `from_language`: the job's `original_language`, "" when unknown.
     """
 
@@ -44,14 +45,20 @@ class Description:
         return TRANSLATED_FROM[self.from_language]
 
 
-def description_for(job, reader_lang, *, is_owner):
-    """The description of `job` as a reader in `reader_lang` should see it (R7)."""
+def description_for(job, reader_lang, *, is_owner, show_original=False):
+    """The description of `job` as a reader in `reader_lang` should see it (R7, R12).
+
+    `show_original`: the page was asked for with ?original=1. It matters only where there
+    would be a translation, and then nothing is translated.
+    """
     original = job.description
     source = job.original_language
     if is_owner:
         return Description(original, "own", source)
     if source == reader_lang:
         return Description(original, "same", source)
+    if show_original:
+        return Description(original, "original", source)
     translated = translate(original, reader_lang)
     if translated.ok:
         return Description(translated.text, "translated", source)
