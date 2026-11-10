@@ -48,13 +48,17 @@ def test_prompt_lists_the_codes_and_the_text_is_data():
     """The system prompt asks for one of our codes or "other"; the text is inside <text>.
 
     1. Detect the language of the job text
-    2. Expect: the system prompt names the 7 codes, "other" and the <text> tags
+    2. Expect: the system prompt names the 7 codes, the rule "or other for any other
+       language", the rule for mixed texts and the <text> tags
     3. Expect: the user message is the job text inside <text>…</text>, unchanged
     """
     _, request = detect_with(FakeClient(answer("ru")))
 
-    for code in ["de", "en", "ru", "uk", "pl", "ro", "tr", "other", "<text>"]:
-        assert code in request["system"]
+    system = request["system"]
+    assert "de, en, ru, uk, pl, ro or tr" in system
+    assert "or other for any other language" in system
+    assert "mixes languages, answer the language of most of it" in system
+    assert "<text>" in system
     assert request["messages"] == [
         {"role": "user", "content": f"<text>{JOB_TEXT}</text>"}
     ]
