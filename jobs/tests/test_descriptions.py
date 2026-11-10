@@ -1,7 +1,7 @@
 """Unit tests: what the job page shows of a description, and forgetting its translations.
 
 Ticket #32. Spec: docs/specs/job-translation.md, iteration 1 (R6, R7, D7, D8, D10, D12),
-acceptance criteria AC5 (deleting) and AC6. description_for() is called with a job and a
+acceptance criteria AC5 (deleting) and AC6; iteration 2 (R12), AC10 and AC11. description_for() is called with a job and a
 language, without a request; its translations go through translate() and its cache
 (the database). The translators are the small classes below, chosen through
 TRANSLATION_BACKEND; nothing reaches the network.
@@ -161,3 +161,35 @@ def test_deleting_the_employer_forgets_the_translations(job):
     job.employer.delete()
 
     assert rows_of(GERMAN_TEXT) == 0
+
+
+# "Show original" (R12, D6; AC10, AC11)
+
+
+def test_show_original_gives_the_original_without_a_call(job, recording):
+    """Asked for the original, a reader in another language gets it, no call (R12).
+
+    1. Ask for the German job's description in Polish, with show_original
+    2. Expect: the original, state "original", from "de", no translator call
+    """
+    result = description_for(job, "pl", is_owner=False, show_original=True)
+
+    assert result == Description(GERMAN_TEXT, "original", "de")
+    assert recording.calls == []
+
+
+@pytest.mark.parametrize(
+    ("lang", "is_owner", "state"), [("pl", True, "own"), ("de", False, "same")]
+)
+def test_show_original_changes_nothing_without_a_translation(
+    job, recording, lang, is_owner, state
+):
+    """For the owner and for the same language there is nothing to toggle (AC11).
+
+    1. Ask with show_original as the owner in Polish, and as a German reader
+    2. Expect: the same as without it, "own" or "same", no translator call
+    """
+    result = description_for(job, lang, is_owner=is_owner, show_original=True)
+
+    assert result == Description(GERMAN_TEXT, state, "de")
+    assert recording.calls == []

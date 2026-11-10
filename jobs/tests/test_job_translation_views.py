@@ -1,7 +1,9 @@
 """Integration tests: a job's language is found on save, its page shows the translation.
 
 Ticket #32. Spec: docs/specs/job-translation.md, iteration 1 (R5-R9, D2, D3, D7-D12),
-acceptance criteria AC3, AC4, AC5 (editing), AC7, AC8. Each test goes through the whole
+acceptance criteria AC3, AC4, AC5 (editing), AC7, AC8; iteration 2, "Show original"
+(R11, R12, D6), AC9-AC11. The Django test client runs no JavaScript: these tests check the
+HTML and the HTMX attributes, the click itself is for an E2E test (R13). Each test goes through the whole
 stack: middleware, URL, view, form, template and database. The translator is the small
 class below, chosen through TRANSLATION_BACKEND; it records its calls, so nothing reaches
 the network.
@@ -280,3 +282,79 @@ def test_translated_page_needs_one_more_query(
 
     with django_assert_num_queries(3):
         client.get(detail_url(job))
+
+
+# "Show original" with HTMX (R11, R12, D6; AC9-AC11)
+
+
+def htmx_link(url):
+    """The attributes of a toggle link to `url`: a plain link HTMX makes partial (D6)."""
+    return (
+        f'href="{url}" hx-get="{url}" hx-select="#description" '
+        'hx-target="#description" hx-swap="outerHTML"'
+    )
+
+
+def test_translation_offers_the_original(client, job):
+    """A translated description has "Show original", a link HTMX turns into a swap.
+
+    1. As a guest with the English cookie, open the German job's page
+    2. Expect: "Show original" linking to the page with ?original=1, with hx-get to the
+       same URL and hx-select / hx-target "#description", hx-swap "outerHTML"
+    """
+    response = as_guest_in(client, "en").get(detail_url(job))
+
+    assertContains(response, htmx_link(f"{detail_url(job)}?original=1"))
+    assertContains(response, "Show original")
+
+
+def test_original_offers_the_translation(client, job, recording):
+    """?original=1 shows the original, labelled, with a link back; nothing translated.
+
+    1. As a guest with the English cookie, open the German job's page with ?original=1
+    2. Expect: the original text, no translation, "Original" and "Show translation"
+       linking to the page without the parameter, with the same HTMX attributes
+    3. Expect: no translator call
+    """
+    response = as_guest_in(client, "en").get(f"{detail_url(job)}?original=1")
+
+    assertContains(response, GERMAN_TEXT)
+    assertNotContains(response, f"en: {GERMAN_TEXT}")
+    assertContains(response, "Original")
+    assertContains(response, "Show translation")
+    assertContains(response, htmx_link(detail_url(job)))
+    assert recording.calls == []
+
+
+def test_nothing_to_toggle_without_a_translation(client, job, settings):
+    """The same language, the owner and a failed translation have no toggle (AC11).
+
+    1. As a German guest, open the German job with ?original=1
+    2. Expect: the original, no "Show translation", no "Show original"
+    3. With a failing translator, open it as an English guest
+    4. Expect: "Translation is not available right now.", no "Show original"
+    """
+    response = as_guest_in(client, "de").get(f"{detail_url(job)}?original=1")
+    assertNotContains(response, "hx-get")
+
+    settings.TRANSLATION_BACKEND = f"{__name__}.UnavailableBackend"
+    response = as_guest_in(client, "en").get(detail_url(job))
+    assertContains(response, "Translation is not available right now.")
+    assertNotContains(response, "Show original")
+
+
+def test_owner_has_no_toggle(employer, job, client):
+    """The owner reads their own text and gets no toggle, also with ?original=1.
+
+    1. Log in as the job's employer, whose language is now Polish
+    2. Open the job's page with ?original=1
+    3. Expect: the original text, no HTMX link
+    """
+    employer.preferred_language = "pl"
+    employer.save()
+    client.force_login(employer)
+
+    response = client.get(f"{detail_url(job)}?original=1")
+
+    assertContains(response, GERMAN_TEXT)
+    assertNotContains(response, "hx-get")

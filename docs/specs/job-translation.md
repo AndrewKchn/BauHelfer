@@ -76,6 +76,7 @@ R7. `jobs.descriptions.description_for(job, reader_lang, *, is_owner)` decides w
     - otherwise `translate(job.description, reader_lang)`: `ok` → the translation, state
       `translated`; not `ok` → the original, state `unavailable` (D10).
     `from_language` is `original_language` (`""` when unknown). The view only calls it.
+    Iteration 2 adds `show_original=False` and the state `original` (R12).
 R8. The reader's language is the active one (`translation.get_language()`), the same that
     picks the page's own strings (i18n.md D3).
 R9. The description's card (`id="description"`, `jobs/_job_description.html`) shows the
@@ -123,10 +124,13 @@ R11. With the state `translated`, the label ends with "· Show original": a link
      `hx-select="#description"`, `hx-target="#description"`, `hx-swap="outerHTML"`:
      HTMX replaces only the card, the page does not reload or scroll. Without JavaScript
      it is a plain link and the page reloads.
-R12. `?original=1` on a job whose state would be `translated` shows the original with
-     "Original · Show translation"; "Show translation" links back to the page without the
-     parameter, with the same HTMX attributes. In every other state the parameter changes
-     nothing. It makes no translator call.
+R12. `?original=1` on a job that would be translated (not the owner, another language)
+     shows the original with "Original · Show translation", state `original`;
+     "Show translation" links back to the page without the parameter, with the same HTMX
+     attributes. For the owner and the same language the parameter changes nothing. It
+     makes no translator call, so it cannot know whether a translation would fail: a
+     failure shows up after "Show translation" ("Translation is not available right
+     now.").
 R13. The toggle is tested with the Django test client (the HTML of both states, the HTMX
      attributes). Clicking it in a browser is for an E2E test, as the photo buttons were
      (job-detail.md D9); M5 has no E2E ticket, so it is proposed for #40 (M6) in the
@@ -138,8 +142,8 @@ AC9.  A translated description has "Show original" linking to `?original=1` with
       HTMX attributes.
 AC10. `?original=1` shows the original text, "Original" and "Show translation" linking to
       the page without the parameter; no translator call.
-AC11. `?original=1` for the owner, for the same language and for a failed translation
-      shows what the page without it shows.
+AC11. `?original=1` for the owner and for the same language shows what the page without
+      it shows. A failed translation offers no "Show original" (nothing to toggle).
 
 ## Decisions
 
