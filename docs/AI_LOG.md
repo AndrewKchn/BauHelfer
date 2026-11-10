@@ -2638,3 +2638,59 @@ it does not fit Render.
   setting for a class, so tests plug in a fake one and never call the network.
 - Why a cache must never store a cut-off answer: it keeps whatever it gets forever, so the
   translator raises instead and the next reader asks again.
+
+## 2026-11-10 · #34 Error handling and cost limits for the AI service + tests with mocked API
+
+**Task given to AI:** make the translation service from #31 safe: show the original text
+instead of an error, limit text length and requests, test it all without the real API.
+Following the ticket workflow, one decision at a time.
+
+**AI helped:** found the facts before the forks: `Job.description` had no length limit, the
+job page is public (readers can be anonymous), and the `anthropic` client waits up to 10
+minutes and retries twice by default. It worked out the cost from the token counts of the
+#31 manual check (about 2 characters per token) and showed that prepaid credits already cap
+the money, so a limit protects the service, not the wallet. It wrote the #34 section of
+`docs/specs/ai-translation.md` (D15–D22), `Translated(text, ok)`, a shared
+`TranslationError` that the Claude translator raises for every `anthropic.APIError`, the
+length and daily limits counted from the cache table, timeout 10 s / 1 retry /
+`max_tokens` 1500, and the 1000-character job description with its help text in 6
+languages. Tests build the API errors as objects and use fake translators; 24 mutations
+were all caught. It seeded my local database with 6 jobs in 6 languages with photos for
+the manual check, and explained how to set the spend limit in the Console.
+
+**AI failed:**
+- Its helper script for mutation checks left a stale `.pyc`: a same-size mutation
+  (`300` → `500`) undone within the same second kept failing tests after the undo. Found
+  when the full test run failed; fixed with `touch` after the undo.
+- One mutation hit a comment instead of the code and reported "no test fails"; repeated on
+  the code line.
+- An integration test used `"Abriss " * 143` as 1001 characters; the form strips the last
+  space, so 1000 were left and the job was saved. Found when the test passed against the
+  code it should fail on.
+- `makemessages` re-wrapped every `.po` file (+780 lines); it edited only the changed entry
+  instead.
+- It first called "Dzwonićdo" and "minibędzie" mistakes of the model and said a
+  same-language translation spoils the text. My second run from the cache showed the
+  spaces are there: the words were glued when I copied the output from the terminal. Only
+  "рigips" (Cyrillic "р") was a real mistake.
+
+**My part:**
+- I chose `Translated(text, ok)` over returning the original silently or raising (D15).
+- My idea: limit the job description instead of only limiting requests. I asked for
+  examples of 1000 and 2000 characters and chose 1000 (D16): 2000 is too much for one job.
+- I chose one daily limit for the whole site, 300 a day, over a per-reader limit (D17):
+  even under abuse the $5 last until the defense.
+- I accepted Claude's defaults D18–D22 (timeout, `max_tokens`, error class only in the log,
+  `TextField` so the migration cannot fail): they matched what I wanted.
+- I asked for fresh local jobs with photos to check the translation, ran the real
+  translation of 6 jobs into Russian and Polish with a separate key (12 calls, about
+  $0.0016), checked the cache in the database and with a second run, which caught the
+  terminal-copy mistake, and deleted the key.
+- In the Console I lowered the monthly limit from $5 to $3, so that credit is left for next
+  month and the defense, and checked that auto-reload is off.
+
+**Learned:**
+- Why a failed translation must not be cached: the cache keeps what it gets forever, so a
+  temporary API error would hide the translation for good.
+- Why a limit counted from saved rows survives Render's sleep while a counter in memory
+  would not, and why a limit on new texts protects more than a limit per reader.
