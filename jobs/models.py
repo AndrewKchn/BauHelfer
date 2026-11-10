@@ -127,7 +127,10 @@ class Job(models.Model):
     )
     # The same list as the worker skills, so jobs can be matched to workers (spec D1).
     job_type = models.CharField(_("job type"), max_length=20, choices=Skill.choices)
-    description = models.TextField(_("description"))
+    # At most 1000 characters (#34, ai-translation.md D16): all a worker needs, and what
+    # one translation may cost. max_length on a TextField: the form checks it and the
+    # column stays "text", so the migration cannot fail on an older, longer text (D22).
+    description = models.TextField(_("description"), max_length=1000)
     # The language the description is written in; the translation (#38) starts from it.
     original_language = models.CharField(
         _("original language"), max_length=2, choices=User.Language.choices

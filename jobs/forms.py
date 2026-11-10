@@ -51,7 +51,9 @@ class JobForm(forms.ModelForm):
         help_texts = {  # noqa: RUF012
             # The only free text of a job: everything else is a key or a number, shown in
             # the reader's language anyway.
-            "description": _("Write in your language. Workers read it in theirs."),
+            "description": _(
+                "Write in your language, up to 1000 characters. Workers read it in theirs."
+            ),
         }
         widgets = {  # noqa: RUF012
             # The class is set here, because daisyUI styles the <textarea> itself.

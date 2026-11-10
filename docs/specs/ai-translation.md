@@ -311,7 +311,9 @@ D20. **The translator turns its own errors into `TranslationError`; the service 
      "untranslated" text. The log has the class only, as notifications.md D10: an error
      message can contain the request. Nothing is cached, so the next reader asks again.
 D21. **A spend limit in the Anthropic Console** (Claude's default, accepted): a second guard
-     outside our code, set once by hand.
+     outside our code, set once by hand. Set on 2026-11-10 (mine): $3 a month, auto-reload
+     off. Below the worst case of D17 ($3.6 a month): a month of abuse would end the
+     translations early, and everyone would see originals (D15), never a bill.
 D22. **`TextField(max_length=1000)`, not a `CharField`; the limit in the help text**
      (Claude's default, accepted): the column stays `text`, so the migration changes
      nothing in the database and cannot fail on a longer old description at the deploy
@@ -330,3 +332,11 @@ D22. **`TextField(max_length=1000)`, not a `CharField`; the limit in the help te
   and must be shortened at the next edit.
 - Between two requests of the same moment both may pass the limit check: the limit can be
   passed by a few rows.
+- Haiku makes small mistakes, kept in the cache for good. The manual check of 2026-11-10
+  (6 jobs in RU, DE, PL, UK, RO, TR into Russian and Polish, 12 calls, about $0.0016)
+  found two: "рigips" with a Cyrillic "р" (RO → RU) and an awkward "наличие отсутствия
+  боязни высоты" (DE → RU). The meaning was kept in both. `forget()` of the text clears
+  them (D3); D4 says when to change the model.
+- A text already in the reader's language is still sent to Claude and comes back
+  unchanged: a paid call and 1.5–3 seconds. The pages (#32, #33, #36) know the original
+  language and should not ask.
