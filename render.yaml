@@ -79,3 +79,6 @@ services:
         sync: false  # secret: the Brevo API key "bauhelfer-render"
       - key: DEFAULT_FROM_EMAIL
         sync: false  # "BauHelfer <…@gmail.com>", the sender confirmed in Brevo
+      # Translating user texts with Claude (#31, docs/specs/ai-translation.md R9).
+      - key: ANTHROPIC_API_KEY
+        sync: false  # secret: the Claude API key "bauhelfer-render"

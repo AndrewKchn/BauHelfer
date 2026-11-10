@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "accounts",
     "jobs",
+    "translations",
 ]
 
 MIDDLEWARE = [
@@ -150,6 +151,14 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL = "BauHelfer <noreply@bauhelfer.local>"
 
 
+# Translating user texts (#31)
+# Who translates jobs and messages, chosen like EMAIL_BACKEND: here a fake translator that
+# answers "[pl] <text>" without a key or network; production.py uses Claude.
+TRANSLATION_BACKEND = "translations.backends.fake.FakeBackend"
+# Read by translations.backends.claude; empty locally, so only the manual check uses one.
+ANTHROPIC_API_KEY = env("ANTHROPIC_API_KEY", default="")
+
+
 # Logging (#124)
 # Everything goes to stdout: Render shows it in its Logs tab (its disk is wiped on every
 # deploy, so no log files). No time in the line, Render adds it. Our apps log events with
@@ -178,6 +187,7 @@ LOGGING = {
     "loggers": {
         "accounts": {"level": "INFO"},  # also accounts.views, accounts.signals, …
         "jobs": {"level": "INFO"},
+        "translations": {"level": "INFO"},  # one line per call to Claude (#31)
         "config": {"level": "INFO"},  # the request log in production (#137)
         "django": {"level": "INFO"},
     },
