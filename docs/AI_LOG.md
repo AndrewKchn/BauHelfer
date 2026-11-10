@@ -2582,3 +2582,59 @@ out, and fixed what it found (header paddings, hyphenation, badges, profile card
   check like `msgfmt --check-header` can see it.
 - What back-translation can and cannot prove: it catches a wrong meaning (a "work permit"
   instead of "the right to work"), not clumsy style; a native speaker is still the real check.
+
+## 2026-11-10 · #31 Claude API translation service with DB cache
+
+**Task given to AI:** build the service that translates user texts (jobs, messages) with the
+Claude API and keeps the result in the database, following the ticket workflow. Before the
+ticket I asked what the API would cost, whether there are alternatives, and whether my
+school's Claude subscription could be used.
+
+**AI helped:** estimated the cost per translation and compared Claude, DeepL API Free / Pro,
+Gemini free and a "translate in Google" button. Before the spec it checked the official
+pages: Anthropic's API data is not used for training, is deleted within 30 days and comes
+with a DPA; DeepL's free API terms allow storing texts forever and forbid personal data. It
+wrote `docs/specs/ai-translation.md` (D1–D14), a `translations` app with `translate()` /
+`forget()`, a cache keyed by SHA-256 + language, a translator chosen by the setting
+`TRANSLATION_BACKEND` (like `EMAIL_BACKEND`), a fake translator for local runs and tests and
+`ClaudeBackend` on `claude-haiku-5-5` with a prompt that treats the user's text as data. It
+checked the Haiku 5.5 docs before the code (no `temperature`, blocks read by type). Tests use
+a recording translator and a fake `anthropic` client, so CI needs no key. It walked me
+through the Console setup step by step and explained what identity federation is and why
+it does not fit Render.
+
+**AI failed:**
+- Its first cost estimate was $0.00025 per translation; the manual check measured about
+  $0.00005, five times less.
+- In the first comparison it listed DeepL Free as "company in Germany" from memory; only
+  the check of the official terms showed that the free API may store texts forever and
+  forbids personal data.
+- Two tests were too weak, found by mutation checks: no test noticed returning the
+  translator's answer instead of the saved row when two requests race (a new test), and the
+  prompt-injection test checked single words that stayed in other sentences (now it checks
+  the whole rule).
+- It wrote D14 into the spec as "accepted" before I had said yes; it asked before the
+  commit.
+
+**My part:**
+- I set my criteria: a one-time $5 is fine, GDPR matters, AI in the project is a plus.
+- I asked to support both translators with a choice, then decided to do DeepL now and add
+  AI later. After the DeepL terms (texts stored forever, no personal data allowed) I went
+  back to Claude.
+- I chose `forget()` to delete a text's translations when its job or message goes (D3,
+  option C), against keeping them forever or deleting them by age.
+- I accepted Claude's defaults D4–D14 (model, fake translator, hash only, no admin, a cut
+  answer raises): they mostly matched my criteria, and what was unclear we discussed first.
+- I created the Console account on the project's Gmail, not the school address, with $5
+  prepaid, no auto-reload and a $5 monthly limit; ran the manual check with a separate key
+  (German and Polish: phone number and count kept, terms right) and deleted that key; added
+  the production key on Render.
+- The model transliterated the name ("Iwan", Polish "Iwana") instead of keeping Cyrillic; I
+  kept it: from my own experience, people who do not know Cyrillic cannot read it and find
+  it hard to read.
+
+**Learned:**
+- How a setting like `TRANSLATION_BACKEND` lets tests replace a paid API: the code asks the
+  setting for a class, so tests plug in a fake one and never call the network.
+- Why a cache must never store a cut-off answer: it keeps whatever it gets forever, so the
+  translator raises instead and the next reader asks again.
