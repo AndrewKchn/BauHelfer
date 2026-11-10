@@ -11,7 +11,7 @@ from typing import ClassVar
 import pytest
 
 from translations.backends import TranslationError
-from translations.backends.fake import FakeBackend
+from translations.backends.fake_claude import FakeClaudeBackend
 from translations.services import detect_language
 
 pytestmark = [pytest.mark.story(32)]
@@ -113,7 +113,7 @@ def test_failing_translator_gives_none_and_a_log_line(settings, caplog):
 def test_fake_backend_cannot_tell():
     """The fake translator answers None: locally a job keeps its employer's language (R4).
 
-    1. Ask FakeBackend for the language of the job text
+    1. Ask FakeClaudeBackend for the language of the job text
     2. Expect: None
     """
-    assert FakeBackend().detect_language(JOB_TEXT) is None
+    assert FakeClaudeBackend().detect_language(JOB_TEXT) is None

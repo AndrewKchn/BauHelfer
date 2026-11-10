@@ -1,7 +1,7 @@
 # Spec: job descriptions in the reader's language, "Show original" (#32)
 
 Status: **agreed**. I decided D1–D6 on 2026-11-10. D7–D13 are Claude's defaults, which I
-accepted on 2026-11-10, before any tests.
+accepted on 2026-11-10, before any tests. I added D14 after the manual check, the same day.
 
 Marks: **(mine, date)** — my decision; **(Claude's default, accepted)** — Claude's default
 that I accepted; **(Claude's recommendation)** — what Claude advised where I chose
@@ -60,7 +60,7 @@ R3. `ClaudeBackend.detect_language(text)`: the same model and client as `transla
     `other`. `other` becomes `""`; any other answer, a cut-off or a declined one raise
     `TranslationError`. Every call is logged without the text:
     `Language detected: lang=<code or other> hash=<12> input_tokens=… output_tokens=…`.
-R4. `FakeBackend.detect_language(text)` returns `None`: locally and in tests a job keeps
+R4. `FakeClaudeBackend.detect_language(text)` returns `None`: locally and in tests a job keeps
     the employer's `preferred_language`, as before #32.
 R5. Posting a job sets `original_language` from `detect_language(description)`; `None`
     keeps `preferred_language` (D2). Editing a job runs the detection only when the
@@ -218,6 +218,14 @@ D12. **Old translations are forgotten when a description changes or its job goes
      employer's account is deleted and its jobs go with it (`on_delete=CASCADE`).
 D13. **Two iterations** (Claude's default, accepted): the first gives a working page with
      translations, the second the toggle on top of it.
+D14. **`FakeBackend` is renamed `FakeClaudeBackend`** (mine, 2026-11-10; changes
+     ai-translation.md R5). "Fake" said that it is not real, not what it stands in for: on
+     job 106 I took its "[uk] …" for a broken translation. Now the pair reads
+     `ClaudeBackend` / `FakeClaudeBackend`. "Backend" stays, as in Django's `EMAIL_BACKEND`
+     and `EmailBackend`: the class that does the work, chosen by a setting. Rejected:
+     `MarkerBackend` (says what it does, not what it replaces); dropping "Backend" from
+     both names (more renames in code checked in #31 and #34). Revisit when a second real
+     translator is added.
 
 ## Known limitations (→ docs/SECURITY.md)
 

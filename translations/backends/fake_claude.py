@@ -1,8 +1,12 @@
-"""A translator that only marks the text, for runserver and tests (#31, D5)."""
+"""Stands in for ClaudeBackend on runserver and in tests (#31 D5; named in #32 D14).
+
+TRANSLATION_BACKEND in base.py points here, as EMAIL_BACKEND points to the console:
+the site works without an Anthropic key, and nothing leaves the computer.
+"""
 
 
-class FakeBackend:
-    """Answers "[<lang>] <text>": no key, no network, no cost, like the console email."""
+class FakeClaudeBackend:
+    """Does not translate: marks the text "[<lang>] <text>". No key, no network, no cost."""
 
     def translate(self, text, target_lang):
         """Return `text` marked with the target language, e.g. "[pl] Abriss ab Montag"."""

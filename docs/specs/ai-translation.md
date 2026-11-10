@@ -49,6 +49,8 @@ R4. The translator is chosen by the setting `TRANSLATION_BACKEND`, a dotted path
     (D5).
 R5. `translations.backends.fake.FakeBackend` returns `"[<lang>] <text>"` and calls nothing
     outside. `base.py` uses it, so the site and the tests run without a key.
+    Renamed by #32: `translations.backends.fake_claude.FakeClaudeBackend`
+    (job-translation.md D14).
 
 ### Acceptance criteria (→ tests)
 

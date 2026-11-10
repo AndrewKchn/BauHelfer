@@ -78,8 +78,11 @@ def test_local_settings_use_the_fake_translator():
     """Locally runserver translates with the fake translator, even with a key in .env.
 
     1. Read TRANSLATION_BACKEND of the local settings module
-    2. Expect: FakeBackend; a real call only through the manual check (R11)
+    2. Expect: FakeClaudeBackend; a real call only through the manual check (R11)
     """
     from config.settings import local
 
-    assert local.TRANSLATION_BACKEND == "translations.backends.fake.FakeBackend"
+    assert (
+        local.TRANSLATION_BACKEND
+        == "translations.backends.fake_claude.FakeClaudeBackend"
+    )
