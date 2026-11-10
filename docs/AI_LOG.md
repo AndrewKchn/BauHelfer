@@ -2694,3 +2694,63 @@ the manual check, and explained how to set the spend limit in the Console.
   temporary API error would hide the translation for good.
 - Why a limit counted from saved rows survives Render's sleep while a counter in memory
   would not, and why a limit on new texts protects more than a limit per reader.
+
+## 2026-11-10 · #32 Auto-translate job descriptions, "show original" toggle
+
+**Task given to AI:** show job descriptions in the reader's language with the translation
+service of #31 and #34, label them as translated by AI, and add a "Show original" toggle
+with HTMX. Following the ticket workflow, one decision at a time, in two iterations.
+
+**AI helped:** compared the job page with the mockup, wrote `docs/specs/job-translation.md`
+(R1–R13, D1–D14) and split the work into two iterations. It added language detection on
+save (`detect_language()` in the service and in `ClaudeBackend`: a one-code prompt,
+`max_tokens` 10, an unexpected answer is an error, "other" becomes an empty language),
+`description_for()` that decides between own text, same language, original, translation
+and "not available", 8 whole-sentence labels in 6 languages, forgetting old translations
+on edit and through a `post_delete` signal, and the toggle as a link to the same page with
+`?original=1` that HTMX turns into a swap of one card. 42 mutations, all caught. It
+clicked the toggle once in a real browser with a throwaway script, prepared the temporary
+settings for my manual check with the real API and removed the fake rows from the dev cache
+first. It explained what a Django "backend" is, with our three examples (email, storage,
+translation).
+
+**AI failed:**
+- Its first fallback for a language not among our 7 was to keep the employer's site
+  language: a German reader would have got an Arabic job untranslated. My question found it.
+- An integration test meant a guest to open the job, but `employer_client` and `client` are
+  the same object, so the "guest" was the owner and nothing was translated. Found when the
+  test failed; fixed with a separate `Client()`.
+- The prompt test checked only the word "other": a mutation removing the rule "or other for
+  any other language" was not caught. The test now checks the exact phrases.
+- The spec of iteration 2 contradicted itself (R12: no translator call with `?original=1`;
+  AC11: show a failed translation there). It noticed this before writing the tests and fixed
+  the spec.
+- `makemessages` re-wrapped the `.po` files again (+780 lines); it kept only the new entries.
+- In iteration 1 it put the new view code between a comment and the code the comment
+  explained; it noticed and fixed it in iteration 2.
+
+**My part:**
+- I chose to translate for guests too (D1): there are no users yet, the cache and the
+  daily limit of #34 are enough.
+- I chose language detection by Claude on save (D2).
+- My question "what happens if someone writes in a language that is not ours?" found the
+  Arabic bug; I chose an empty language with the label "Translated by AI" (D3).
+- I asked for a "Translating…" note while the first reader waits, and dropped it when it
+  needed a second HTMX request: the first reader can wait 2 seconds (D4).
+- I asked what "original" means: the whole page or only the text. I chose only the
+  description because most jobs will be in German and the worker needs the employer's own
+  words (D5).
+- I rejected a separate URL for the card as too much and chose the same page with
+  `?original=1` (D6).
+- I accepted Claude's defaults D7–D13: they were small, with little to argue about.
+- On job 106 I noticed that the languages did not match: the dev cache mixed real
+  translations from #34 with "[uk] …" from the fake translator.
+- I found the name `FakeBackend` unclear and asked why it is a "backend". I named it
+  "fake Claude" myself, and it became `FakeClaudeBackend` (D14).
+- I moved the manual check to after iteration 2 and ran it myself with a separate key:
+  3 jobs in Ukrainian, the toggle without new calls, and a new Russian job detected as `ru`.
+  Then I deleted the key.
+
+**Learned:**
+- How HTMX `hx-select` swaps one part of a normal page without a second view.
+- What a Django backend is and how a setting chooses it.

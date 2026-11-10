@@ -1,0 +1,25 @@
+{% load i18n %}
+{# The job's description, translated or not (#32, docs/specs/job-translation.md R9). #}
+{# `description` comes from jobs.descriptions.description_for(): the text and its state. #}
+{# id="description": the "Show original" toggle swaps this card (R11, R12, D6). #}
+<section id="description" class="card mt-4 bg-base-100 shadow-sm">
+  <div class="card-body break-words p-4">
+    {# linebreaksbr keeps the employer's line breaks; the text is escaped first, a #}
+    {# translation too (ai-translation.md D9). #}
+    <p>{{ description.text|linebreaksbr }}</p>
+    {% if description.state == "translated" %}
+      {# 文A as on the mockup; hidden from screen readers, the sentence says it all. #}
+      <p class="mt-2 text-sm text-base-content/60">
+        <span aria-hidden="true">文A</span> {{ description.label }} ·
+        {% with url=request.path|add:"?original=1" %}{% include "jobs/_description_toggle.html" with label=_("Show original") %}{% endwith %}
+      </p>
+    {% elif description.state == "original" %}
+      <p class="mt-2 text-sm text-base-content/60">
+        {% translate "Original" %} ·
+        {% include "jobs/_description_toggle.html" with url=request.path label=_("Show translation") %}
+      </p>
+    {% elif description.state == "unavailable" %}
+      <p class="mt-2 text-sm text-base-content/60">{% translate "Translation is not available right now." %}</p>
+    {% endif %}
+  </div>
+</section>

@@ -372,6 +372,38 @@ msgstr "Ваш email підтверджено. Ласкаво просимо д�
 msgid "Profile saved."
 msgstr "Профіль збережено."
 
+#: jobs/descriptions.py
+msgid "Translated from German by AI"
+msgstr "Перекладено ШІ з німецької"
+
+#: jobs/descriptions.py
+msgid "Translated from English by AI"
+msgstr "Перекладено ШІ з англійської"
+
+#: jobs/descriptions.py
+msgid "Translated from Russian by AI"
+msgstr "Перекладено ШІ з російської"
+
+#: jobs/descriptions.py
+msgid "Translated from Ukrainian by AI"
+msgstr "Перекладено ШІ з української"
+
+#: jobs/descriptions.py
+msgid "Translated from Polish by AI"
+msgstr "Перекладено ШІ з польської"
+
+#: jobs/descriptions.py
+msgid "Translated from Romanian by AI"
+msgstr "Перекладено ШІ з румунської"
+
+#: jobs/descriptions.py
+msgid "Translated from Turkish by AI"
+msgstr "Перекладено ШІ з турецької"
+
+#: jobs/descriptions.py
+msgid "Translated by AI"
+msgstr "Перекладено ШІ"
+
 #: jobs/forms.py
 msgid "Hourly rate, €"
 msgstr "Погодинна ставка, €"
@@ -995,6 +1027,22 @@ msgstr[0] "Потрібен %(workers)s робітник"
 msgstr[1] "Потрібні %(workers)s робітники"
 msgstr[2] "Потрібно %(workers)s робітників"
 msgstr[3] "Потрібно %(workers)s робітника"
+
+#: templates/jobs/_job_description.html
+msgid "Show original"
+msgstr "Показати оригінал"
+
+#: templates/jobs/_job_description.html
+msgid "Original"
+msgstr "Оригінал"
+
+#: templates/jobs/_job_description.html
+msgid "Show translation"
+msgstr "Показати переклад"
+
+#: templates/jobs/_job_description.html
+msgid "Translation is not available right now."
+msgstr "Переклад зараз недоступний."
 
 #: templates/jobs/_job_photos.html
 #, python-format

@@ -370,6 +370,38 @@ msgstr "Ihre E-Mail ist bestätigt. Willkommen bei BauHelfer!"
 msgid "Profile saved."
 msgstr "Profil gespeichert."
 
+#: jobs/descriptions.py
+msgid "Translated from German by AI"
+msgstr "Von KI aus dem Deutschen übersetzt"
+
+#: jobs/descriptions.py
+msgid "Translated from English by AI"
+msgstr "Von KI aus dem Englischen übersetzt"
+
+#: jobs/descriptions.py
+msgid "Translated from Russian by AI"
+msgstr "Von KI aus dem Russischen übersetzt"
+
+#: jobs/descriptions.py
+msgid "Translated from Ukrainian by AI"
+msgstr "Von KI aus dem Ukrainischen übersetzt"
+
+#: jobs/descriptions.py
+msgid "Translated from Polish by AI"
+msgstr "Von KI aus dem Polnischen übersetzt"
+
+#: jobs/descriptions.py
+msgid "Translated from Romanian by AI"
+msgstr "Von KI aus dem Rumänischen übersetzt"
+
+#: jobs/descriptions.py
+msgid "Translated from Turkish by AI"
+msgstr "Von KI aus dem Türkischen übersetzt"
+
+#: jobs/descriptions.py
+msgid "Translated by AI"
+msgstr "Von KI übersetzt"
+
 #: jobs/forms.py
 msgid "Hourly rate, €"
 msgstr "Stundenlohn, €"
@@ -977,6 +1009,22 @@ msgid "Needs %(workers)s worker"
 msgid_plural "Needs %(workers)s workers"
 msgstr[0] "%(workers)s Helfer gesucht"
 msgstr[1] "%(workers)s Helfer gesucht"
+
+#: templates/jobs/_job_description.html
+msgid "Show original"
+msgstr "Original anzeigen"
+
+#: templates/jobs/_job_description.html
+msgid "Original"
+msgstr "Original"
+
+#: templates/jobs/_job_description.html
+msgid "Show translation"
+msgstr "Übersetzung anzeigen"
+
+#: templates/jobs/_job_description.html
+msgid "Translation is not available right now."
+msgstr "Die Übersetzung ist gerade nicht verfügbar."
 
 #: templates/jobs/_job_photos.html
 #, python-format

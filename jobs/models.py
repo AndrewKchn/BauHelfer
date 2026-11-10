@@ -16,6 +16,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from accounts.models import Skill, User
+from translations.services import forget
 
 from .photos import make_thumbnail
 
@@ -131,9 +132,14 @@ class Job(models.Model):
     # one translation may cost. max_length on a TextField: the form checks it and the
     # column stays "text", so the migration cannot fail on an older, longer text (D22).
     description = models.TextField(_("description"), max_length=1000)
-    # The language the description is written in; the translation (#38) starts from it.
+    # The language the description is written in, found by Claude when the job is saved
+    # (#32, job-translation.md D2). Empty: a language not among our 7, so every reader
+    # gets a translation (D3).
     original_language = models.CharField(
-        _("original language"), max_length=2, choices=User.Language.choices
+        _("original language"),
+        max_length=2,
+        choices=User.Language.choices,
+        blank=True,
     )
     address = models.CharField(_("address"), max_length=200)
     district = models.CharField(_("district"), max_length=60, choices=District.choices)
@@ -359,6 +365,18 @@ def delete_photo_file(sender, instance, **kwargs):
             storage.delete(name)
 
     transaction.on_commit(delete_files)
+
+
+@receiver(post_delete, sender=Job)
+def forget_description(sender, instance, **kwargs):
+    """Delete the cached translations of a deleted job's description (#32, R6, D12).
+
+    The translations contain what the employer wrote, names and phone numbers too; they
+    must not outlive the job (ai-translation.md D3). A signal for the same reason as the
+    photo files above: it also runs when the job goes with its employer's account. No
+    on_commit: the rows are in the same database, so a rollback brings them back too.
+    """
+    forget(instance.description)
 
 
 class JobStateError(Exception):

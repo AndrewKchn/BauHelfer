@@ -370,6 +370,38 @@ msgstr "E-postanız onaylandı. BauHelfer'e hoş geldiniz!"
 msgid "Profile saved."
 msgstr "Profil kaydedildi."
 
+#: jobs/descriptions.py
+msgid "Translated from German by AI"
+msgstr "Yapay zekâ ile Almancadan çevrildi"
+
+#: jobs/descriptions.py
+msgid "Translated from English by AI"
+msgstr "Yapay zekâ ile İngilizceden çevrildi"
+
+#: jobs/descriptions.py
+msgid "Translated from Russian by AI"
+msgstr "Yapay zekâ ile Rusçadan çevrildi"
+
+#: jobs/descriptions.py
+msgid "Translated from Ukrainian by AI"
+msgstr "Yapay zekâ ile Ukraynacadan çevrildi"
+
+#: jobs/descriptions.py
+msgid "Translated from Polish by AI"
+msgstr "Yapay zekâ ile Lehçeden çevrildi"
+
+#: jobs/descriptions.py
+msgid "Translated from Romanian by AI"
+msgstr "Yapay zekâ ile Rumenceden çevrildi"
+
+#: jobs/descriptions.py
+msgid "Translated from Turkish by AI"
+msgstr "Yapay zekâ ile Türkçeden çevrildi"
+
+#: jobs/descriptions.py
+msgid "Translated by AI"
+msgstr "Yapay zekâ ile çevrildi"
+
 #: jobs/forms.py
 msgid "Hourly rate, €"
 msgstr "Saatlik ücret, €"
@@ -977,6 +1009,22 @@ msgid "Needs %(workers)s worker"
 msgid_plural "Needs %(workers)s workers"
 msgstr[0] "%(workers)s işçi gerekli"
 msgstr[1] "%(workers)s işçi gerekli"
+
+#: templates/jobs/_job_description.html
+msgid "Show original"
+msgstr "Orijinali göster"
+
+#: templates/jobs/_job_description.html
+msgid "Original"
+msgstr "Orijinal"
+
+#: templates/jobs/_job_description.html
+msgid "Show translation"
+msgstr "Çeviriyi göster"
+
+#: templates/jobs/_job_description.html
+msgid "Translation is not available right now."
+msgstr "Çeviri şu anda kullanılamıyor."
 
 #: templates/jobs/_job_photos.html
 #, python-format

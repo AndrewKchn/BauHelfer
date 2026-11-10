@@ -152,9 +152,9 @@ DEFAULT_FROM_EMAIL = "BauHelfer <noreply@bauhelfer.local>"
 
 
 # Translating user texts (#31)
-# Who translates jobs and messages, chosen like EMAIL_BACKEND: here a fake translator that
-# answers "[pl] <text>" without a key or network; production.py uses Claude.
-TRANSLATION_BACKEND = "translations.backends.fake.FakeBackend"
+# Who translates jobs and messages, chosen like EMAIL_BACKEND: here a fake Claude that
+# answers "[pl] <text>" without a key or network; production.py uses the real one.
+TRANSLATION_BACKEND = "translations.backends.fake_claude.FakeClaudeBackend"
 # Read by translations.backends.claude; empty locally, so only the manual check uses one.
 ANTHROPIC_API_KEY = env("ANTHROPIC_API_KEY", default="")
 # Cost limits (#34): longer texts and texts above the daily limit are shown in the original
