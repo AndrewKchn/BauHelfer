@@ -1,3 +1,0 @@
-{# The "Show original" / "Show translation" link (#32, R11, R12, D6). A plain link to the #}
-{# same page; with HTMX it fetches that page and swaps only #description, no reload. #}
-<a class="link" href="{{ url }}" hx-get="{{ url }}" hx-select="#description" hx-target="#description" hx-swap="outerHTML">{{ label }}</a>

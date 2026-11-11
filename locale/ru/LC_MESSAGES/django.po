@@ -372,38 +372,6 @@ msgstr "Ваш email подтверждён. Добро пожаловать в 
 msgid "Profile saved."
 msgstr "Профиль сохранён."
 
-#: jobs/descriptions.py
-msgid "Translated from German by AI"
-msgstr "Переведено ИИ с немецкого"
-
-#: jobs/descriptions.py
-msgid "Translated from English by AI"
-msgstr "Переведено ИИ с английского"
-
-#: jobs/descriptions.py
-msgid "Translated from Russian by AI"
-msgstr "Переведено ИИ с русского"
-
-#: jobs/descriptions.py
-msgid "Translated from Ukrainian by AI"
-msgstr "Переведено ИИ с украинского"
-
-#: jobs/descriptions.py
-msgid "Translated from Polish by AI"
-msgstr "Переведено ИИ с польского"
-
-#: jobs/descriptions.py
-msgid "Translated from Romanian by AI"
-msgstr "Переведено ИИ с румынского"
-
-#: jobs/descriptions.py
-msgid "Translated from Turkish by AI"
-msgstr "Переведено ИИ с турецкого"
-
-#: jobs/descriptions.py
-msgid "Translated by AI"
-msgstr "Переведено ИИ"
-
 #: jobs/forms.py
 msgid "Hourly rate, €"
 msgstr "Ставка в час, €"
@@ -646,6 +614,38 @@ msgstr "В этом изображении слишком много пиксе�
 #: jobs/photos.py
 msgid "A photo can be at most 5 MB."
 msgstr "Фото может быть не больше 5 МБ."
+
+#: jobs/shown_text.py
+msgid "Translated from German by AI"
+msgstr "Переведено ИИ с немецкого"
+
+#: jobs/shown_text.py
+msgid "Translated from English by AI"
+msgstr "Переведено ИИ с английского"
+
+#: jobs/shown_text.py
+msgid "Translated from Russian by AI"
+msgstr "Переведено ИИ с русского"
+
+#: jobs/shown_text.py
+msgid "Translated from Ukrainian by AI"
+msgstr "Переведено ИИ с украинского"
+
+#: jobs/shown_text.py
+msgid "Translated from Polish by AI"
+msgstr "Переведено ИИ с польского"
+
+#: jobs/shown_text.py
+msgid "Translated from Romanian by AI"
+msgstr "Переведено ИИ с румынского"
+
+#: jobs/shown_text.py
+msgid "Translated from Turkish by AI"
+msgstr "Переведено ИИ с турецкого"
+
+#: jobs/shown_text.py
+msgid "Translated by AI"
+msgstr "Переведено ИИ"
 
 #: jobs/views.py
 msgid "Please fill in your company profile before posting a job."
@@ -1028,22 +1028,6 @@ msgstr[1] "Нужны %(workers)s рабочих"
 msgstr[2] "Нужно %(workers)s рабочих"
 msgstr[3] "Нужно %(workers)s рабочего"
 
-#: templates/jobs/_job_description.html
-msgid "Show original"
-msgstr "Показать оригинал"
-
-#: templates/jobs/_job_description.html
-msgid "Original"
-msgstr "Оригинал"
-
-#: templates/jobs/_job_description.html
-msgid "Show translation"
-msgstr "Показать перевод"
-
-#: templates/jobs/_job_description.html
-msgid "Translation is not available right now."
-msgstr "Перевод сейчас недоступен."
-
 #: templates/jobs/_job_photos.html
 #, python-format
 msgid "Photos (%(count)s of %(max)s)"
@@ -1161,6 +1145,22 @@ msgstr "Отменить вакансию"
 #: templates/jobs/_photo_placeholder.html
 msgid "No photo"
 msgstr "Нет фото"
+
+#: templates/jobs/_translation_label.html
+msgid "Show original"
+msgstr "Показать оригинал"
+
+#: templates/jobs/_translation_label.html
+msgid "Original"
+msgstr "Оригинал"
+
+#: templates/jobs/_translation_label.html
+msgid "Show translation"
+msgstr "Показать перевод"
+
+#: templates/jobs/_translation_label.html
+msgid "Translation is not available right now."
+msgstr "Перевод сейчас недоступен."
 
 #: templates/jobs/job_confirm_cancel.html
 msgid "Cancel this job?"

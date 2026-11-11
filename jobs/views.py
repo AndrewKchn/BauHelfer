@@ -33,10 +33,10 @@ from accounts.models import User
 from accounts.views import RoleRequiredMixin
 from translations.services import detect_language, forget
 
-from .descriptions import description_for
 from .forms import ApplicationForm, JobFilterForm, JobForm, JobPhotosForm
 from .models import Application, ApplicationStateError, Job, JobPhoto, JobStateError
 from .notifications import notify_decision, notify_new_application
+from .shown_text import description_for
 
 # "jobs.views". Ids only, never an email or other personal data (#124).
 logger = logging.getLogger(__name__)

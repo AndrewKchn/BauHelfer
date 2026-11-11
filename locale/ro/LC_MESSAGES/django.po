@@ -371,38 +371,6 @@ msgstr "Adresa de e-mail este confirmată. Bun venit la BauHelfer!"
 msgid "Profile saved."
 msgstr "Profil salvat."
 
-#: jobs/descriptions.py
-msgid "Translated from German by AI"
-msgstr "Tradus de AI din germană"
-
-#: jobs/descriptions.py
-msgid "Translated from English by AI"
-msgstr "Tradus de AI din engleză"
-
-#: jobs/descriptions.py
-msgid "Translated from Russian by AI"
-msgstr "Tradus de AI din rusă"
-
-#: jobs/descriptions.py
-msgid "Translated from Ukrainian by AI"
-msgstr "Tradus de AI din ucraineană"
-
-#: jobs/descriptions.py
-msgid "Translated from Polish by AI"
-msgstr "Tradus de AI din poloneză"
-
-#: jobs/descriptions.py
-msgid "Translated from Romanian by AI"
-msgstr "Tradus de AI din română"
-
-#: jobs/descriptions.py
-msgid "Translated from Turkish by AI"
-msgstr "Tradus de AI din turcă"
-
-#: jobs/descriptions.py
-msgid "Translated by AI"
-msgstr "Tradus de AI"
-
 #: jobs/forms.py
 msgid "Hourly rate, €"
 msgstr "Tarif orar, €"
@@ -644,6 +612,38 @@ msgstr "Această imagine are prea mulți pixeli. Încărcați o fotografie obiș
 #: jobs/photos.py
 msgid "A photo can be at most 5 MB."
 msgstr "O fotografie poate avea cel mult 5 MB."
+
+#: jobs/shown_text.py
+msgid "Translated from German by AI"
+msgstr "Tradus de AI din germană"
+
+#: jobs/shown_text.py
+msgid "Translated from English by AI"
+msgstr "Tradus de AI din engleză"
+
+#: jobs/shown_text.py
+msgid "Translated from Russian by AI"
+msgstr "Tradus de AI din rusă"
+
+#: jobs/shown_text.py
+msgid "Translated from Ukrainian by AI"
+msgstr "Tradus de AI din ucraineană"
+
+#: jobs/shown_text.py
+msgid "Translated from Polish by AI"
+msgstr "Tradus de AI din poloneză"
+
+#: jobs/shown_text.py
+msgid "Translated from Romanian by AI"
+msgstr "Tradus de AI din română"
+
+#: jobs/shown_text.py
+msgid "Translated from Turkish by AI"
+msgstr "Tradus de AI din turcă"
+
+#: jobs/shown_text.py
+msgid "Translated by AI"
+msgstr "Tradus de AI"
 
 #: jobs/views.py
 msgid "Please fill in your company profile before posting a job."
@@ -1019,22 +1019,6 @@ msgstr[0] "Necesar: %(workers)s muncitor"
 msgstr[1] "Necesari: %(workers)s muncitori"
 msgstr[2] "Necesari: %(workers)s de muncitori"
 
-#: templates/jobs/_job_description.html
-msgid "Show original"
-msgstr "Arată originalul"
-
-#: templates/jobs/_job_description.html
-msgid "Original"
-msgstr "Original"
-
-#: templates/jobs/_job_description.html
-msgid "Show translation"
-msgstr "Arată traducerea"
-
-#: templates/jobs/_job_description.html
-msgid "Translation is not available right now."
-msgstr "Traducerea nu este disponibilă acum."
-
 #: templates/jobs/_job_photos.html
 #, python-format
 msgid "Photos (%(count)s of %(max)s)"
@@ -1150,6 +1134,22 @@ msgstr "Anulați lucrarea"
 #: templates/jobs/_photo_placeholder.html
 msgid "No photo"
 msgstr "Fără fotografie"
+
+#: templates/jobs/_translation_label.html
+msgid "Show original"
+msgstr "Arată originalul"
+
+#: templates/jobs/_translation_label.html
+msgid "Original"
+msgstr "Original"
+
+#: templates/jobs/_translation_label.html
+msgid "Show translation"
+msgstr "Arată traducerea"
+
+#: templates/jobs/_translation_label.html
+msgid "Translation is not available right now."
+msgstr "Traducerea nu este disponibilă acum."
 
 #: templates/jobs/job_confirm_cancel.html
 msgid "Cancel this job?"
