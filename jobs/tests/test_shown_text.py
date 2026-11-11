@@ -7,6 +7,7 @@ function, so the tests see whether the rule asked for a translation at all.
 """
 
 import pytest
+from django.utils import translation
 
 from jobs.shown_text import ShownText, shown_text
 from translations.services import Translated
@@ -98,7 +99,10 @@ def test_unknown_source_language_is_translated_for_everyone(ok):
     result = shown_text(TEXT, "", "de", is_author=False, translated=ok)
 
     assert result.state == "translated"
-    assert result.label == "Translated by AI"
+    # The label is lazy: it is translated when read, into the active language, which an
+    # earlier test may have left on Polish. English, the language of the code.
+    with translation.override("en"):
+        assert result.label == "Translated by AI"
 
 
 def test_label_names_the_source_language(ok):
@@ -109,4 +113,5 @@ def test_label_names_the_source_language(ok):
     """
     result = shown_text(TEXT, "uk", "de", is_author=False, translated=ok)
 
-    assert result.label == "Translated from Ukrainian by AI"
+    with translation.override("en"):  # lazy, as above
+        assert result.label == "Translated from Ukrainian by AI"
