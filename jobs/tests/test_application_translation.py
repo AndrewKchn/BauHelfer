@@ -1,9 +1,10 @@
 """Unit tests: the application messages as the employer sees them, and forgetting them.
 
 Ticket #33. Spec: docs/specs/application-translation.md, iteration 2 (R10, R13, D5-D7),
-acceptance criterion AC8 and the rule behind AC6. messages_for() is called with saved
-applications and a language, without a request. The translator is the small class below,
-chosen through TRANSLATION_BACKEND; it records its calls, so nothing reaches the network.
+acceptance criterion AC8 and the rule behind AC6; iteration 3 (R16), AC11. messages_for()
+is called with saved applications and a language, without a request. The translator is
+the small class below, chosen through TRANSLATION_BACKEND; it records its calls, so
+nothing reaches the network.
 """
 
 from typing import ClassVar
@@ -139,3 +140,24 @@ def test_deleting_forgets_the_translations_of_the_message(job, deleted):
 
     assert rows_of(UKRAINIAN) == 0
     assert rows_of("Ein anderer Text.") == 1
+
+
+# "Show original" (R16, D8; AC11)
+
+
+def test_show_original_switches_only_that_message(job, recording):
+    """The message asked for is shown in the original, the others stay translated.
+
+    1. Save two Ukrainian applications
+    2. Ask for their messages as a German reader, with the first one's id as original_id
+    3. Expect: the first in the original, state "original"; the second translated
+    4. Expect: one translator call, for the second message only
+    """
+    andrii = apply(job, "andrii@example.com", UKRAINIAN, "uk")
+    olena = apply(job, "olena@example.com", "Я одна.", "uk")
+
+    first, second = messages_for([andrii, olena], "de", original_id=andrii.pk)
+
+    assert first.shown_message == ShownText(UKRAINIAN, "original", "uk")
+    assert second.shown_message.state == "translated"
+    assert recording.calls == [("Я одна.", "de")]

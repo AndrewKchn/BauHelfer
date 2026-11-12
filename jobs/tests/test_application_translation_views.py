@@ -1,7 +1,9 @@
 """Integration tests: a message's language is found when sent, the employer reads it translated.
 
 Ticket #33. Spec: docs/specs/application-translation.md, iteration 2 (R6-R8, R11, R12,
-D1, D3-D5, D10), acceptance criteria AC4-AC7 and AC9. Each test goes through the whole
+D1, D3-D5, D10), acceptance criteria AC4-AC7 and AC9; iteration 3, "Show original" per
+message (R15, R16, D8), AC10-AC12. The test client runs no JavaScript: the click itself is
+for an E2E test (R17). Each test goes through the whole
 stack: middleware, URL, view, form, template and database. The translator is the small
 class below, chosen through TRANSLATION_BACKEND; it records its calls, so nothing reaches
 the network.
@@ -351,3 +353,91 @@ def test_queries_do_not_grow_with_translated_messages(employer_client, job):
     with_three = count_page_queries(employer_client, job)
 
     assert with_three == with_one
+
+
+# "Show original" per message (R15, R16, D8; AC10-AC12)
+
+
+def htmx_link(text, href, url, target):
+    """The toggle's <a>: `href` for a plain click, `url` fetched by HTMX into `target`."""
+    return (
+        f'<a class="link" href="{href}" hx-get="{url}" hx-select="#{target}" '
+        f'hx-target="#{target}" hx-swap="outerHTML">{text}</a>'
+    )
+
+
+def test_translated_message_offers_the_original(employer_client, job):
+    """ "Show original" links to the page with this application's id, swapping its block.
+
+    1. Save a Ukrainian application
+    2. Open the page as the English employer
+    3. Expect: "Show original" with href ?original=<id>#application-<id>, hx-get without
+       the anchor, hx-select and hx-target #message-<id>
+    """
+    andrii = apply(job, "andrii@example.com", UKRAINIAN, "uk")
+    page = detail_url(job)
+
+    response = employer_client.get(page)
+
+    url = f"{page}?original={andrii.pk}"
+    assertContains(
+        response,
+        htmx_link(
+            "Show original",
+            f"{url}#application-{andrii.pk}",
+            url,
+            f"message-{andrii.pk}",
+        ),
+        html=True,
+    )
+
+
+def test_original_shows_that_message_and_offers_the_translation(
+    employer_client, job, recording
+):
+    """?original=<id> shows that message as written; the other stays translated.
+
+    1. Save two Ukrainian applications
+    2. Open the page with ?original=<first id>
+    3. Expect: the first in the original with "Original" and "Show translation" linking to
+       the page without the parameter; the second translated
+    4. Expect: no translation of the first message
+    """
+    andrii = apply(job, "andrii@example.com", UKRAINIAN, "uk")
+    apply(job, "olena@example.com", "Я одна.", "uk")
+    page = detail_url(job)
+
+    response = employer_client.get(f"{page}?original={andrii.pk}")
+
+    assertContains(response, f"“{UKRAINIAN}”")
+    assertContains(response, "Original")
+    assertContains(
+        response,
+        htmx_link(
+            "Show translation",
+            f"{page}#application-{andrii.pk}",
+            page,
+            f"message-{andrii.pk}",
+        ),
+        html=True,
+    )
+    assertContains(response, "en: Я одна.")
+    assert ("translate", UKRAINIAN, "en") not in recording.calls
+
+
+@pytest.mark.parametrize("value", ["abc", "other-job"])
+def test_wrong_original_changes_nothing(employer_client, employer, job, value):
+    """A letter or another job's application id: the page as without the parameter.
+
+    1. Save a Ukrainian application, and one to another job of the same employer
+    2. Open the page with ?original=abc or ?original=<the other job's application id>
+    3. Expect: 200, the message translated with "Show original"
+    """
+    apply(job, "andrii@example.com", UKRAINIAN, "uk")
+    other = apply(make_job(employer), "olena@example.com", "Я одна.", "uk")
+    original = other.pk if value == "other-job" else value
+
+    response = employer_client.get(f"{detail_url(job)}?original={original}")
+
+    assertContains(response, f"en: {UKRAINIAN}")
+    assertContains(response, "Show original")
