@@ -277,6 +277,41 @@ class Job(models.Model):
         return (self.date, self.start_time) <= (now.date(), now.time())
 
     @property
+    def has_ended(self):
+        """Whether the work is over: start plus hours has passed, Munich time (#37 D1)."""
+        # ends_at has no time zone, as the job's date and start time; so take Munich's
+        # "now" without one too, as has_started compares Munich dates and times.
+        return timezone.localtime().replace(tzinfo=None) >= self.ends_at
+
+    @property
+    def can_mark_done(self):
+        """Whether the employer can mark this job done (job-done.md R1, D1, D2).
+
+        Open or filled, at least one worker accepted ("found 2 of 3 and worked" counts),
+        and the work is over. Done unlocks the reviews of #38, so only work that happened.
+        """
+        if self.status not in (self.Status.OPEN, self.Status.FILLED):
+            return False
+        # Through places_left: it reads the annotation of with_workers_found() when the job
+        # was loaded with it, so "My jobs" asks no query per card (R5).
+        found = self.workers_needed - self.places_left
+        return found > 0 and self.has_ended
+
+    def mark_done(self):
+        """Mark this job done (job-done.md R2); the applications keep their statuses.
+
+        The job row is locked and read again, as in cancel(): an old copy (another tab
+        cancelled the job a moment ago) does not win. Raises JobStateError, and changes
+        nothing, unless can_mark_done is true for the saved row.
+        """
+        with transaction.atomic():
+            saved = Job.objects.select_for_update().get(pk=self.pk)
+            if not saved.can_mark_done:
+                raise JobStateError
+            self.status = self.Status.DONE
+            self.save(update_fields=["status"])
+
+    @property
     def accepts_applications(self):
         """Whether workers can still apply: open and not started yet (#19 spec R7, D2).
 
@@ -494,6 +529,9 @@ class Application(models.Model):
             and self.job.status == Job.Status.CANCELLED
         ):
             return self.Status.CANCELLED
+        # The next step of an accepted application: #38 asks for a review there (#37 D6).
+        if self.status == self.Status.ACCEPTED and self.job.status == Job.Status.DONE:
+            return "done"
         waiting = self.status in (self.Status.PENDING, self.Status.CLOSED)
         if waiting and self.job.is_over:
             return "past"

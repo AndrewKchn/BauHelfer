@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BauHelfer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-07 02:18+0100\n"
+"POT-Creation-Date: 2026-11-12 13:15+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -495,7 +495,7 @@ msgstr "Offen"
 msgid "Filled"
 msgstr "Besetzt"
 
-#: jobs/models.py
+#: jobs/models.py jobs/views.py
 msgid "Done"
 msgstr "Erledigt"
 
@@ -710,6 +710,10 @@ msgstr "Foto gelöscht."
 #: jobs/views.py
 msgid "Job cancelled."
 msgstr "Job abgesagt."
+
+#: jobs/views.py
+msgid "Job marked as done."
+msgstr "Job als erledigt markiert."
 
 #: jobs/views.py
 msgid "Complete your profile to apply."
@@ -1184,6 +1188,14 @@ msgstr "Bearbeiten"
 #: templates/jobs/_my_job_card.html templates/jobs/job_confirm_cancel.html
 msgid "Cancel job"
 msgstr "Job absagen"
+
+#: templates/jobs/_my_job_card.html
+msgid "Mark this job as done? This cannot be undone."
+msgstr "Diesen Job als erledigt markieren? Das kann nicht rückgängig gemacht werden."
+
+#: templates/jobs/_my_job_card.html
+msgid "Mark as done"
+msgstr "Als erledigt markieren"
 
 #: templates/jobs/_photo_placeholder.html
 msgid "No photo"
