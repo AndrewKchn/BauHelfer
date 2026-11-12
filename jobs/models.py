@@ -228,22 +228,28 @@ class Job(models.Model):
         return self.status
 
     def cancel(self):
-        """Cancel this open job and its accepted workers (contacts.md R2, D3, D9).
+        """Cancel this open or filled job and its accepted workers (contacts.md R2, D3,
+        D9; job-done.md R10, D10).
 
         The accepted applications become "cancelled", so they show no contacts any more;
         pending, closed and rejected ones stay. The job row is locked, as in
         Application._lock: a second click with an old copy reads "cancelled" and stops.
-        Raises JobStateError, and changes nothing, unless the job is open.
+        Returns the applications it cancelled: the view emails their workers (R13).
+        Raises JobStateError, and changes nothing, unless the job is open or filled.
         """
         with transaction.atomic():
             status = Job.objects.select_for_update().get(pk=self.pk).status
-            if status != self.Status.OPEN:
+            if status not in (self.Status.OPEN, self.Status.FILLED):
                 raise JobStateError
             self.status = self.Status.CANCELLED
             self.save(update_fields=["status"])
-            self.applications.filter(status=Application.Status.ACCEPTED).update(
-                status=Application.Status.CANCELLED
-            )
+            accepted = self.applications.filter(status=Application.Status.ACCEPTED)
+            # list(): read them before update() changes the rows the queryset selects.
+            cancelled = list(accepted.select_related("worker"))
+            accepted.update(status=Application.Status.CANCELLED)
+            for application in cancelled:
+                application.status = Application.Status.CANCELLED
+            return cancelled
 
     def workers_found(self):
         """How many workers the employer has taken: the sum over accepted applications.
@@ -520,19 +526,17 @@ class Application(models.Model):
     def tab(self):
         """Which tab of "My applications" this application is in (my-applications.md R2).
 
-        Its status, except: a pending one of a cancelled job is "cancelled", since nobody
-        will answer it (D9); a pending or "Job filled" one of a job that is over is "past":
-        it is over and did not happen (D3).
+        Its status, except: a pending or "Job filled" one of a cancelled job is
+        "cancelled", since nobody will answer it (D9; "Job filled" since #37, job-done.md
+        D13); an accepted one of a done job is "done" (#37 D6); a pending or "Job filled"
+        one of a job that is over is "past": it is over and did not happen (D3).
         """
-        if (
-            self.status == self.Status.PENDING
-            and self.job.status == Job.Status.CANCELLED
-        ):
+        waiting = self.status in (self.Status.PENDING, self.Status.CLOSED)
+        if waiting and self.job.status == Job.Status.CANCELLED:
             return self.Status.CANCELLED
-        # The next step of an accepted application: #38 asks for a review there (#37 D6).
+        # The next step of an accepted application: #38 asks for a review there.
         if self.status == self.Status.ACCEPTED and self.job.status == Job.Status.DONE:
             return "done"
-        waiting = self.status in (self.Status.PENDING, self.Status.CLOSED)
         if waiting and self.job.is_over:
             return "past"
         return self.status

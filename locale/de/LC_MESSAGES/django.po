@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BauHelfer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 13:15+0100\n"
+"POT-Creation-Date: 2026-11-12 13:35+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -983,6 +983,33 @@ msgstr ""
 msgid "You are accepted: %(job_type)s, %(date)s"
 msgstr "Sie sind angenommen: %(job_type)s, %(date)s"
 
+#: templates/emails/application_cancelled_body.txt
+#, python-format
+msgid ""
+"The employer cancelled the job: %(job_type)s, %(date)s, start at %(time)s"
+msgstr ""
+"Der Auftraggeber hat den Job abgesagt: %(job_type)s, %(date)s, Beginn um "
+"%(time)s."
+
+#: templates/emails/application_cancelled_body.txt
+#, python-format
+msgid ""
+"The employer cancelled your place: %(job_type)s, %(date)s, start at %(time)s"
+msgstr ""
+"Der Auftraggeber hat Ihren Platz abgesagt: %(job_type)s, %(date)s, Beginn um "
+"%(time)s."
+
+#: templates/emails/application_cancelled_body.txt
+msgid "You have nothing to do. Your applications are on “My applications”:"
+msgstr ""
+"Sie müssen nichts weiter tun. Ihre Bewerbungen finden Sie unter „Meine "
+"Bewerbungen“:"
+
+#: templates/emails/application_cancelled_subject.txt
+#, python-format
+msgid "Cancelled: %(job_type)s, %(date)s"
+msgstr "Abgesagt: %(job_type)s, %(date)s"
+
 #: templates/emails/application_rejected_body.txt
 #, python-format
 msgid ""
@@ -1191,7 +1218,8 @@ msgstr "Job absagen"
 
 #: templates/jobs/_my_job_card.html
 msgid "Mark this job as done? This cannot be undone."
-msgstr "Diesen Job als erledigt markieren? Das kann nicht rückgängig gemacht werden."
+msgstr ""
+"Diesen Job als erledigt markieren? Das kann nicht rückgängig gemacht werden."
 
 #: templates/jobs/_my_job_card.html
 msgid "Mark as done"

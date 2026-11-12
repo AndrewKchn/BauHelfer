@@ -36,7 +36,7 @@ from translations.services import detect_language, forget, translate
 
 from .forms import ApplicationForm, JobFilterForm, JobForm, JobPhotosForm
 from .models import Application, ApplicationStateError, Job, JobPhoto, JobStateError
-from .notifications import notify_decision, notify_new_application
+from .notifications import notify_cancelled, notify_decision, notify_new_application
 from .shown_text import description_for, messages_for
 
 # "jobs.views". Ids only, never an email or other personal data (#124).
@@ -329,21 +329,32 @@ class JobCancelView(OwnOpenJobMixin, DetailView):
 
     Cancelling changes the status and keeps the row: the job stays in "My jobs", and the
     applications to it (#22) keep their job. Its accepted workers are cancelled too, so
-    they no longer see the contacts (#25, contacts.md D3).
+    they no longer see the contacts (#25, contacts.md D3), and each gets an email (#37,
+    job-done.md R13, D10). A filled job can be cancelled too (#37 R10, R11).
     """
 
     template_name = "jobs/job_confirm_cancel.html"
     context_object_name = "job"
 
+    @override
+    def get_queryset(self):
+        """The logged-in employer's open and filled jobs (the mixin: open only)."""
+        return self.request.user.jobs.filter(
+            status__in=(Job.Status.OPEN, Job.Status.FILLED)
+        )
+
     def post(self, request, *args, **kwargs):
         """Mark the job cancelled and go back to "My jobs"."""
         job = self.get_object()  # 404 unless it is the employer's own open job
         try:
-            job.cancel()
+            cancelled = job.cancel()
         except JobStateError:
             # Another tab cancelled it a moment earlier: the same 404 as get_object().
             raise Http404 from None
         logger.info("Job cancelled: job_id=%s employer_id=%s", job.pk, request.user.pk)
+        # After the change is saved, as the emails of #27 (notifications.md D5).
+        for application in cancelled:
+            notify_cancelled(request, application)
         messages.success(request, _("Job cancelled."))
         return redirect("my_jobs")
 
@@ -683,6 +694,8 @@ class ApplicationCancelView(OwnApplicationMixin, View):
                 application.job_id,
                 request.user.pk,
             )
+        # After the change is saved and logged, as in JobCancelView (#37, job-done.md D12).
+        notify_cancelled(request, application)
         return back_to(application)
 
 

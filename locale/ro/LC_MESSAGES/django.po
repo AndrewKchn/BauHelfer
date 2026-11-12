@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BauHelfer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 13:15+0100\n"
+"POT-Creation-Date: 2026-11-12 13:35+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -989,6 +989,30 @@ msgstr ""
 #, python-format
 msgid "You are accepted: %(job_type)s, %(date)s"
 msgstr "Ați fost acceptat: %(job_type)s, %(date)s"
+
+#: templates/emails/application_cancelled_body.txt
+#, python-format
+msgid ""
+"The employer cancelled the job: %(job_type)s, %(date)s, start at %(time)s"
+msgstr ""
+"Angajatorul a anulat lucrarea: %(job_type)s, %(date)s, începere la %(time)s."
+
+#: templates/emails/application_cancelled_body.txt
+#, python-format
+msgid ""
+"The employer cancelled your place: %(job_type)s, %(date)s, start at %(time)s"
+msgstr ""
+"Angajatorul v-a anulat locul: %(job_type)s, %(date)s, începere la %(time)s."
+
+#: templates/emails/application_cancelled_body.txt
+msgid "You have nothing to do. Your applications are on “My applications”:"
+msgstr ""
+"Nu trebuie să faceți nimic. Candidaturile dvs. sunt la „Candidaturile mele”:"
+
+#: templates/emails/application_cancelled_subject.txt
+#, python-format
+msgid "Cancelled: %(job_type)s, %(date)s"
+msgstr "Anulat: %(job_type)s, %(date)s"
 
 #: templates/emails/application_rejected_body.txt
 #, python-format

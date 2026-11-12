@@ -23,6 +23,11 @@
           <a href="{% url 'job_edit' job.pk %}" class="link">{% translate "Edit" %}</a>
           <span aria-hidden="true" class="text-base-content/50">·</span>
           <a href="{% url 'job_cancel' job.pk %}" class="link text-error">{% translate "Cancel job" %}</a>
+        {% elif job.tab == "filled" and not job.is_over %}
+          {# A filled job can be cancelled, not edited: its workers were taken for it #}
+          {# (#37, job-done.md R11, D10). #}
+          <span aria-hidden="true" class="text-base-content/50">·</span>
+          <a href="{% url 'job_cancel' job.pk %}" class="link text-error">{% translate "Cancel job" %}</a>
         {% endif %}
         {# The work is over and someone did it (#37, job-done.md R4, D1-D4, D8); the #}
         {# browser asks first, as before Cancel. |escapejs: see job_detail.html. #}

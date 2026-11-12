@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BauHelfer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 13:15+0100\n"
+"POT-Creation-Date: 2026-11-12 13:35+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -993,6 +993,31 @@ msgstr "Kontakt do zleceniodawcy i adres są na stronie „Moje zgłoszenia”:"
 #, python-format
 msgid "You are accepted: %(job_type)s, %(date)s"
 msgstr "Zgłoszenie przyjęte: %(job_type)s, %(date)s"
+
+#: templates/emails/application_cancelled_body.txt
+#, python-format
+msgid ""
+"The employer cancelled the job: %(job_type)s, %(date)s, start at %(time)s"
+msgstr ""
+"Zleceniodawca anulował zlecenie: %(job_type)s, %(date)s, początek o %(time)s."
+
+#: templates/emails/application_cancelled_body.txt
+#, python-format
+msgid ""
+"The employer cancelled your place: %(job_type)s, %(date)s, start at %(time)s"
+msgstr ""
+"Zleceniodawca anulował Pana/Pani miejsce: %(job_type)s, %(date)s, początek o "
+"%(time)s."
+
+#: templates/emails/application_cancelled_body.txt
+msgid "You have nothing to do. Your applications are on “My applications”:"
+msgstr ""
+"Nie musi Pan/Pani nic robić. Zgłoszenia są na stronie „Moje zgłoszenia”:"
+
+#: templates/emails/application_cancelled_subject.txt
+#, python-format
+msgid "Cancelled: %(job_type)s, %(date)s"
+msgstr "Anulowane: %(job_type)s, %(date)s"
 
 #: templates/emails/application_rejected_body.txt
 #, python-format

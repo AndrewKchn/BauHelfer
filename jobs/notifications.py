@@ -1,4 +1,5 @@
-"""Emails about applications: a new one to the employer, the decision to the worker (#27).
+"""Emails about applications: a new one to the employer, the decision to the worker (#27);
+a cancelled job or place to the worker (#37, docs/specs/job-done.md R13, R14).
 
 docs/specs/notifications.md. The views call these after the change is saved (D5). Each
 email is rendered in the recipient's language (D8); a failed email is logged and never
@@ -31,6 +32,15 @@ def notify_decision(request, application):
     else:
         kind, path = "application_rejected", reverse("home")
     send(request, application, kind, application.worker, path)
+
+
+def notify_cancelled(request, application):
+    """Email the worker that their job or their place was cancelled (#37 R13, D10, D12).
+
+    One template for both: it reads the job's status to say which (R14).
+    """
+    path = reverse("my_applications")
+    send(request, application, "application_cancelled", application.worker, path)
 
 
 def send(request, application, kind, recipient, path):
