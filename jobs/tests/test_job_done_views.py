@@ -242,9 +242,10 @@ def test_buttons_cost_no_query_per_job(employer_client, employer):
 def test_worker_sees_a_done_tab_after_accepted(client, employer):
     """The "Done" tab right after "Accepted", in the done jobs' colour (R7, D6).
 
-    1. Save Ivan's accepted application of a done job, and of an open job next week
+    1. Save Ivan's accepted application of a done job, of a filled job next week, and a
+       pending one of an open job next week
     2. Open "My applications" as Ivan
-    3. Expect: the tabs accepted, done; the badge "Done 1" with data-colour
+    3. Expect: the tabs accepted, done, pending; the badge "Done 1" with data-colour
        badge-secondary
     """
     ivan = make_worker("ivan@example.com")
@@ -256,6 +257,7 @@ def test_worker_sees_a_done_tab_after_accepted(client, employer):
     upcoming_application = Application.objects.create(
         job=upcoming, worker=ivan, workers_accepted=1, status="accepted"
     )
+    pending = Application.objects.create(job=make_job(employer), worker=ivan)
     client.force_login(ivan)
 
     response = client.get(reverse("my_applications"))
@@ -263,6 +265,7 @@ def test_worker_sees_a_done_tab_after_accepted(client, employer):
     assert groups(response) == [
         ("accepted", [upcoming_application]),
         ("done", [done_application]),
+        ("pending", [pending]),
     ]
     assertContains(response, 'data-colour="badge-secondary">Done 1')
 
