@@ -255,10 +255,11 @@ def test_application_that_was_not_accepted_cannot_be_reviewed(employer, worker, 
 def test_job_that_is_not_done_cannot_be_reviewed(employer, worker, status):
     """A filled job that is over but not done, or a cancelled one: no (R5, D1).
 
-    1. Save an accepted application of a filled / cancelled job two days ago
+    1. Save an accepted application of a filled / cancelled job two days ago; give it a
+       done_at anyway, so the status alone has to say no
     2. Expect: can_review is False for both sides
     """
-    job = done_job(employer, status=status, done_at=None)
+    job = done_job(employer, status=status)
     application = accepted(job, worker)
 
     assert application.can_review(worker) is False
