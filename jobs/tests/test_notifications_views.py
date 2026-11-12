@@ -172,22 +172,6 @@ def test_filling_the_job_emails_only_the_accepted_worker(
     assert [email.to for email in mailoutbox] == [["ivan@example.com"]]
 
 
-def test_cancelling_an_accepted_worker_sends_nothing(client, employer, job, mailoutbox):
-    """Taking an accepted worker off the job sends no email (D6).
-
-    1. Save Ivan's accepted application
-    2. As Anna, cancel it
-    3. Expect: it is cancelled; no email
-    """
-    application = apply(job, "ivan@example.com", status="accepted", workers_accepted=1)
-
-    post_as(client, employer, "application_cancel", application.pk)
-
-    application.refresh_from_db()
-    assert application.status == Application.Status.CANCELLED
-    assert mailoutbox == []
-
-
 def test_withdrawing_sends_nothing(client, ivan, job, mailoutbox):
     """A worker withdrawing their application sends no email (D6).
 

@@ -275,13 +275,23 @@ def test_other_employer_gets_404(client, other_employer, job, name):
     assert job.status == Job.Status.OPEN
 
 
-@pytest.mark.parametrize("status", ["filled", "done", "cancelled"])
-@pytest.mark.parametrize("name", ["job_edit", "job_cancel"])
+# A filled job can be cancelled since #37 (job-done.md D10): tested there.
+@pytest.mark.parametrize(
+    ("status", "name"),
+    [
+        ("filled", "job_edit"),
+        ("done", "job_edit"),
+        ("cancelled", "job_edit"),
+        ("done", "job_cancel"),
+        ("cancelled", "job_cancel"),
+    ],
+)
 def test_job_that_is_not_open_gives_404(employer_client, employer, status, name):
-    """Only open jobs can be edited or cancelled, even by their owner.
+    """Only open jobs can be edited, open and filled ones cancelled, even by their owner.
 
     1. Log in as the employer
-    2. Open edit / cancel of their own filled / done / cancelled job
+    2. Open edit of their own filled / done / cancelled job, or cancel of a done /
+       cancelled one
     3. Expect: 404
     """
     closed_job = make_job(employer, status=status)

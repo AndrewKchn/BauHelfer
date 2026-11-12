@@ -160,11 +160,12 @@ def test_cancelling_a_job_does_not_touch_other_jobs(employer, job):
     assert other.status == Application.Status.ACCEPTED
 
 
-@pytest.mark.parametrize("status", ["filled", "done", "cancelled"])
+# A filled job can be cancelled since #37 (job-done.md D10): test_job_cancel_filled.py.
+@pytest.mark.parametrize("status", ["done", "cancelled"])
 def test_only_an_open_job_can_be_cancelled(job, status):
-    """A filled, done or cancelled job is refused and nothing changes (R2).
+    """A done or cancelled job is refused and nothing changes (R2).
 
-    1. Save an accepted application, then set the job filled, done or cancelled
+    1. Save an accepted application, then set the job done or cancelled
     2. Cancel the job
     3. Expect: JobStateError; the job and the application are unchanged
     """
