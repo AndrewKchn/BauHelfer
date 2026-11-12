@@ -74,8 +74,14 @@ def test_owner_sees_each_application_with_the_workers_details(employer_client, j
     4. Expect: no crew size and no work-permit line: changed in #24
        (accept-reject.md D22, D23)
     """
+    # In the employer's English: shown as written, not translated (#33, D10).
     application = apply(
-        job, "ivan@example.com", "Ivan Petrenko", workers_offered=2, message="We are 3."
+        job,
+        "ivan@example.com",
+        "Ivan Petrenko",
+        workers_offered=2,
+        message="We are 3.",
+        original_language="en",
     )
     WorkerProfile.objects.filter(user=application.worker).update(legal_status="gewerbe")
 

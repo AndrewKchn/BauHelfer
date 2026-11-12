@@ -79,6 +79,29 @@ def translate(text, target_lang):
     return Translated(row.text, ok=True)
 
 
+def translate_many(texts, target_lang):
+    """Each of `texts` in `target_lang`, as translate() gives it: {text: Translated}.
+
+    For a page with many texts, such as the applications on a job page (#33,
+    application-translation.md R9, D2): the cached translations of all of them come in one
+    query, so the page's queries do not grow with its texts ("N+1"). A text not in the
+    cache goes through translate(), with its limits and logging; that happens once per
+    text, the next page reads the cache.
+    """
+    # A dict: a repeated text is looked up and translated once. An empty `texts` makes no
+    # query (Django knows `__in` an empty list finds nothing); an unknown language and an
+    # empty text are left to translate().
+    keys = {source_hash(text): text for text in texts}
+    cached = Translation.objects.filter(
+        source_hash__in=keys, target_language=target_lang
+    ).values_list("source_hash", "text")
+    result = {keys[key]: Translated(text, ok=True) for key, text in cached}
+    for text in texts:
+        if text not in result:
+            result[text] = translate(text, target_lang)
+    return result
+
+
 def _translations_today():
     """How many translations the site saved in the last 24 hours (D17)."""
     since = timezone.now() - timedelta(hours=24)

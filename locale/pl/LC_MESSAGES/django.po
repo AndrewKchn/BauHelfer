@@ -372,38 +372,6 @@ msgstr "E-mail potwierdzony. Witamy w BauHelfer!"
 msgid "Profile saved."
 msgstr "Profil zapisany."
 
-#: jobs/descriptions.py
-msgid "Translated from German by AI"
-msgstr "Przetłumaczono przez AI z niemieckiego"
-
-#: jobs/descriptions.py
-msgid "Translated from English by AI"
-msgstr "Przetłumaczono przez AI z angielskiego"
-
-#: jobs/descriptions.py
-msgid "Translated from Russian by AI"
-msgstr "Przetłumaczono przez AI z rosyjskiego"
-
-#: jobs/descriptions.py
-msgid "Translated from Ukrainian by AI"
-msgstr "Przetłumaczono przez AI z ukraińskiego"
-
-#: jobs/descriptions.py
-msgid "Translated from Polish by AI"
-msgstr "Przetłumaczono przez AI z polskiego"
-
-#: jobs/descriptions.py
-msgid "Translated from Romanian by AI"
-msgstr "Przetłumaczono przez AI z rumuńskiego"
-
-#: jobs/descriptions.py
-msgid "Translated from Turkish by AI"
-msgstr "Przetłumaczono przez AI z tureckiego"
-
-#: jobs/descriptions.py
-msgid "Translated by AI"
-msgstr "Przetłumaczono przez AI"
-
 #: jobs/forms.py
 msgid "Hourly rate, €"
 msgstr "Stawka godzinowa, €"
@@ -646,6 +614,38 @@ msgstr "To zdjęcie ma za dużo pikseli. Proszę przesłać zwykłe zdjęcie."
 #: jobs/photos.py
 msgid "A photo can be at most 5 MB."
 msgstr "Zdjęcie może mieć najwyżej 5 MB."
+
+#: jobs/shown_text.py
+msgid "Translated from German by AI"
+msgstr "Przetłumaczono przez AI z niemieckiego"
+
+#: jobs/shown_text.py
+msgid "Translated from English by AI"
+msgstr "Przetłumaczono przez AI z angielskiego"
+
+#: jobs/shown_text.py
+msgid "Translated from Russian by AI"
+msgstr "Przetłumaczono przez AI z rosyjskiego"
+
+#: jobs/shown_text.py
+msgid "Translated from Ukrainian by AI"
+msgstr "Przetłumaczono przez AI z ukraińskiego"
+
+#: jobs/shown_text.py
+msgid "Translated from Polish by AI"
+msgstr "Przetłumaczono przez AI z polskiego"
+
+#: jobs/shown_text.py
+msgid "Translated from Romanian by AI"
+msgstr "Przetłumaczono przez AI z rumuńskiego"
+
+#: jobs/shown_text.py
+msgid "Translated from Turkish by AI"
+msgstr "Przetłumaczono przez AI z tureckiego"
+
+#: jobs/shown_text.py
+msgid "Translated by AI"
+msgstr "Przetłumaczono przez AI"
 
 #: jobs/views.py
 msgid "Please fill in your company profile before posting a job."
@@ -1028,22 +1028,6 @@ msgstr[1] "Potrzeba %(workers)s pracowników"
 msgstr[2] "Potrzeba %(workers)s pracowników"
 msgstr[3] "Potrzeba %(workers)s pracownika"
 
-#: templates/jobs/_job_description.html
-msgid "Show original"
-msgstr "Pokaż oryginał"
-
-#: templates/jobs/_job_description.html
-msgid "Original"
-msgstr "Oryginał"
-
-#: templates/jobs/_job_description.html
-msgid "Show translation"
-msgstr "Pokaż tłumaczenie"
-
-#: templates/jobs/_job_description.html
-msgid "Translation is not available right now."
-msgstr "Tłumaczenie jest teraz niedostępne."
-
 #: templates/jobs/_job_photos.html
 #, python-format
 msgid "Photos (%(count)s of %(max)s)"
@@ -1161,6 +1145,22 @@ msgstr "Anuluj zlecenie"
 #: templates/jobs/_photo_placeholder.html
 msgid "No photo"
 msgstr "Brak zdjęcia"
+
+#: templates/jobs/_translation_label.html
+msgid "Show original"
+msgstr "Pokaż oryginał"
+
+#: templates/jobs/_translation_label.html
+msgid "Original"
+msgstr "Oryginał"
+
+#: templates/jobs/_translation_label.html
+msgid "Show translation"
+msgstr "Pokaż tłumaczenie"
+
+#: templates/jobs/_translation_label.html
+msgid "Translation is not available right now."
+msgstr "Tłumaczenie jest teraz niedostępne."
 
 #: templates/jobs/job_confirm_cancel.html
 msgid "Cancel this job?"

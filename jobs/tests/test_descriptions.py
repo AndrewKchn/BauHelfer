@@ -11,7 +11,7 @@ from typing import ClassVar
 
 import pytest
 
-from jobs.descriptions import Description, description_for
+from jobs.shown_text import ShownText, description_for
 from translations.backends import TranslationError
 from translations.models import Translation
 from translations.services import source_hash, translate
@@ -68,7 +68,7 @@ def test_another_language_gets_the_translation(job, recording):
     """
     result = description_for(job, "pl", is_owner=False)
 
-    assert result == Description(f"pl: {GERMAN_TEXT}", "translated", "de")
+    assert result == ShownText(f"pl: {GERMAN_TEXT}", "translated", "de")
     assert recording.calls == [(GERMAN_TEXT, "pl")]
 
 
@@ -83,7 +83,7 @@ def test_unknown_source_language_is_translated_for_everyone(job, recording):
 
     result = description_for(job, "de", is_owner=False)
 
-    assert result == Description(f"de: {GERMAN_TEXT}", "translated", "")
+    assert result == ShownText(f"de: {GERMAN_TEXT}", "translated", "")
 
 
 def test_same_language_is_not_translated(job, recording):
@@ -94,7 +94,7 @@ def test_same_language_is_not_translated(job, recording):
     """
     result = description_for(job, "de", is_owner=False)
 
-    assert result == Description(GERMAN_TEXT, "same", "de")
+    assert result == ShownText(GERMAN_TEXT, "same", "de")
     assert recording.calls == []
 
 
@@ -106,7 +106,7 @@ def test_owner_sees_their_own_text(job, recording):
     """
     result = description_for(job, "pl", is_owner=True)
 
-    assert result == Description(GERMAN_TEXT, "own", "de")
+    assert result == ShownText(GERMAN_TEXT, "own", "de")
     assert recording.calls == []
 
 
@@ -121,7 +121,7 @@ def test_failed_translation_shows_the_original(job, settings):
 
     result = description_for(job, "pl", is_owner=False)
 
-    assert result == Description(GERMAN_TEXT, "unavailable", "de")
+    assert result == ShownText(GERMAN_TEXT, "unavailable", "de")
 
 
 # Forgetting translations when the job goes (R6, D12; AC5)
@@ -174,7 +174,7 @@ def test_show_original_gives_the_original_without_a_call(job, recording):
     """
     result = description_for(job, "pl", is_owner=False, show_original=True)
 
-    assert result == Description(GERMAN_TEXT, "original", "de")
+    assert result == ShownText(GERMAN_TEXT, "original", "de")
     assert recording.calls == []
 
 
@@ -191,5 +191,5 @@ def test_show_original_changes_nothing_without_a_translation(
     """
     result = description_for(job, lang, is_owner=is_owner, show_original=True)
 
-    assert result == Description(GERMAN_TEXT, state, "de")
+    assert result == ShownText(GERMAN_TEXT, state, "de")
     assert recording.calls == []

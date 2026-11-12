@@ -150,8 +150,14 @@ def test_save_built_screenshots(page):
             languages=["uk"],
             legal_status="gewerbe",
         )
+        # In Ukrainian (#33): the employer reads it translated, "Translated from
+        # Ukrainian by AI" as on the mockup; the fake translator marks it "[en] …".
         Application.objects.create(
-            job=demolition, worker=applicant, workers_offered=team, message=message
+            job=demolition,
+            worker=applicant,
+            workers_offered=team,
+            message=message,
+            original_language="uk",
         )
     # Mehmet accepted (#24): "1 of 2 workers found", the bar, "Cancel", and Andrii's crew
     # of 2 gets "Accept 1 of 2" with the "fills the job" warning.

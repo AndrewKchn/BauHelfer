@@ -77,6 +77,8 @@ R7. `jobs.descriptions.description_for(job, reader_lang, *, is_owner)` decides w
       `translated`; not `ok` → the original, state `unavailable` (D10).
     `from_language` is `original_language` (`""` when unknown). The view only calls it.
     Iteration 2 adds `show_original=False` and the state `original` (R12).
+    Changed by #33 (application-translation.md R1–R3, D5, D12): `jobs/shown_text.py`,
+    `ShownText`; `description_for()` calls the shared rule `shown_text()`.
 R8. The reader's language is the active one (`translation.get_language()`), the same that
     picks the page's own strings (i18n.md D3).
 R9. The description's card (`id="description"`, `jobs/_job_description.html`) shows the
