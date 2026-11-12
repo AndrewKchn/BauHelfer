@@ -73,6 +73,11 @@ check blocks the merge:
 - `pytest --cov`: all tests pass and **coverage ≥ 80 %** of lines **and branches** (every
   `if` must be tested both ways), settings in `pyproject.toml`
 - `interrogate`: **≥ 80 %** of functions and classes have a docstring
+- translations (#29, #30): `makemessages` must change nothing in `locale/` (a string wrapped
+  in the code but missing from the `.po` files fails the run); `tests/test_translations.py`
+  checks with `msgfmt` that every string of every `.po` is translated and not fuzzy, that
+  every `.mo` is compiled from its `.po`, that placeholders are not broken
+  (`--check-format`) and that plural strings have all the language's forms (`--check-header`)
 - the Allure report is built from the results: tests grouped by milestone and story,
   the report of `main` at <https://andrewkchn.github.io/BauHelfer/>
 - a failed run uploads the `playwright-traces` artifact (`test-results/`, #21): download it
@@ -109,8 +114,23 @@ check blocks the merge:
     fail.
   - A broken build input (`tailwind/input.css`): after undoing it, **rebuild
     `static/css/app.css`**, or the next run still reads the broken build (#113).
-  - A mutant of the same size in the same second can reuse the cached `.pyc`: run with
-    `PYTHONDONTWRITEBYTECODE=1` (#64).
+  - A mutant of the same size in the same second can reuse the cached `.pyc`: Python checks
+    only the source's size and mtime (in seconds). Run with `PYTHONDONTWRITEBYTECODE=1` (#64),
+    or `touch` the file after putting it back (#34: `300` → `500` and back left the mutant
+    running).
+- **`xfail` only with `strict=True, raises=AssertionError`.** A test that must fail until a
+  later ticket (#29: the untranslated strings until #30). Without `raises`, an xfail also
+  hides unrelated errors: during #29 it hid a `ModuleNotFoundError`. `strict` turns the run
+  red once the test passes, so the marker is not forgotten.
+- **Lazy strings in a unit test** (#33). A `gettext_lazy` string is translated when it is
+  read, into the language active at that moment; a view test before it may have left another
+  language active. Wrap the assert in `with translation.override("en"):`
+  (`jobs/tests/test_shown_text.py`); the test passed in the random order of the full run by
+  luck and failed only in a fixed order.
+- **A fake translator** (#31). `TRANSLATION_BACKEND` points to
+  `translations/backends/fake_claude.py` locally and in tests, which returns `[pl] <text>`;
+  tests of the real backend pass a fake `anthropic` client, so no test calls the API
+  (`translations/tests/test_claude_backend.py`).
 - **A fixed clock.** Tests that depend on the time replace `django.utils.timezone.now` with
   pytest's `monkeypatch` (`frozen_now` in `jobs/tests/test_models.py` and
   `jobs/tests/test_job_filter.py`; one shared fixture: #133). No new dependency.
