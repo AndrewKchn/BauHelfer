@@ -61,7 +61,9 @@ Copy `.env.example` to `.env` before the first run.
 
 - Code, comments, docs, issues and commit messages in English.
 - Every UI string is wrapped in `gettext` / `{% translate %}`; from M5 also translated into all
-  7 languages (DE, EN, RU, UK, PL, RO, TR).
+  7 languages (DE, EN, RU, UK, PL, RO, TR), as in #30: the glossary and polite address of
+  `docs/specs/translations.md`, RU / UK reviewed by the student, DE / PL / RO / TR checked by
+  back-translation (an agent that sees only the translations), all plural forms.
 - No secrets or personal data in the repo — it is public.
 - Keep it simple: Django built-ins first, no new dependency without asking.
 - Every method that overrides a parent method — including a mixin method that overrides one in

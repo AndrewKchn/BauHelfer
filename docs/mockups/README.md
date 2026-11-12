@@ -43,7 +43,7 @@ theme, full page, test data only. A ticket that changes a screen overwrites its 
 | --- | --- | --- | --- |
 | Post a job | "From · To" | start time + hours | #15 (`docs/specs/job.md` D2) |
 | Post a job | district found on the map | district drop-down until geocoding (#41) | #16 |
-| Post a job | rate "12,00" with a comma | a dot until the translations (M5) | #16 |
+| Post a job | rate "12,00" with a comma | a dot: the number field (`<input type="number">`) takes only a dot; the browser may show a comma in its own language. Kept in #97 | #16, #97 |
 | Post a job | photo tiles in the form | photos are added on the job's edit page, which opens after "Publish" at `#photos`; the form says so | #64 (D10, D13, D21) |
 | Post a job | an "Add" tile with a camera | a file field (several files) and an "Add photos" button | #64 (D14) |
 | Jobs list | district · date · time on one line | district on its own line (cut with "…"), date and time below | #18 (D8) |

@@ -1,6 +1,20 @@
 # BauHelfer translations (#29). Edit msgstr here, then run compilemessages.
 msgid ""
-msgstr "Project-Id-Version: BauHelfer\nReport-Msgid-Bugs-To: \nPOT-Creation-Date: 2026-11-07 02:18+0100\nPO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\nLast-Translator: FULL NAME <EMAIL@ADDRESS>\nLanguage-Team: LANGUAGE <LL@li.org>\nLanguage: uk\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != 11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || (n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
+msgstr ""
+"Project-Id-Version: BauHelfer\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-07 02:18+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != "
+"11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % "
+"100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || "
+"(n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
 
 #: accounts/admin.py
 msgid "Profile"
@@ -24,7 +38,8 @@ msgstr "Неправильний email або пароль."
 
 #: accounts/forms.py
 msgid "Please confirm your email first. We sent you a link when you signed up."
-msgstr "Спочатку підтвердьте email. Ми надіслали вам посилання під час реєстрації."
+msgstr ""
+"Спочатку підтвердьте email. Ми надіслали вам посилання під час реєстрації."
 
 #: accounts/forms.py templates/accounts/employer_profile.html
 #: templates/accounts/worker_profile.html
@@ -32,16 +47,22 @@ msgid "Email"
 msgstr "Email"
 
 #: accounts/forms.py
-msgid "Optional. Shown only to the people you work with, until the day of the job is over."
-msgstr "Необов'язково. Бачать лише ті, з ким ви працюєте, і лише до кінця дня роботи."
+msgid ""
+"Optional. Shown only to the people you work with, until the day of the job "
+"is over."
+msgstr ""
+"Необов'язково. Бачать лише ті, з ким ви працюєте, і лише до кінця дня роботи."
 
 #: accounts/forms.py
 msgid "I am allowed to work in Germany"
 msgstr "Я маю право працювати в Німеччині"
 
 #: accounts/forms.py
-msgid "For example as an EU citizen, or with a residence permit that allows work."
-msgstr "Наприклад, як громадянин ЄС або з посвідкою на проживання, що дозволяє працювати."
+msgid ""
+"For example as an EU citizen, or with a residence permit that allows work."
+msgstr ""
+"Наприклад, як громадянин ЄС або з посвідкою на проживання, що дозволяє "
+"працювати."
 
 #: accounts/forms.py templates/accounts/_worker_profile_card.html
 msgid "Skills"
@@ -96,7 +117,9 @@ msgid "email notifications"
 msgstr "сповіщення email"
 
 #: accounts/models.py
-msgid "New applications and decisions on applications. Emails about your password are always sent."
+msgid ""
+"New applications and decisions on applications. Emails about your password "
+"are always sent."
 msgstr "Нові заявки та рішення щодо заявок. Листи про пароль надходять завжди."
 
 #: accounts/models.py
@@ -349,16 +372,25 @@ msgid "email verification required"
 msgstr "потрібне підтвердження email"
 
 #: accounts/models.py
-msgid "Off: a new account is active and logged in at once, with no confirmation email, e.g. for a demo. Its address stays unconfirmed, so it gets no emails."
-msgstr "Вимкнено: новий акаунт одразу активний і вхід виконано, без листа для підтвердження, наприклад для демонстрації. Його адреса залишається непідтвердженою, тому листів він не отримує."
+msgid ""
+"Off: a new account is active and logged in at once, with no confirmation "
+"email, e.g. for a demo. Its address stays unconfirmed, so it gets no emails."
+msgstr ""
+"Вимкнено: новий акаунт одразу активний і вхід виконано, без листа для "
+"підтвердження, наприклад для демонстрації. Його адреса залишається "
+"непідтвердженою, тому листів він не отримує."
 
 #: accounts/models.py
 msgid "site settings"
 msgstr "налаштування сайту"
 
 #: accounts/validators.py
-msgid "Enter the number with a country code, e.g. +49 151 12345678, or with an area code, e.g. 0151 12345678."
-msgstr "Введіть номер з кодом країни, наприклад +49 151 12345678, або з кодом міста, наприклад 0151 12345678."
+msgid ""
+"Enter the number with a country code, e.g. +49 151 12345678, or with an area "
+"code, e.g. 0151 12345678."
+msgstr ""
+"Введіть номер з кодом країни, наприклад +49 151 12345678, або з кодом міста, "
+"наприклад 0151 12345678."
 
 #: accounts/views.py
 msgid "Welcome to BauHelfer! Your account is ready."
@@ -377,7 +409,8 @@ msgid "Hourly rate, €"
 msgstr "Погодинна ставка, €"
 
 #: jobs/forms.py
-msgid "Write in your language, up to 1000 characters. Workers read it in theirs."
+msgid ""
+"Write in your language, up to 1000 characters. Workers read it in theirs."
 msgstr "Пишіть своєю мовою, до 1000 символів. Робітники прочитають своєю."
 
 #: jobs/forms.py
@@ -926,12 +959,24 @@ msgstr "Вітаємо!"
 
 #: templates/emails/application_accepted_body.txt
 #, python-format
-msgid "The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: %(counter)s worker."
-msgid_plural "The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: %(counter)s workers."
-msgstr[0] "Роботодавець прийняв вас на роботу «%(job_type)s», %(date)s, початок о %(time)s: %(counter)s робітник."
-msgstr[1] "Роботодавець прийняв вас на роботу «%(job_type)s», %(date)s, початок о %(time)s: %(counter)s робітники."
-msgstr[2] "Роботодавець прийняв вас на роботу «%(job_type)s», %(date)s, початок о %(time)s: %(counter)s робітників."
-msgstr[3] "Роботодавець прийняв вас на роботу «%(job_type)s», %(date)s, початок о %(time)s: %(counter)s робітника."
+msgid ""
+"The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: "
+"%(counter)s worker."
+msgid_plural ""
+"The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: "
+"%(counter)s workers."
+msgstr[0] ""
+"Роботодавець прийняв вас на роботу «%(job_type)s», %(date)s, початок о "
+"%(time)s: %(counter)s робітник."
+msgstr[1] ""
+"Роботодавець прийняв вас на роботу «%(job_type)s», %(date)s, початок о "
+"%(time)s: %(counter)s робітники."
+msgstr[2] ""
+"Роботодавець прийняв вас на роботу «%(job_type)s», %(date)s, початок о "
+"%(time)s: %(counter)s робітників."
+msgstr[3] ""
+"Роботодавець прийняв вас на роботу «%(job_type)s», %(date)s, початок о "
+"%(time)s: %(counter)s робітника."
 
 #: templates/emails/application_accepted_body.txt
 msgid "The employer's contact and the address are on “My applications”:"
@@ -944,7 +989,8 @@ msgstr "Вас прийнято: %(job_type)s, %(date)s"
 
 #: templates/emails/application_rejected_body.txt
 #, python-format
-msgid "The employer did not accept your application for %(job_type)s, %(date)s."
+msgid ""
+"The employer did not accept your application for %(job_type)s, %(date)s."
 msgstr "Роботодавець не прийняв вашу заявку: %(job_type)s, %(date)s."
 
 #: templates/emails/application_rejected_body.txt
@@ -958,12 +1004,24 @@ msgstr "Заявку не прийнято: %(job_type)s, %(date)s"
 
 #: templates/emails/new_application_body.txt
 #, python-format
-msgid "%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s worker."
-msgid_plural "%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s workers."
-msgstr[0] "Нова заявка від %(name)s на вашу вакансію «%(job_type)s», %(date)s: %(counter)s робітник."
-msgstr[1] "Нова заявка від %(name)s на вашу вакансію «%(job_type)s», %(date)s: %(counter)s робітники."
-msgstr[2] "Нова заявка від %(name)s на вашу вакансію «%(job_type)s», %(date)s: %(counter)s робітників."
-msgstr[3] "Нова заявка від %(name)s на вашу вакансію «%(job_type)s», %(date)s: %(counter)s робітника."
+msgid ""
+"%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s "
+"worker."
+msgid_plural ""
+"%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s "
+"workers."
+msgstr[0] ""
+"Нова заявка від %(name)s на вашу вакансію «%(job_type)s», %(date)s: "
+"%(counter)s робітник."
+msgstr[1] ""
+"Нова заявка від %(name)s на вашу вакансію «%(job_type)s», %(date)s: "
+"%(counter)s робітники."
+msgstr[2] ""
+"Нова заявка від %(name)s на вашу вакансію «%(job_type)s», %(date)s: "
+"%(counter)s робітників."
+msgstr[3] ""
+"Нова заявка від %(name)s на вашу вакансію «%(job_type)s», %(date)s: "
+"%(counter)s робітника."
 
 #: templates/emails/new_application_body.txt
 msgid "Accept or reject the application here:"
@@ -975,8 +1033,12 @@ msgid "New application: %(job_type)s, %(date)s"
 msgstr "Нова заявка: %(job_type)s, %(date)s"
 
 #: templates/emails/verify_email_body.txt
-msgid "Someone created a BauHelfer account with this email address. Open this link to confirm the address and activate the account:"
-msgstr "Хтось створив акаунт BauHelfer із цією адресою email. Відкрийте посилання, щоб підтвердити адресу й активувати акаунт:"
+msgid ""
+"Someone created a BauHelfer account with this email address. Open this link "
+"to confirm the address and activate the account:"
+msgstr ""
+"Хтось створив акаунт BauHelfer із цією адресою email. Відкрийте посилання, "
+"щоб підтвердити адресу й активувати акаунт:"
 
 #: templates/emails/verify_email_body.txt
 #, python-format
@@ -988,8 +1050,12 @@ msgstr[2] "Посилання працює один раз і %(counter)s дні
 msgstr[3] "Посилання працює один раз і %(counter)s дня."
 
 #: templates/emails/verify_email_body.txt
-msgid "If you did not create an account, ignore this email: without the link nothing happens."
-msgstr "Якщо ви не створювали акаунт, просто проігноруйте цей лист: без переходу за посиланням нічого не станеться."
+msgid ""
+"If you did not create an account, ignore this email: without the link "
+"nothing happens."
+msgstr ""
+"Якщо ви не створювали акаунт, просто проігноруйте цей лист: без переходу за "
+"посиланням нічого не станеться."
 
 #: templates/emails/verify_email_subject.txt
 msgid "Confirm your email for BauHelfer"
@@ -1260,7 +1326,8 @@ msgstr "Відхилити"
 
 #: templates/jobs/job_detail.html
 msgid "Accepting fills the job: the other pending applications will be closed."
-msgstr "Якщо прийняти, вакансію буде набрано, а інші заявки на розгляді закриються."
+msgstr ""
+"Якщо прийняти, вакансію буде набрано, а інші заявки на розгляді закриються."
 
 #: templates/jobs/job_detail.html
 msgid "No applications yet."
@@ -1430,20 +1497,31 @@ msgid "Check your email"
 msgstr "Перевірте пошту"
 
 #: templates/registration/password_reset_done.html
-msgid "If an account with this email exists, we have sent a link to set a new password. Check your spam folder too."
-msgstr "Якщо акаунт із цим email існує, ми надіслали посилання для нового пароля. Перевірте й папку «Спам»."
+msgid ""
+"If an account with this email exists, we have sent a link to set a new "
+"password. Check your spam folder too."
+msgstr ""
+"Якщо акаунт із цим email існує, ми надіслали посилання для нового пароля. "
+"Перевірте й папку «Спам»."
 
 #: templates/registration/password_reset_email.txt
-msgid "Someone asked to reset the password for your BauHelfer account. Open this link to set a new password:"
-msgstr "Хтось запросив скидання пароля для вашого акаунта BauHelfer. Відкрийте посилання, щоб задати новий пароль:"
+msgid ""
+"Someone asked to reset the password for your BauHelfer account. Open this "
+"link to set a new password:"
+msgstr ""
+"Хтось запросив скидання пароля для вашого акаунта BauHelfer. Відкрийте "
+"посилання, щоб задати новий пароль:"
 
 #: templates/registration/password_reset_email.txt
 msgid "If it was not you, ignore this email: your password stays the same."
 msgstr "Якщо це були не ви, проігноруйте лист: пароль залишиться тим самим."
 
 #: templates/registration/password_reset_form.html
-msgid "Enter the email of your account. We will send you a link to set a new password."
-msgstr "Введіть email вашого акаунта. Ми надішлемо посилання для нового пароля."
+msgid ""
+"Enter the email of your account. We will send you a link to set a new "
+"password."
+msgstr ""
+"Введіть email вашого акаунта. Ми надішлемо посилання для нового пароля."
 
 #: templates/registration/password_reset_form.html
 msgid "Send link"
@@ -1464,7 +1542,8 @@ msgstr "Вже є акаунт?"
 #: templates/registration/register_done.html
 #, python-format
 msgid "We sent a link to <strong class=\"break-all\">%(email)s</strong>."
-msgstr "Ми надіслали посилання на <strong class=\"break-all\">%(email)s</strong>."
+msgstr ""
+"Ми надіслали посилання на <strong class=\"break-all\">%(email)s</strong>."
 
 #: templates/registration/register_done.html
 msgid "We sent a link to your email address."
@@ -1498,16 +1577,24 @@ msgid "Press the button to confirm your address and activate your account."
 msgstr "Натисніть кнопку, щоб підтвердити адресу й активувати акаунт."
 
 #: templates/registration/verify_email.html
-msgid "This link is invalid or has expired. It works only once: if you already confirmed your email, just log in."
-msgstr "Це посилання недійсне або застаріло. Воно працює лише один раз: якщо ви вже підтвердили email, просто увійдіть."
+msgid ""
+"This link is invalid or has expired. It works only once: if you already "
+"confirmed your email, just log in."
+msgstr ""
+"Це посилання недійсне або застаріло. Воно працює лише один раз: якщо ви вже "
+"підтвердили email, просто увійдіть."
 
 #: templates/registration/verify_email_resend.html
 msgid "Enter the email you signed up with. We send a new link to confirm it."
-msgstr "Введіть email, з яким ви реєструвалися. Ми надішлемо нове посилання для підтвердження."
+msgstr ""
+"Введіть email, з яким ви реєструвалися. Ми надішлемо нове посилання для "
+"підтвердження."
 
 #: templates/registration/verify_email_resend_done.html
 msgid "If an unconfirmed account uses this address, we sent a new link."
-msgstr "Якщо ця адреса належить непідтвердженому акаунту, ми надіслали нове посилання."
+msgstr ""
+"Якщо ця адреса належить непідтвердженому акаунту, ми надіслали нове "
+"посилання."
 
 #: templates/registration/verify_email_resend_done.html
 msgid "A new link can be sent once every 10 minutes."

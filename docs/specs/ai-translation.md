@@ -129,7 +129,9 @@ D3. **`forget(text)` removes a text's translations** (mine, 2026-11-07; option C
     it when a job or message is deleted or edited. Rejected: keeping translations forever
     (A, as in the plan); deleting rows unused for N days (B: Render's free plan has no cron,
     the command would be run by hand). Costs: two jobs with the same text share rows, so
-    forgetting one makes the other translate again — a few hundredths of a cent.
+    forgetting one makes the other translate again — a few hundredths of a cent. Done for
+    jobs in #32 (job-translation.md D12) and for application messages in #33
+    (application-translation.md D7); chat messages: #36.
 D4. **`claude-haiku-5-5` without thinking** (Claude's default, accepted): $0.10 / $0.50 per
     million input / output tokens against $1 / $5 for `claude-haiku-4-5` in the plan, and 4
     times the requests per minute. A translation needs no reasoning, and thinking tokens are
@@ -145,7 +147,9 @@ D7. **Empty text is not translated** (Claude's default, accepted): no call and n
     nothing.
 D8. **Only our 7 languages as targets; the source language is detected by Claude**
     (Claude's default, accepted): authors write in any language; a text already in the
-    target language comes back unchanged.
+    target language comes back unchanged. Changed by #32 (job-translation.md D8, D11): the
+    language is detected once when the text is saved, and a text in the reader's language is
+    not sent at all; #33 does the same for application messages.
 D9. **The user's text is data, not instructions** (Claude's default, accepted): it goes inside
     `<text>` tags and the prompt says so. If the model still follows an instruction inside,
     only the author's own text is shown changed. The translation is shown through Django's

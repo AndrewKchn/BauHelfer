@@ -1,6 +1,19 @@
 # BauHelfer translations (#29). Edit msgstr here, then run compilemessages.
 msgid ""
-msgstr "Project-Id-Version: BauHelfer\nReport-Msgid-Bugs-To: \nPOT-Creation-Date: 2026-11-07 02:18+0100\nPO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\nLast-Translator: FULL NAME <EMAIL@ADDRESS>\nLanguage-Team: LANGUAGE <LL@li.org>\nLanguage: ru\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
+msgstr ""
+"Project-Id-Version: BauHelfer\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-07 02:18+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
+"(n%100>=11 && n%100<=14)? 2 : 3);\n"
 
 #: accounts/admin.py
 msgid "Profile"
@@ -32,16 +45,23 @@ msgid "Email"
 msgstr "Email"
 
 #: accounts/forms.py
-msgid "Optional. Shown only to the people you work with, until the day of the job is over."
-msgstr "Необязательно. Видят только те, с кем вы работаете, и только до конца дня работы."
+msgid ""
+"Optional. Shown only to the people you work with, until the day of the job "
+"is over."
+msgstr ""
+"Необязательно. Видят только те, с кем вы работаете, и только до конца дня "
+"работы."
 
 #: accounts/forms.py
 msgid "I am allowed to work in Germany"
 msgstr "У меня есть право работать в Германии"
 
 #: accounts/forms.py
-msgid "For example as an EU citizen, or with a residence permit that allows work."
-msgstr "Например, как гражданин ЕС или с видом на жительство, который разрешает работу."
+msgid ""
+"For example as an EU citizen, or with a residence permit that allows work."
+msgstr ""
+"Например, как гражданин ЕС или с видом на жительство, который разрешает "
+"работу."
 
 #: accounts/forms.py templates/accounts/_worker_profile_card.html
 msgid "Skills"
@@ -96,7 +116,9 @@ msgid "email notifications"
 msgstr "уведомления по email"
 
 #: accounts/models.py
-msgid "New applications and decisions on applications. Emails about your password are always sent."
+msgid ""
+"New applications and decisions on applications. Emails about your password "
+"are always sent."
 msgstr "Новые заявки и решения по заявкам. Письма о пароле приходят всегда."
 
 #: accounts/models.py
@@ -349,16 +371,25 @@ msgid "email verification required"
 msgstr "требуется подтверждение email"
 
 #: accounts/models.py
-msgid "Off: a new account is active and logged in at once, with no confirmation email, e.g. for a demo. Its address stays unconfirmed, so it gets no emails."
-msgstr "Выключено: новый аккаунт сразу активен и вход выполнен, без письма для подтверждения, например для демонстрации. Его адрес остаётся неподтверждённым, поэтому писем он не получает."
+msgid ""
+"Off: a new account is active and logged in at once, with no confirmation "
+"email, e.g. for a demo. Its address stays unconfirmed, so it gets no emails."
+msgstr ""
+"Выключено: новый аккаунт сразу активен и вход выполнен, без письма для "
+"подтверждения, например для демонстрации. Его адрес остаётся "
+"неподтверждённым, поэтому писем он не получает."
 
 #: accounts/models.py
 msgid "site settings"
 msgstr "настройки сайта"
 
 #: accounts/validators.py
-msgid "Enter the number with a country code, e.g. +49 151 12345678, or with an area code, e.g. 0151 12345678."
-msgstr "Введите номер с кодом страны, например +49 151 12345678, или с кодом города, например 0151 12345678."
+msgid ""
+"Enter the number with a country code, e.g. +49 151 12345678, or with an area "
+"code, e.g. 0151 12345678."
+msgstr ""
+"Введите номер с кодом страны, например +49 151 12345678, или с кодом города, "
+"например 0151 12345678."
 
 #: accounts/views.py
 msgid "Welcome to BauHelfer! Your account is ready."
@@ -377,7 +408,8 @@ msgid "Hourly rate, €"
 msgstr "Ставка в час, €"
 
 #: jobs/forms.py
-msgid "Write in your language, up to 1000 characters. Workers read it in theirs."
+msgid ""
+"Write in your language, up to 1000 characters. Workers read it in theirs."
 msgstr "Пишите на своём языке, до 1000 символов. Рабочие прочитают на своём."
 
 #: jobs/forms.py
@@ -926,12 +958,24 @@ msgstr "Здравствуйте!"
 
 #: templates/emails/application_accepted_body.txt
 #, python-format
-msgid "The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: %(counter)s worker."
-msgid_plural "The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: %(counter)s workers."
-msgstr[0] "Работодатель принял вас на работу «%(job_type)s», %(date)s, начало в %(time)s: %(counter)s рабочий."
-msgstr[1] "Работодатель принял вас на работу «%(job_type)s», %(date)s, начало в %(time)s: %(counter)s рабочих."
-msgstr[2] "Работодатель принял вас на работу «%(job_type)s», %(date)s, начало в %(time)s: %(counter)s рабочих."
-msgstr[3] "Работодатель принял вас на работу «%(job_type)s», %(date)s, начало в %(time)s: %(counter)s рабочего."
+msgid ""
+"The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: "
+"%(counter)s worker."
+msgid_plural ""
+"The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: "
+"%(counter)s workers."
+msgstr[0] ""
+"Работодатель принял вас на работу «%(job_type)s», %(date)s, начало в "
+"%(time)s: %(counter)s рабочий."
+msgstr[1] ""
+"Работодатель принял вас на работу «%(job_type)s», %(date)s, начало в "
+"%(time)s: %(counter)s рабочих."
+msgstr[2] ""
+"Работодатель принял вас на работу «%(job_type)s», %(date)s, начало в "
+"%(time)s: %(counter)s рабочих."
+msgstr[3] ""
+"Работодатель принял вас на работу «%(job_type)s», %(date)s, начало в "
+"%(time)s: %(counter)s рабочего."
 
 #: templates/emails/application_accepted_body.txt
 msgid "The employer's contact and the address are on “My applications”:"
@@ -944,7 +988,8 @@ msgstr "Вас приняли: %(job_type)s, %(date)s"
 
 #: templates/emails/application_rejected_body.txt
 #, python-format
-msgid "The employer did not accept your application for %(job_type)s, %(date)s."
+msgid ""
+"The employer did not accept your application for %(job_type)s, %(date)s."
 msgstr "Работодатель не принял вашу заявку: %(job_type)s, %(date)s."
 
 #: templates/emails/application_rejected_body.txt
@@ -958,12 +1003,24 @@ msgstr "Заявка не принята: %(job_type)s, %(date)s"
 
 #: templates/emails/new_application_body.txt
 #, python-format
-msgid "%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s worker."
-msgid_plural "%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s workers."
-msgstr[0] "Новая заявка от %(name)s на вашу вакансию «%(job_type)s», %(date)s: %(counter)s рабочий."
-msgstr[1] "Новая заявка от %(name)s на вашу вакансию «%(job_type)s», %(date)s: %(counter)s рабочих."
-msgstr[2] "Новая заявка от %(name)s на вашу вакансию «%(job_type)s», %(date)s: %(counter)s рабочих."
-msgstr[3] "Новая заявка от %(name)s на вашу вакансию «%(job_type)s», %(date)s: %(counter)s рабочего."
+msgid ""
+"%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s "
+"worker."
+msgid_plural ""
+"%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s "
+"workers."
+msgstr[0] ""
+"Новая заявка от %(name)s на вашу вакансию «%(job_type)s», %(date)s: "
+"%(counter)s рабочий."
+msgstr[1] ""
+"Новая заявка от %(name)s на вашу вакансию «%(job_type)s», %(date)s: "
+"%(counter)s рабочих."
+msgstr[2] ""
+"Новая заявка от %(name)s на вашу вакансию «%(job_type)s», %(date)s: "
+"%(counter)s рабочих."
+msgstr[3] ""
+"Новая заявка от %(name)s на вашу вакансию «%(job_type)s», %(date)s: "
+"%(counter)s рабочего."
 
 #: templates/emails/new_application_body.txt
 msgid "Accept or reject the application here:"
@@ -975,8 +1032,12 @@ msgid "New application: %(job_type)s, %(date)s"
 msgstr "Новая заявка: %(job_type)s, %(date)s"
 
 #: templates/emails/verify_email_body.txt
-msgid "Someone created a BauHelfer account with this email address. Open this link to confirm the address and activate the account:"
-msgstr "Кто-то создал аккаунт BauHelfer с этим адресом email. Откройте ссылку, чтобы подтвердить адрес и активировать аккаунт:"
+msgid ""
+"Someone created a BauHelfer account with this email address. Open this link "
+"to confirm the address and activate the account:"
+msgstr ""
+"Кто-то создал аккаунт BauHelfer с этим адресом email. Откройте ссылку, чтобы "
+"подтвердить адрес и активировать аккаунт:"
 
 #: templates/emails/verify_email_body.txt
 #, python-format
@@ -988,8 +1049,12 @@ msgstr[2] "Ссылка работает один раз и %(counter)s дней
 msgstr[3] "Ссылка работает один раз и %(counter)s дня."
 
 #: templates/emails/verify_email_body.txt
-msgid "If you did not create an account, ignore this email: without the link nothing happens."
-msgstr "Если вы не создавали аккаунт, просто проигнорируйте это письмо: без перехода по ссылке ничего не произойдёт."
+msgid ""
+"If you did not create an account, ignore this email: without the link "
+"nothing happens."
+msgstr ""
+"Если вы не создавали аккаунт, просто проигнорируйте это письмо: без перехода "
+"по ссылке ничего не произойдёт."
 
 #: templates/emails/verify_email_subject.txt
 msgid "Confirm your email for BauHelfer"
@@ -1260,7 +1325,9 @@ msgstr "Отклонить"
 
 #: templates/jobs/job_detail.html
 msgid "Accepting fills the job: the other pending applications will be closed."
-msgstr "Если принять, вакансия будет набрана, а остальные заявки на рассмотрении закроются."
+msgstr ""
+"Если принять, вакансия будет набрана, а остальные заявки на рассмотрении "
+"закроются."
 
 #: templates/jobs/job_detail.html
 msgid "No applications yet."
@@ -1430,19 +1497,29 @@ msgid "Check your email"
 msgstr "Проверьте почту"
 
 #: templates/registration/password_reset_done.html
-msgid "If an account with this email exists, we have sent a link to set a new password. Check your spam folder too."
-msgstr "Если аккаунт с этим email существует, мы отправили ссылку для нового пароля. Проверьте и папку «Спам»."
+msgid ""
+"If an account with this email exists, we have sent a link to set a new "
+"password. Check your spam folder too."
+msgstr ""
+"Если аккаунт с этим email существует, мы отправили ссылку для нового пароля. "
+"Проверьте и папку «Спам»."
 
 #: templates/registration/password_reset_email.txt
-msgid "Someone asked to reset the password for your BauHelfer account. Open this link to set a new password:"
-msgstr "Кто-то запросил сброс пароля для вашего аккаунта BauHelfer. Откройте ссылку, чтобы задать новый пароль:"
+msgid ""
+"Someone asked to reset the password for your BauHelfer account. Open this "
+"link to set a new password:"
+msgstr ""
+"Кто-то запросил сброс пароля для вашего аккаунта BauHelfer. Откройте ссылку, "
+"чтобы задать новый пароль:"
 
 #: templates/registration/password_reset_email.txt
 msgid "If it was not you, ignore this email: your password stays the same."
 msgstr "Если это были не вы, проигнорируйте письмо: пароль останется прежним."
 
 #: templates/registration/password_reset_form.html
-msgid "Enter the email of your account. We will send you a link to set a new password."
+msgid ""
+"Enter the email of your account. We will send you a link to set a new "
+"password."
 msgstr "Введите email вашего аккаунта. Мы отправим ссылку для нового пароля."
 
 #: templates/registration/password_reset_form.html
@@ -1498,16 +1575,24 @@ msgid "Press the button to confirm your address and activate your account."
 msgstr "Нажмите кнопку, чтобы подтвердить адрес и активировать аккаунт."
 
 #: templates/registration/verify_email.html
-msgid "This link is invalid or has expired. It works only once: if you already confirmed your email, just log in."
-msgstr "Эта ссылка недействительна или устарела. Она работает только один раз: если вы уже подтвердили email, просто войдите."
+msgid ""
+"This link is invalid or has expired. It works only once: if you already "
+"confirmed your email, just log in."
+msgstr ""
+"Эта ссылка недействительна или устарела. Она работает только один раз: если "
+"вы уже подтвердили email, просто войдите."
 
 #: templates/registration/verify_email_resend.html
 msgid "Enter the email you signed up with. We send a new link to confirm it."
-msgstr "Введите email, с которым вы регистрировались. Мы отправим новую ссылку для подтверждения."
+msgstr ""
+"Введите email, с которым вы регистрировались. Мы отправим новую ссылку для "
+"подтверждения."
 
 #: templates/registration/verify_email_resend_done.html
 msgid "If an unconfirmed account uses this address, we sent a new link."
-msgstr "Если этот адрес принадлежит неподтверждённому аккаунту, мы отправили новую ссылку."
+msgstr ""
+"Если этот адрес принадлежит неподтверждённому аккаунту, мы отправили новую "
+"ссылку."
 
 #: templates/registration/verify_email_resend_done.html
 msgid "A new link can be sent once every 10 minutes."

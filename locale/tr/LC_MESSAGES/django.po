@@ -1,6 +1,17 @@
 # BauHelfer translations (#29). Edit msgstr here, then run compilemessages.
 msgid ""
-msgstr "Project-Id-Version: BauHelfer\nReport-Msgid-Bugs-To: \nPOT-Creation-Date: 2026-11-07 02:18+0100\nPO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\nLast-Translator: FULL NAME <EMAIL@ADDRESS>\nLanguage-Team: LANGUAGE <LL@li.org>\nLanguage: tr\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=(n > 1);\n"
+msgstr ""
+"Project-Id-Version: BauHelfer\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-07 02:18+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: tr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: accounts/admin.py
 msgid "Profile"
@@ -24,7 +35,9 @@ msgstr "E-posta veya şifre yanlış."
 
 #: accounts/forms.py
 msgid "Please confirm your email first. We sent you a link when you signed up."
-msgstr "Lütfen önce e-postanızı onaylayın. Kayıt olduğunuzda size bir bağlantı gönderdik."
+msgstr ""
+"Lütfen önce e-postanızı onaylayın. Kayıt olduğunuzda size bir bağlantı "
+"gönderdik."
 
 #: accounts/forms.py templates/accounts/employer_profile.html
 #: templates/accounts/worker_profile.html
@@ -32,16 +45,22 @@ msgid "Email"
 msgstr "E-posta"
 
 #: accounts/forms.py
-msgid "Optional. Shown only to the people you work with, until the day of the job is over."
-msgstr "İsteğe bağlı. Yalnızca birlikte çalıştığınız kişilere, iş günü bitene kadar gösterilir."
+msgid ""
+"Optional. Shown only to the people you work with, until the day of the job "
+"is over."
+msgstr ""
+"İsteğe bağlı. Yalnızca birlikte çalıştığınız kişilere, iş günü bitene kadar "
+"gösterilir."
 
 #: accounts/forms.py
 msgid "I am allowed to work in Germany"
 msgstr "Almanya'da çalışma hakkım var"
 
 #: accounts/forms.py
-msgid "For example as an EU citizen, or with a residence permit that allows work."
-msgstr "Örneğin AB vatandaşı olarak veya çalışmaya izin veren bir oturma izniyle."
+msgid ""
+"For example as an EU citizen, or with a residence permit that allows work."
+msgstr ""
+"Örneğin AB vatandaşı olarak veya çalışmaya izin veren bir oturma izniyle."
 
 #: accounts/forms.py templates/accounts/_worker_profile_card.html
 msgid "Skills"
@@ -96,8 +115,12 @@ msgid "email notifications"
 msgstr "e-posta bildirimleri"
 
 #: accounts/models.py
-msgid "New applications and decisions on applications. Emails about your password are always sent."
-msgstr "Yeni başvurular ve başvurularla ilgili kararlar. Şifrenizle ilgili e-postalar her zaman gönderilir."
+msgid ""
+"New applications and decisions on applications. Emails about your password "
+"are always sent."
+msgstr ""
+"Yeni başvurular ve başvurularla ilgili kararlar. Şifrenizle ilgili e-"
+"postalar her zaman gönderilir."
 
 #: accounts/models.py
 msgid "email confirmed at"
@@ -347,16 +370,24 @@ msgid "email verification required"
 msgstr "e-posta doğrulaması gerekli"
 
 #: accounts/models.py
-msgid "Off: a new account is active and logged in at once, with no confirmation email, e.g. for a demo. Its address stays unconfirmed, so it gets no emails."
-msgstr "Kapalı: yeni hesap onay e-postası olmadan hemen etkinleşir ve oturum açılır, örneğin bir demo için. Adresi onaylanmamış kalır, bu yüzden e-posta almaz."
+msgid ""
+"Off: a new account is active and logged in at once, with no confirmation "
+"email, e.g. for a demo. Its address stays unconfirmed, so it gets no emails."
+msgstr ""
+"Kapalı: yeni hesap onay e-postası olmadan hemen etkinleşir ve oturum açılır, "
+"örneğin bir demo için. Adresi onaylanmamış kalır, bu yüzden e-posta almaz."
 
 #: accounts/models.py
 msgid "site settings"
 msgstr "site ayarları"
 
 #: accounts/validators.py
-msgid "Enter the number with a country code, e.g. +49 151 12345678, or with an area code, e.g. 0151 12345678."
-msgstr "Numarayı ülke koduyla, örneğin +49 151 12345678, veya alan koduyla, örneğin 0151 12345678, girin."
+msgid ""
+"Enter the number with a country code, e.g. +49 151 12345678, or with an area "
+"code, e.g. 0151 12345678."
+msgstr ""
+"Numarayı ülke koduyla, örneğin +49 151 12345678, veya alan koduyla, örneğin "
+"0151 12345678, girin."
 
 #: accounts/views.py
 msgid "Welcome to BauHelfer! Your account is ready."
@@ -375,8 +406,10 @@ msgid "Hourly rate, €"
 msgstr "Saatlik ücret, €"
 
 #: jobs/forms.py
-msgid "Write in your language, up to 1000 characters. Workers read it in theirs."
-msgstr "Kendi dilinizde yazın, en fazla 1000 karakter. İşçiler kendi dillerinde okur."
+msgid ""
+"Write in your language, up to 1000 characters. Workers read it in theirs."
+msgstr ""
+"Kendi dilinizde yazın, en fazla 1000 karakter. İşçiler kendi dillerinde okur."
 
 #: jobs/forms.py
 msgid "The date cannot be in the past."
@@ -918,10 +951,18 @@ msgstr "Merhaba,"
 
 #: templates/emails/application_accepted_body.txt
 #, python-format
-msgid "The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: %(counter)s worker."
-msgid_plural "The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: %(counter)s workers."
-msgstr[0] "İşveren sizi kabul etti. İş: %(job_type)s, %(date)s, başlangıç saati %(time)s, %(counter)s işçi."
-msgstr[1] "İşveren sizi kabul etti. İş: %(job_type)s, %(date)s, başlangıç saati %(time)s, %(counter)s işçi."
+msgid ""
+"The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: "
+"%(counter)s worker."
+msgid_plural ""
+"The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: "
+"%(counter)s workers."
+msgstr[0] ""
+"İşveren sizi kabul etti. İş: %(job_type)s, %(date)s, başlangıç saati "
+"%(time)s, %(counter)s işçi."
+msgstr[1] ""
+"İşveren sizi kabul etti. İş: %(job_type)s, %(date)s, başlangıç saati "
+"%(time)s, %(counter)s işçi."
 
 #: templates/emails/application_accepted_body.txt
 msgid "The employer's contact and the address are on “My applications”:"
@@ -934,7 +975,8 @@ msgstr "Kabul edildiniz: %(job_type)s, %(date)s"
 
 #: templates/emails/application_rejected_body.txt
 #, python-format
-msgid "The employer did not accept your application for %(job_type)s, %(date)s."
+msgid ""
+"The employer did not accept your application for %(job_type)s, %(date)s."
 msgstr "İşveren başvurunuzu kabul etmedi. İş: %(job_type)s, %(date)s."
 
 #: templates/emails/application_rejected_body.txt
@@ -948,10 +990,16 @@ msgstr "Başvuru kabul edilmedi: %(job_type)s, %(date)s"
 
 #: templates/emails/new_application_body.txt
 #, python-format
-msgid "%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s worker."
-msgid_plural "%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s workers."
-msgstr[0] "Yeni başvuru: %(name)s. İlanınız: %(job_type)s, %(date)s, %(counter)s işçi."
-msgstr[1] "Yeni başvuru: %(name)s. İlanınız: %(job_type)s, %(date)s, %(counter)s işçi."
+msgid ""
+"%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s "
+"worker."
+msgid_plural ""
+"%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s "
+"workers."
+msgstr[0] ""
+"Yeni başvuru: %(name)s. İlanınız: %(job_type)s, %(date)s, %(counter)s işçi."
+msgstr[1] ""
+"Yeni başvuru: %(name)s. İlanınız: %(job_type)s, %(date)s, %(counter)s işçi."
 
 #: templates/emails/new_application_body.txt
 msgid "Accept or reject the application here:"
@@ -963,8 +1011,12 @@ msgid "New application: %(job_type)s, %(date)s"
 msgstr "Yeni başvuru: %(job_type)s, %(date)s"
 
 #: templates/emails/verify_email_body.txt
-msgid "Someone created a BauHelfer account with this email address. Open this link to confirm the address and activate the account:"
-msgstr "Birisi bu e-posta adresiyle bir BauHelfer hesabı oluşturdu. Adresi onaylamak ve hesabı etkinleştirmek için bu bağlantıyı açın:"
+msgid ""
+"Someone created a BauHelfer account with this email address. Open this link "
+"to confirm the address and activate the account:"
+msgstr ""
+"Birisi bu e-posta adresiyle bir BauHelfer hesabı oluşturdu. Adresi onaylamak "
+"ve hesabı etkinleştirmek için bu bağlantıyı açın:"
 
 #: templates/emails/verify_email_body.txt
 #, python-format
@@ -974,8 +1026,12 @@ msgstr[0] "Bağlantı bir kez ve %(counter)s gün geçerlidir."
 msgstr[1] "Bağlantı bir kez ve %(counter)s gün geçerlidir."
 
 #: templates/emails/verify_email_body.txt
-msgid "If you did not create an account, ignore this email: without the link nothing happens."
-msgstr "Bir hesap oluşturmadıysanız bu e-postayı dikkate almayın: bağlantı açılmazsa hiçbir şey olmaz."
+msgid ""
+"If you did not create an account, ignore this email: without the link "
+"nothing happens."
+msgstr ""
+"Bir hesap oluşturmadıysanız bu e-postayı dikkate almayın: bağlantı açılmazsa "
+"hiçbir şey olmaz."
 
 #: templates/emails/verify_email_subject.txt
 msgid "Confirm your email for BauHelfer"
@@ -1390,7 +1446,9 @@ msgstr "Bağlantı geçersiz"
 
 #: templates/registration/password_reset_confirm.html
 msgid "This link was already used or has expired. Please ask for a new one."
-msgstr "Bu bağlantı zaten kullanılmış veya süresi dolmuş. Lütfen yeni bir bağlantı isteyin."
+msgstr ""
+"Bu bağlantı zaten kullanılmış veya süresi dolmuş. Lütfen yeni bir bağlantı "
+"isteyin."
 
 #: templates/registration/password_reset_confirm.html
 #: templates/registration/password_reset_form.html
@@ -1404,20 +1462,32 @@ msgid "Check your email"
 msgstr "E-postanızı kontrol edin"
 
 #: templates/registration/password_reset_done.html
-msgid "If an account with this email exists, we have sent a link to set a new password. Check your spam folder too."
-msgstr "Bu e-postayla bir hesap varsa, yeni şifre belirlemek için bir bağlantı gönderdik. İstenmeyen e-posta klasörünü de kontrol edin."
+msgid ""
+"If an account with this email exists, we have sent a link to set a new "
+"password. Check your spam folder too."
+msgstr ""
+"Bu e-postayla bir hesap varsa, yeni şifre belirlemek için bir bağlantı "
+"gönderdik. İstenmeyen e-posta klasörünü de kontrol edin."
 
 #: templates/registration/password_reset_email.txt
-msgid "Someone asked to reset the password for your BauHelfer account. Open this link to set a new password:"
-msgstr "Birisi BauHelfer hesabınızın şifresini sıfırlamak istedi. Yeni şifre belirlemek için bu bağlantıyı açın:"
+msgid ""
+"Someone asked to reset the password for your BauHelfer account. Open this "
+"link to set a new password:"
+msgstr ""
+"Birisi BauHelfer hesabınızın şifresini sıfırlamak istedi. Yeni şifre "
+"belirlemek için bu bağlantıyı açın:"
 
 #: templates/registration/password_reset_email.txt
 msgid "If it was not you, ignore this email: your password stays the same."
 msgstr "Bu siz değilseniz bu e-postayı dikkate almayın: şifreniz aynı kalır."
 
 #: templates/registration/password_reset_form.html
-msgid "Enter the email of your account. We will send you a link to set a new password."
-msgstr "Hesabınızın e-postasını girin. Yeni şifre belirlemeniz için size bir bağlantı göndereceğiz."
+msgid ""
+"Enter the email of your account. We will send you a link to set a new "
+"password."
+msgstr ""
+"Hesabınızın e-postasını girin. Yeni şifre belirlemeniz için size bir "
+"bağlantı göndereceğiz."
 
 #: templates/registration/password_reset_form.html
 msgid "Send link"
@@ -1438,7 +1508,9 @@ msgstr "Zaten hesabınız var mı?"
 #: templates/registration/register_done.html
 #, python-format
 msgid "We sent a link to <strong class=\"break-all\">%(email)s</strong>."
-msgstr "Bağlantıyı şu adrese gönderdik: <strong class=\"break-all\">%(email)s</strong>."
+msgstr ""
+"Bağlantıyı şu adrese gönderdik: <strong class=\"break-all\">%(email)s</"
+"strong>."
 
 #: templates/registration/register_done.html
 msgid "We sent a link to your email address."
@@ -1472,16 +1544,23 @@ msgid "Press the button to confirm your address and activate your account."
 msgstr "Adresinizi onaylamak ve hesabınızı etkinleştirmek için düğmeye basın."
 
 #: templates/registration/verify_email.html
-msgid "This link is invalid or has expired. It works only once: if you already confirmed your email, just log in."
-msgstr "Bu bağlantı geçersiz veya süresi dolmuş. Yalnızca bir kez çalışır: e-postanızı zaten onayladıysanız giriş yapmanız yeterli."
+msgid ""
+"This link is invalid or has expired. It works only once: if you already "
+"confirmed your email, just log in."
+msgstr ""
+"Bu bağlantı geçersiz veya süresi dolmuş. Yalnızca bir kez çalışır: e-"
+"postanızı zaten onayladıysanız giriş yapmanız yeterli."
 
 #: templates/registration/verify_email_resend.html
 msgid "Enter the email you signed up with. We send a new link to confirm it."
-msgstr "Kayıt olduğunuz e-postayı girin. Onaylamanız için yeni bir bağlantı göndeririz."
+msgstr ""
+"Kayıt olduğunuz e-postayı girin. Onaylamanız için yeni bir bağlantı "
+"göndeririz."
 
 #: templates/registration/verify_email_resend_done.html
 msgid "If an unconfirmed account uses this address, we sent a new link."
-msgstr "Bu adresi onaylanmamış bir hesap kullanıyorsa yeni bir bağlantı gönderdik."
+msgstr ""
+"Bu adresi onaylanmamış bir hesap kullanıyorsa yeni bir bağlantı gönderdik."
 
 #: templates/registration/verify_email_resend_done.html
 msgid "A new link can be sent once every 10 minutes."

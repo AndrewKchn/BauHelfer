@@ -35,6 +35,12 @@ In [accounts/models.py](../accounts/models.py) and [jobs/models.py](../jobs/mode
 - **Application (#22):** the job, the worker, a free-text message (≤ 500 characters; it may
   hold a phone number or a name), how many workers were offered and accepted, the status.
   Deleted with the job or the account (`CASCADE`); the data export (#44) has to include it.
+- **Translations (#31–#33):** the cache keeps the SHA-256 of a job description or application
+  message, not the text, but the translation itself can hold the same names and phone
+  numbers. Deleted with its job or application, see [Translation](#translation-3134).
+- **Language cookie (#29):** `django_language`, only the chosen language code (`ru`), set only
+  when someone presses a language in the switcher; Django's default lifetime (until the browser
+  is closed). Strictly necessary for a function the user asked for, so no consent is needed.
 
 The phone is checked for a callable format: `+` and a country code or `0` and a German area
 code, 10–15 digits (`validate_phone` in [accounts/validators.py](../accounts/validators.py),
@@ -45,7 +51,8 @@ used on `User.phone`, so the profile forms and the admin both check it; tests in
 
 Everything is stored in the EU, see [Hosting](#hosting-and-secrets). Emails go out through
 Brevo (France, EU), which receives each recipient's address and name, the job type and the
-date, see [Email](#email-and-address-confirmation-27-81).
+date, see [Email](#email-and-address-confirmation-27-81). Job descriptions and application
+messages are sent to Anthropic in the US for translation, see [Translation](#translation-3134).
 
 ## Accounts (#9)
 
@@ -135,6 +142,30 @@ Everything goes to stdout, which Render shows in its Logs tab (`LOGGING` in
 | Server errors reach the logs | Django prints a 500 with its traceback only with DEBUG on; our `LOGGING` sends it to stdout with DEBUG off too, once | `LOGGING` in [base.py](../config/settings/base.py) | `test_server_error_is_printed_to_stdout_with_debug_off`, `test_server_error_is_printed_once_with_debug_on`, `test_local_settings_do_not_change_the_production_levels` in [tests/test_logging.py](../tests/test_logging.py) |
 | Request lines without personal data | gunicorn's access log is off (its default line starts with the visitor's IP). Our own line: method, path without the query string, status and time — no IP, no User-Agent, no Referer. The password reset link is logged as its URL pattern `/accounts/reset/<uidb64>/<token>/`, also when another middleware answers first. Render's health check and static files are not logged | `GUNICORN_CMD_ARGS` in [render.yaml](../render.yaml), `RequestLogMiddleware` in [config/middleware.py](../config/middleware.py) (production only); `docs/specs/request-logging.md` | `test_render_starts_gunicorn_without_an_access_log` in [tests/test_request_logging_setup.py](../tests/test_request_logging_setup.py); `test_password_reset_link_is_logged_without_uid_and_token`, `test_reset_link_is_hidden_when_a_middleware_answers_first`, `test_user_agent_and_referer_are_not_logged`, `test_query_string_is_not_logged`, `test_render_health_check_is_not_logged` in [tests/test_request_logging.py](../tests/test_request_logging.py) |
 
+## Language (#29)
+
+| Protection | How | Code | Tests |
+|---|---|---|---|
+| The switcher changes only the language | POST only with the CSRF token; Django's `set_language` refuses a `next` on another site (no open redirect), and an unknown language code changes nothing. Since the switcher is a form on every page, guests now get the `csrftoken` cookie on every page | `LanguageView` in [accounts/views.py](../accounts/views.py); `docs/specs/i18n.md` D8 | `test_next_to_another_site_goes_home`, `test_switching_needs_a_post`, `test_unknown_language_changes_nothing` in [test_language_views.py](../accounts/tests/test_language_views.py) |
+| A logged-in user's language is in the profile, not only in the cookie | `preferred_language` can now be changed on the site (before only in the admin); signup stores the language in use; the profile wins over the cookie, so site and emails speak the same language on every device | `UserLanguageMiddleware` in [accounts/middleware.py](../accounts/middleware.py); `docs/specs/i18n.md` D1, D3 | `test_logged_in_switch_is_saved_in_the_profile`, `test_profile_language_wins_over_the_cookie` in [test_language_views.py](../accounts/tests/test_language_views.py); `test_middleware_switches_to_the_profile_language` in [test_language.py](../accounts/tests/test_language.py) |
+
+## Translation (#31–#34)
+
+Job descriptions (#32) and application messages (#33) are translated by the Claude API
+(Anthropic). Specs: `docs/specs/ai-translation.md`, `job-translation.md`,
+`application-translation.md`.
+
+| Protection | How | Code | Tests |
+|---|---|---|---|
+| Only the text leaves, to one processor | Anthropic gets the text and nothing else: no email, name or id. When it leaves: a job description when it is saved (its language is detected, D11 of job-translation.md) and when a reader in another language opens the job; an application message when it is sent (detected and translated into the employer's language at once). Anthropic does not train on API data — a contract term, Commercial Terms section B "Customer Content" (<https://www.anthropic.com/legal/commercial-terms>), and the Privacy Center (<https://privacy.claude.com/en/articles/7996868-is-my-data-used-for-model-training>; the exceptions are feedback buttons and an opt-in, which we do not use); deleted within 30 days (up to 2 years if flagged for a policy violation). Both checked on 2026-11-10 | [translations/backends/claude.py](../translations/backends/claude.py), `JobApplyView` in [jobs/views.py](../jobs/views.py) | `test_users_text_is_data_inside_text_tags` in [test_claude_backend.py](../translations/tests/test_claude_backend.py) |
+| The cache keeps no source text | A row is the SHA-256 of the source + language → translation | `Translation` in [translations/models.py](../translations/models.py) | `test_row_stores_the_hash_not_the_source_text` in [test_services.py](../translations/tests/test_services.py) |
+| Translations do not outlive their text | Deleting a job, an application or the account (`CASCADE`) deletes the cached translations of its text; editing a description deletes those of the old text. Application messages are never edited | `forget` in [translations/services.py](../translations/services.py); `forget_description`, `forget_message` in [jobs/models.py](../jobs/models.py); `JobEditView` in [jobs/views.py](../jobs/views.py) | `test_deleting_a_job_forgets_its_translations`, `test_deleting_the_employer_forgets_the_translations` in [test_descriptions.py](../jobs/tests/test_descriptions.py); `test_new_description_forgets_the_old_translations` in [test_job_translation_views.py](../jobs/tests/test_job_translation_views.py); `test_deleting_forgets_the_translations_of_the_message` in [test_application_translation.py](../jobs/tests/test_application_translation.py) |
+| Logs never hold the text | The log line of a call, a failure or a skip has the language, a 12-character hash prefix, the token counts or the error class | [translations/services.py](../translations/services.py), [translations/backends/claude.py](../translations/backends/claude.py) | `test_each_call_is_logged_without_the_text` in [test_claude_backend.py](../translations/tests/test_claude_backend.py) and [test_claude_detect.py](../translations/tests/test_claude_detect.py); `test_failure_is_logged_without_the_text` in [test_errors_and_limits.py](../translations/tests/test_errors_and_limits.py) |
+| A prompt injection changes only the author's own translation | The text goes inside `<text>` tags and the prompt says it is data (ai-translation.md D9) | [translations/backends/claude.py](../translations/backends/claude.py) | `test_users_text_is_data_inside_text_tags` in [test_claude_backend.py](../translations/tests/test_claude_backend.py) |
+| A failing API never breaks a page | Network, timeout, 429, 529, a bad key or no credit: the reader gets the original with "Translation is not available right now", and nothing is cached (ai-translation.md D15) | `translate` in [translations/services.py](../translations/services.py) | `test_failed_translation_gives_the_original`, `test_failed_translation_is_not_cached` in [test_errors_and_limits.py](../translations/tests/test_errors_and_limits.py) |
+| The cost is capped | Texts over 1000 characters are not sent (job descriptions are limited to 1000 in the form); at most 300 new translations in 24 hours for the whole site; client timeout 10 s, 1 retry, `max_tokens` 1500. Outside the code: a $3/month spend limit in the Anthropic Console, auto-reload off | [translations/services.py](../translations/services.py), [translations/backends/claude.py](../translations/backends/claude.py) | `test_text_of_1001_characters_is_not_sent`, `test_new_text_is_not_sent_after_300_today`, `test_limits_are_1000_characters_and_300_a_day` in [test_errors_and_limits.py](../translations/tests/test_errors_and_limits.py); `test_description_of_1001_characters_is_refused` in [test_description_length.py](../jobs/tests/test_description_length.py) |
+| The key only on Render | `ANTHROPIC_API_KEY` lives only in Render's environment (`sync: false`); production does not start without it; locally and in tests the fake translator is used, so no text leaves the computer | [production.py](../config/settings/production.py), [render.yaml](../render.yaml) | `test_production_does_not_start_without_the_key`, `test_render_asks_for_the_key`, `test_local_settings_use_the_fake_translator` in [tests/test_translation_production.py](../tests/test_translation_production.py) |
+
 ## Django defaults we rely on
 
 Not tested separately, because they are Django's own behaviour and not our settings:
@@ -172,9 +203,10 @@ accepted on purpose, see [Known limitations](#known-limitations).
   [.gitignore](../.gitignore); [.env.example](../.env.example) has only placeholders. On Render
   the secret key is generated once by Render ([render.yaml](../render.yaml)); CI uses a dummy key
   ([ci.yml](../.github/workflows/ci.yml)).
-- **Data stays in the EU.** The web service runs on Render, the database and the job photos on
-  Supabase, all in Frankfurt ([render.yaml](../render.yaml)); emails go through Brevo in France
-  (#27).
+- **Data is stored in the EU.** The web service runs on Render, the database and the job photos
+  on Supabase, all in Frankfurt ([render.yaml](../render.yaml)); emails go through Brevo in
+  France (#27). The exception is translation: job descriptions and application messages are
+  processed by Anthropic in the US (#31), see [Known limitations](#known-limitations).
 - **Email key only on Render.** The Brevo key `bauhelfer-render` has only the "Transactional
   email" permission and lives only in Render's environment (`sync: false` in
   [render.yaml](../render.yaml)); production does not start without `BREVO_API_KEY` or
@@ -304,5 +336,22 @@ accepted on purpose, see [Known limitations](#known-limitations).
   D30).
 - **Cancelled and past jobs keep a public page** with district, date and description, and their
   photos stay until the job or the account is deleted. Revisit with data minimisation in M7.
+- **Translated texts leave the EU (#31–#34).** Job descriptions and application messages go to
+  Anthropic's API, which processes them in the US (no EU region). They can hold personal data,
+  e.g. a name and a phone number. Legal basis: Anthropic's Data Processing Addendum with the EU
+  Standard Contractual Clauses (GDPR Art. 46). Remaining risk: the contract does not stop US
+  authorities from requesting data from a US company (why the EU court struck down Privacy
+  Shield, Schrems II, 2020). What limits it: only the text is sent, no training, deleted within
+  30 days, at most 1000 characters and 300 new translations a day, no source text in our
+  database or logs (see [Translation](#translation-3134)). Missing before a real launch: the
+  privacy page must name Anthropic and the transfer to the US (GDPR Art. 13, #43); possibly an
+  EU-hosted translator (Claude on AWS Bedrock in Frankfurt, or DeepL). Not done now: a new
+  dependency and account, and the project has test data only.
+- **Translation details:** detecting a text's language is not counted in the daily limit of 300
+  (about $0.0001 each; the Console's spend limit still caps the month; job-translation.md D11).
+  Two texts that are the same (two jobs, or two "Hallo" messages) share their cached
+  translations, so deleting one forgets them for both (ai-translation.md D3). Applications sent
+  before #33 have no language and are translated for every reader (application-translation.md
+  D10).
 - **Only the phone format is checked:** "+49 (0)151 …" passes, though some phones cannot dial
   the "(0)". Decided not to add a rule for it.
