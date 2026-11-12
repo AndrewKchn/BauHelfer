@@ -2754,3 +2754,63 @@ translation).
 **Learned:**
 - How HTMX `hx-select` swaps one part of a normal page without a second view.
 - What a Django backend is and how a setting chooses it.
+
+## 2026-11-12 · #33 Auto-translate application messages
+
+**Task given to AI:** show application messages to the employer in their own language with
+the translation service of #31 / #34, with the label and "Show original" toggle of #32, one
+toggle per message. Following the ticket workflow, one decision at a time.
+
+**AI helped:** found that the only place an employer reads a message is the job page (emails
+carry no message text), compared it with the "My jobs" mockup and wrote
+`docs/specs/application-translation.md` (R1–R17, D1–D12) in three iterations. It moved the
+rule "who sees the original, who a translation" into `shown_text()`, which takes plain
+values, and the label with its toggle into one template, with the #32 tests still green. It
+added `Application.original_language` found when the message is sent, the translation into
+the employer's language at sending time, `translate_many()` (all cached messages in one
+query), `messages_for()`, a `post_delete` receiver that forgets a deleted message's
+translations, and `?original=<id>` that swaps only one message's block with HTMX. 31
+mutations, all caught after the fixes below. It took 360 px shots in both themes and clicked
+the toggle once in Playwright with a throwaway script (not committed). It explained the
+four layers with a diagram, what `ShownText` is and why it is frozen, and when a rule
+belongs in a model property and when in a function.
+
+**AI failed:**
+- Its first place for the rule was `translations/display.py`, inside the translator. My
+  question showed the translator would then decide for the pages.
+- Its own new unit test was flaky: `ShownText.label` is lazy and was translated into the
+  Polish an earlier test left active. It passed in the random order of the full run and was
+  found only by the mutation check in a fixed order. Fixed with `translation.override("en")`.
+- Its sending tests followed the redirect to the worker's page in Ukrainian, which
+  translated the job description: an extra call and a Ukrainian "Application sent.". Found
+  when they failed; fixed by not following the redirect.
+- A lambda in a loop read the loop variable when called (ruff B023); fixed with a default
+  argument.
+- A cache lookup without the language filter was not caught by any test: an employer could
+  have got a Polish translation. Found by a surviving mutation; a test was added.
+- It wrote 5 lines in `translate_many()` that only repeated what `translate()` and Django
+  already do. Found by surviving mutations; removed instead of tested.
+- A #23 test failed after the new field: an application without a language is now
+  translated (D10). Correct behaviour; the test got `original_language="en"`.
+- Moving the label strings made `makemessages` re-wrap every `.po` file; it changed only the
+  `#:` lines and put the entries where `makemessages` would, so CI saw no change.
+
+**My part:**
+- I chose to translate a message when it is sent, into the employer's language: "the worker
+  waits 2 s rather than the employer 16" (D1).
+- I chose one query for all messages: "of course one query", to keep the rule of #23 (D2).
+- I asked whether deciding what to show is the translator's job. It is not: the rule stays
+  in `jobs`, without models, and #36 reuses it with its own wrapper (D5). I also asked how
+  #36 will reuse it.
+- I asked to do the refactoring as its own first iteration (D11).
+- I asked why rename `Description` if nothing changes; after the answer (the change that
+  matters is the function without a model, the name is for the reader) I chose to rename
+  it (D12).
+- I accepted Claude's defaults D3, D4, D6–D10: they were small and repeated decisions of #32.
+- I checked every iteration by hand on `runserver`: the translated message, the label, the
+  toggle without a reload, `?original=abc`, and that deleting the worker removes the
+  translations.
+
+**Learned:**
+- What N+1 is and how one `__in` query avoids it.
+- Why a lazy translated string makes a test depend on the order of tests.
