@@ -162,6 +162,8 @@ D3. **"Past" is what is over and did not happen** (mine, 2026-10-31; option A): 
     filled job and an accepted application stay in their tabs: the work probably happened,
     and #37 marks it done from there. Rejected: everything past except cancelled (B: "Past"
     mixes the expired with what waits for "Done"). **Revisit when** #37 adds "Done".
+    **Changed by #37** (`docs/specs/job-done.md` D2): an open job with accepted workers that
+    is over waits in "Past" for "Mark as done".
 D4. **Withdrawing sets a status "Withdrawn"; the row stays** (mine, 2026-10-31): the employer
     sees that the worker left, and the worker cannot apply again. Rejected: deleting the row
     (the application disappears from the employer's page without a trace, and the worker
@@ -172,7 +174,8 @@ D5. **Every application that is still in play can be withdrawn: pending, "Job fi
 D6. **The employer gets a "Past" tab too, computed, without cron** (mine, 2026-10-31): a
     status changed at a set time needs a scheduled task (contacts.md D4); a tab chosen when
     the page is shown does not. Edit and cancel links are hidden there; the views still
-    accept a past open job. **Revisit when** #37 (posted to #96).
+    accept a past open job. **Revisit when** #37 (posted to #96). **Changed by #37**
+    (`docs/specs/job-done.md` D9): the views refuse it too.
 D7. **The order of the work: three iterations** (Claude's default, accepted): the worker's
     page first, since the other two build on it.
 D8. **`Job.is_over` is the one "the day is over" rule** (Claude's default, accepted):

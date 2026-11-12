@@ -221,7 +221,9 @@ D18. **Cancelling a job with accepted workers stays as it is** (Claude's default
      D7 left it to M4): only open jobs can be cancelled, filled ones not; the accepted
      workers are not told until #27. Raised in "Docs sync — M4" (#96). **Changed by #25**
      (`docs/specs/contacts.md` D3): cancelling a job now cancels its accepted applications.
-     A filled job still cannot be cancelled: revisit in #37.
+     A filled job still cannot be cancelled: revisit in #37. **Changed by #37**
+     (`docs/specs/job-done.md` D10): a filled job can be cancelled, and the workers get an
+     email.
 D19. **No bar on "My jobs"** (Claude's default): features before polish.
 D20. **Existing data is not migrated** (Claude's default): `workers_accepted` starts at 0;
      before this ticket nothing could accept an application except the admin.
