@@ -306,6 +306,17 @@ class Job(models.Model):
         found = self.workers_needed - self.places_left
         return found > 0 and self.has_ended
 
+    @property
+    def has_workers_to_rate(self):
+        """Whether the employer can still rate one of this job's workers (#38, reviews.md
+        R11a, D15): "Rate the workers" on "My jobs".
+
+        can_review() of each application decides, so the rules stay in one place. Reads
+        applications.all(): "My jobs" prefetches them with their reviews, so a card asks
+        no query (R12).
+        """
+        return any(a.can_review(self.employer) for a in self.applications.all())
+
     def mark_done(self):
         """Mark this job done (job-done.md R2); the applications keep their statuses.
 
@@ -663,6 +674,24 @@ class Application(models.Model):
             return None
         return self.job.done_at + self.REVIEW_PERIOD
 
+    @property
+    def reviews_open(self):
+        """Whether the 14 days for reviews are running now (R4, D3).
+
+        False before "done" and for a job marked done before #38, which has no done_at
+        (D9).
+        """
+        deadline = self.review_deadline
+        return deadline is not None and timezone.now() < deadline
+
+    def review_by(self, user):
+        """`user`'s review of this application, or None.
+
+        Reads reviews.all(): with prefetch_related("reviews") the pages ask no query per
+        card (R12); without it, one query for the two reviews an application can have.
+        """
+        return next((r for r in self.reviews.all() if r.author_id == user.pk), None)
+
     def can_review(self, user):
         """Whether `user` can rate the other side of this work now (#38, reviews.md R5).
 
@@ -672,14 +701,11 @@ class Application(models.Model):
         """
         if self.status != self.Status.ACCEPTED or self.job.status != Job.Status.DONE:
             return False
-        # None: a job marked done before #38 has no done_at and gets no review (D9).
-        deadline = self.review_deadline
-        if deadline is None or timezone.now() >= deadline:
+        if not self.reviews_open:
             return False
         if user.pk not in (self.worker_id, self.job.employer_id):
             return False
-        # The reviews of #38 point here as Review.application (related_name="reviews").
-        return not self.reviews.filter(author_id=user.pk).exists()
+        return self.review_by(user) is None
 
 
 @receiver(post_delete, sender=Application)

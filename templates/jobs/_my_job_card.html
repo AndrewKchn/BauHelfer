@@ -37,6 +37,10 @@
             {% csrf_token %}
             <button type="submit" class="btn btn-primary btn-sm">{% translate "Mark as done" %}</button>
           </form>
+        {% elif job.has_workers_to_rate %}
+          {# Then, in the same place, while a worker is left to rate (#38, reviews.md #}
+          {# R11a, D15): to the job page, where each worker has "Rate" (D4). #}
+          <a href="{% url 'job_detail' job.pk %}#applications" class="btn btn-primary btn-sm ml-auto">{% translate "Rate the workers" %}</a>
         {% endif %}
       </div>
     </div>

@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}{% include "emails/_greeting.txt" %}
+
+{% blocktranslate with employer=job.employer.employer_profile.display_name job_type=job.get_job_type_display date=job.date|date:"DATE_FORMAT" %}{{ employer }} marked the job as done: {{ job_type }}, {{ date }}.{% endblocktranslate %}
+
+{% blocktranslate with deadline=application.review_deadline|date:"DATE_FORMAT" %}Please rate the employer by {{ deadline }}. Your review is shown when the employer rates you too, or after that date:{% endblocktranslate %}
+{{ link }}
+
+{% include "emails/_footer.txt" %}
+{% endautoescape %}

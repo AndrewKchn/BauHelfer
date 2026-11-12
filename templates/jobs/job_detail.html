@@ -198,6 +198,12 @@
                         {% csrf_token %}
                         <button type="submit" class="btn btn-outline btn-sm">{% translate "Cancel" %}</button>
                       </form>
+                    {% elif application.can_rate %}
+                      {# A done job: rate this worker, then the own rating instead (#38, #}
+                      {# reviews.md R11, D4, D11); set by the view (add_review_state). #}
+                      <a href="{% url 'review_create' application.pk %}" class="btn btn-primary btn-sm">{% translate "Rate" %}</a>
+                    {% elif application.own_review %}
+                      <span class="text-sm">{% blocktranslate with rating=application.own_review.rating %}Rated ★{{ rating }}{% endblocktranslate %}</span>
                     {% endif %}
                   </div>
                   {# Decisions only on a pending application of an open job (#24, R7, D5). #}

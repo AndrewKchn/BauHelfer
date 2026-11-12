@@ -1,5 +1,6 @@
 """Emails about applications: a new one to the employer, the decision to the worker (#27);
-a cancelled job or place to the worker (#37, docs/specs/job-done.md R13, R14).
+a cancelled job or place to the worker (#37, docs/specs/job-done.md R13, R14); a done job
+to rate (#38, docs/specs/reviews.md R13).
 
 docs/specs/notifications.md. The views call these after the change is saved (D5). Each
 email is rendered in the recipient's language (D8); a failed email is logged and never
@@ -41,6 +42,15 @@ def notify_cancelled(request, application):
     """
     path = reverse("my_applications")
     send(request, application, "application_cancelled", application.worker, path)
+
+
+def notify_review_request(request, application):
+    """Email the worker of a done job to rate the employer, with the link (#38 R13, D5).
+
+    Only workers: the employer marked the job done and sees the "Rate" buttons.
+    """
+    path = reverse("review_create", args=[application.pk])
+    send(request, application, "review_request", application.worker, path)
 
 
 def send(request, application, kind, recipient, path):
