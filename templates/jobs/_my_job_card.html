@@ -10,19 +10,33 @@
         </div>
       </div>
       {# The links use the card's full width, so they stay on one line on a phone. #}
-      <div class="flex flex-wrap gap-x-2 text-sm font-semibold">
+      <div class="flex flex-wrap items-center gap-x-2 text-sm font-semibold">
         {% if job.applications_count %}
           <a href="{% url 'job_detail' job.pk %}#applications" class="link">{% blocktranslate count applications=job.applications_count %}{{ applications }} application{% plural %}{{ applications }} applications{% endblocktranslate %}</a>
         {% else %}
           <span class="font-normal text-base-content/70">{% translate "No applications yet" %}</span>
         {% endif %}
-        {# Only open jobs can change (spec D7); the views answer 404 for the others anyway. #}
-        {# A past one cannot either; its views still accept it until #37 (#26, D6). #}
+        {# Only open jobs can change (spec D7), and not past ones (#26, D6); the views #}
+        {# answer 404 for the others anyway (#37, job-done.md D9). #}
         {% if job.tab == "open" %}
           <span aria-hidden="true" class="text-base-content/50">·</span>
           <a href="{% url 'job_edit' job.pk %}" class="link">{% translate "Edit" %}</a>
           <span aria-hidden="true" class="text-base-content/50">·</span>
           <a href="{% url 'job_cancel' job.pk %}" class="link text-error">{% translate "Cancel job" %}</a>
+        {% elif job.tab == "filled" and not job.is_over %}
+          {# A filled job can be cancelled, not edited: its workers were taken for it #}
+          {# (#37, job-done.md R11, D10). #}
+          <span aria-hidden="true" class="text-base-content/50">·</span>
+          <a href="{% url 'job_cancel' job.pk %}" class="link text-error">{% translate "Cancel job" %}</a>
+        {% endif %}
+        {# The work is over and someone did it (#37, job-done.md R4, D1-D4, D8); the #}
+        {# browser asks first, as before Cancel. |escapejs: see job_detail.html. #}
+        {% if job.can_mark_done %}
+          {% translate "Mark this job as done? This cannot be undone." as question %}
+          <form method="post" action="{% url 'job_done' job.pk %}" onsubmit="return confirm('{{ question|escapejs }}')" class="ml-auto">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary btn-sm">{% translate "Mark as done" %}</button>
+          </form>
         {% endif %}
       </div>
     </div>

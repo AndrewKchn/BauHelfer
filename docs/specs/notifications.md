@@ -189,7 +189,8 @@ D5. **The views call the sending, after the change is saved** (mine, 2026-11-01;
     Costs: a change made in Django admin sends no email. **Revisit when** applications can
     be decided another way than the buttons.
 D6. **Only the three emails of the ticket** (Claude's default, accepted). Filled, cancelled and
-    withdrawn send nothing. **Revisit when** users ask for them.
+    withdrawn send nothing. **Revisit when** users ask for them. **Changed by #37**
+    (`docs/specs/job-done.md` D10, D12): a cancelled job or place emails the worker.
 D7. **Plain text only** (Claude's default, accepted), like the password reset email: no layout
     to test in mail clients.
 D8. **The recipient's language, not the clicker's** (Claude's default, accepted): the employer

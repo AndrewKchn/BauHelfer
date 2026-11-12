@@ -2814,3 +2814,61 @@ belongs in a model property and when in a function.
 **Learned:**
 - What N+1 is and how one `__in` query avoids it.
 - Why a lazy translated string makes a test depend on the order of tests.
+
+## 2026-11-12 · #37 Mark job as done
+
+**Task given to AI:** start sprint M6 (due 15 Nov) and do #37: the employer marks a job done
+after the work, which unlocks the reviews of #38. The issue also had two questions left from
+#96: whether a filled job can be cancelled (and whether its workers are told), and whether
+the edit and cancel views should refuse a job that is over.
+
+**AI helped:** it laid out the sprint's dependencies and the options for making it smaller.
+It compared the issue with the "My jobs" mockup and found every "revisit in #37" in the
+specs, `SECURITY.md` and the issue comments before writing the spec. It wrote
+`docs/specs/job-done.md` (D1–D13, two iterations), the failing tests, then `Job.can_mark_done`,
+`Job.mark_done()` (row lock, read again), `JobDoneView`, the "Done" tabs, the 404 for jobs
+that are over, `Job.cancel()` for filled jobs returning the cancelled applications,
+`notify_cancelled()` with one email template for both cases, and translations into 6
+languages. Back-translation of DE/PL/RO/TR was done by separate agents. 25 mutations, all
+caught after the fix below. 360 px shots in both themes, and the cheat-sheet tab.
+
+**AI failed:**
+- The test for the worker's "Done" tab did not check its position: with no pending
+  application, "Done" after "Pending" also passed. Found by a surviving mutation; a pending
+  application was added to the test.
+- The first failing-tests file of iteration 2 imported `notify_cancelled` by name, so the
+  whole run stopped at collection. Changed to `notifications.notify_cancelled`, so each test
+  fails on its own.
+- The English email said "start at 8 a.m.." (two dots): the time format already ends with a
+  dot. Found when it printed a real email; the dot went from the English sentence only.
+- In `ApplicationCancelView` it sent the email before the log lines, unlike
+  `JobCancelView`. Found in the `runserver` log I pasted; moved after them.
+- The rule "a ticket that changes a mockup screen updates `docs/mockups/built/`" did not fit:
+  the script shoots the first tab ("Open"), where nothing changed. The PNGs were not updated;
+  noted in Docs sync M6.
+
+**My part:**
+- Sprint: Claude recommended cutting M6 to 5 tickets (auto-translation to Stretch). I chose
+  the whole sprint, a couple of tickets a day: there is still time to do everything I
+  planned.
+- D1: "Mark as done" only after the work ends, not from the work date as the issue said. I
+  think it is more correct: someone may drop out during the work.
+- D2: I asked "what if it was cancelled?" before deciding; then chose that an open job with
+  at least one accepted worker can be marked done too, not only a filled one.
+- D10: Claude recommended leaving "a filled job cannot be cancelled" as it is. I chose that
+  it can be cancelled and every worker gets an email, "otherwise the rating gets lost":
+  a worker who is not told may come for nothing, and a late cancel costs the employer
+  nothing.
+- D11: a fixed email text; the employer's reason I kept as an improvement. My ideas went to
+  other tickets: a cancellation message (with the reason) in the chat → #35; rating a late
+  cancellation → #38.
+- I accepted Claude's defaults D3–D9, D12, D13: they were small, and they matched what I
+  wanted.
+- I checked both iterations by hand on `runserver`. When no emails appeared, it turned out
+  my test workers had no confirmed address (the rule of #27), not a bug; after confirming
+  them I saw the cancel email in Russian and English, and "your place" in Ukrainian.
+
+**Learned:**
+- Why the model checks the rule again under a row lock although the template already hides
+  the button.
+- Why `list()` is needed before `update()` in `Job.cancel()`.

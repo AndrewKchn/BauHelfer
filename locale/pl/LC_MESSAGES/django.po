@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BauHelfer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-07 02:18+0100\n"
+"POT-Creation-Date: 2026-11-12 13:35+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -499,7 +499,7 @@ msgstr "Otwarte"
 msgid "Filled"
 msgstr "Obsadzone"
 
-#: jobs/models.py
+#: jobs/models.py jobs/views.py
 msgid "Done"
 msgstr "Zakończone"
 
@@ -715,6 +715,10 @@ msgstr "Zdjęcie usunięte."
 #: jobs/views.py
 msgid "Job cancelled."
 msgstr "Zlecenie anulowane."
+
+#: jobs/views.py
+msgid "Job marked as done."
+msgstr "Zlecenie oznaczone jako zakończone."
 
 #: jobs/views.py
 msgid "Complete your profile to apply."
@@ -990,6 +994,31 @@ msgstr "Kontakt do zleceniodawcy i adres są na stronie „Moje zgłoszenia”:"
 msgid "You are accepted: %(job_type)s, %(date)s"
 msgstr "Zgłoszenie przyjęte: %(job_type)s, %(date)s"
 
+#: templates/emails/application_cancelled_body.txt
+#, python-format
+msgid ""
+"The employer cancelled the job: %(job_type)s, %(date)s, start at %(time)s"
+msgstr ""
+"Zleceniodawca anulował zlecenie: %(job_type)s, %(date)s, początek o %(time)s."
+
+#: templates/emails/application_cancelled_body.txt
+#, python-format
+msgid ""
+"The employer cancelled your place: %(job_type)s, %(date)s, start at %(time)s"
+msgstr ""
+"Zleceniodawca anulował Pana/Pani miejsce: %(job_type)s, %(date)s, początek o "
+"%(time)s."
+
+#: templates/emails/application_cancelled_body.txt
+msgid "You have nothing to do. Your applications are on “My applications”:"
+msgstr ""
+"Nie musi Pan/Pani nic robić. Zgłoszenia są na stronie „Moje zgłoszenia”:"
+
+#: templates/emails/application_cancelled_subject.txt
+#, python-format
+msgid "Cancelled: %(job_type)s, %(date)s"
+msgstr "Anulowane: %(job_type)s, %(date)s"
+
 #: templates/emails/application_rejected_body.txt
 #, python-format
 msgid ""
@@ -1210,6 +1239,14 @@ msgstr "Edytuj"
 #: templates/jobs/_my_job_card.html templates/jobs/job_confirm_cancel.html
 msgid "Cancel job"
 msgstr "Anuluj zlecenie"
+
+#: templates/jobs/_my_job_card.html
+msgid "Mark this job as done? This cannot be undone."
+msgstr "Oznaczyć zlecenie jako zakończone? Tej operacji nie można cofnąć."
+
+#: templates/jobs/_my_job_card.html
+msgid "Mark as done"
+msgstr "Oznacz jako zakończone"
 
 #: templates/jobs/_photo_placeholder.html
 msgid "No photo"

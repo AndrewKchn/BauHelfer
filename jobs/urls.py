@@ -18,6 +18,7 @@ urlpatterns = [
     path("<int:pk>/apply/", views.JobApplyView.as_view(), name="job_apply"),
     path("<int:pk>/edit/", views.JobEditView.as_view(), name="job_edit"),
     path("<int:pk>/cancel/", views.JobCancelView.as_view(), name="job_cancel"),
+    path("<int:pk>/done/", views.JobDoneView.as_view(), name="job_done"),  # #37
     # Photos (#64): add to a job (pk = the job), delete one photo (pk = the photo).
     path("<int:pk>/photos/", views.JobPhotoAddView.as_view(), name="job_photo_add"),
     # Decisions on one application (#24); pk = the application.

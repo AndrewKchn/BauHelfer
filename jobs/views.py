@@ -4,7 +4,8 @@ edit, cancel (#16, docs/specs/job-form.md), add and delete photos (#64,
 docs/specs/job-photos.md). The job page shows its employer the applications (#23,
 docs/specs/applications-list.md), who accepts or rejects them (#24,
 docs/specs/accept-reject.md). The worker sees their applications on "My applications" and
-withdraws them there (#26, docs/specs/my-applications.md).
+withdraws them there (#26, docs/specs/my-applications.md). The employer marks a job done
+on "My jobs" (#37, docs/specs/job-done.md).
 """
 
 import logging
@@ -35,7 +36,7 @@ from translations.services import detect_language, forget, translate
 
 from .forms import ApplicationForm, JobFilterForm, JobForm, JobPhotosForm
 from .models import Application, ApplicationStateError, Job, JobPhoto, JobStateError
-from .notifications import notify_decision, notify_new_application
+from .notifications import notify_cancelled, notify_decision, notify_new_application
 from .shown_text import description_for, messages_for
 
 # "jobs.views". Ids only, never an email or other personal data (#124).
@@ -59,13 +60,22 @@ class OwnOpenJobMixin(EmployerRequiredMixin):
 
     get_object() looks the id from the URL up in this queryset only. Another employer's job,
     or a job that is not open, is not in it, so the answer is 404: the page does not even
-    tell that such a job exists.
+    tell that such a job exists. A job whose day is over gives 404 too (#37,
+    job-done.md R9, D9): the rule of the "Past" tab, which hides the links.
     """
 
     @override
     def get_queryset(self):
         """Only the logged-in employer's open jobs."""
         return self.request.user.jobs.open()
+
+    @override
+    def get_object(self, queryset=None):
+        """The job from the URL, unless its day is over."""
+        job = super().get_object(queryset)
+        if job.is_over:
+            raise Http404
+        return job
 
 
 class EmployerProfileRequiredMixin:
@@ -150,9 +160,14 @@ class MyJobsView(EmployerRequiredMixin, ListView):
 
     @override
     def get_queryset(self):
-        """Only the logged-in employer's jobs, each with its number of applications."""
+        """Only the logged-in employer's jobs, each with its number of applications.
+
+        with_workers_found(): "Mark as done" asks how many were accepted, from the same
+        query (#37 R5).
+        """
         return (
             self.request.user.jobs.annotate(applications_count=Count("applications"))
+            .with_workers_found()
             .prefetch_related("photos")
             .order_by("date", "start_time")
         )
@@ -181,6 +196,8 @@ class MyApplicationsView(WorkerRequiredMixin, ListView):
     # the colours of the application status badges, "Withdrawn" and "Past" grey (D20).
     tabs = (
         (Application.Status.ACCEPTED, "badge-success"),
+        # The next step of an accepted one, in the colour of the done jobs (#37 R7, D6).
+        ("done", "badge-secondary"),
         (Application.Status.PENDING, "badge-warning"),
         (Application.Status.CLOSED, "badge-info"),
         (Application.Status.REJECTED, "badge-error"),
@@ -214,7 +231,7 @@ class MyApplicationsView(WorkerRequiredMixin, ListView):
         applications = sorted(
             context["applications"], key=lambda application: application.job.is_over
         )
-        labels = dict(Application.Status.choices, past=_("Past"))
+        labels = dict(Application.Status.choices, done=_("Done"), past=_("Past"))
         context["groups"] = tab_groups(
             applications, self.tabs, labels, lambda application: application.tab
         )
@@ -294,6 +311,14 @@ class JobPhotoDeleteView(EmployerRequiredMixin, SuccessMessageMixin, DeleteView)
         return JobPhoto.objects.filter(job__in=self.request.user.jobs.open())
 
     @override
+    def get_object(self, queryset=None):
+        """The photo from the URL, unless its job's day is over (#37 R9, D9)."""
+        photo = super().get_object(queryset)
+        if photo.job.is_over:
+            raise Http404
+        return photo
+
+    @override
     def get_success_url(self):
         """Back to the job's edit page."""
         return reverse("job_edit", args=[self.object.job_id])
@@ -304,22 +329,60 @@ class JobCancelView(OwnOpenJobMixin, DetailView):
 
     Cancelling changes the status and keeps the row: the job stays in "My jobs", and the
     applications to it (#22) keep their job. Its accepted workers are cancelled too, so
-    they no longer see the contacts (#25, contacts.md D3).
+    they no longer see the contacts (#25, contacts.md D3), and each gets an email (#37,
+    job-done.md R13, D10). A filled job can be cancelled too (#37 R10, R11).
     """
 
     template_name = "jobs/job_confirm_cancel.html"
     context_object_name = "job"
 
+    @override
+    def get_queryset(self):
+        """The logged-in employer's open and filled jobs (the mixin: open only)."""
+        return self.request.user.jobs.filter(
+            status__in=(Job.Status.OPEN, Job.Status.FILLED)
+        )
+
     def post(self, request, *args, **kwargs):
         """Mark the job cancelled and go back to "My jobs"."""
         job = self.get_object()  # 404 unless it is the employer's own open job
         try:
-            job.cancel()
+            cancelled = job.cancel()
         except JobStateError:
             # Another tab cancelled it a moment earlier: the same 404 as get_object().
             raise Http404 from None
         logger.info("Job cancelled: job_id=%s employer_id=%s", job.pk, request.user.pk)
+        # After the change is saved, as the emails of #27 (notifications.md D5).
+        for application in cancelled:
+            notify_cancelled(request, application)
         messages.success(request, _("Job cancelled."))
+        return redirect("my_jobs")
+
+
+class JobDoneView(EmployerRequiredMixin, SingleObjectMixin, View):
+    """POST: the employer marks a finished job done (#37, job-done.md R3).
+
+    Only POST: a link could be followed by a browser or a preview by itself (GET gives
+    405). The button is on "My jobs" and asks first (D4).
+    """
+
+    http_method_names = ("post",)
+
+    @override
+    def get_queryset(self):
+        """Only the logged-in employer's jobs; another employer's job gives 404."""
+        return self.request.user.jobs.all()
+
+    def post(self, request, *args, **kwargs):
+        """Mark the job done and go back to "My jobs"."""
+        job = self.get_object()
+        try:
+            job.mark_done()
+        except JobStateError:
+            # Not over yet, nobody accepted, or no longer open or filled: as JobCancelView.
+            raise Http404 from None
+        logger.info("Job done: job_id=%s employer_id=%s", job.pk, request.user.pk)
+        messages.success(request, _("Job marked as done."))
         return redirect("my_jobs")
 
 
@@ -631,6 +694,8 @@ class ApplicationCancelView(OwnApplicationMixin, View):
                 application.job_id,
                 request.user.pk,
             )
+        # After the change is saved and logged, as in JobCancelView (#37, job-done.md D12).
+        notify_cancelled(request, application)
         return back_to(application)
 
 

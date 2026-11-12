@@ -228,22 +228,28 @@ class Job(models.Model):
         return self.status
 
     def cancel(self):
-        """Cancel this open job and its accepted workers (contacts.md R2, D3, D9).
+        """Cancel this open or filled job and its accepted workers (contacts.md R2, D3,
+        D9; job-done.md R10, D10).
 
         The accepted applications become "cancelled", so they show no contacts any more;
         pending, closed and rejected ones stay. The job row is locked, as in
         Application._lock: a second click with an old copy reads "cancelled" and stops.
-        Raises JobStateError, and changes nothing, unless the job is open.
+        Returns the applications it cancelled: the view emails their workers (R13).
+        Raises JobStateError, and changes nothing, unless the job is open or filled.
         """
         with transaction.atomic():
             status = Job.objects.select_for_update().get(pk=self.pk).status
-            if status != self.Status.OPEN:
+            if status not in (self.Status.OPEN, self.Status.FILLED):
                 raise JobStateError
             self.status = self.Status.CANCELLED
             self.save(update_fields=["status"])
-            self.applications.filter(status=Application.Status.ACCEPTED).update(
-                status=Application.Status.CANCELLED
-            )
+            accepted = self.applications.filter(status=Application.Status.ACCEPTED)
+            # list(): read them before update() changes the rows the queryset selects.
+            cancelled = list(accepted.select_related("worker"))
+            accepted.update(status=Application.Status.CANCELLED)
+            for application in cancelled:
+                application.status = Application.Status.CANCELLED
+            return cancelled
 
     def workers_found(self):
         """How many workers the employer has taken: the sum over accepted applications.
@@ -275,6 +281,41 @@ class Job(models.Model):
         """
         now = timezone.localtime()  # Munich time, as the job's date and start time
         return (self.date, self.start_time) <= (now.date(), now.time())
+
+    @property
+    def has_ended(self):
+        """Whether the work is over: start plus hours has passed, Munich time (#37 D1)."""
+        # ends_at has no time zone, as the job's date and start time; so take Munich's
+        # "now" without one too, as has_started compares Munich dates and times.
+        return timezone.localtime().replace(tzinfo=None) >= self.ends_at
+
+    @property
+    def can_mark_done(self):
+        """Whether the employer can mark this job done (job-done.md R1, D1, D2).
+
+        Open or filled, at least one worker accepted ("found 2 of 3 and worked" counts),
+        and the work is over. Done unlocks the reviews of #38, so only work that happened.
+        """
+        if self.status not in (self.Status.OPEN, self.Status.FILLED):
+            return False
+        # Through places_left: it reads the annotation of with_workers_found() when the job
+        # was loaded with it, so "My jobs" asks no query per card (R5).
+        found = self.workers_needed - self.places_left
+        return found > 0 and self.has_ended
+
+    def mark_done(self):
+        """Mark this job done (job-done.md R2); the applications keep their statuses.
+
+        The job row is locked and read again, as in cancel(): an old copy (another tab
+        cancelled the job a moment ago) does not win. Raises JobStateError, and changes
+        nothing, unless can_mark_done is true for the saved row.
+        """
+        with transaction.atomic():
+            saved = Job.objects.select_for_update().get(pk=self.pk)
+            if not saved.can_mark_done:
+                raise JobStateError
+            self.status = self.Status.DONE
+            self.save(update_fields=["status"])
 
     @property
     def accepts_applications(self):
@@ -485,16 +526,17 @@ class Application(models.Model):
     def tab(self):
         """Which tab of "My applications" this application is in (my-applications.md R2).
 
-        Its status, except: a pending one of a cancelled job is "cancelled", since nobody
-        will answer it (D9); a pending or "Job filled" one of a job that is over is "past":
-        it is over and did not happen (D3).
+        Its status, except: a pending or "Job filled" one of a cancelled job is
+        "cancelled", since nobody will answer it (D9; "Job filled" since #37, job-done.md
+        D13); an accepted one of a done job is "done" (#37 D6); a pending or "Job filled"
+        one of a job that is over is "past": it is over and did not happen (D3).
         """
-        if (
-            self.status == self.Status.PENDING
-            and self.job.status == Job.Status.CANCELLED
-        ):
-            return self.Status.CANCELLED
         waiting = self.status in (self.Status.PENDING, self.Status.CLOSED)
+        if waiting and self.job.status == Job.Status.CANCELLED:
+            return self.Status.CANCELLED
+        # The next step of an accepted application: #38 asks for a review there.
+        if self.status == self.Status.ACCEPTED and self.job.status == Job.Status.DONE:
+            return "done"
         if waiting and self.job.is_over:
             return "past"
         return self.status
