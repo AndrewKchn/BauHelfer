@@ -8,8 +8,12 @@
 {# the block #target, no reload (job-translation.md D6). #}
 {% if shown.state == "translated" %}
   <p class="mt-2 text-sm text-base-content/60">
-    <span aria-hidden="true">文A</span> {{ shown.label }} ·
-    <a class="link" href="{{ original_url }}" hx-get="{{ original_url }}" hx-select="#{{ target }}" hx-target="#{{ target }}" hx-swap="outerHTML">{% translate "Show original" %}</a>
+    <span aria-hidden="true">文A</span> {{ shown.label }}
+    {# Until iteration 3 of #33 the application messages pass no original_url. #}
+    {% if original_url %}
+      ·
+      <a class="link" href="{{ original_url }}" hx-get="{{ original_url }}" hx-select="#{{ target }}" hx-target="#{{ target }}" hx-swap="outerHTML">{% translate "Show original" %}</a>
+    {% endif %}
   </p>
 {% elif shown.state == "original" %}
   <p class="mt-2 text-sm text-base-content/60">

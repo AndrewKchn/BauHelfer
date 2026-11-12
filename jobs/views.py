@@ -31,12 +31,12 @@ from django.views.generic.detail import SingleObjectMixin
 
 from accounts.models import User
 from accounts.views import RoleRequiredMixin
-from translations.services import detect_language, forget
+from translations.services import detect_language, forget, translate
 
 from .forms import ApplicationForm, JobFilterForm, JobForm, JobPhotosForm
 from .models import Application, ApplicationStateError, Job, JobPhoto, JobStateError
 from .notifications import notify_decision, notify_new_application
-from .shown_text import description_for
+from .shown_text import description_for, messages_for
 
 # "jobs.views". Ids only, never an email or other personal data (#124).
 logger = logging.getLogger(__name__)
@@ -395,9 +395,14 @@ class JobDetailView(DetailView):
             # queries. select_related: each application's worker and profile come in the
             # same query, so 10 applications cost one query, not 21 (D7). The skills are an
             # array in the profile row and need no query of their own. Newest first (D5).
-            context["applications"] = job.applications.select_related(
-                "worker__worker_profile"
-            ).order_by("-created_at")
+            # Each message in the employer's language, the cached ones in one query (#33,
+            # application-translation.md R10, R11, D2).
+            context["applications"] = messages_for(
+                job.applications.select_related("worker__worker_profile").order_by(
+                    "-created_at"
+                ),
+                translation.get_language(),
+            )
             # The template picks "Accept 2" or "Accept 1 of 2" and the "fills the job"
             # warning with it (accept-reject.md R7, R8); loaded with the job, no query.
             context["places_left"] = job.places_left
@@ -461,6 +466,12 @@ class JobApplyView(WorkerRequiredMixin, JobDetailView):
         if not form.is_valid():
             # The same page again, with the typed values and the errors.
             return self.render_to_response(self.get_context_data(apply_form=form))
+        # The message's language (#33, application-translation.md R7, D3): Claude finds
+        # it; when it cannot tell, or there is no message, the worker's site language.
+        language = detect_language(form.cleaned_data["message"])
+        form.instance.original_language = (
+            worker.preferred_language if language is None else language
+        )
         application = form.save()
         # Ids only: the message may hold a phone number or a name (#124, D9).
         logger.info(
@@ -470,6 +481,12 @@ class JobApplyView(WorkerRequiredMixin, JobDetailView):
             worker.pk,
         )
         notify_new_application(request, application)  # the employer (#27)
+        # Translated now, into the employer's language, so the employer's page reads it from
+        # the cache (#33, R8, D1): the worker waits once, not the employer once per
+        # application. The result is not needed here; translate() never raises.
+        employer_language = job.employer.preferred_language
+        if application.message and application.original_language != employer_language:
+            translate(application.message, employer_language)
         messages.success(request, _("Application sent."))
         return redirect("job_detail", pk=job.pk)
 

@@ -12,7 +12,7 @@ from dataclasses import dataclass
 
 from django.utils.translation import gettext_lazy as _
 
-from translations.services import translate
+from translations.services import translate, translate_many
 
 # One whole sentence per source language: a language name cannot be put into one sentence,
 # German says "aus dem Russischen", Russian "с немецкого" (D9). "" is a language not among
@@ -84,3 +84,27 @@ def description_for(job, reader_lang, *, is_owner, show_original=False):
         translated=lambda: translate(job.description, reader_lang),
         show_original=show_original,
     )
+
+
+def messages_for(applications, reader_lang):
+    """Give each application a `shown_message`: its message as the employer should see it.
+
+    #33, application-translation.md R10, D2, D5. The messages that need a translation are
+    read from the cache in one query (translate_many); the rule for each is shown_text().
+    The page is the employer's, never the worker's, so the reader is not the author (D6).
+    Returns the applications as a list, ready for the template.
+    """
+    applications = list(applications)
+    needed = [a.message for a in applications if a.original_language != reader_lang]
+    translations = translate_many(needed, reader_lang)
+    for application in applications:
+        application.shown_message = shown_text(
+            application.message,
+            application.original_language,
+            reader_lang,
+            is_author=False,
+            # `text=` binds this application's message now: a lambda in a loop would
+            # otherwise read the loop variable when called (ruff B023).
+            translated=lambda text=application.message: translations[text],
+        )
+    return applications

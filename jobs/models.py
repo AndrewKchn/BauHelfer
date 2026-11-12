@@ -422,6 +422,15 @@ class Application(models.Model):
     # A CharField, not a TextField: the column becomes varchar(500), so even code that
     # skips the form cannot save more. The form shows it as a <textarea> (spec D3).
     message = models.CharField(_("message"), max_length=500, blank=True)
+    # The language the message is written in, found by Claude when it is sent (#33,
+    # application-translation.md R6, D3), as Job.original_language. Empty: a language not
+    # among our 7; also every application sent before #33 (D10).
+    original_language = models.CharField(
+        _("original language"),
+        max_length=2,
+        choices=User.Language.choices,
+        blank=True,
+    )
     # The form allows at most the team size and the workers needed (D4); the database only
     # knows the fixed range, the same as Job.workers_needed.
     workers_offered = models.PositiveSmallIntegerField(
@@ -597,3 +606,15 @@ class Application(models.Model):
             self.status = self.Status.WITHDRAWN
             self.save(update_fields=["status"])
             return took_a_place and self._reopen_job()
+
+
+@receiver(post_delete, sender=Application)
+def forget_message(sender, instance, **kwargs):
+    """Delete the cached translations of a deleted application's message (#33, R13, D7).
+
+    As forget_description() above: the message may hold a name or a phone number and must
+    not outlive its application. A signal, so it also runs when the application goes with
+    its job or with the worker's account (CASCADE). Messages are never edited, so this is
+    the only place that forgets them.
+    """
+    forget(instance.message)

@@ -169,8 +169,14 @@
                     </p>
                   {% endif %}
                   {% if application.message %}
-                    {# whitespace-pre-line keeps the line breaks the worker typed. #}
-                    <p class="whitespace-pre-line break-words">“{{ application.message }}”</p>
+                    {# The message in the employer's language, or the original, as #}
+                    {# jobs.shown_text.messages_for() decided (#33, R12, D4, D5): this #}
+                    {# template checks no language. whitespace-pre-line keeps the line #}
+                    {# breaks the worker typed. #}
+                    <div id="message-{{ application.pk }}">
+                      <p class="whitespace-pre-line break-words">“{{ application.shown_message.text }}”</p>
+                      {% include "jobs/_translation_label.html" with shown=application.shown_message %}
+                    </div>
                   {% endif %}
                   <div class="flex items-center justify-between gap-2">
                     <p class="text-xs text-base-content/60">
