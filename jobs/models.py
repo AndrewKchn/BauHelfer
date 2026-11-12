@@ -171,6 +171,9 @@ class Job(models.Model):
         _("status"), max_length=10, choices=Status.choices, default=Status.OPEN
     )
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    # When the employer marked it done (#37); the 14 days for reviews count from here
+    # (#38, docs/specs/reviews.md R3, D9). Empty for every job that is not done.
+    done_at = models.DateTimeField(_("done at"), null=True, blank=True, editable=False)
 
     # At most this many photos per job; the forms check it (docs/specs/job-photos.md D6).
     MAX_PHOTOS = 5
@@ -315,7 +318,8 @@ class Job(models.Model):
             if not saved.can_mark_done:
                 raise JobStateError
             self.status = self.Status.DONE
-            self.save(update_fields=["status"])
+            self.done_at = timezone.now()  # the start of the reviews (#38 R3)
+            self.save(update_fields=["status", "done_at"])
 
     @property
     def accepts_applications(self):
@@ -648,6 +652,34 @@ class Application(models.Model):
             self.status = self.Status.WITHDRAWN
             self.save(update_fields=["status"])
             return took_a_place and self._reopen_job()
+
+    # How long after "done" both sides can rate each other (#38, reviews.md D3).
+    REVIEW_PERIOD = timedelta(days=14)
+
+    @property
+    def review_deadline(self):
+        """When the reviews of this work close: 14 days after "done"; None before (R4)."""
+        if self.job.done_at is None:
+            return None
+        return self.job.done_at + self.REVIEW_PERIOD
+
+    def can_review(self, user):
+        """Whether `user` can rate the other side of this work now (#38, reviews.md R5).
+
+        Only work that happened: an accepted application of a done job (D1), within the 14
+        days (D3), by its worker or its job's employer, once each (D6). A method, not a
+        property, as the answer depends on who asks.
+        """
+        if self.status != self.Status.ACCEPTED or self.job.status != Job.Status.DONE:
+            return False
+        # None: a job marked done before #38 has no done_at and gets no review (D9).
+        deadline = self.review_deadline
+        if deadline is None or timezone.now() >= deadline:
+            return False
+        if user.pk not in (self.worker_id, self.job.employer_id):
+            return False
+        # The reviews of #38 point here as Review.application (related_name="reviews").
+        return not self.reviews.filter(author_id=user.pk).exists()
 
 
 @receiver(post_delete, sender=Application)

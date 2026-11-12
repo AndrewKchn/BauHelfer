@@ -3,14 +3,15 @@
   _form_fields.html uses it for every field; a page that lays out its fields by hand (the job
   form, #16) includes it once per field. Errors of the field go right under it, and the field
   gets a red border. Checkbox and radio groups (several choices) get a legend and one row per
-  choice; a single checkbox sits in front of its label. Drop-downs and text areas have their
+  choice (two or three columns, one with one_column=True); a single checkbox sits in front of its label. Drop-downs and text areas have their
   own daisyUI classes (select, textarea).
 {% endcomment %}
 <fieldset class="fieldset">
   {% if field.widget_type == "checkboxselectmultiple" or field.widget_type == "radioselect" %}
     {# A group has no single input to point a <label for> at, so it gets a <legend>. #}
     <legend class="fieldset-legend">{{ field.label }}</legend>
-    <div class="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-3">
+    {# one_column=True: one choice per row, for long labels such as the review tags (#38). #}
+    <div class="grid gap-x-4 gap-y-3 {% if one_column %}grid-cols-1{% else %}grid-cols-2 sm:grid-cols-3{% endif %}">
       {% for choice in field %}
         <label class="flex min-w-0 cursor-pointer items-center gap-2 text-base break-words hyphens-auto">{{ choice.tag }} {{ choice.choice_label }}</label>
       {% endfor %}

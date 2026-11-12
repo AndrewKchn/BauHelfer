@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BauHelfer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 13:35+0100\n"
+"POT-Creation-Date: 2026-11-12 21:24+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -563,9 +563,13 @@ msgstr "stawka godzinowa (€)"
 msgid "status"
 msgstr "status"
 
-#: jobs/models.py
+#: jobs/models.py reviews/models.py
 msgid "created at"
 msgstr "utworzono"
+
+#: jobs/models.py
+msgid "done at"
+msgstr "data zakończenia"
 
 #: jobs/models.py
 msgid "job"
@@ -631,7 +635,7 @@ msgstr "zaoferowani pracownicy"
 msgid "workers accepted"
 msgstr "przyjęci pracownicy"
 
-#: jobs/models.py
+#: jobs/models.py reviews/models.py
 msgid "application"
 msgstr "zgłoszenie"
 
@@ -775,6 +779,78 @@ msgstr "Tego zgłoszenia nie można już wycofać."
 #: jobs/views.py
 msgid "Application withdrawn."
 msgstr "Zgłoszenie wycofane."
+
+#: reviews/forms.py
+msgid "Rating"
+msgstr "Ocena"
+
+#: reviews/forms.py
+msgid "What went well? (optional)"
+msgstr "Co poszło dobrze? (opcjonalnie)"
+
+#: reviews/models.py
+msgid "On time"
+msgstr "Punktualność"
+
+#: reviews/models.py
+msgid "Careful work"
+msgstr "Staranna praca"
+
+#: reviews/models.py
+msgid "Hard-working"
+msgstr "Pracowitość"
+
+#: reviews/models.py
+msgid "Left the site clean"
+msgstr "Porządek na budowie po pracy"
+
+#: reviews/models.py
+msgid "Followed safety rules"
+msgstr "Przestrzeganie zasad BHP"
+
+#: reviews/models.py
+msgid "Paid in full and on time"
+msgstr "Zapłata w całości i na czas"
+
+#: reviews/models.py
+msgid "Job as described"
+msgstr "Zlecenie zgodne z opisem"
+
+#: reviews/models.py
+msgid "Safe workplace"
+msgstr "Bezpieczne miejsce pracy"
+
+#: reviews/models.py
+msgid "Clear instructions"
+msgstr "Jasne polecenia"
+
+#: reviews/models.py
+msgid "Respectful"
+msgstr "Szacunek"
+
+#: reviews/models.py
+msgid "author"
+msgstr "autor"
+
+#: reviews/models.py
+msgid "rating"
+msgstr "ocena"
+
+#: reviews/models.py
+msgid "tags"
+msgstr "tagi"
+
+#: reviews/models.py
+msgid "review"
+msgstr "opinia"
+
+#: reviews/models.py
+msgid "reviews"
+msgstr "opinie"
+
+#: reviews/views.py
+msgid "Review published."
+msgstr "Opinia opublikowana."
 
 #: templates/_language_switcher.html
 msgid "Change language"
@@ -1639,3 +1715,32 @@ msgstr ""
 #: templates/registration/verify_email_resend_done.html
 msgid "A new link can be sent once every 10 minutes."
 msgstr "Nowy link można wysłać raz na 10 minut."
+
+#: templates/reviews/review_form.html
+msgid "Rate the work"
+msgstr "Ocena pracy"
+
+#: templates/reviews/review_form.html
+#, python-format
+msgid "Rate %(name)s"
+msgstr "Ocena: %(name)s"
+
+#: templates/reviews/review_form.html
+#, python-format
+msgid "%(stars)s star"
+msgid_plural "%(stars)s stars"
+msgstr[0] "%(stars)s gwiazdka"
+msgstr[1] "%(stars)s gwiazdki"
+msgstr[2] "%(stars)s gwiazdek"
+msgstr[3] "%(stars)s gwiazdki"
+
+#: templates/reviews/review_form.html
+#, python-format
+msgid ""
+"Your review will be shown when %(name)s rates you too, or on %(date)s. It "
+"cannot be changed."
+msgstr "Pana/Pani opinia zostanie pokazana, gdy %(name)s również Pana/Panią oceni, lub najpóźniej %(date)s. Nie można jej zmienić."
+
+#: templates/reviews/review_form.html
+msgid "Publish review"
+msgstr "Opublikuj opinię"

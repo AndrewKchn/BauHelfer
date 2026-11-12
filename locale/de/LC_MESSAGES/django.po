@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BauHelfer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 13:35+0100\n"
+"POT-Creation-Date: 2026-11-12 21:24+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -559,9 +559,13 @@ msgstr "Stundenlohn (€)"
 msgid "status"
 msgstr "Status"
 
-#: jobs/models.py
+#: jobs/models.py reviews/models.py
 msgid "created at"
 msgstr "erstellt am"
+
+#: jobs/models.py
+msgid "done at"
+msgstr "erledigt am"
 
 #: jobs/models.py
 msgid "job"
@@ -627,7 +631,7 @@ msgstr "angebotene Helfer"
 msgid "workers accepted"
 msgstr "angenommene Helfer"
 
-#: jobs/models.py
+#: jobs/models.py reviews/models.py
 msgid "application"
 msgstr "Bewerbung"
 
@@ -769,6 +773,78 @@ msgstr "Diese Bewerbung kann nicht mehr zurückgezogen werden."
 #: jobs/views.py
 msgid "Application withdrawn."
 msgstr "Bewerbung zurückgezogen."
+
+#: reviews/forms.py
+msgid "Rating"
+msgstr "Sterne"
+
+#: reviews/forms.py
+msgid "What went well? (optional)"
+msgstr "Was lief gut? (optional)"
+
+#: reviews/models.py
+msgid "On time"
+msgstr "Pünktlich"
+
+#: reviews/models.py
+msgid "Careful work"
+msgstr "Sorgfältige Arbeit"
+
+#: reviews/models.py
+msgid "Hard-working"
+msgstr "Fleißig"
+
+#: reviews/models.py
+msgid "Left the site clean"
+msgstr "Baustelle sauber hinterlassen"
+
+#: reviews/models.py
+msgid "Followed safety rules"
+msgstr "Sicherheitsregeln eingehalten"
+
+#: reviews/models.py
+msgid "Paid in full and on time"
+msgstr "Vollständig und pünktlich bezahlt"
+
+#: reviews/models.py
+msgid "Job as described"
+msgstr "Job wie beschrieben"
+
+#: reviews/models.py
+msgid "Safe workplace"
+msgstr "Sicherer Arbeitsplatz"
+
+#: reviews/models.py
+msgid "Clear instructions"
+msgstr "Klare Anweisungen"
+
+#: reviews/models.py
+msgid "Respectful"
+msgstr "Respektvoll"
+
+#: reviews/models.py
+msgid "author"
+msgstr "Verfasser"
+
+#: reviews/models.py
+msgid "rating"
+msgstr "Sterne"
+
+#: reviews/models.py
+msgid "tags"
+msgstr "Merkmale"
+
+#: reviews/models.py
+msgid "review"
+msgstr "Bewertung"
+
+#: reviews/models.py
+msgid "reviews"
+msgstr "Bewertungen"
+
+#: reviews/views.py
+msgid "Review published."
+msgstr "Bewertung veröffentlicht."
 
 #: templates/_language_switcher.html
 msgid "Change language"
@@ -1622,3 +1698,30 @@ msgstr ""
 #: templates/registration/verify_email_resend_done.html
 msgid "A new link can be sent once every 10 minutes."
 msgstr "Ein neuer Link kann alle 10 Minuten gesendet werden."
+
+#: templates/reviews/review_form.html
+msgid "Rate the work"
+msgstr "Arbeit bewerten"
+
+#: templates/reviews/review_form.html
+#, python-format
+msgid "Rate %(name)s"
+msgstr "%(name)s bewerten"
+
+#: templates/reviews/review_form.html
+#, python-format
+msgid "%(stars)s star"
+msgid_plural "%(stars)s stars"
+msgstr[0] "%(stars)s Stern"
+msgstr[1] "%(stars)s Sterne"
+
+#: templates/reviews/review_form.html
+#, python-format
+msgid ""
+"Your review will be shown when %(name)s rates you too, or on %(date)s. It "
+"cannot be changed."
+msgstr "Ihre Bewertung wird angezeigt, sobald %(name)s Sie ebenfalls bewertet, spätestens am %(date)s. Sie kann nicht geändert werden."
+
+#: templates/reviews/review_form.html
+msgid "Publish review"
+msgstr "Bewertung veröffentlichen"

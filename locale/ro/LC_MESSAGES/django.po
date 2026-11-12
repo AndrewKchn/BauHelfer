@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BauHelfer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 13:35+0100\n"
+"POT-Creation-Date: 2026-11-12 21:24+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -561,9 +561,13 @@ msgstr "tarif orar (€)"
 msgid "status"
 msgstr "stare"
 
-#: jobs/models.py
+#: jobs/models.py reviews/models.py
 msgid "created at"
 msgstr "creată la"
+
+#: jobs/models.py
+msgid "done at"
+msgstr "data finalizării"
 
 #: jobs/models.py
 msgid "job"
@@ -629,7 +633,7 @@ msgstr "muncitori oferiți"
 msgid "workers accepted"
 msgstr "muncitori acceptați"
 
-#: jobs/models.py
+#: jobs/models.py reviews/models.py
 msgid "application"
 msgstr "candidatură"
 
@@ -773,6 +777,78 @@ msgstr "Această candidatură nu mai poate fi retrasă."
 #: jobs/views.py
 msgid "Application withdrawn."
 msgstr "Candidatura a fost retrasă."
+
+#: reviews/forms.py
+msgid "Rating"
+msgstr "Evaluare"
+
+#: reviews/forms.py
+msgid "What went well? (optional)"
+msgstr "Ce a mers bine? (opțional)"
+
+#: reviews/models.py
+msgid "On time"
+msgstr "Punctualitate"
+
+#: reviews/models.py
+msgid "Careful work"
+msgstr "Muncă atentă"
+
+#: reviews/models.py
+msgid "Hard-working"
+msgstr "Hărnicie"
+
+#: reviews/models.py
+msgid "Left the site clean"
+msgstr "Șantier lăsat curat"
+
+#: reviews/models.py
+msgid "Followed safety rules"
+msgstr "Respectarea regulilor de siguranță"
+
+#: reviews/models.py
+msgid "Paid in full and on time"
+msgstr "Plată integrală și la timp"
+
+#: reviews/models.py
+msgid "Job as described"
+msgstr "Lucrare conform descrierii"
+
+#: reviews/models.py
+msgid "Safe workplace"
+msgstr "Loc de muncă sigur"
+
+#: reviews/models.py
+msgid "Clear instructions"
+msgstr "Instrucțiuni clare"
+
+#: reviews/models.py
+msgid "Respectful"
+msgstr "Respect"
+
+#: reviews/models.py
+msgid "author"
+msgstr "autor"
+
+#: reviews/models.py
+msgid "rating"
+msgstr "evaluare"
+
+#: reviews/models.py
+msgid "tags"
+msgstr "etichete"
+
+#: reviews/models.py
+msgid "review"
+msgstr "recenzie"
+
+#: reviews/models.py
+msgid "reviews"
+msgstr "recenzii"
+
+#: reviews/views.py
+msgid "Review published."
+msgstr "Recenzie publicată."
 
 #: templates/_language_switcher.html
 msgid "Change language"
@@ -1625,3 +1701,31 @@ msgstr ""
 #: templates/registration/verify_email_resend_done.html
 msgid "A new link can be sent once every 10 minutes."
 msgstr "Un link nou poate fi trimis o dată la 10 minute."
+
+#: templates/reviews/review_form.html
+msgid "Rate the work"
+msgstr "Evaluați lucrarea"
+
+#: templates/reviews/review_form.html
+#, python-format
+msgid "Rate %(name)s"
+msgstr "Evaluare: %(name)s"
+
+#: templates/reviews/review_form.html
+#, python-format
+msgid "%(stars)s star"
+msgid_plural "%(stars)s stars"
+msgstr[0] "%(stars)s stea"
+msgstr[1] "%(stars)s stele"
+msgstr[2] "%(stars)s de stele"
+
+#: templates/reviews/review_form.html
+#, python-format
+msgid ""
+"Your review will be shown when %(name)s rates you too, or on %(date)s. It "
+"cannot be changed."
+msgstr "Recenzia dumneavoastră va fi afișată când %(name)s vă va evalua la rândul său, sau în data de %(date)s. Nu poate fi modificată."
+
+#: templates/reviews/review_form.html
+msgid "Publish review"
+msgstr "Publicați recenzia"
