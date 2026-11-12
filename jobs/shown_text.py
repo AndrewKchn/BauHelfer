@@ -86,16 +86,21 @@ def description_for(job, reader_lang, *, is_owner, show_original=False):
     )
 
 
-def messages_for(applications, reader_lang):
+def messages_for(applications, reader_lang, *, original_id=None):
     """Give each application a `shown_message`: its message as the employer should see it.
 
-    #33, application-translation.md R10, D2, D5. The messages that need a translation are
-    read from the cache in one query (translate_many); the rule for each is shown_text().
-    The page is the employer's, never the worker's, so the reader is not the author (D6).
-    Returns the applications as a list, ready for the template.
+    #33, application-translation.md R10, R16, D2, D5. The messages that need a translation
+    are read from the cache in one query (translate_many); the rule for each is
+    shown_text(). The page is the employer's, never the worker's, so the reader is not the
+    author (D6). `original_id`: the application whose "Show original" was pressed; only its
+    message is shown as written (D8). Returns the applications as a list, for the template.
     """
     applications = list(applications)
-    needed = [a.message for a in applications if a.original_language != reader_lang]
+    needed = [
+        a.message
+        for a in applications
+        if a.original_language != reader_lang and a.pk != original_id
+    ]
     translations = translate_many(needed, reader_lang)
     for application in applications:
         application.shown_message = shown_text(
@@ -106,5 +111,6 @@ def messages_for(applications, reader_lang):
             # `text=` binds this application's message now: a lambda in a loop would
             # otherwise read the loop variable when called (ruff B023).
             translated=lambda text=application.message: translations[text],
+            show_original=application.pk == original_id,
         )
     return applications

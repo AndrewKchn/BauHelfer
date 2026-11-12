@@ -1,24 +1,22 @@
 {% load i18n %}
 {# The small grey line under a user's text: "Translated from … by AI · Show original" and #}
-{# the other states (#32 R9, R11, R12; #33 application-translation.md R4, D9). #}
+{# the other states (#32 R9, R11, R12; #33 application-translation.md R4, R15, D9). #}
 {# Parameters: `shown`, a ShownText (jobs/shown_text.py); `target`, the id of the block #}
-{# to swap; `original_url` and `translation_url`, the pages of the two states. #}
+{# to swap; `original_url` and `translation_url`, the pages of the two states; `anchor`, #}
+{# optional, where a plain click without JavaScript lands (D8). #}
 {# Branches only on shown.state: the rule decided it, the template only draws (D5). #}
 {# The links: a plain link to the same page; with HTMX it fetches that page and swaps only #}
-{# the block #target, no reload (job-translation.md D6). #}
+{# the block #target, no reload (job-translation.md D6). The anchor is only in href: in #}
+{# hx-get, HTMX would scroll to it after the swap (R15). #}
 {% if shown.state == "translated" %}
   <p class="mt-2 text-sm text-base-content/60">
-    <span aria-hidden="true">文A</span> {{ shown.label }}
-    {# Until iteration 3 of #33 the application messages pass no original_url. #}
-    {% if original_url %}
-      ·
-      <a class="link" href="{{ original_url }}" hx-get="{{ original_url }}" hx-select="#{{ target }}" hx-target="#{{ target }}" hx-swap="outerHTML">{% translate "Show original" %}</a>
-    {% endif %}
+    <span aria-hidden="true">文A</span> {{ shown.label }} ·
+    <a class="link" href="{{ original_url }}{% if anchor %}#{{ anchor }}{% endif %}" hx-get="{{ original_url }}" hx-select="#{{ target }}" hx-target="#{{ target }}" hx-swap="outerHTML">{% translate "Show original" %}</a>
   </p>
 {% elif shown.state == "original" %}
   <p class="mt-2 text-sm text-base-content/60">
     {% translate "Original" %} ·
-    <a class="link" href="{{ translation_url }}" hx-get="{{ translation_url }}" hx-select="#{{ target }}" hx-target="#{{ target }}" hx-swap="outerHTML">{% translate "Show translation" %}</a>
+    <a class="link" href="{{ translation_url }}{% if anchor %}#{{ anchor }}{% endif %}" hx-get="{{ translation_url }}" hx-select="#{{ target }}" hx-target="#{{ target }}" hx-swap="outerHTML">{% translate "Show translation" %}</a>
   </p>
 {% elif shown.state == "unavailable" %}
   <p class="mt-2 text-sm text-base-content/60">{% translate "Translation is not available right now." %}</p>

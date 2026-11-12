@@ -397,11 +397,13 @@ class JobDetailView(DetailView):
             # array in the profile row and need no query of their own. Newest first (D5).
             # Each message in the employer's language, the cached ones in one query (#33,
             # application-translation.md R10, R11, D2).
+            # ?original=<id> is the "Show original" link of one message (R16, D8).
             context["applications"] = messages_for(
                 job.applications.select_related("worker__worker_profile").order_by(
                     "-created_at"
                 ),
                 translation.get_language(),
+                original_id=original_id(self.request),
             )
             # The template picks "Accept 2" or "Accept 1 of 2" and the "fills the job"
             # warning with it (accept-reject.md R7, R8); loaded with the job, no query.
@@ -435,6 +437,16 @@ class JobDetailView(DetailView):
             in (Application.Status.PENDING, Application.Status.CLOSED)
         )
         return context
+
+
+def original_id(request):
+    """The application id in ?original=, or None (#33, R16).
+
+    Anything that is not a number is ignored: the page is shown as without it (AC12). An id
+    of another job's application matches nothing on this page, so it changes nothing.
+    """
+    value = request.GET.get("original", "")
+    return int(value) if value.isdecimal() else None
 
 
 class JobApplyView(WorkerRequiredMixin, JobDetailView):
