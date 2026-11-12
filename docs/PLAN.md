@@ -19,9 +19,9 @@ written issue by issue.
 | Part | Choice | Why |
 |---|---|---|
 | Backend | **Python 3.12 + Django 5** | Built-in auth, form validation, ORM, migrations, admin and i18n — everything BauHelfer needs. Fastest path to a working result |
-| Frontend | **Django templates + HTMX 2 + Tailwind CSS 4 + daisyUI 5** | The whole project stays in Python with minimal JavaScript. HTMX adds interactivity (applications, chat); the job filters are a plain GET form that reloads the page (#18, `docs/specs/job-list.md` D9). Tailwind gives a mobile-first layout. Decided in #3: **daisyUI** on top of Tailwind (short classes like `btn`, no own JS, so no clash with HTMX; Flowbite and plain Tailwind rejected). Own colour theme with dark mode in #83. Tailwind is **built** by the standalone CLI via `pytailwindcss` (no Node.js), not loaded from a CDN: smaller CSS, no flash of unstyled page, and no visitor IPs sent to a CDN (GDPR). **HTMX 2.0.10**, not the new 4.0 (released Aug 2026): far more docs and examples. HTMX, daisyUI and its theme plugin (`daisyui-theme.mjs`, same 5.7.47 release, #83) are downloaded files in the repo; HTMX is served by WhiteNoise, the daisyUI files are used only to build the CSS |
+| Frontend | **Django templates + HTMX 2 + Tailwind CSS 4 + daisyUI 5** | The whole project stays in Python with minimal JavaScript. HTMX adds interactivity (applications, chat); the job filters are a plain GET form that reloads the page (#18, `docs/specs/job-list.md` D9). Tailwind gives a mobile-first layout. Decided in #3: **daisyUI** on top of Tailwind (short classes like `btn`, no own JS, so no clash with HTMX; Flowbite and plain Tailwind rejected). Own colour theme with dark mode in #83. Tailwind is **built** by the standalone CLI via `pytailwindcss` (no Node.js), not loaded from a CDN: smaller CSS, no flash of unstyled page, and no visitor IPs sent to a CDN (GDPR). **HTMX 2.0.10**, not the new 4.0 (released Aug 2026): far more docs and examples. HTMX, daisyUI and its theme plugin (`daisyui-theme.mjs`, same 5.7.47 release, #83) are downloaded files in the repo; HTMX is served by WhiteNoise, the daisyUI files are used only to build the CSS. HTMX pattern since #32 (`docs/specs/job-translation.md` D6): a plain link to the same page with a parameter (`?original=1`), made partial by `hx-get` + `hx-select` + `hx-target` + `hx-swap="outerHTML"` — no second view, works without JavaScript; the server renders the whole page to swap one block |
 | Database | **PostgreSQL**: Docker locally, **Supabase** (Frankfurt, free plan) in production | Django standard, same engine everywhere. Supabase instead of a Render database: Render's free database expires after 30 days, Supabase's does not (it pauses after 7 days without activity). Only plain PostgreSQL is used, via the Session pooler; Data API off, RLS on |
-| Text translation | **Claude API** (`claude-haiku-4-5`) | Handles construction slang and context; translations are cached in the DB |
+| Text translation | **Claude API** (`claude-haiku-5-5`, #31) through the official `anthropic` library | Handles construction slang and context; translations are cached in the DB. Haiku 5.5 instead of the planned 4.5: newer and 10× cheaper. Chosen like `EMAIL_BACKEND`: the setting `TRANSLATION_BACKEND`, a fake translator locally and in tests, so nothing leaves the computer. Rejected in #31 (`docs/specs/ai-translation.md` D1): DeepL API Free (its terms allow keeping the texts and forbid personal data), DeepL Pro (monthly fee), Gemini free (trains on the texts). The API has no EU region: see `docs/SECURITY.md`. Limits (#34): texts up to 1000 characters, 300 new translations a day, $3/month spend limit in the Console |
 | Map | **Leaflet + OpenStreetMap**, Nominatim geocoding | Free, no API keys |
 | Job photos | **Supabase Storage** (the same project as the database, Frankfurt) via `django-storages` S3 + `boto3`; **Pillow** for validation, resizing and EXIF stripping | The Render disk is wiped on every deploy. Decided in #64: Cloudflare R2 rejected, it needs a payment card even on the free tier. The database stores only paths, so moving later means new env values and copying the files. Production needs six env variables (`MEDIA_S3_*`, `MEDIA_PUBLIC_URL`) and does not start without them; the app stays stateless (can run several instances) |
 | Email | **Brevo** (France, EU; free plan 300 emails a day, no card) through its HTTP API with `django-anymail` | Decided in #27. Not SMTP: Render's free plan blocks the ports 25, 465 and 587 since 2025-09-26. Without our own domain the sender is the project's Gmail address, shown "via brevosend.com". Locally and in tests the console backend: nothing leaves the computer |
@@ -50,8 +50,10 @@ written issue by issue.
 - **EmployerProfile**: `company_name` (optional: a private person has none), `trades` — one or
   more from a fixed list, incl. "private person" and "other" (#12). The contact person is
   `User.name`.
-- **Job** (#15, `docs/specs/job.md`): employer, job type (the worker `Skill` list), description,
-  `original_language`, address, `district` (the 25 Stadtbezirke + "Munich area (outside the
+- **Job** (#15, `docs/specs/job.md`): employer, job type (the worker `Skill` list), description
+  (≤ 1000 characters, #34), `original_language` (found by Claude when a new or changed
+  description is saved; empty = a language not among our 7, translated for every reader, #32),
+  address, `district` (the 25 Stadtbezirke + "Munich area (outside the
   city)"), coordinates as two decimals (no PostGIS), `date` + `start_time` + `hours` 1–10
   (§ 3 ArbZG), `workers_needed` 1–10, `hourly_rate` in € (at least the minimum wage of the
   job's date, `settings.MINIMUM_WAGES`, #16), status open | filled | done | cancelled,
@@ -62,8 +64,12 @@ written issue by issue.
   ≤ 500 characters), `workers_offered` (1 to the smaller of the team size and the workers
   needed), `workers_accepted` (how many of the crew were taken, #24), status pending |
   accepted | rejected | closed ("Job filled", #24) | cancelled (#24) | withdrawn (#26),
-  `created_at`; one per worker and job.
-- **Translation**: translation cache (source text hash + language → translated text).
+  `original_language` of the message (found by Claude when it is sent; if Claude cannot tell,
+  the worker's site language, #33), `created_at`; one per worker and job.
+- **Translation** (#31, `docs/specs/ai-translation.md`): translation cache, SHA-256 of the
+  source text + language → translated text; the source text itself is not stored. Rows are
+  deleted by `forget(text)` when their job or application is deleted or the description
+  changes (#32, #33).
 - **Message**: chat within an accepted application.
 - **Review**: rating 1–5 + text, after status done, in both directions.
 
@@ -75,10 +81,10 @@ In the MVP a crew is a single account with a `team_size` field; full crews with 
 BauHelfer/
 ├── config/            # Django settings
 ├── accounts/          # User, profiles, registration
-├── jobs/              # Job, Application
+├── jobs/              # Job, Application; shown_text.py: who sees a translation (#33)
 ├── chat/              # Message
 ├── reviews/           # Review
-├── translations/      # Claude API service + cache
+├── translations/      # Claude API service + cache: translate, translate_many, forget
 ├── templates/  static/  locale/
 ├── tests/  tests/e2e/ # checks that belong to no app; Playwright flows
 ├── docs/PLAN.md  docs/AI_LOG.md  docs/SECURITY.md  docs/TESTING.md
@@ -93,7 +99,7 @@ BauHelfer/
 `backend`, `frontend`, `database`, `i18n`, `ai`, `legal`, `devops`, `testing`, `docs`, `stretch`
 (+ default `bug` and `enhancement`; other default labels are removed).
 
-## Milestones and issues (94)
+## Milestones and issues (95)
 
 Each issue has a **Description** and a **Done when…** checklist. Numbers are GitHub issue numbers;
 the status of each issue lives on the board, not here.
@@ -217,6 +223,8 @@ the status of each issue lives on the board, not here.
 - #114 `/accounts/profile/` redirects to the user's own profile page (`frontend`, `stretch`)
 - #115 Let users suggest a missing trade (`backend`, `stretch`)
 - #143 Choose how many workers of a crew to accept (`backend`, `stretch`)
+- #157 Keep the application state rules in one place (`can_cancel`, `can_decide`) (`backend`,
+  `stretch`)
 
 ## Testing approach
 
@@ -245,12 +253,31 @@ Translations are done inside each UI ticket, not in one late batch.
 
 - **From M2:** every UI string is wrapped in translation functions (`{% translate %}`,
   `gettext_lazy`).
-- **#29 (M5)** sets up i18n and adds a CI check that fails on untranslated or fuzzy strings.
-- **#30** translates all strings written in M2–M4 into the 7 languages.
-- **From M5 on:** every UI ticket translates its own strings into all 7 languages.
+- **#29 (M5)** sets up i18n and the language switcher, and adds a test that fails on
+  untranslated or fuzzy strings (`tests/test_translations.py`). The compiled `.mo` files are in
+  git, so Render needs no gettext (`docs/specs/i18n.md` D4).
+- **#30** translates all strings written in M2–M4 into the 6 languages besides English, and
+  adds a CI step: `makemessages` must change nothing in `locale/` (a string wrapped in the code
+  but missing from the `.po` files fails), `msgfmt --check-format` catches broken placeholders
+  and `--check-header` missing plural forms (`docs/specs/translations.md` D4, D8, D14).
+- **From M5 on:** every UI ticket translates its own strings, the same way as #30: the
+  glossary and the polite address in `docs/specs/translations.md` (D5; "Gewerbe", "Minijob"
+  and "BauHelfer" stay as they are, D10); RU / UK reviewed by me, DE / PL / RO / TR checked by
+  back-translation by an agent that sees only the translations, and I decide each string whose
+  meaning changed (D1, D12). Plural strings need all the language's forms: RU / UK / PL have
+  4, RO 3 (D14). Known limitation: no native speaker has reviewed DE / PL / RO / TR.
+- **Long translations:** a new badge or button label must fit at 360 px in German and
+  Romanian, the longest languages; long words may hyphenate (`hyphens-auto`). No test guards
+  it yet: the E2E check is planned in #40 (`docs/specs/translations.md` D15–D17).
 
 User content (job descriptions, application and chat messages) is translated by the Claude API
-(#31–#34, #36), not by `.po` files.
+(#31–#34, #36), not by `.po` files. One rule decides who sees the original and who a
+translation, `shown_text()` in `jobs/shown_text.py` (#33): the author and a reader in the
+text's language get the original without an API call, everyone else a translation with the
+label "Translated by AI" and a "Show original" toggle (`templates/jobs/_translation_label.html`).
+Each kind of text has a small wrapper (`description_for`, `messages_for`; #36 adds one for chat).
+Pages that list many texts use `translate_many()`: the cached translations of all of them in one
+query.
 
 ## Board and workflow
 
@@ -281,7 +308,7 @@ Board: [BauHelfer](https://github.com/users/AndrewKchn/projects/1), columns Todo
 ## Verification
 
 - `gh label list` — 12 labels; `gh api repos/AndrewKchn/BauHelfer/milestones --jq '.[].title'` — 9 milestones.
-- `gh issue list --state all --limit 100 --json number --jq length` → 94; every issue has a
+- `gh issue list --state all --limit 300 --json number --jq length` → 95; every issue has a
   milestone and a label.
 - `gh project item-list 1 --owner AndrewKchn` — all issues are on the board, each non-Stretch
   issue has a Sprint.
