@@ -44,7 +44,10 @@ English, Russian, Ukrainian, Polish, Romanian and Turkish.
 ## Run locally
 
 You need [git](https://git-scm.com/), [uv](https://docs.astral.sh/uv/) (it installs Python 3.12
-for you) and [Docker](https://docs.docker.com/get-docker/).
+for you), [Docker](https://docs.docker.com/get-docker/) and, to work on translations or run the
+translation tests, gettext (a program, not a Python package: `sudo apt install gettext` on
+Ubuntu, `brew install gettext` on macOS). The site itself runs without it: the compiled `.mo`
+files are in git.
 
 1. Clone the repository:
    ```bash
@@ -125,6 +128,7 @@ Test levels, where tests live, more commands and how tests are named:
 
 ## Status
 
-In development. Done: M1 (foundation and first deploy), M2 (accounts and profiles), M3 (jobs)
-and M4 (applications, contacts after acceptance, email notifications). Next is M5,
-multilingual UI and AI translation.
+In development. Done: M1 (foundation and first deploy), M2 (accounts and profiles), M3 (jobs),
+M4 (applications, contacts after acceptance, email notifications) and M5 (the site in 7
+languages, job descriptions and application messages translated by AI). Next is M6, chat and
+reviews.
