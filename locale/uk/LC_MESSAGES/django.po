@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BauHelfer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-13 00:17+0100\n"
+"POT-Creation-Date: 2026-11-13 00:50+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -984,7 +984,8 @@ msgstr "Головне меню"
 msgid "Menu"
 msgstr "Меню"
 
-#: templates/base.html templates/jobs/my_applications.html
+#: templates/base.html templates/jobs/job_detail.html
+#: templates/jobs/my_applications.html
 msgid "My applications"
 msgstr "Мої заявки"
 

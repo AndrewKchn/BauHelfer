@@ -147,7 +147,8 @@ def test_login_with_email_in_any_case(client, user):
 
     1. anna@example.com exists
     2. Log in as ANNA@Example.com
-    3. Expect: redirect to home, logged in, "Log out" in the header
+    3. Expect: redirect to the worker's "My applications" (home until #38), logged in,
+       "Log out" in the header
     """
     response = client.post(
         reverse("login"),
@@ -155,7 +156,7 @@ def test_login_with_email_in_any_case(client, user):
         follow=True,
     )
 
-    assertRedirects(response, reverse("home"))
+    assertRedirects(response, reverse("my_applications"))
     assert is_logged_in(client)
     assertContains(response, "Log out")
 
@@ -223,7 +224,8 @@ def test_login_ignores_a_next_link_to_another_site(client, user):
     """After login the user is never sent to another site.
 
     1. Log in from /accounts/login/?next=https://evil.example.com/
-    2. Expect: redirect to home, not to evil.example.com
+    2. Expect: redirect to the worker's "My applications" (home until #38), not to
+       evil.example.com
     """
     evil = "https://evil.example.com/"
 
@@ -232,7 +234,7 @@ def test_login_ignores_a_next_link_to_another_site(client, user):
         {"username": "anna@example.com", "password": PASSWORD, "next": evil},
     )
 
-    assertRedirects(response, reverse("home"))
+    assertRedirects(response, reverse("my_applications"))
 
 
 @pytest.mark.story(88)
@@ -255,17 +257,17 @@ def test_login_gives_a_new_session_id(client, user):
 
 
 def test_logged_in_user_is_sent_away_from_login(client, user):
-    """A logged-in user who opens the login page goes to the home page.
+    """A logged-in user who opens the login page goes to their own page.
 
-    1. Log in
+    1. Log in as a worker
     2. Open the login page
-    3. Expect: redirect to home
+    3. Expect: redirect to "My applications" (home until #38)
     """
     client.force_login(user)
 
     response = client.get(reverse("login"))
 
-    assertRedirects(response, reverse("home"))
+    assertRedirects(response, reverse("my_applications"))
 
 
 def test_logout_logs_out_and_goes_home(client, user):

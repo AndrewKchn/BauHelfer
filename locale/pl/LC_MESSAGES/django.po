@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BauHelfer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-13 00:17+0100\n"
+"POT-Creation-Date: 2026-11-13 00:50+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -987,7 +987,8 @@ msgstr "Menu główne"
 msgid "Menu"
 msgstr "Menu"
 
-#: templates/base.html templates/jobs/my_applications.html
+#: templates/base.html templates/jobs/job_detail.html
+#: templates/jobs/my_applications.html
 msgid "My applications"
 msgstr "Moje zgłoszenia"
 
@@ -1151,7 +1152,9 @@ msgstr ""
 msgid ""
 "Please rate the employer by %(deadline)s. Your review is shown when the "
 "employer rates you too, or after that date:"
-msgstr "Prosimy ocenić zleceniodawcę do %(deadline)s. Opinia Pana/Pani zostanie pokazana, gdy zleceniodawca również Pana/Panią oceni, lub po tej dacie:"
+msgstr ""
+"Prosimy ocenić zleceniodawcę do %(deadline)s. Opinia Pana/Pani zostanie "
+"pokazana, gdy zleceniodawca również Pana/Panią oceni, lub po tej dacie:"
 
 #: templates/emails/review_request_subject.txt
 #, python-format
@@ -1774,7 +1777,9 @@ msgstr[3] "%(stars)s gwiazdki"
 msgid ""
 "Your review will be shown when %(name)s rates you too, or on %(date)s. It "
 "cannot be changed."
-msgstr "Opinia Pana/Pani zostanie pokazana, gdy %(name)s również Pana/Panią oceni, lub najpóźniej %(date)s. Nie można jej zmienić."
+msgstr ""
+"Opinia Pana/Pani zostanie pokazana, gdy %(name)s również Pana/Panią oceni, "
+"lub najpóźniej %(date)s. Nie można jej zmienić."
 
 #: templates/reviews/review_form.html
 msgid "Publish review"

@@ -43,7 +43,8 @@ logger = logging.getLogger(__name__)
 
 
 class LoginView(auth_views.LoginView):
-    """Django's login, but an employer lands on "My jobs" (#20, docs/specs/my-jobs.md D4).
+    """Django's login, but each role lands on its own page: an employer on "My jobs" (#20,
+    docs/specs/my-jobs.md D4), a worker on "My applications" (#38, reviews.md R15, D16).
 
     Django asks get_default_redirect_url() only when there is no safe `?next=` address, so
     a `?next=` still wins. After a successful login request.user is the new user.
@@ -51,9 +52,14 @@ class LoginView(auth_views.LoginView):
 
     @override
     def get_default_redirect_url(self):
-        """ "My jobs" for an employer; LOGIN_REDIRECT_URL (the home page) for everyone else."""
-        if self.request.user.role == User.Role.EMPLOYER:
-            return reverse("my_jobs")
+        """The role's own page; LOGIN_REDIRECT_URL (the home page) without a role yet."""
+        landing_pages = {
+            User.Role.EMPLOYER: "my_jobs",
+            User.Role.WORKER: "my_applications",
+        }
+        url_name = landing_pages.get(self.request.user.role)
+        if url_name:
+            return reverse(url_name)
         return super().get_default_redirect_url()
 
 

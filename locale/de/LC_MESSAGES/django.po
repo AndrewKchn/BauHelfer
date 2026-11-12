@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BauHelfer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-13 00:17+0100\n"
+"POT-Creation-Date: 2026-11-13 00:50+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -981,7 +981,8 @@ msgstr "Hauptnavigation"
 msgid "Menu"
 msgstr "Menü"
 
-#: templates/base.html templates/jobs/my_applications.html
+#: templates/base.html templates/jobs/job_detail.html
+#: templates/jobs/my_applications.html
 msgid "My applications"
 msgstr "Meine Bewerbungen"
 
@@ -1137,7 +1138,10 @@ msgstr ""
 msgid ""
 "Please rate the employer by %(deadline)s. Your review is shown when the "
 "employer rates you too, or after that date:"
-msgstr "Bitte bewerten Sie den Auftraggeber bis zum %(deadline)s. Ihre Bewertung wird angezeigt, sobald der Auftraggeber Sie ebenfalls bewertet, spätestens ab diesem Datum:"
+msgstr ""
+"Bitte bewerten Sie den Auftraggeber bis zum %(deadline)s. Ihre Bewertung "
+"wird angezeigt, sobald der Auftraggeber Sie ebenfalls bewertet, spätestens "
+"ab diesem Datum:"
 
 #: templates/emails/review_request_subject.txt
 #, python-format
