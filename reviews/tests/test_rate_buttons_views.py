@@ -114,6 +114,22 @@ def test_card_has_no_button_after_the_deadline(client, employer, worker):
     assertNotContains(response, "Rate the employer")
 
 
+def test_card_hides_the_own_rating_after_the_deadline(client, employer, worker):
+    """Nothing after the 14 days, also no "Rated" (D11).
+
+    1. Save Ivan's application of a job done 15 days ago and his 4-star review of it
+    2. Open "My applications" as Ivan
+    3. Expect: no "Rated ★4"
+    """
+    application = accepted(done_job(employer, done_ago=15 * DAY), worker)
+    Review.objects.create(application=application, author=worker, rating=4)
+    client.force_login(worker)
+
+    response = client.get(reverse("my_applications"))
+
+    assertNotContains(response, "Rated ★4")
+
+
 def test_my_applications_buttons_cost_no_query_per_card(client, employer, worker):
     """The same queries for 1 and for 3 done cards (R12).
 
