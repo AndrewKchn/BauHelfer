@@ -3,7 +3,7 @@
 Status: **agreed**. I decided D1–D5 on 2026-11-12 (my criteria: easy to use, simple code,
 and honest reviews: in #37 I wrote that reviews are the only check that the work happened).
 D6–D14 are Claude's defaults, which I accepted on 2026-11-12, before any tests. I added
-D15 on 2026-11-13, after trying iteration 2 locally.
+D15–D17 on 2026-11-13, after trying iteration 2 locally.
 
 Marks: **(mine, date)** — my decision; **(Claude's default, accepted)** — Claude's default
 that I accepted; **(Claude's recommendation)** — what Claude advised where I chose
@@ -17,10 +17,12 @@ review stays hidden until the other side has rated too, or until the 14 days for
 are over, so nobody rates in revenge. This ticket stores the reviews; #39 shows them on the
 profiles and the job page.
 
-Two iterations in one branch:
+Three iterations in one branch:
 
 1. The review and its page (R1–R9, D1–D4, D6–D13).
 2. The "Rate" buttons and the email when a job is done (R10–R14, D5, D14, D15).
+3. A worker's way back to "My applications": after login, and from the job page (R15,
+   R16, D16, D17).
 
 ### Out of scope
 
@@ -86,6 +88,15 @@ R13. `mark_done()`'s view emails every accepted worker of the job (D5): subject
 R14. Every new string is wrapped for translation and translated into all 7 languages (the
      tags included).
 
+### Iteration 3: the worker's way back to "My applications"
+
+R15. After logging in, a worker lands on "My applications", where "Rate the employer"
+     waits, as an employer lands on "My jobs" (D16). A `?next=` address still wins; a
+     logged-in worker who opens the login page goes there too (the same method). A user
+     without a role still lands on the home page (my-jobs.md R11).
+R16. The job page: a worker who applied to this job sees "← My applications" at the top,
+     where the owner sees "← My jobs"; everyone else "← Jobs", as before (D17).
+
 ## Acceptance criteria (→ tests)
 
 ### Iteration 1
@@ -120,6 +131,14 @@ AC10. Same number of queries for 1 and for 3 cards / workers / jobs with the but
 AC11. Marking a job with two accepted workers done sends two emails, in each worker's
       language, with the link to each one's review page; a worker with emails off gets
       none. A failing mail backend: the job is still done, the error logged.
+
+### Iteration 3
+
+AC12. A worker who logs in on the login page is sent to "My applications"; with
+      `?next=` to that page; a logged-in worker who opens the login page to "My
+      applications".
+AC13. The job page as a worker with an application to it: a link "← My applications";
+      as a worker without one, and as a guest: "← Jobs"; as the owner: "← My jobs".
 
 ## Decisions
 
@@ -180,6 +199,20 @@ D15. **"Rate the workers" on the employer's "My jobs" card** (mine, 2026-11-13; 
      left to rate; the rating itself stays on the job page, per worker (D4). Rejected: the
      button on every done card for 14 days (B: it asks for reviews already given); leaving
      it (C). Cost: two more queries for the whole page, none per card.
+D16. **A worker lands on "My applications" after login** (mine, 2026-11-13; option A): I
+     want workers to get used to their own page, as employers did with "My jobs"; there
+     the next job, its contacts and "Rate the employer" wait. A worker with no application
+     sees "You have not applied to any job yet." and "Find a job", one click to the list.
+     Rejected: "My applications" only when there are applications (B: a query at login,
+     the landing depends on the data); leaving the job list (C). Changes my-jobs.md R11,
+     D4 (there only the employer had a page of their own).
+D17. **"← My applications" on the job page for a worker who applied** (mine, 2026-11-13;
+     option A): by who looks, as the owner's "← My jobs" (applications-list.md D17), not
+     by the page they came from. A worker who opens their own job from the list goes back
+     to "My applications" too; that is where it is. Rejected: `?from=applications` on the
+     card links (B: more code, and the email's link has none); the browser's back (C:
+     JavaScript, and nowhere to go from an email). Changes applications-list.md D17 for
+     workers.
 
 ## Open questions
 
