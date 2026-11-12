@@ -1,6 +1,18 @@
 # BauHelfer translations (#29). Edit msgstr here, then run compilemessages.
 msgid ""
-msgstr "Project-Id-Version: BauHelfer\nReport-Msgid-Bugs-To: \nPOT-Creation-Date: 2026-11-07 02:18+0100\nPO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\nLast-Translator: FULL NAME <EMAIL@ADDRESS>\nLanguage-Team: LANGUAGE <LL@li.org>\nLanguage: ro\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));\n"
+msgstr ""
+"Project-Id-Version: BauHelfer\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-07 02:18+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: ro\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?"
+"2:1));\n"
 
 #: accounts/admin.py
 msgid "Profile"
@@ -24,7 +36,8 @@ msgstr "E-mail sau parolă greșită."
 
 #: accounts/forms.py
 msgid "Please confirm your email first. We sent you a link when you signed up."
-msgstr "Confirmați mai întâi adresa de e-mail. V-am trimis un link la înregistrare."
+msgstr ""
+"Confirmați mai întâi adresa de e-mail. V-am trimis un link la înregistrare."
 
 #: accounts/forms.py templates/accounts/employer_profile.html
 #: templates/accounts/worker_profile.html
@@ -32,16 +45,22 @@ msgid "Email"
 msgstr "E-mail"
 
 #: accounts/forms.py
-msgid "Optional. Shown only to the people you work with, until the day of the job is over."
-msgstr "Opțional. Vizibil doar pentru persoanele cu care lucrați, până la sfârșitul zilei de lucru."
+msgid ""
+"Optional. Shown only to the people you work with, until the day of the job "
+"is over."
+msgstr ""
+"Opțional. Vizibil doar pentru persoanele cu care lucrați, până la sfârșitul "
+"zilei de lucru."
 
 #: accounts/forms.py
 msgid "I am allowed to work in Germany"
 msgstr "Am dreptul să lucrez în Germania"
 
 #: accounts/forms.py
-msgid "For example as an EU citizen, or with a residence permit that allows work."
-msgstr "De exemplu, ca cetățean UE sau cu un permis de ședere care permite munca."
+msgid ""
+"For example as an EU citizen, or with a residence permit that allows work."
+msgstr ""
+"De exemplu, ca cetățean UE sau cu un permis de ședere care permite munca."
 
 #: accounts/forms.py templates/accounts/_worker_profile_card.html
 msgid "Skills"
@@ -96,8 +115,12 @@ msgid "email notifications"
 msgstr "notificări prin e-mail"
 
 #: accounts/models.py
-msgid "New applications and decisions on applications. Emails about your password are always sent."
-msgstr "Candidaturi noi și decizii privind candidaturile. E-mailurile despre parolă se trimit întotdeauna."
+msgid ""
+"New applications and decisions on applications. Emails about your password "
+"are always sent."
+msgstr ""
+"Candidaturi noi și decizii privind candidaturile. E-mailurile despre parolă "
+"se trimit întotdeauna."
 
 #: accounts/models.py
 msgid "email confirmed at"
@@ -233,7 +256,8 @@ msgstr "mărimea echipei"
 
 #: accounts/models.py
 msgid "1 = only you. 2-10 = your crew, including you."
-msgstr "1 = doar dumneavoastră. 2–10 = echipa dumneavoastră, inclusiv dumneavoastră."
+msgstr ""
+"1 = doar dumneavoastră. 2–10 = echipa dumneavoastră, inclusiv dumneavoastră."
 
 #: accounts/models.py
 msgid "skills"
@@ -348,16 +372,25 @@ msgid "email verification required"
 msgstr "confirmarea e-mailului este obligatorie"
 
 #: accounts/models.py
-msgid "Off: a new account is active and logged in at once, with no confirmation email, e.g. for a demo. Its address stays unconfirmed, so it gets no emails."
-msgstr "Dezactivat: un cont nou este activ și autentificat imediat, fără e-mail de confirmare, de exemplu pentru o demonstrație. Adresa lui rămâne neconfirmată, deci nu primește e-mailuri."
+msgid ""
+"Off: a new account is active and logged in at once, with no confirmation "
+"email, e.g. for a demo. Its address stays unconfirmed, so it gets no emails."
+msgstr ""
+"Dezactivat: un cont nou este activ și autentificat imediat, fără e-mail de "
+"confirmare, de exemplu pentru o demonstrație. Adresa lui rămâne "
+"neconfirmată, deci nu primește e-mailuri."
 
 #: accounts/models.py
 msgid "site settings"
 msgstr "setările site-ului"
 
 #: accounts/validators.py
-msgid "Enter the number with a country code, e.g. +49 151 12345678, or with an area code, e.g. 0151 12345678."
-msgstr "Introduceți numărul cu prefixul țării, de ex. +49 151 12345678, sau cu prefixul zonei, de ex. 0151 12345678."
+msgid ""
+"Enter the number with a country code, e.g. +49 151 12345678, or with an area "
+"code, e.g. 0151 12345678."
+msgstr ""
+"Introduceți numărul cu prefixul țării, de ex. +49 151 12345678, sau cu "
+"prefixul zonei, de ex. 0151 12345678."
 
 #: accounts/views.py
 msgid "Welcome to BauHelfer! Your account is ready."
@@ -376,8 +409,11 @@ msgid "Hourly rate, €"
 msgstr "Tarif orar, €"
 
 #: jobs/forms.py
-msgid "Write in your language, up to 1000 characters. Workers read it in theirs."
-msgstr "Scrieți în limba dumneavoastră, până la 1000 de caractere. Muncitorii citesc în limba lor."
+msgid ""
+"Write in your language, up to 1000 characters. Workers read it in theirs."
+msgstr ""
+"Scrieți în limba dumneavoastră, până la 1000 de caractere. Muncitorii citesc "
+"în limba lor."
 
 #: jobs/forms.py
 msgid "The date cannot be in the past."
@@ -607,7 +643,8 @@ msgstr "Încărcați o fotografie în format JPEG, PNG sau WebP."
 
 #: jobs/photos.py
 msgid "This picture has too many pixels. Please upload a normal photo."
-msgstr "Această imagine are prea mulți pixeli. Încărcați o fotografie obișnuită."
+msgstr ""
+"Această imagine are prea mulți pixeli. Încărcați o fotografie obișnuită."
 
 #: jobs/photos.py
 msgid "A photo can be at most 5 MB."
@@ -707,7 +744,8 @@ msgstr[2] "Acceptați: %(count)d de muncitori de la %(name)s."
 
 #: jobs/views.py
 msgid "The job is filled. The other pending applications were closed."
-msgstr "Lucrarea este ocupată. Celelalte candidaturi în așteptare au fost închise."
+msgstr ""
+"Lucrarea este ocupată. Celelalte candidaturi în așteptare au fost închise."
 
 #: jobs/views.py
 #, python-format
@@ -922,15 +960,26 @@ msgstr "Bună ziua,"
 
 #: templates/emails/application_accepted_body.txt
 #, python-format
-msgid "The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: %(counter)s worker."
-msgid_plural "The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: %(counter)s workers."
-msgstr[0] "Angajatorul v-a acceptat pentru %(job_type)s, %(date)s, începere la %(time)s: %(counter)s muncitor."
-msgstr[1] "Angajatorul v-a acceptat pentru %(job_type)s, %(date)s, începere la %(time)s: %(counter)s muncitori."
-msgstr[2] "Angajatorul v-a acceptat pentru %(job_type)s, %(date)s, începere la %(time)s: %(counter)s de muncitori."
+msgid ""
+"The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: "
+"%(counter)s worker."
+msgid_plural ""
+"The employer accepted you for %(job_type)s, %(date)s, start at %(time)s: "
+"%(counter)s workers."
+msgstr[0] ""
+"Angajatorul v-a acceptat pentru %(job_type)s, %(date)s, începere la "
+"%(time)s: %(counter)s muncitor."
+msgstr[1] ""
+"Angajatorul v-a acceptat pentru %(job_type)s, %(date)s, începere la "
+"%(time)s: %(counter)s muncitori."
+msgstr[2] ""
+"Angajatorul v-a acceptat pentru %(job_type)s, %(date)s, începere la "
+"%(time)s: %(counter)s de muncitori."
 
 #: templates/emails/application_accepted_body.txt
 msgid "The employer's contact and the address are on “My applications”:"
-msgstr "Datele de contact ale angajatorului și adresa sunt la „Candidaturile mele”:"
+msgstr ""
+"Datele de contact ale angajatorului și adresa sunt la „Candidaturile mele”:"
 
 #: templates/emails/application_accepted_subject.txt
 #, python-format
@@ -939,7 +988,8 @@ msgstr "Ați fost acceptat: %(job_type)s, %(date)s"
 
 #: templates/emails/application_rejected_body.txt
 #, python-format
-msgid "The employer did not accept your application for %(job_type)s, %(date)s."
+msgid ""
+"The employer did not accept your application for %(job_type)s, %(date)s."
 msgstr "Angajatorul nu v-a acceptat candidatura pentru %(job_type)s, %(date)s."
 
 #: templates/emails/application_rejected_body.txt
@@ -953,11 +1003,21 @@ msgstr "Candidatură neacceptată: %(job_type)s, %(date)s"
 
 #: templates/emails/new_application_body.txt
 #, python-format
-msgid "%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s worker."
-msgid_plural "%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s workers."
-msgstr[0] "%(name)s a candidat la lucrarea dumneavoastră %(job_type)s, %(date)s, cu %(counter)s muncitor."
-msgstr[1] "%(name)s a candidat la lucrarea dumneavoastră %(job_type)s, %(date)s, cu %(counter)s muncitori."
-msgstr[2] "%(name)s a candidat la lucrarea dumneavoastră %(job_type)s, %(date)s, cu %(counter)s de muncitori."
+msgid ""
+"%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s "
+"worker."
+msgid_plural ""
+"%(name)s applied for your job %(job_type)s, %(date)s, with %(counter)s "
+"workers."
+msgstr[0] ""
+"%(name)s a candidat la lucrarea dumneavoastră %(job_type)s, %(date)s, cu "
+"%(counter)s muncitor."
+msgstr[1] ""
+"%(name)s a candidat la lucrarea dumneavoastră %(job_type)s, %(date)s, cu "
+"%(counter)s muncitori."
+msgstr[2] ""
+"%(name)s a candidat la lucrarea dumneavoastră %(job_type)s, %(date)s, cu "
+"%(counter)s de muncitori."
 
 #: templates/emails/new_application_body.txt
 msgid "Accept or reject the application here:"
@@ -969,8 +1029,12 @@ msgid "New application: %(job_type)s, %(date)s"
 msgstr "Candidatură nouă: %(job_type)s, %(date)s"
 
 #: templates/emails/verify_email_body.txt
-msgid "Someone created a BauHelfer account with this email address. Open this link to confirm the address and activate the account:"
-msgstr "Cineva a creat un cont BauHelfer cu această adresă de e-mail. Deschideți acest link pentru a confirma adresa și a activa contul:"
+msgid ""
+"Someone created a BauHelfer account with this email address. Open this link "
+"to confirm the address and activate the account:"
+msgstr ""
+"Cineva a creat un cont BauHelfer cu această adresă de e-mail. Deschideți "
+"acest link pentru a confirma adresa și a activa contul:"
 
 #: templates/emails/verify_email_body.txt
 #, python-format
@@ -981,8 +1045,12 @@ msgstr[1] "Linkul funcționează o singură dată, timp de %(counter)s zile."
 msgstr[2] "Linkul funcționează o singură dată, timp de %(counter)s de zile."
 
 #: templates/emails/verify_email_body.txt
-msgid "If you did not create an account, ignore this email: without the link nothing happens."
-msgstr "Dacă nu ați creat un cont, ignorați acest e-mail: fără link nu se întâmplă nimic."
+msgid ""
+"If you did not create an account, ignore this email: without the link "
+"nothing happens."
+msgstr ""
+"Dacă nu ați creat un cont, ignorați acest e-mail: fără link nu se întâmplă "
+"nimic."
 
 #: templates/emails/verify_email_subject.txt
 msgid "Confirm your email for BauHelfer"
@@ -1249,7 +1317,9 @@ msgstr "Respingeți"
 
 #: templates/jobs/job_detail.html
 msgid "Accepting fills the job: the other pending applications will be closed."
-msgstr "Dacă acceptați, lucrarea devine ocupată: celelalte candidaturi în așteptare vor fi închise."
+msgstr ""
+"Dacă acceptați, lucrarea devine ocupată: celelalte candidaturi în așteptare "
+"vor fi închise."
 
 #: templates/jobs/job_detail.html
 msgid "No applications yet."
@@ -1417,20 +1487,33 @@ msgid "Check your email"
 msgstr "Verificați e-mailul"
 
 #: templates/registration/password_reset_done.html
-msgid "If an account with this email exists, we have sent a link to set a new password. Check your spam folder too."
-msgstr "Dacă există un cont cu această adresă, am trimis un link pentru o parolă nouă. Verificați și dosarul de spam."
+msgid ""
+"If an account with this email exists, we have sent a link to set a new "
+"password. Check your spam folder too."
+msgstr ""
+"Dacă există un cont cu această adresă, am trimis un link pentru o parolă "
+"nouă. Verificați și dosarul de spam."
 
 #: templates/registration/password_reset_email.txt
-msgid "Someone asked to reset the password for your BauHelfer account. Open this link to set a new password:"
-msgstr "Cineva a cerut resetarea parolei contului dumneavoastră BauHelfer. Deschideți acest link pentru a seta o parolă nouă:"
+msgid ""
+"Someone asked to reset the password for your BauHelfer account. Open this "
+"link to set a new password:"
+msgstr ""
+"Cineva a cerut resetarea parolei contului dumneavoastră BauHelfer. "
+"Deschideți acest link pentru a seta o parolă nouă:"
 
 #: templates/registration/password_reset_email.txt
 msgid "If it was not you, ignore this email: your password stays the same."
-msgstr "Dacă nu ați fost dumneavoastră, ignorați acest e-mail: parola rămâne aceeași."
+msgstr ""
+"Dacă nu ați fost dumneavoastră, ignorați acest e-mail: parola rămâne aceeași."
 
 #: templates/registration/password_reset_form.html
-msgid "Enter the email of your account. We will send you a link to set a new password."
-msgstr "Introduceți adresa de e-mail a contului. Vă vom trimite un link pentru o parolă nouă."
+msgid ""
+"Enter the email of your account. We will send you a link to set a new "
+"password."
+msgstr ""
+"Introduceți adresa de e-mail a contului. Vă vom trimite un link pentru o "
+"parolă nouă."
 
 #: templates/registration/password_reset_form.html
 msgid "Send link"
@@ -1485,16 +1568,23 @@ msgid "Press the button to confirm your address and activate your account."
 msgstr "Apăsați butonul pentru a confirma adresa și a activa contul."
 
 #: templates/registration/verify_email.html
-msgid "This link is invalid or has expired. It works only once: if you already confirmed your email, just log in."
-msgstr "Acest link nu este valid sau a expirat. Funcționează o singură dată: dacă ați confirmat deja adresa, autentificați-vă."
+msgid ""
+"This link is invalid or has expired. It works only once: if you already "
+"confirmed your email, just log in."
+msgstr ""
+"Acest link nu este valid sau a expirat. Funcționează o singură dată: dacă "
+"ați confirmat deja adresa, autentificați-vă."
 
 #: templates/registration/verify_email_resend.html
 msgid "Enter the email you signed up with. We send a new link to confirm it."
-msgstr "Introduceți adresa de e-mail cu care v-ați înregistrat. Vă trimitem un link nou pentru confirmare."
+msgstr ""
+"Introduceți adresa de e-mail cu care v-ați înregistrat. Vă trimitem un link "
+"nou pentru confirmare."
 
 #: templates/registration/verify_email_resend_done.html
 msgid "If an unconfirmed account uses this address, we sent a new link."
-msgstr "Dacă un cont neconfirmat folosește această adresă, am trimis un link nou."
+msgstr ""
+"Dacă un cont neconfirmat folosește această adresă, am trimis un link nou."
 
 #: templates/registration/verify_email_resend_done.html
 msgid "A new link can be sent once every 10 minutes."
