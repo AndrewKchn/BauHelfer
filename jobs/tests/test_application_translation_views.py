@@ -10,10 +10,11 @@ the network.
 from typing import ClassVar
 
 import pytest
+from django.contrib.messages import get_messages
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
-from pytest_django.asserts import assertContains, assertNotContains
+from pytest_django.asserts import assertContains, assertNotContains, assertRedirects
 
 from jobs.models import Application
 from jobs.shown_text import ShownText
@@ -97,12 +98,14 @@ def employer_client(client, employer):
 
 
 def send(client, worker, job, message):
-    """Log in as `worker` and send an application with `message`."""
+    """Log in as `worker` and send an application with `message`.
+
+    The redirect is not followed: the job page after it is the worker's, in Ukrainian, and
+    would translate the job's description, a call that has nothing to do with sending.
+    """
     client.force_login(worker)
     return client.post(
-        reverse("job_apply", args=[job.pk]),
-        {"workers_offered": 1, "message": message},
-        follow=True,
+        reverse("job_apply", args=[job.pk]), {"workers_offered": 1, "message": message}
     )
 
 
@@ -200,13 +203,15 @@ def test_failing_translator_does_not_stop_the_application(
 
     1. The translator raises on detection and on translation
     2. Send an application with a message
-    3. Expect: "Application sent.", the application saved with the worker's language
+    3. Expect: back to the job with a success message ("Application sent." in the
+       worker's Ukrainian), the application saved with the worker's language
     """
     settings.TRANSLATION_BACKEND = f"{__name__}.UnavailableBackend"
 
     response = send(client, worker, job, UKRAINIAN)
 
-    assertContains(response, "Application sent.")
+    assertRedirects(response, detail_url(job), fetch_redirect_response=False)
+    assert [m.level_tag for m in get_messages(response.wsgi_request)] == ["success"]
     assert Application.objects.get().original_language == "uk"
 
 

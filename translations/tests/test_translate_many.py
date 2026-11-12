@@ -70,6 +70,20 @@ def test_cached_texts_cost_one_query(recording, django_assert_num_queries):
     assert recording.calls == []
 
 
+def test_a_translation_into_another_language_is_not_used():
+    """The cache row of another language is not this reader's translation.
+
+    1. Cache a Polish translation of a text
+    2. Ask for the text in German
+    3. Expect: a new German translation, not the Polish one
+    """
+    cache("Suntem trei.", "pl", "Jest nas trzech.")
+
+    result = translate_many(["Suntem trei."], "de")
+
+    assert result == {"Suntem trei.": Translated("de: Suntem trei.", ok=True)}
+
+
 def test_a_text_not_cached_is_translated_and_saved(recording):
     """A text missing from the cache goes to the translator, as with translate().
 
