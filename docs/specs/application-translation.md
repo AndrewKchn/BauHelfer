@@ -144,7 +144,8 @@ AC9. The page's queries do not grow with the applications (applications-list.md 
 R15. With the state `translated`, the label ends with "· Show original": a link to the same
      page with `?original=<application id>#application-<id>` (D8). HTMX attributes as in
      job-translation.md R11, but `hx-select` and `hx-target` are `#message-<id>`, the
-     message's own block: only it is swapped, without a reload.
+     message's own block: only it is swapped, without a reload. `#application-<id>` is
+     only in `href`, not in `hx-get`: HTMX would scroll to it after the swap.
 R16. `?original=<id>` shows that application's message in the original with "Original ·
      Show translation", state `original`; the others stay translated. "Show translation"
      links to the page without the parameter. A wrong or foreign id changes nothing.
