@@ -2,7 +2,8 @@
 
 Status: **agreed**. I decided D1–D5 on 2026-11-12 (my criteria: easy to use, simple code,
 and honest reviews: in #37 I wrote that reviews are the only check that the work happened).
-D6–D14 are Claude's defaults, which I accepted on 2026-11-12, before any tests.
+D6–D14 are Claude's defaults, which I accepted on 2026-11-12, before any tests. I added
+D15 on 2026-11-13, after trying iteration 2 locally.
 
 Marks: **(mine, date)** — my decision; **(Claude's default, accepted)** — Claude's default
 that I accepted; **(Claude's recommendation)** — what Claude advised where I chose
@@ -19,7 +20,7 @@ profiles and the job page.
 Two iterations in one branch:
 
 1. The review and its page (R1–R9, D1–D4, D6–D13).
-2. The "Rate" buttons and the email when a job is done (R10–R14, D5, D14).
+2. The "Rate" buttons and the email when a job is done (R10–R14, D5, D14, D15).
 
 ### Out of scope
 
@@ -71,8 +72,12 @@ R10. "My applications", "Done" tab: a card that `can_review` shows "Rate the emp
      instead; after the deadline neither (D11).
 R11. The job page, the owner's list of accepted workers of a done job: "Rate" next to each
      worker that `can_review`, "Rated ★4" after it (D4, D11).
-R12. Both pages ask no extra query per card or per worker for the buttons (the reviews
-     are loaded with the applications).
+R11a. "My jobs", "Done" tab: a job with at least one accepted worker the employer can
+      still rate shows "Rate the workers" (`btn-primary`, where "Mark as done" was), a link
+      to the job page's list of applications (D15); none once all are rated or after the
+      deadline.
+R12. The three pages ask no extra query per card or per worker for the buttons (the
+     reviews are loaded with the applications).
 R13. `mark_done()`'s view emails every accepted worker of the job (D5): subject
      "Rate the employer: <job type>, <date>"; the body says the employer marked the job
      done, that the worker can rate them until <deadline date>, and links to the review
@@ -109,7 +114,9 @@ AC8. "My applications": "Rate the employer" on a done card the worker can review
      "Rated ★4" after the review; nothing after the deadline.
 AC9. The job page: "Rate" next to an accepted worker of the owner's done job, "Rated ★4"
      after it; none on a filled job that is not done.
-AC10. Same number of queries for 1 and for 3 cards / workers with the buttons.
+AC9a. "My jobs": "Rate the workers" on a done job with a worker left to rate, linking to
+      its applications; none when every worker is rated, none after the deadline.
+AC10. Same number of queries for 1 and for 3 cards / workers / jobs with the buttons.
 AC11. Marking a job with two accepted workers done sends two emails, in each worker's
       language, with the link to each one's review page; a worker with emails off gets
       none. A failing mail backend: the job is still done, the error logged.
@@ -167,6 +174,12 @@ D12. **The stars are daisyUI's `rating`: five radio buttons** (Claude's default,
 D13. **Reviews in a new app `reviews`** (Claude's default, accepted), as planned in `docs/PLAN.md`.
 D14. **The email is sent by the view, after the save** (Claude's default, accepted), as the
      cancellation email of #37.
+D15. **"Rate the workers" on the employer's "My jobs" card** (mine, 2026-11-13; option A):
+     the worker saw "Rate the employer" in the list, the employer only on the job page, and
+     gets no email (D5), so the 14 days could end unnoticed. Shown only while someone is
+     left to rate; the rating itself stays on the job page, per worker (D4). Rejected: the
+     button on every done card for 14 days (B: it asks for reviews already given); leaving
+     it (C). Cost: two more queries for the whole page, none per card.
 
 ## Open questions
 
