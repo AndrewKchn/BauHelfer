@@ -2872,3 +2872,64 @@ caught after the fix below. 360 px shots in both themes, and the cheat-sheet tab
 - Why the model checks the rule again under a row lock although the template already hides
   the button.
 - Why `list()` is needed before `update()` in `Job.cancel()`.
+
+## 2026-11-13 · #38 Reviews and ratings in both directions
+
+**Task given to AI:** do #38: after a job is done, the employer and each accepted worker
+rate each other. My open question from #37 was in the issue: should a worker be able to rate
+an employer who cancels at the last minute?
+
+**AI helped:** it compared the issue with the "Worker profile" and "My applications"
+mockups and put the forks to me one at a time, each with an example and a cost table. It
+wrote `docs/specs/reviews.md` (D1–D17, three iterations) and the failing tests. Then it wrote
+the new `reviews` app: `Review` with two database rules (one review per side, rating 1–5),
+`Job.done_at`, `Application.can_review()` as the one place that decides who may review, and
+`Review.is_visible`, which is computed when read, with no scheduled job. On top of that: the
+review page, the "Rate" / "Rated ★4" buttons with no query per card, the email to the
+workers when a job is done, "Rate the workers" on "My jobs", the worker's landing page after
+login, and the link back from the job page. It translated everything into 6 languages; DE,
+PL, RO and TR were back-translated by separate agents. It ran 47 mutations, took 360 px shots
+in both themes, drafted the Docs sync comments and wrote the cheat-sheet tab.
+
+**AI failed:**
+- My first question about the tags ("are there stars for each tag?") showed that its
+  proposal did not say there is one rating per job. Later its table for the back link
+  mentioned the employer, and I thought it was changing the employer's page. Both needed a
+  second, clearer explanation.
+- Four mutations survived. Twice a check duplicated `can_review` (a filter in the review
+  view, a status check in `has_workers_to_rate`), and both were removed. Twice a test was
+  missing or weak: the "job not done" test passed because of the deadline, not the status,
+  and nothing checked that "Rated ★4" disappears after the deadline. A test was fixed and one
+  was added.
+- Its own translations had 7 style problems found by back-translation: a vague date in DE,
+  "Pana/Pani opinia" in PL, "Notă" and "Evaluat" in RO, a broken phrase in TR. gettext also
+  offered wrong "fuzzy" guesses ("Rating" → "Painting"). These were replaced before
+  compiling.
+- One test used a URL name that does not exist (`job_list`). Twice ruff refused a mutable
+  class attribute. Both were caught by the test run and the linter.
+- It sent two GitHub writes in one command, and auto mode blocked it. It worked one command
+  at a time.
+
+**My part:**
+- D1: I liked option B more (a worker can rate an employer who cancels less than 24 hours
+  before the start). I chose A, only done jobs, because time is short. B is kept as an idea
+  in Docs sync M6, and the limitation is written down.
+- D2: Claude recommended a public comment, as on the mockup. I chose stars plus positive
+  tags instead: a review takes little time, and no AI translation or moderation is needed. I
+  wasn't sure how to count the tags, so that went to #39.
+- D3 (hidden until both sides rate, or for 14 days), D4 (one review page) and D5 (email to
+  the workers): I took Claude's recommendations because they matched what I wanted.
+- D6–D14: I accepted Claude's defaults: they were small, and they matched what I wanted.
+- My own ideas after trying it locally: tags one per row ("I don't like that the text
+  wraps"); "Rate the workers" on "My jobs" (D15), because the worker saw the button in the
+  list and the employer did not; a worker lands on "My applications" after login (D16), "so
+  they get used to clicking there right away"; "← My applications" on the job page for a
+  worker who applied (D17).
+- I checked every iteration by hand on `runserver`, including the "Rate the employer" email
+  in the console. I read the RU and UK translations and accepted the back-translation fixes.
+
+**Learned:**
+- Why a unique constraint in the database is needed although the form already checks: two
+  tabs can both pass the form.
+- Why a template cannot call `can_review(user)`, and how `prefetch_related("reviews")`
+  keeps the buttons to one query for the whole page.
