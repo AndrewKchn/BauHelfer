@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Rate the work" %} · BauHelfer{% endblock %}
+
+{% block content %}
+  {# One side rates the other for one done job (#38, docs/specs/reviews.md R8, D2, D4). #}
+  <div class="card bg-base-100 shadow-sm">
+    <div class="card-body">
+      <h1 class="card-title text-2xl break-words">{% blocktranslate with name=rated_name %}Rate {{ name }}{% endblocktranslate %}</h1>
+      {% include "jobs/_job_summary.html" %}
+
+      <form method="post" class="mt-2">
+        {% csrf_token %}
+        {% include "_form_errors.html" %}
+
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">{{ form.rating.label }}</legend>
+          {# daisyUI's rating (D12): five radio buttons drawn as stars, no JavaScript. #}
+          {# Picking the 4th fills stars 1-4; each star says its number to screen readers. #}
+          <div class="rating rating-lg gap-2">
+            {% for choice in form.rating %}
+              <input type="radio" name="{{ form.rating.html_name }}" value="{{ choice.data.value }}" class="mask mask-star-2 bg-accent" aria-label="{% blocktranslate count stars=choice.data.value %}{{ stars }} star{% plural %}{{ stars }} stars{% endblocktranslate %}"{% if choice.data.selected %} checked{% endif %} required>
+            {% endfor %}
+          </div>
+          {% for error in form.rating.errors %}
+            <p class="text-sm text-error">{{ error }}</p>
+          {% endfor %}
+        </fieldset>
+
+        {# One tag per row: in two columns the long ones broke into three lines. #}
+        {% include "_form_field.html" with field=form.tags one_column=True %}
+
+        {# The review is hidden until the other side rates too, or until the deadline (D3); #}
+        {# it cannot be changed (D6). Said before publishing, so nobody is surprised. #}
+        <p class="mt-4 text-sm text-base-content/70">{% blocktranslate with name=rated_name date=application.review_deadline|date:"j M" %}Your review will be shown when {{ name }} rates you too, or on {{ date }}. It cannot be changed.{% endblocktranslate %}</p>
+
+        <button type="submit" class="btn btn-primary mt-4 w-full">{% translate "Publish review" %}</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

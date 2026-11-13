@@ -7,9 +7,13 @@
 {% block title %}{{ job.get_job_type_display }} · BauHelfer{% endblock %}
 
 {% block content %}
-  {# The owner comes from "My jobs" and goes back there (#23, applications-list.md D17). #}
+  {# The owner comes from "My jobs" and goes back there (#23, applications-list.md D17); #}
+  {# a worker who applied, to "My applications", where this job is (#38, reviews.md R16, #}
+  {# D17). `application` is the worker's own, set by the view for workers only. #}
   {% if is_owner %}
     <a href="{% url 'my_jobs' %}" class="link link-hover text-sm">← {% translate "My jobs" %}</a>
+  {% elif application %}
+    <a href="{% url 'my_applications' %}" class="link link-hover text-sm">← {% translate "My applications" %}</a>
   {% else %}
     <a href="{% url 'home' %}" class="link link-hover text-sm">← {% translate "Jobs" %}</a>
   {% endif %}
@@ -198,6 +202,12 @@
                         {% csrf_token %}
                         <button type="submit" class="btn btn-outline btn-sm">{% translate "Cancel" %}</button>
                       </form>
+                    {% elif application.can_rate %}
+                      {# A done job: rate this worker, then the own rating instead (#38, #}
+                      {# reviews.md R11, D4, D11); set by the view (add_review_state). #}
+                      <a href="{% url 'review_create' application.pk %}" class="btn btn-primary btn-sm">{% translate "Rate" %}</a>
+                    {% elif application.own_review %}
+                      <span class="text-sm">{% blocktranslate with rating=application.own_review.rating %}Rated ★{{ rating }}{% endblocktranslate %}</span>
                     {% endif %}
                   </div>
                   {# Decisions only on a pending application of an open job (#24, R7, D5). #}

@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BauHelfer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 13:35+0100\n"
+"POT-Creation-Date: 2026-11-13 00:50+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -560,9 +560,13 @@ msgstr "погодинна ставка (€)"
 msgid "status"
 msgstr "статус"
 
-#: jobs/models.py
+#: jobs/models.py reviews/models.py
 msgid "created at"
 msgstr "створено"
+
+#: jobs/models.py
+msgid "done at"
+msgstr "дата завершення"
 
 #: jobs/models.py
 msgid "job"
@@ -628,7 +632,7 @@ msgstr "запропоновано робітників"
 msgid "workers accepted"
 msgstr "прийнято робітників"
 
-#: jobs/models.py
+#: jobs/models.py reviews/models.py
 msgid "application"
 msgstr "заявка"
 
@@ -773,6 +777,78 @@ msgstr "Цю заявку вже не можна відкликати."
 msgid "Application withdrawn."
 msgstr "Заявку відкликано."
 
+#: reviews/forms.py
+msgid "Rating"
+msgstr "Оцінка"
+
+#: reviews/forms.py
+msgid "What went well? (optional)"
+msgstr "Що було добре? (необов'язково)"
+
+#: reviews/models.py
+msgid "On time"
+msgstr "Пунктуальність"
+
+#: reviews/models.py
+msgid "Careful work"
+msgstr "Акуратна робота"
+
+#: reviews/models.py
+msgid "Hard-working"
+msgstr "Працьовитість"
+
+#: reviews/models.py
+msgid "Left the site clean"
+msgstr "Порядок на об'єкті після роботи"
+
+#: reviews/models.py
+msgid "Followed safety rules"
+msgstr "Дотримання техніки безпеки"
+
+#: reviews/models.py
+msgid "Paid in full and on time"
+msgstr "Оплата повністю і вчасно"
+
+#: reviews/models.py
+msgid "Job as described"
+msgstr "Робота відповідає опису"
+
+#: reviews/models.py
+msgid "Safe workplace"
+msgstr "Безпечне робоче місце"
+
+#: reviews/models.py
+msgid "Clear instructions"
+msgstr "Зрозумілі вказівки"
+
+#: reviews/models.py
+msgid "Respectful"
+msgstr "Шанобливе ставлення"
+
+#: reviews/models.py
+msgid "author"
+msgstr "автор"
+
+#: reviews/models.py
+msgid "rating"
+msgstr "оцінка"
+
+#: reviews/models.py
+msgid "tags"
+msgstr "мітки"
+
+#: reviews/models.py
+msgid "review"
+msgstr "відгук"
+
+#: reviews/models.py
+msgid "reviews"
+msgstr "відгуки"
+
+#: reviews/views.py
+msgid "Review published."
+msgstr "Відгук опубліковано."
+
 #: templates/_language_switcher.html
 msgid "Change language"
 msgstr "Змінити мову"
@@ -908,7 +984,8 @@ msgstr "Головне меню"
 msgid "Menu"
 msgstr "Меню"
 
-#: templates/base.html templates/jobs/my_applications.html
+#: templates/base.html templates/jobs/job_detail.html
+#: templates/jobs/my_applications.html
 msgid "My applications"
 msgstr "Мої заявки"
 
@@ -1060,6 +1137,26 @@ msgstr "Прийняти або відхилити заявку можна ту�
 msgid "New application: %(job_type)s, %(date)s"
 msgstr "Нова заявка: %(job_type)s, %(date)s"
 
+#: templates/emails/review_request_body.txt
+#, python-format
+msgid "%(employer)s marked the job as done: %(job_type)s, %(date)s."
+msgstr ""
+"%(employer)s: вакансію «%(job_type)s», %(date)s, позначено як завершену."
+
+#: templates/emails/review_request_body.txt
+#, python-format
+msgid ""
+"Please rate the employer by %(deadline)s. Your review is shown when the "
+"employer rates you too, or after that date:"
+msgstr ""
+"Будь ласка, оцініть роботодавця до %(deadline)s. Ваш відгук буде показано, "
+"коли роботодавець теж оцінить вас, або після цієї дати:"
+
+#: templates/emails/review_request_subject.txt
+#, python-format
+msgid "Rate the employer: %(job_type)s, %(date)s"
+msgstr "Оцініть роботодавця: %(job_type)s, %(date)s"
+
 #: templates/emails/verify_email_body.txt
 msgid ""
 "Someone created a BauHelfer account with this email address. Open this link "
@@ -1180,6 +1277,15 @@ msgid "Withdraw"
 msgstr "Відкликати"
 
 #: templates/jobs/_my_application_card.html
+msgid "Rate the employer"
+msgstr "Оцінити роботодавця"
+
+#: templates/jobs/_my_application_card.html templates/jobs/job_detail.html
+#, python-format
+msgid "Rated ★%(rating)s"
+msgstr "Ваша оцінка: ★%(rating)s"
+
+#: templates/jobs/_my_application_card.html
 msgid "Contact"
 msgstr "Контакт"
 
@@ -1243,6 +1349,10 @@ msgstr "Позначити вакансію як завершену? Цю дію
 #: templates/jobs/_my_job_card.html
 msgid "Mark as done"
 msgstr "Позначити як завершену"
+
+#: templates/jobs/_my_job_card.html
+msgid "Rate the workers"
+msgstr "Оцінити робітників"
 
 #: templates/jobs/_photo_placeholder.html
 msgid "No photo"
@@ -1340,6 +1450,10 @@ msgstr "Скасувати участь %(name)s? Цю дію не можна с
 #: templates/jobs/job_detail.html
 msgid "Cancel"
 msgstr "Скасувати"
+
+#: templates/jobs/job_detail.html
+msgid "Rate"
+msgstr "Оцінити"
 
 #: templates/jobs/job_detail.html
 #, python-format
@@ -1635,3 +1749,34 @@ msgstr ""
 #: templates/registration/verify_email_resend_done.html
 msgid "A new link can be sent once every 10 minutes."
 msgstr "Нове посилання можна надіслати раз на 10 хвилин."
+
+#: templates/reviews/review_form.html
+msgid "Rate the work"
+msgstr "Оцінити роботу"
+
+#: templates/reviews/review_form.html
+#, python-format
+msgid "Rate %(name)s"
+msgstr "Оцінка: %(name)s"
+
+#: templates/reviews/review_form.html
+#, python-format
+msgid "%(stars)s star"
+msgid_plural "%(stars)s stars"
+msgstr[0] "%(stars)s зірка"
+msgstr[1] "%(stars)s зірки"
+msgstr[2] "%(stars)s зірок"
+msgstr[3] "%(stars)s зірки"
+
+#: templates/reviews/review_form.html
+#, python-format
+msgid ""
+"Your review will be shown when %(name)s rates you too, or on %(date)s. It "
+"cannot be changed."
+msgstr ""
+"Ваш відгук буде показано, коли %(name)s теж оцінить вас, або %(date)s. "
+"Змінити його буде неможливо."
+
+#: templates/reviews/review_form.html
+msgid "Publish review"
+msgstr "Опублікувати відгук"

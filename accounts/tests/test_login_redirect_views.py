@@ -1,7 +1,9 @@
 """Integration tests: where a user lands after logging in (#20).
 
-Spec: docs/specs/my-jobs.md, iteration 2 (R11-R13, AC9-AC11, D4). An employer lands on
-"My jobs", everyone else on the home page; a `?next=` address still wins.
+Spec: docs/specs/my-jobs.md, iteration 2 (R11-R13, AC9-AC11, D4), and since #38
+docs/specs/reviews.md, iteration 3 (R15, AC12, D16). An employer lands on
+"My jobs", a worker on "My applications", a user without a role on the home page; a
+`?next=` address still wins.
 """
 
 import pytest
@@ -45,18 +47,52 @@ def test_employer_lands_on_my_jobs(client):
     assertRedirects(response, reverse("my_jobs"))
 
 
-def test_worker_lands_on_the_home_page(client):
-    """After logging in, a worker goes to the home page, the job list (AC10).
+@pytest.mark.story(38)
+def test_worker_lands_on_my_applications(client):
+    """After logging in, a worker goes to "My applications" (#38, reviews.md R15, D16).
+
+    Changed by #38: until then the home page, the job list (AC10 of #20).
 
     1. Create a worker
     2. Log in on the login page
-    3. Expect: a redirect to the home page
+    3. Expect: a redirect to "My applications"
     """
     make_user(User.Role.WORKER)
 
     response = log_in(client)
 
-    assertRedirects(response, reverse("home"), fetch_redirect_response=False)
+    assertRedirects(response, reverse("my_applications"))
+
+
+@pytest.mark.story(38)
+def test_next_address_wins_for_a_worker(client):
+    """A worker sent to login from another page goes back there (#38, R15).
+
+    1. Create a worker
+    2. Log in on the login page with ?next= their profile page
+    3. Expect: a redirect to the profile page, not to "My applications"
+    """
+    make_user(User.Role.WORKER)
+
+    profile = reverse("worker_profile")
+    response = log_in(client, reverse("login") + "?next=" + profile)
+
+    assertRedirects(response, profile, fetch_redirect_response=False)
+
+
+@pytest.mark.story(38)
+def test_logged_in_worker_opening_login_goes_to_my_applications(client):
+    """A logged-in worker who opens the login page goes to "My applications" (#38, R15).
+
+    1. Log in as a worker
+    2. Open the login page
+    3. Expect: a redirect to "My applications"
+    """
+    client.force_login(make_user(User.Role.WORKER))
+
+    response = client.get(reverse("login"))
+
+    assertRedirects(response, reverse("my_applications"))
 
 
 def test_user_without_a_role_lands_on_the_home_page(client):

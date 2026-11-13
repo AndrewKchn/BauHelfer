@@ -171,6 +171,9 @@ class Job(models.Model):
         _("status"), max_length=10, choices=Status.choices, default=Status.OPEN
     )
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    # When the employer marked it done (#37); the 14 days for reviews count from here
+    # (#38, docs/specs/reviews.md R3, D9). Empty for every job that is not done.
+    done_at = models.DateTimeField(_("done at"), null=True, blank=True, editable=False)
 
     # At most this many photos per job; the forms check it (docs/specs/job-photos.md D6).
     MAX_PHOTOS = 5
@@ -303,6 +306,17 @@ class Job(models.Model):
         found = self.workers_needed - self.places_left
         return found > 0 and self.has_ended
 
+    @property
+    def has_workers_to_rate(self):
+        """Whether the employer can still rate one of this job's workers (#38, reviews.md
+        R11a, D15): "Rate the workers" on "My jobs".
+
+        can_review() of each application decides, so the rules stay in one place. Reads
+        applications.all(): "My jobs" prefetches them with their reviews, so a card asks
+        no query (R12).
+        """
+        return any(a.can_review(self.employer) for a in self.applications.all())
+
     def mark_done(self):
         """Mark this job done (job-done.md R2); the applications keep their statuses.
 
@@ -315,7 +329,8 @@ class Job(models.Model):
             if not saved.can_mark_done:
                 raise JobStateError
             self.status = self.Status.DONE
-            self.save(update_fields=["status"])
+            self.done_at = timezone.now()  # the start of the reviews (#38 R3)
+            self.save(update_fields=["status", "done_at"])
 
     @property
     def accepts_applications(self):
@@ -648,6 +663,49 @@ class Application(models.Model):
             self.status = self.Status.WITHDRAWN
             self.save(update_fields=["status"])
             return took_a_place and self._reopen_job()
+
+    # How long after "done" both sides can rate each other (#38, reviews.md D3).
+    REVIEW_PERIOD = timedelta(days=14)
+
+    @property
+    def review_deadline(self):
+        """When the reviews of this work close: 14 days after "done"; None before (R4)."""
+        if self.job.done_at is None:
+            return None
+        return self.job.done_at + self.REVIEW_PERIOD
+
+    @property
+    def reviews_open(self):
+        """Whether the 14 days for reviews are running now (R4, D3).
+
+        False before "done" and for a job marked done before #38, which has no done_at
+        (D9).
+        """
+        deadline = self.review_deadline
+        return deadline is not None and timezone.now() < deadline
+
+    def review_by(self, user):
+        """`user`'s review of this application, or None.
+
+        Reads reviews.all(): with prefetch_related("reviews") the pages ask no query per
+        card (R12); without it, one query for the two reviews an application can have.
+        """
+        return next((r for r in self.reviews.all() if r.author_id == user.pk), None)
+
+    def can_review(self, user):
+        """Whether `user` can rate the other side of this work now (#38, reviews.md R5).
+
+        Only work that happened: an accepted application of a done job (D1), within the 14
+        days (D3), by its worker or its job's employer, once each (D6). A method, not a
+        property, as the answer depends on who asks.
+        """
+        if self.status != self.Status.ACCEPTED or self.job.status != Job.Status.DONE:
+            return False
+        if not self.reviews_open:
+            return False
+        if user.pk not in (self.worker_id, self.job.employer_id):
+            return False
+        return self.review_by(user) is None
 
 
 @receiver(post_delete, sender=Application)

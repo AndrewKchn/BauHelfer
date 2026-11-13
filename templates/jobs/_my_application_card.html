@@ -25,6 +25,13 @@
             <button type="submit" class="btn btn-outline btn-sm">{% translate "Withdraw" %}</button>
           </form>
         {% endif %}
+        {# A done job, on the same line: the review page, then the own rating (#38, #}
+        {# reviews.md R10, D11). The view sets can_rate and own_review (add_review_state). #}
+        {% if application.can_rate %}
+          <a href="{% url 'review_create' application.pk %}" class="btn btn-primary btn-sm shrink-0">{% translate "Rate the employer" %}</a>
+        {% elif application.own_review %}
+          <span class="shrink-0 text-sm">{% blocktranslate with rating=application.own_review.rating %}Rated ★{{ rating }}{% endblocktranslate %}</span>
+        {% endif %}
       </div>
       {# The employer's name and phone and the exact address, while the contacts are shown; #}
       {# never the email (R7, D14; contacts.md R1, R5). tel: dials it on a phone. #}

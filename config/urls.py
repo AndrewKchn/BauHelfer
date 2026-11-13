@@ -27,6 +27,7 @@ urlpatterns = [
     path("", JobListView.as_view(), name="home"),  # the home page is the job list (#18)
     path("accounts/", include("accounts.urls")),
     path("jobs/", include("jobs.urls")),
+    path("applications/", include("reviews.urls")),  # the review page (#38)
     path("admin/", admin.site.urls),
 ]
 

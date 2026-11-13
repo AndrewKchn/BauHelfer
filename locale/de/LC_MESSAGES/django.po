@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BauHelfer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 13:35+0100\n"
+"POT-Creation-Date: 2026-11-13 00:50+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -559,9 +559,13 @@ msgstr "Stundenlohn (€)"
 msgid "status"
 msgstr "Status"
 
-#: jobs/models.py
+#: jobs/models.py reviews/models.py
 msgid "created at"
 msgstr "erstellt am"
+
+#: jobs/models.py
+msgid "done at"
+msgstr "erledigt am"
 
 #: jobs/models.py
 msgid "job"
@@ -627,7 +631,7 @@ msgstr "angebotene Helfer"
 msgid "workers accepted"
 msgstr "angenommene Helfer"
 
-#: jobs/models.py
+#: jobs/models.py reviews/models.py
 msgid "application"
 msgstr "Bewerbung"
 
@@ -770,6 +774,78 @@ msgstr "Diese Bewerbung kann nicht mehr zurückgezogen werden."
 msgid "Application withdrawn."
 msgstr "Bewerbung zurückgezogen."
 
+#: reviews/forms.py
+msgid "Rating"
+msgstr "Sterne"
+
+#: reviews/forms.py
+msgid "What went well? (optional)"
+msgstr "Was lief gut? (optional)"
+
+#: reviews/models.py
+msgid "On time"
+msgstr "Pünktlich"
+
+#: reviews/models.py
+msgid "Careful work"
+msgstr "Sorgfältige Arbeit"
+
+#: reviews/models.py
+msgid "Hard-working"
+msgstr "Fleißig"
+
+#: reviews/models.py
+msgid "Left the site clean"
+msgstr "Baustelle sauber hinterlassen"
+
+#: reviews/models.py
+msgid "Followed safety rules"
+msgstr "Sicherheitsregeln eingehalten"
+
+#: reviews/models.py
+msgid "Paid in full and on time"
+msgstr "Vollständig und pünktlich bezahlt"
+
+#: reviews/models.py
+msgid "Job as described"
+msgstr "Job wie beschrieben"
+
+#: reviews/models.py
+msgid "Safe workplace"
+msgstr "Sicherer Arbeitsplatz"
+
+#: reviews/models.py
+msgid "Clear instructions"
+msgstr "Klare Anweisungen"
+
+#: reviews/models.py
+msgid "Respectful"
+msgstr "Respektvoll"
+
+#: reviews/models.py
+msgid "author"
+msgstr "Verfasser"
+
+#: reviews/models.py
+msgid "rating"
+msgstr "Sterne"
+
+#: reviews/models.py
+msgid "tags"
+msgstr "Merkmale"
+
+#: reviews/models.py
+msgid "review"
+msgstr "Bewertung"
+
+#: reviews/models.py
+msgid "reviews"
+msgstr "Bewertungen"
+
+#: reviews/views.py
+msgid "Review published."
+msgstr "Bewertung veröffentlicht."
+
 #: templates/_language_switcher.html
 msgid "Change language"
 msgstr "Sprache ändern"
@@ -905,7 +981,8 @@ msgstr "Hauptnavigation"
 msgid "Menu"
 msgstr "Menü"
 
-#: templates/base.html templates/jobs/my_applications.html
+#: templates/base.html templates/jobs/job_detail.html
+#: templates/jobs/my_applications.html
 msgid "My applications"
 msgstr "Meine Bewerbungen"
 
@@ -1050,6 +1127,27 @@ msgstr "Hier können Sie die Bewerbung annehmen oder ablehnen:"
 msgid "New application: %(job_type)s, %(date)s"
 msgstr "Neue Bewerbung: %(job_type)s, %(date)s"
 
+#: templates/emails/review_request_body.txt
+#, python-format
+msgid "%(employer)s marked the job as done: %(job_type)s, %(date)s."
+msgstr ""
+"%(employer)s hat den Job als erledigt markiert: %(job_type)s, %(date)s."
+
+#: templates/emails/review_request_body.txt
+#, python-format
+msgid ""
+"Please rate the employer by %(deadline)s. Your review is shown when the "
+"employer rates you too, or after that date:"
+msgstr ""
+"Bitte bewerten Sie den Auftraggeber bis zum %(deadline)s. Ihre Bewertung "
+"wird angezeigt, sobald der Auftraggeber Sie ebenfalls bewertet, spätestens "
+"ab diesem Datum:"
+
+#: templates/emails/review_request_subject.txt
+#, python-format
+msgid "Rate the employer: %(job_type)s, %(date)s"
+msgstr "Auftraggeber bewerten: %(job_type)s, %(date)s"
+
 #: templates/emails/verify_email_body.txt
 msgid ""
 "Someone created a BauHelfer account with this email address. Open this link "
@@ -1162,6 +1260,15 @@ msgid "Withdraw"
 msgstr "Zurückziehen"
 
 #: templates/jobs/_my_application_card.html
+msgid "Rate the employer"
+msgstr "Auftraggeber bewerten"
+
+#: templates/jobs/_my_application_card.html templates/jobs/job_detail.html
+#, python-format
+msgid "Rated ★%(rating)s"
+msgstr "Bewertet: ★%(rating)s"
+
+#: templates/jobs/_my_application_card.html
 msgid "Contact"
 msgstr "Kontakt"
 
@@ -1224,6 +1331,10 @@ msgstr ""
 #: templates/jobs/_my_job_card.html
 msgid "Mark as done"
 msgstr "Als erledigt markieren"
+
+#: templates/jobs/_my_job_card.html
+msgid "Rate the workers"
+msgstr "Helfer bewerten"
 
 #: templates/jobs/_photo_placeholder.html
 msgid "No photo"
@@ -1322,6 +1433,10 @@ msgstr "%(name)s absagen? Das kann nicht rückgängig gemacht werden."
 #: templates/jobs/job_detail.html
 msgid "Cancel"
 msgstr "Absagen"
+
+#: templates/jobs/job_detail.html
+msgid "Rate"
+msgstr "Bewerten"
 
 #: templates/jobs/job_detail.html
 #, python-format
@@ -1622,3 +1737,32 @@ msgstr ""
 #: templates/registration/verify_email_resend_done.html
 msgid "A new link can be sent once every 10 minutes."
 msgstr "Ein neuer Link kann alle 10 Minuten gesendet werden."
+
+#: templates/reviews/review_form.html
+msgid "Rate the work"
+msgstr "Arbeit bewerten"
+
+#: templates/reviews/review_form.html
+#, python-format
+msgid "Rate %(name)s"
+msgstr "%(name)s bewerten"
+
+#: templates/reviews/review_form.html
+#, python-format
+msgid "%(stars)s star"
+msgid_plural "%(stars)s stars"
+msgstr[0] "%(stars)s Stern"
+msgstr[1] "%(stars)s Sterne"
+
+#: templates/reviews/review_form.html
+#, python-format
+msgid ""
+"Your review will be shown when %(name)s rates you too, or on %(date)s. It "
+"cannot be changed."
+msgstr ""
+"Ihre Bewertung wird angezeigt, sobald %(name)s Sie ebenfalls bewertet, "
+"spätestens am %(date)s. Sie kann nicht geändert werden."
+
+#: templates/reviews/review_form.html
+msgid "Publish review"
+msgstr "Bewertung veröffentlichen"

@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BauHelfer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 13:35+0100\n"
+"POT-Creation-Date: 2026-11-13 00:50+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -556,9 +556,13 @@ msgstr "saatlik ücret (€)"
 msgid "status"
 msgstr "durum"
 
-#: jobs/models.py
+#: jobs/models.py reviews/models.py
 msgid "created at"
 msgstr "oluşturulma tarihi"
+
+#: jobs/models.py
+msgid "done at"
+msgstr "tamamlanma tarihi"
 
 #: jobs/models.py
 msgid "job"
@@ -624,7 +628,7 @@ msgstr "önerilen işçi sayısı"
 msgid "workers accepted"
 msgstr "kabul edilen işçi sayısı"
 
-#: jobs/models.py
+#: jobs/models.py reviews/models.py
 msgid "application"
 msgstr "başvuru"
 
@@ -765,6 +769,78 @@ msgstr "Bu başvuru artık geri çekilemez."
 msgid "Application withdrawn."
 msgstr "Başvuru geri çekildi."
 
+#: reviews/forms.py
+msgid "Rating"
+msgstr "Puan"
+
+#: reviews/forms.py
+msgid "What went well? (optional)"
+msgstr "Neler iyiydi? (isteğe bağlı)"
+
+#: reviews/models.py
+msgid "On time"
+msgstr "Dakik"
+
+#: reviews/models.py
+msgid "Careful work"
+msgstr "Özenli çalışma"
+
+#: reviews/models.py
+msgid "Hard-working"
+msgstr "Çalışkan"
+
+#: reviews/models.py
+msgid "Left the site clean"
+msgstr "Şantiyeyi temiz bıraktı"
+
+#: reviews/models.py
+msgid "Followed safety rules"
+msgstr "Güvenlik kurallarına uydu"
+
+#: reviews/models.py
+msgid "Paid in full and on time"
+msgstr "Tam ve zamanında ödeme"
+
+#: reviews/models.py
+msgid "Job as described"
+msgstr "İş ilandaki gibiydi"
+
+#: reviews/models.py
+msgid "Safe workplace"
+msgstr "Güvenli çalışma ortamı"
+
+#: reviews/models.py
+msgid "Clear instructions"
+msgstr "Açık talimatlar"
+
+#: reviews/models.py
+msgid "Respectful"
+msgstr "Saygılı"
+
+#: reviews/models.py
+msgid "author"
+msgstr "yazar"
+
+#: reviews/models.py
+msgid "rating"
+msgstr "puan"
+
+#: reviews/models.py
+msgid "tags"
+msgstr "etiketler"
+
+#: reviews/models.py
+msgid "review"
+msgstr "değerlendirme"
+
+#: reviews/models.py
+msgid "reviews"
+msgstr "değerlendirmeler"
+
+#: reviews/views.py
+msgid "Review published."
+msgstr "Değerlendirme yayınlandı."
+
 #: templates/_language_switcher.html
 msgid "Change language"
 msgstr "Dili değiştir"
@@ -900,7 +976,8 @@ msgstr "Ana menü"
 msgid "Menu"
 msgstr "Menü"
 
-#: templates/base.html templates/jobs/my_applications.html
+#: templates/base.html templates/jobs/job_detail.html
+#: templates/jobs/my_applications.html
 msgid "My applications"
 msgstr "Başvurularım"
 
@@ -1039,6 +1116,26 @@ msgstr "Başvuruyu buradan kabul edin veya reddedin:"
 msgid "New application: %(job_type)s, %(date)s"
 msgstr "Yeni başvuru: %(job_type)s, %(date)s"
 
+#: templates/emails/review_request_body.txt
+#, python-format
+msgid "%(employer)s marked the job as done: %(job_type)s, %(date)s."
+msgstr ""
+"%(employer)s işi tamamlandı olarak işaretledi. İş: %(job_type)s, %(date)s."
+
+#: templates/emails/review_request_body.txt
+#, python-format
+msgid ""
+"Please rate the employer by %(deadline)s. Your review is shown when the "
+"employer rates you too, or after that date:"
+msgstr ""
+"Lütfen işvereni %(deadline)s tarihine kadar değerlendirin. Değerlendirmeniz, "
+"işveren de sizi değerlendirdiğinde veya bu tarihten sonra gösterilecek:"
+
+#: templates/emails/review_request_subject.txt
+#, python-format
+msgid "Rate the employer: %(job_type)s, %(date)s"
+msgstr "İşvereni değerlendirin: %(job_type)s, %(date)s"
+
 #: templates/emails/verify_email_body.txt
 msgid ""
 "Someone created a BauHelfer account with this email address. Open this link "
@@ -1151,6 +1248,15 @@ msgid "Withdraw"
 msgstr "Geri çek"
 
 #: templates/jobs/_my_application_card.html
+msgid "Rate the employer"
+msgstr "İşvereni değerlendir"
+
+#: templates/jobs/_my_application_card.html templates/jobs/job_detail.html
+#, python-format
+msgid "Rated ★%(rating)s"
+msgstr "Puanınız: ★%(rating)s"
+
+#: templates/jobs/_my_application_card.html
 msgid "Contact"
 msgstr "İletişim"
 
@@ -1212,6 +1318,10 @@ msgstr "Bu iş tamamlandı olarak işaretlensin mi? Bu işlem geri alınamaz."
 #: templates/jobs/_my_job_card.html
 msgid "Mark as done"
 msgstr "Tamamlandı olarak işaretle"
+
+#: templates/jobs/_my_job_card.html
+msgid "Rate the workers"
+msgstr "İşçileri değerlendir"
 
 #: templates/jobs/_photo_placeholder.html
 msgid "No photo"
@@ -1309,6 +1419,10 @@ msgstr "İptal edilsin mi: %(name)s? Bu işlem geri alınamaz."
 #: templates/jobs/job_detail.html
 msgid "Cancel"
 msgstr "İptal et"
+
+#: templates/jobs/job_detail.html
+msgid "Rate"
+msgstr "Değerlendir"
 
 #: templates/jobs/job_detail.html
 #, python-format
@@ -1602,3 +1716,32 @@ msgstr ""
 #: templates/registration/verify_email_resend_done.html
 msgid "A new link can be sent once every 10 minutes."
 msgstr "Yeni bağlantı 10 dakikada bir gönderilebilir."
+
+#: templates/reviews/review_form.html
+msgid "Rate the work"
+msgstr "İşi değerlendirin"
+
+#: templates/reviews/review_form.html
+#, python-format
+msgid "Rate %(name)s"
+msgstr "Değerlendirme: %(name)s"
+
+#: templates/reviews/review_form.html
+#, python-format
+msgid "%(stars)s star"
+msgid_plural "%(stars)s stars"
+msgstr[0] "%(stars)s yıldız"
+msgstr[1] "%(stars)s yıldız"
+
+#: templates/reviews/review_form.html
+#, python-format
+msgid ""
+"Your review will be shown when %(name)s rates you too, or on %(date)s. It "
+"cannot be changed."
+msgstr ""
+"Değerlendirmeniz, %(name)s de sizi değerlendirdiğinde veya %(date)s "
+"tarihinde gösterilecek. Değiştirilemez."
+
+#: templates/reviews/review_form.html
+msgid "Publish review"
+msgstr "Değerlendirmeyi yayınla"

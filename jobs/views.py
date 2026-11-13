@@ -36,7 +36,12 @@ from translations.services import detect_language, forget, translate
 
 from .forms import ApplicationForm, JobFilterForm, JobForm, JobPhotosForm
 from .models import Application, ApplicationStateError, Job, JobPhoto, JobStateError
-from .notifications import notify_cancelled, notify_decision, notify_new_application
+from .notifications import (
+    notify_cancelled,
+    notify_decision,
+    notify_new_application,
+    notify_review_request,
+)
 from .shown_text import description_for, messages_for
 
 # "jobs.views". Ids only, never an email or other personal data (#124).
@@ -129,6 +134,22 @@ class JobCreateView(EmployerRequiredMixin, EmployerProfileRequiredMixin, CreateV
         return reverse("job_edit", args=[self.object.pk]) + "#photos"
 
 
+def add_review_state(applications, user):
+    """Give each application what its "Rate" button needs, for `user` (#38, reviews.md
+    R10, R11, D11).
+
+    A template cannot call can_review(user) with an argument, so the view asks for it:
+    `can_rate` shows the button; `own_review`, the user's review while the 14 days run,
+    shows "Rated ★4" instead. Load the applications with prefetch_related("reviews"):
+    then this asks no query per application (R12).
+    """
+    for application in applications:
+        application.can_rate = application.can_review(user)
+        open_ = application.reviews_open
+        application.own_review = application.review_by(user) if open_ else None
+    return applications
+
+
 def tab_groups(items, tabs, labels, tab_of):
     """The groups for templates/_status_tabs.html: one per tab that has items, in order.
 
@@ -163,12 +184,13 @@ class MyJobsView(EmployerRequiredMixin, ListView):
         """Only the logged-in employer's jobs, each with its number of applications.
 
         with_workers_found(): "Mark as done" asks how many were accepted, from the same
-        query (#37 R5).
+        query (#37 R5). "applications__reviews": "Rate the workers" asks each application
+        whether it can be reviewed, two more queries for all cards (#38 R11a, R12).
         """
         return (
             self.request.user.jobs.annotate(applications_count=Count("applications"))
             .with_workers_found()
-            .prefetch_related("photos")
+            .prefetch_related("photos", "applications__reviews")
             .order_by("date", "start_time")
         )
 
@@ -213,9 +235,10 @@ class MyApplicationsView(WorkerRequiredMixin, ListView):
         select_related: the job and the employer in the same query; prefetch_related: the
         photos of all jobs in one more. Two queries however many cards (D11, D13).
         """
+        # "reviews": the "Rate the employer" buttons, one query more (#38 R10, R12).
         return (
             self.request.user.applications.select_related("job__employer")
-            .prefetch_related("job__photos")
+            .prefetch_related("job__photos", "reviews")
             .order_by("job__date", "job__start_time")
         )
 
@@ -229,7 +252,8 @@ class MyApplicationsView(WorkerRequiredMixin, ListView):
         """
         context = super().get_context_data(**kwargs)
         applications = sorted(
-            context["applications"], key=lambda application: application.job.is_over
+            add_review_state(context["applications"], self.request.user),
+            key=lambda application: application.job.is_over,
         )
         labels = dict(Application.Status.choices, done=_("Done"), past=_("Past"))
         context["groups"] = tab_groups(
@@ -382,6 +406,11 @@ class JobDoneView(EmployerRequiredMixin, SingleObjectMixin, View):
             # Not over yet, nobody accepted, or no longer open or filled: as JobCancelView.
             raise Http404 from None
         logger.info("Job done: job_id=%s employer_id=%s", job.pk, request.user.pk)
+        # Each accepted worker gets the link to rate the employer, after the save (#38,
+        # reviews.md R13, D5, D14); a failed email never undoes "done".
+        accepted = job.applications.filter(status=Application.Status.ACCEPTED)
+        for application in accepted.select_related("worker"):
+            notify_review_request(request, application)
         messages.success(request, _("Job marked as done."))
         return redirect("my_jobs")
 
@@ -461,13 +490,16 @@ class JobDetailView(DetailView):
             # Each message in the employer's language, the cached ones in one query (#33,
             # application-translation.md R10, R11, D2).
             # ?original=<id> is the "Show original" link of one message (R16, D8).
-            context["applications"] = messages_for(
-                job.applications.select_related("worker__worker_profile").order_by(
-                    "-created_at"
-                ),
+            # prefetch_related("reviews"): the "Rate" buttons of a done job in one more
+            # query, however many workers (#38 R11, R12).
+            applications = messages_for(
+                job.applications.select_related("worker__worker_profile")
+                .prefetch_related("reviews")
+                .order_by("-created_at"),
                 translation.get_language(),
                 original_id=original_id(self.request),
             )
+            context["applications"] = add_review_state(applications, user)
             # The template picks "Accept 2" or "Accept 1 of 2" and the "fills the job"
             # warning with it (accept-reject.md R7, R8); loaded with the job, no query.
             context["places_left"] = job.places_left
