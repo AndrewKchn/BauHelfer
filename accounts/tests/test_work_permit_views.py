@@ -226,29 +226,30 @@ def test_profile_card_shows_confirmation_without_date(worker):
     """The card employers will see (#23) says "confirmed", without the date.
 
     1. Render the profile card of a confirmed worker
-    2. Expect: "Confirmed by the worker", and not the date
+    2. Expect: "Allowed to work in Germany (confirmed by the worker)" (#39, ratings.md
+       D12), and not the date
     """
     profile = make_profile(worker)
     confirm(worker)
 
     html = render_to_string("accounts/_worker_profile_card.html", {"profile": profile})
 
-    assert "Confirmed by the worker" in html
+    assert "Allowed to work in Germany (confirmed by the worker)" in html
     assert FIRST_CONFIRMATION_TEXT not in html
 
 
 def test_profile_card_of_an_unconfirmed_worker(worker):
-    """A profile saved before this ticket shows "Not confirmed".
+    """A profile saved before this ticket shows "Work permit not confirmed".
 
     1. Render the profile card of a worker with a profile and no confirmation
-    2. Expect: "Not confirmed"
+    2. Expect: "Work permit not confirmed" (#39, ratings.md D12)
     """
     profile = make_profile(worker)
 
     html = render_to_string("accounts/_worker_profile_card.html", {"profile": profile})
 
-    assert "Not confirmed" in html
-    assert "Confirmed by the worker" not in html
+    assert "Work permit not confirmed" in html
+    assert "Allowed to work in Germany" not in html
 
 
 # AC8: admin (R6)
