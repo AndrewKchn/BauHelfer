@@ -48,9 +48,9 @@ R4. The worker's profile card (own page and `/accounts/workers/<id>/`) gets the 
     reviews)" (D9, D10). With no visible review: "No reviews yet" (D7).
 R5. The employer's profile card (own page and the job page) gets the same kind of head:
     initials, company or name, the rating (D10).
-R6. The applications list on the owner's job page: "★ 4,7 (9)" or "No reviews yet" after
-    "2 workers", as on the mockup; one query for the whole list, not one per application
-    (D8).
+R6. The applications list on the owner's job page: "★ 4,7 (9)" or "No reviews yet" on a
+    line under "2 workers" (next to it, it broke at 360 px); one query for the whole list,
+    not one per application (D8).
 
 ### Iteration 2: the tags and the latest reviews
 
@@ -125,7 +125,9 @@ D12. **"✓ Allowed to work in Germany (confirmed by the worker)"** (mine, 2026-
      BauHelfer had checked, and an employer might not ask for the residence permit.
      Without a confirmation: "Work permit not confirmed" in grey, the words of the
      applications list. Rejected: the mockup's words (A); the old "Work permit" row (C).
-     Keeps work-permit.md D6 (no date for employers). **Revisit when** the site checks
+     Keeps work-permit.md D6 (no date for employers). On the worker's own page the old
+     "Allowed to work in Germany — confirmed on <date>." repeated the line; it is now
+     "You confirmed it on <date>." right under it (mine, 2026-11-16). **Revisit when** the site checks
      documents itself.
 
 ## Open questions
@@ -148,6 +150,6 @@ D12. **"✓ Allowed to work in Germany (confirmed by the worker)"** (mine, 2026-
 | Worker profile: "Rate the work on 12 Oct" form | none: the review page of #38 | reviews.md D4 |
 | Job detail: employer card "Window fitter · ★ 4,8 (12 reviews)" | the card with the trades, the rating and a link to the employer's page | D4 |
 | My jobs: "new, no reviews" | "No reviews yet" | D7 |
-| My jobs: "Crew of 2 · ★ 4,7 (9) · work permit ✓" | "2 workers · ★ 4,7 (9)"; the permit only when missing, as now | R6, applications-list.md |
+| My jobs: "Crew of 2 · ★ 4,7 (9) · work permit ✓" | "2 workers", "★ 4,7 (9)" on the next line; the permit only when missing, as now | R6, applications-list.md |
 | Worker profile: "✓ Confirmed: allowed to work in Germany" | "✓ Allowed to work in Germany (confirmed by the worker)" | D12 |
 | — | an employer's page with the latest reviews | D4 |
