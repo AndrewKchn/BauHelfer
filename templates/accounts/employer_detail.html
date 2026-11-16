@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Employer profile" %} · BauHelfer{% endblock %}
+
+{% block content %}
+  {# An employer's public page (#39, docs/specs/ratings.md R11, D4, D11): the card of the #}
+  {# job page, no contacts, and the latest reviews, which never name a worker (D3). #}
+  <div class="card bg-base-100 shadow-sm">
+    <div class="card-body gap-6">
+      <h1 class="card-title text-2xl">{% translate "Employer profile" %}</h1>
+
+      {% include "accounts/_employer_profile_card.html" %}
+    </div>
+  </div>
+  {% include "reviews/_review_list.html" %}
+{% endblock %}

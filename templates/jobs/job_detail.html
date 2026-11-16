@@ -257,7 +257,7 @@
     {# comes with the job (select_related), so the missing one costs no query either. #}
     <section class="card mt-4 bg-base-100 shadow-sm">
       <div class="card-body gap-3 p-4">
-        {% with profile=job.employer.employer_profile show_phone=application.shows_contacts rating=employer_rating %}
+        {% with profile=job.employer.employer_profile show_phone=application.shows_contacts rating=employer_rating reviews_link=True %}
           {# A section title, not the name: the card itself shows the company and the person. #}
           <h2 class="text-lg font-semibold">{% translate "Employer" %}</h2>
           {% if profile %}

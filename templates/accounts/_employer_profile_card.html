@@ -5,7 +5,8 @@
   for an accepted worker until the day of the job is over (#25, contacts.md R3, D7).
   Since #39 a head as on the job page mockup (docs/specs/ratings.md R5): the initials, the
   company (or the person without one) and the rating.
-  Needs `profile` (an EmployerProfile) and `rating` (a reviews.models.Rating).
+  Needs `profile` (an EmployerProfile) and `rating` (a reviews.models.Rating); `reviews_link`
+  adds a link to the employer's public page (#39, R12).
 {% endcomment %}
 <div class="flex items-center gap-4">
   <div class="avatar avatar-placeholder shrink-0">
@@ -20,6 +21,14 @@
       <p class="break-words text-base-content/70">{{ profile.user.name }}</p>
     {% endif %}
     <p>{% include "reviews/_rating.html" %}</p>
+    {# The job page sets reviews_link: the reviews are on the employer's page (R12). #}
+    {% if reviews_link and rating.count %}
+      <a href="{% url 'employer_detail' profile.user_id %}" class="link text-sm">{% blocktranslate count counter=rating.count trimmed %}
+        {{ counter }} review →
+      {% plural %}
+        {{ counter }} reviews →
+      {% endblocktranslate %}</a>
+    {% endif %}
   </div>
 </div>
 

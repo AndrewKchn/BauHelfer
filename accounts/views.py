@@ -371,6 +371,33 @@ class WorkerDetailView(RoleRequiredMixin, DetailView):
         return context
 
 
+class EmployerDetailView(DetailView):
+    """An employer's public page: the card, the tag summary and the latest reviews (#39).
+
+    docs/specs/ratings.md R11, D4, D11. No login mixin: it shows what the card on the
+    public job page shows, plus the reviews, which never name a worker (D3).
+    """
+
+    template_name = "accounts/employer_detail.html"
+    context_object_name = "employer"
+
+    @override
+    def get_queryset(self):
+        """Only employers with a profile: a worker's id or an unknown one gives 404."""
+        return User.objects.filter(employer_profile__isnull=False).select_related(
+            "employer_profile"
+        )
+
+    @override
+    def get_context_data(self, **kwargs):
+        """Give the shared card its `profile` and `rating`, the list its `reviews`."""
+        context = super().get_context_data(**kwargs)
+        context["profile"] = self.object.employer_profile
+        context["rating"] = Review.objects.rating_of(self.object)
+        context["reviews"] = Review.objects.latest_about(self.object)
+        return context
+
+
 class EmployerProfileView(ProfileView):
     """The employer's own profile page (#12)."""
 
