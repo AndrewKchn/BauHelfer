@@ -257,6 +257,7 @@ class ProfileView(RoleRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context["profile"] = getattr(self.request.user, self.profile_name)
         context["rating"] = Review.objects.rating_of(self.request.user)
+        context["reviews"] = Review.objects.latest_about(self.request.user)
         return context
 
 
@@ -366,6 +367,7 @@ class WorkerDetailView(RoleRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context["profile"] = self.object.worker_profile
         context["rating"] = Review.objects.rating_of(self.object)
+        context["reviews"] = Review.objects.latest_about(self.object)
         return context
 
 

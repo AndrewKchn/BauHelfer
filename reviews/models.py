@@ -1,6 +1,7 @@
 """Reviews after a done job, in both directions (#38, docs/specs/reviews.md)."""
 
-from typing import NamedTuple
+from collections import Counter
+from dataclasses import dataclass, field
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
@@ -9,6 +10,7 @@ from django.db import models
 from django.db.models import Avg, Count, Exists, F, OuterRef, Q
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext
 
 from jobs.models import Application
 
@@ -33,14 +35,24 @@ class EmployerTag(models.TextChoices):
     RESPECTFUL = "respectful", _("Respectful")
 
 
-class Rating(NamedTuple):
+# Every tag value with its name, and its place in the lists: ties in the tag summary keep
+# this order, so the page does not shuffle them (#39, ratings.md R7).
+TAG_NAMES = dict(WorkerTag.choices + EmployerTag.choices)
+TAG_ORDER = list(TAG_NAMES)
+
+
+@dataclass(frozen=True)
+class Rating:
     """A user's average stars and how many reviews it is made of (#39, ratings.md R3).
 
-    `average` is None when nobody has rated the user yet (D7).
+    `average` is None when nobody has rated the user yet (D7). `tags` is the tag summary
+    (R7, D1): (name, how many reviews have it), most often first; only rating_of() fills
+    it, the applications list needs none.
     """
 
     average: float | None
     count: int
+    tags: list = field(default_factory=list)
 
 
 NO_RATING = Rating(average=None, count=0)
@@ -76,13 +88,39 @@ class ReviewQuerySet(models.QuerySet):
         return self.filter(on_their_work).exclude(author=user)
 
     def rating_of(self, user):
-        """`user`'s Rating from the visible reviews about them, in one query (R3)."""
-        result = (
+        """`user`'s Rating with the tag summary, from the visible reviews about them (R3, R7).
+
+        One query: the stars and tags of every such review. Python then counts: a user
+        has tens of reviews, not millions, and counting tags inside an array column in
+        SQL (unnest) would be harder to read.
+        """
+        rows = list(self.visible().about(user).values_list("rating", "tags"))
+        if not rows:
+            return NO_RATING
+        stars = [rating for rating, _tags in rows]
+        counts = Counter(tag for _rating, tags in rows for tag in tags)
+        # Most often first; a tie in the order of the tag lists (D1).
+        ordered = sorted(counts, key=lambda tag: (-counts[tag], TAG_ORDER.index(tag)))
+        return Rating(
+            average=sum(stars) / len(stars),
+            count=len(stars),
+            tags=[(TAG_NAMES[tag], counts[tag]) for tag in ordered],
+        )
+
+    def latest_about(self, user, limit=5):
+        """The newest `limit` visible reviews about `user`, newest first (R8, D5).
+
+        select_related: the author's profiles and the job come in the same query, so the
+        list asks no query per review (author_label, the job type and date).
+        """
+        return (
             self.visible()
             .about(user)
-            .aggregate(average=Avg("rating"), count=Count("id"))
+            .select_related(
+                "author__employer_profile", "author__worker_profile", "application__job"
+            )
+            .order_by("-created_at", "-pk")[:limit]
         )
-        return Rating(**result)
 
     def worker_ratings(self, worker_ids):
         """{worker id: Rating} for the workers of a list, in one query (R6, D8).
@@ -158,6 +196,30 @@ class Review(models.Model):
 
     def __str__(self):
         return f"{self.rating}★ by {self.author} on {self.application}"
+
+    @property
+    def author_label(self):
+        """Who is named over the review in a list (#39, ratings.md R9, D3).
+
+        An employer's review: the company, or the person without one. A worker's review
+        never names the worker (their review of an employer is public on the job page):
+        "Worker", or "Crew of 3" for a crew.
+        """
+        if self.author_id == self.application.worker_id:
+            profile = getattr(self.author, "worker_profile", None)
+            team = profile.team_size if profile else 1
+            if team == 1:
+                return _("Worker")
+            return ngettext("Crew of %(count)d", "Crew of %(count)d", team) % {
+                "count": team
+            }
+        profile = getattr(self.author, "employer_profile", None)
+        return (profile and profile.company_name) or self.author.name
+
+    @property
+    def tag_names(self):
+        """The review's tags as names in the page's language (#39, R9)."""
+        return [TAG_NAMES[tag] for tag in self.tags]
 
     @property
     def is_visible(self):
