@@ -145,6 +145,9 @@
                       <p class="text-sm">
                         <span class="font-semibold">{% include "jobs/_crew.html" %}</span>
                       </p>
+                      {# "★ 4,7 (9)" as on the mockup (#39, ratings.md R6), on a line of its #}
+                      {# own: next to "2 workers" and the badge it broke at 360 px. #}
+                      <p class="text-sm">{% include "reviews/_rating.html" with rating=application.worker_rating short=True %}</p>
                     </div>
                     {% include "jobs/_application_status_badge.html" %}
                   </div>
@@ -253,8 +256,8 @@
     {# in the admin by an employer without a profile shows the account's name. The profile #}
     {# comes with the job (select_related), so the missing one costs no query either. #}
     <section class="card mt-4 bg-base-100 shadow-sm">
-      <div class="card-body p-4">
-        {% with profile=job.employer.employer_profile show_phone=application.shows_contacts %}
+      <div class="card-body gap-3 p-4">
+        {% with profile=job.employer.employer_profile show_phone=application.shows_contacts rating=employer_rating reviews_link=True %}
           {# A section title, not the name: the card itself shows the company and the person. #}
           <h2 class="text-lg font-semibold">{% translate "Employer" %}</h2>
           {% if profile %}

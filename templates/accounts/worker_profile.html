@@ -10,10 +10,12 @@
 
       {% include "accounts/_worker_profile_card.html" %}
 
+      {# The date only here (work-permit.md D6); the card's green line says what, so this #}
+      {# says only when (#39, ratings.md D12), right under it: the card body has gap-6. #}
       {% if profile.user.work_permit_confirmed_at %}
-        <p class="text-sm">
+        <p class="-mt-5 text-sm text-base-content/70">
           {% blocktranslate with date=profile.user.work_permit_confirmed_at|date:"SHORT_DATE_FORMAT" trimmed %}
-            Allowed to work in Germany — confirmed on {{ date }}.
+            You confirmed it on {{ date }}.
           {% endblocktranslate %}
         </p>
       {% endif %}
@@ -37,4 +39,6 @@
       </div>
     </div>
   </div>
+  {# The latest reviews under the profile, as on the mockup (#39, ratings.md R8). #}
+  {% include "reviews/_review_list.html" %}
 {% endblock %}

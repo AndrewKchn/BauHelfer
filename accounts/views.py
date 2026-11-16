@@ -25,6 +25,8 @@ from django.views.generic import (
     View,
 )
 
+from reviews.models import Review
+
 from .emails import send_verification_email
 from .forms import (
     EmployerProfileForm,
@@ -251,9 +253,11 @@ class ProfileView(RoleRequiredMixin, TemplateView):
 
     @override
     def get_context_data(self, **kwargs):
-        """Give the template the profile as `profile`."""
+        """Give the template the profile as `profile` and the user's `rating` (#39)."""
         context = super().get_context_data(**kwargs)
         context["profile"] = getattr(self.request.user, self.profile_name)
+        context["rating"] = Review.objects.rating_of(self.request.user)
+        context["reviews"] = Review.objects.latest_about(self.request.user)
         return context
 
 
@@ -359,9 +363,38 @@ class WorkerDetailView(RoleRequiredMixin, DetailView):
 
     @override
     def get_context_data(self, **kwargs):
-        """Give the shared profile card its `profile`."""
+        """Give the shared profile card its `profile` and `rating` (#39)."""
         context = super().get_context_data(**kwargs)
         context["profile"] = self.object.worker_profile
+        context["rating"] = Review.objects.rating_of(self.object)
+        context["reviews"] = Review.objects.latest_about(self.object)
+        return context
+
+
+class EmployerDetailView(DetailView):
+    """An employer's public page: the card, the tag summary and the latest reviews (#39).
+
+    docs/specs/ratings.md R11, D4, D11. No login mixin: it shows what the card on the
+    public job page shows, plus the reviews, which never name a worker (D3).
+    """
+
+    template_name = "accounts/employer_detail.html"
+    context_object_name = "employer"
+
+    @override
+    def get_queryset(self):
+        """Only employers with a profile: a worker's id or an unknown one gives 404."""
+        return User.objects.filter(employer_profile__isnull=False).select_related(
+            "employer_profile"
+        )
+
+    @override
+    def get_context_data(self, **kwargs):
+        """Give the shared card its `profile` and `rating`, the list its `reviews`."""
+        context = super().get_context_data(**kwargs)
+        context["profile"] = self.object.employer_profile
+        context["rating"] = Review.objects.rating_of(self.object)
+        context["reviews"] = Review.objects.latest_about(self.object)
         return context
 
 

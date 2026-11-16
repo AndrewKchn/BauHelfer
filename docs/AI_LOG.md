@@ -2933,3 +2933,58 @@ in both themes, drafted the Docs sync comments and wrote the cheat-sheet tab.
   tabs can both pass the form.
 - Why a template cannot call `can_review(user)`, and how `prefetch_related("reviews")`
   keeps the buttons to one query for the whole page.
+
+## 2026-11-16 · #39 Show rating on profiles and applications
+
+**Task given to AI:** show the reviews of #38 on profiles and in the applications list
+(issue #39), with two inputs of mine from earlier tickets: build the worker profile like the
+mockup (#30 comment) and decide how to count the tags (open question from #38).
+
+**AI helped:** it wrote the spec `docs/specs/ratings.md` and brought the forks one at a time,
+each with an example. It moved the visibility rule of `Review.is_visible` into one database
+query (`visible()`, with `Exists`), so the applications list gets every worker's rating in one
+grouped query, and a test counts the queries. It wrote the tests first, the code in four
+iterations, and the employer's public page. The translations into 6 languages followed; DE,
+PL, RO and TR were back-translated by four separate agents. It ran about 60 mutations, took
+360 px shots in both themes (and in German), saved the built worker-profile screenshot,
+drafted the Docs sync comments and wrote the cheat-sheet tab. When I asked, it cleaned the
+local database down to six test accounts and wrote a seed script for local checks.
+
+**AI failed:**
+- Its first screenshot run showed error 500 on the worker pages: its own test data used a
+  skill code that does not exist (`cleanup`). It found this by looking at the shots.
+- One of its tests failed because it changed a profile with `.update()` in the database while
+  the user object still held the old profile in memory. The test was fixed, not the code.
+- Three mutations survived. The tag test passed without sorting, because the most frequent tag
+  also came first in the list. "★ 5" was found in the head ("★ 5.0") instead of the review,
+  and the review's tags were found in the summary. All three tests were strengthened.
+- The screenshots showed three layout problems: the rating broke "2 workers · ★ 4.7 (3)" at
+  360 px, my own page said "Allowed to work in Germany" twice, and the blocks in the job
+  page's employer card stuck together.
+- Its German screenshot run failed once: it set the language before the login, so the login
+  form had German labels.
+
+**My part:**
+- D1 "On time · 7 of 9": I took Claude's recommendation because it misleads the least: an
+  unticked tag does not read as the opposite.
+- D2 only visible reviews count: the recommendation matched what I wanted, and I did not want
+  different sets of rules on different pages.
+- D3 no worker names over reviews: to protect workers' data, since the employer's card is
+  public.
+- D4: when D4 was about only a summary on the job page, I asked about the asymmetry: a worker
+  has a page for employers, an employer has none. The question came to me during manual
+  testing. It led to the employer's public page.
+- D12: Claude noticed that the mockup's "Confirmed: allowed to work in Germany" reads as if
+  the site had checked documents. I chose "(confirmed by the worker)", and on my own page
+  "You confirmed it on <date>." instead of a second line.
+- D9 (the worker card like the mockup) was my idea from #30. D5–D8, D10 and D11 were
+  Claude's defaults, and I accepted them.
+- I asked to keep only six local test accounts and to build test data with them, because
+  finding fitting data by hand was hard.
+- I checked the RU and UK translations and every page on my local server with those accounts.
+
+**Learned:**
+- Why a hidden review must not change the average: otherwise the average gives away what the
+  other side rated before I rate back.
+- How `values().annotate()` turns into one GROUP BY query, so the applications list asks for
+  every worker's rating at once instead of once per worker.

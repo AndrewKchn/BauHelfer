@@ -1,0 +1,21 @@
+{% load i18n %}
+{% comment %}
+  A user's rating (#39, docs/specs/ratings.md R4-R6): "★ 4,7 (9 reviews)", or with `short`
+  "★ 4,7 (9)" for the applications list, as on the mockups; "No reviews yet" without one
+  (D7). One star and the number, not five stars (D10). floatformat writes the average in the
+  page's language: "4,7" in German, "4.7" in English (D6).
+  Needs `rating` (a reviews.models.Rating, from visible reviews only, D2).
+{% endcomment %}
+{% if rating.count %}
+  {% if short %}
+    <span class="whitespace-nowrap">★ {{ rating.average|floatformat:1 }} ({{ rating.count }})</span>
+  {% else %}
+    <span>{% blocktranslate with average=rating.average|floatformat:1 count counter=rating.count trimmed %}
+      ★ {{ average }} ({{ counter }} review)
+    {% plural %}
+      ★ {{ average }} ({{ counter }} reviews)
+    {% endblocktranslate %}</span>
+  {% endif %}
+{% else %}
+  <span class="text-base-content/70">{% translate "No reviews yet" %}</span>
+{% endif %}

@@ -1,0 +1,28 @@
+{% load i18n %}
+{% comment %}
+  The latest visible reviews about a user (#39, docs/specs/ratings.md R8-R10, D5): who wrote
+  it (never a worker's name, D3), the stars, the tags and the job with its date. Nothing
+  when there is none: the card's head says "No reviews yet".
+  Needs `reviews` (from Review.objects.latest_about()).
+{% endcomment %}
+{% if reviews %}
+  <section class="card mt-4 bg-base-100 shadow-sm">
+    <div class="card-body p-4">
+      <h2 class="text-xs font-semibold uppercase tracking-wide text-base-content/70">{% translate "Reviews" %}</h2>
+      <ul class="flex flex-col gap-3">
+        {% for review in reviews %}
+          <li class="rounded-box bg-base-200 p-3">
+            <div class="flex items-start justify-between gap-2">
+              <p class="min-w-0 break-words font-semibold">{{ review.author_label }}</p>
+              <span class="whitespace-nowrap">★ {{ review.rating }}</span>
+            </div>
+            {% if review.tags %}
+              <p class="text-sm">{{ review.tag_names|join:", " }}</p>
+            {% endif %}
+            <p class="text-sm text-base-content/70">{{ review.application.job.get_job_type_display }} · {{ review.application.job.date|date:"j M" }}</p>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </section>
+{% endif %}

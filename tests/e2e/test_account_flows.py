@@ -84,7 +84,9 @@ def test_worker_signs_up_and_fills_in_the_profile_on_a_phone(page):
     main = page.get_by_role("main")
     for text in ("Ana Popescu", "+49 151 12345678", "Carrying materials", "Romanian"):
         expect(main.get_by_text(text)).to_be_visible()
-    expect(main.get_by_text("Confirmed by the worker")).to_be_visible()
+    expect(
+        main.get_by_text("Allowed to work in Germany (confirmed by the worker)")
+    ).to_be_visible()
     assert_fits_the_screen(page)
 
     page.get_by_label("Menu").click()

@@ -275,12 +275,13 @@ def test_translated_page_needs_one_more_query(
     1. Give the job 0 or 3 photos
     2. As a guest with the English cookie, open the page once: the translation is saved
     3. Open it again and count the queries
-    4. Expect: 3 queries — the job, the photos and the cached translation
+    4. Expect: 4 queries — the job, the photos, the employer's rating (#39) and the
+       cached translation
     """
     add_photos(job, photos)
     as_guest_in(client, "en").get(detail_url(job))
 
-    with django_assert_num_queries(3):
+    with django_assert_num_queries(4):
         client.get(detail_url(job))
 
 

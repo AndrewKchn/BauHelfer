@@ -1,0 +1,19 @@
+{% load i18n %}
+{% comment %}
+  What others ticked about a user (#39, docs/specs/ratings.md R7, D1): "On time · 7 of 9",
+  most often first. The number of reviews is said with each tag, so an unticked tag does not
+  read as the opposite. Nothing when no visible review has a tag.
+  Needs `rating` (a reviews.models.Rating from rating_of()).
+{% endcomment %}
+{% if rating.tags %}
+  <div>
+    <p class="text-xs font-semibold uppercase tracking-wide text-base-content/70">{% translate "What went well" %}</p>
+    <ul class="mt-1">
+      {% for name, number in rating.tags %}
+        <li>{% blocktranslate with tag=name number=number total=rating.count trimmed %}
+          {{ tag }} · {{ number }} of {{ total }}
+        {% endblocktranslate %}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}

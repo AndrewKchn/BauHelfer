@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BauHelfer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-13 00:50+0100\n"
+"POT-Creation-Date: 2026-11-16 13:59+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -70,7 +70,7 @@ msgstr "Beceriler"
 msgid "Languages you speak"
 msgstr "Konuştuğunuz diller"
 
-#: accounts/forms.py templates/accounts/_worker_profile_card.html
+#: accounts/forms.py
 msgid "Legal status"
 msgstr "Yasal durum"
 
@@ -82,7 +82,7 @@ msgstr "İş alanları"
 msgid "Employer"
 msgstr "İşveren"
 
-#: accounts/models.py
+#: accounts/models.py reviews/models.py
 msgid "Worker"
 msgstr "İşçi"
 
@@ -282,7 +282,7 @@ msgstr "işçi profilleri"
 msgid "Individual"
 msgstr "Tek kişi"
 
-#: accounts/models.py
+#: accounts/models.py reviews/models.py
 #, python-format
 msgid "Crew of %(count)d"
 msgid_plural "Crew of %(count)d"
@@ -858,12 +858,11 @@ msgid "Off"
 msgstr "Kapalı"
 
 #: templates/accounts/_employer_profile_card.html
-msgid "Company"
-msgstr "Şirket"
-
-#: templates/accounts/_employer_profile_card.html
-msgid "Contact person"
-msgstr "İletişim kişisi"
+#, python-format
+msgid "%(counter)s review →"
+msgid_plural "%(counter)s reviews →"
+msgstr[0] "%(counter)s değerlendirme →"
+msgstr[1] "%(counter)s değerlendirme →"
 
 #: templates/accounts/_employer_profile_card.html
 #: templates/accounts/employer_profile.html
@@ -877,28 +876,20 @@ msgid "not given"
 msgstr "belirtilmedi"
 
 #: templates/accounts/_worker_profile_card.html
-msgid "Name"
-msgstr "Ad"
-
-#: templates/accounts/_worker_profile_card.html
-msgid "Team"
-msgstr "Ekip"
-
-#: templates/accounts/_worker_profile_card.html
 msgid "Languages"
 msgstr "Diller"
 
 #: templates/accounts/_worker_profile_card.html
-msgid "Work permit"
-msgstr "Çalışma izni"
+msgid "Allowed to work in Germany (confirmed by the worker)"
+msgstr "Almanya'da çalışma hakkı var (işçi tarafından onaylandı)"
 
-#: templates/accounts/_worker_profile_card.html
-msgid "Confirmed by the worker"
-msgstr "İşçi tarafından onaylandı"
+#: templates/accounts/_worker_profile_card.html templates/jobs/job_detail.html
+msgid "Work permit not confirmed"
+msgstr "Çalışma izni onaylanmadı"
 
-#: templates/accounts/_worker_profile_card.html
-msgid "Not confirmed"
-msgstr "Onaylanmadı"
+#: templates/accounts/employer_detail.html
+msgid "Employer profile"
+msgstr "İşveren profili"
 
 #: templates/accounts/employer_profile.html
 #: templates/accounts/employer_profile_form.html templates/base.html
@@ -957,8 +948,8 @@ msgstr "Profilim"
 
 #: templates/accounts/worker_profile.html
 #, python-format
-msgid "Allowed to work in Germany — confirmed on %(date)s."
-msgstr "Almanya'da çalışma hakkı — onay tarihi: %(date)s."
+msgid "You confirmed it on %(date)s."
+msgstr "%(date)s tarihinde onayladınız."
 
 #: templates/accounts/worker_profile.html
 msgid "Employers see these only after they accept your application."
@@ -1403,10 +1394,6 @@ msgid "No skill:"
 msgstr "Beceri yok:"
 
 #: templates/jobs/job_detail.html
-msgid "Work permit not confirmed"
-msgstr "Çalışma izni onaylanmadı"
-
-#: templates/jobs/job_detail.html
 #, python-format
 msgid "Sent %(date)s"
 msgstr "Gönderim: %(date)s"
@@ -1717,6 +1704,30 @@ msgstr ""
 msgid "A new link can be sent once every 10 minutes."
 msgstr "Yeni bağlantı 10 dakikada bir gönderilebilir."
 
+#: templates/reviews/_rating.html
+#, python-format
+msgid "★ %(average)s (%(counter)s review)"
+msgid_plural "★ %(average)s (%(counter)s reviews)"
+msgstr[0] "★ %(average)s (%(counter)s değerlendirme)"
+msgstr[1] "★ %(average)s (%(counter)s değerlendirme)"
+
+#: templates/reviews/_rating.html
+msgid "No reviews yet"
+msgstr "Henüz değerlendirme yok"
+
+#: templates/reviews/_review_list.html
+msgid "Reviews"
+msgstr "Değerlendirmeler"
+
+#: templates/reviews/_tag_summary.html
+msgid "What went well"
+msgstr "Neler iyiydi"
+
+#: templates/reviews/_tag_summary.html
+#, python-format
+msgid "%(tag)s · %(number)s of %(total)s"
+msgstr "%(tag)s · %(number)s / %(total)s"
+
 #: templates/reviews/review_form.html
 msgid "Rate the work"
 msgstr "İşi değerlendirin"
@@ -1745,3 +1756,24 @@ msgstr ""
 #: templates/reviews/review_form.html
 msgid "Publish review"
 msgstr "Değerlendirmeyi yayınla"
+
+#~ msgid "Company"
+#~ msgstr "Şirket"
+
+#~ msgid "Contact person"
+#~ msgstr "İletişim kişisi"
+
+#~ msgid "Name"
+#~ msgstr "Ad"
+
+#~ msgid "Team"
+#~ msgstr "Ekip"
+
+#~ msgid "Work permit"
+#~ msgstr "Çalışma izni"
+
+#~ msgid "Confirmed by the worker"
+#~ msgstr "İşçi tarafından onaylandı"
+
+#~ msgid "Not confirmed"
+#~ msgstr "Onaylanmadı"

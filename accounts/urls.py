@@ -53,6 +53,12 @@ urlpatterns = [
     ),
     # Another worker's profile, for the employers they applied to (#23): pk = the user id.
     path("workers/<int:pk>/", views.WorkerDetailView.as_view(), name="worker_detail"),
+    # An employer's public page with the latest reviews, for everyone (#39): pk = user id.
+    path(
+        "employers/<int:pk>/",
+        views.EmployerDetailView.as_view(),
+        name="employer_detail",
+    ),
     path(
         "profile/employer/",
         views.EmployerProfileView.as_view(),

@@ -55,7 +55,8 @@ def test_employer_the_worker_applied_to_sees_the_profile(client, employer, worke
     1. Ivan (crew of 3, demolition, German, Minijob, work permit) applied to Anna's job
     2. Log in as Anna and open Ivan's worker page
     3. Expect: the title "Worker profile"; Ivan's name, "Crew of 3", the skill, the
-       language, the legal status and "Confirmed by the worker"
+       language, the legal status and "Allowed to work in Germany (confirmed by the
+       worker)" (#39, ratings.md D12)
     """
     client.force_login(employer)
 
@@ -67,7 +68,7 @@ def test_employer_the_worker_applied_to_sees_the_profile(client, employer, worke
     assertContains(response, "Demolition")
     assertContains(response, "German")
     assertContains(response, "Minijob")
-    assertContains(response, "Confirmed by the worker")
+    assertContains(response, "Allowed to work in Germany (confirmed by the worker)")
 
 
 def test_worker_page_shows_no_contact_details(client, employer, worker, job):
