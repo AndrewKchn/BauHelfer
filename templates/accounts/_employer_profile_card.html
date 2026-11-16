@@ -3,25 +3,34 @@
   Who the employer is, read-only. Used on the employer's own profile page and on the job page
   (#19). No contact details, except the phone when `show_phone` is set: the job page sets it
   for an accepted worker until the day of the job is over (#25, contacts.md R3, D7).
-  Needs `profile` (an EmployerProfile).
+  Since #39 a head as on the job page mockup (docs/specs/ratings.md R5): the initials, the
+  company (or the person without one) and the rating.
+  Needs `profile` (an EmployerProfile) and `rating` (a reviews.models.Rating).
 {% endcomment %}
-{# Phone: each label above its value, so the badges get the whole width (#30, D17); #}
-{# from sm the labels sit in a column on the left. #}
-<dl class="grid grid-cols-1 gap-y-1 sm:grid-cols-[max-content_1fr] sm:gap-x-6 sm:gap-y-4">
-  {% if profile.company_name %}
-    <dt class="mt-3 font-semibold first:mt-0 sm:mt-0">{% translate "Company" %}</dt>
-    <dd class="min-w-0 break-words">{{ profile.company_name }}</dd>
-  {% endif %}
+<div class="flex items-center gap-4">
+  <div class="avatar avatar-placeholder shrink-0">
+    <div class="w-12 rounded-full bg-primary text-primary-content">
+      <span aria-hidden="true">{{ profile.user.initials }}</span>
+    </div>
+  </div>
+  <div class="min-w-0">
+    <p class="break-words text-lg font-bold">{{ profile.company_name|default:profile.user.name }}</p>
+    {# The person under the company; without a company the name is already above. #}
+    {% if profile.company_name %}
+      <p class="break-words text-base-content/70">{{ profile.user.name }}</p>
+    {% endif %}
+    <p>{% include "reviews/_rating.html" %}</p>
+  </div>
+</div>
 
-  <dt class="mt-3 font-semibold first:mt-0 sm:mt-0">{% translate "Contact person" %}</dt>
-  <dd class="min-w-0 break-words">{{ profile.user.name }}</dd>
-
+{# Labels above their values, as on the worker's card (D9). #}
+<dl class="flex flex-col gap-1">
   {% if show_phone %}
-    <dt class="mt-3 font-semibold first:mt-0 sm:mt-0">{% translate "Phone" %}</dt>
-    <dd class="min-w-0 break-words">{% include "accounts/_phone.html" with phone=profile.user.phone %}</dd>
+    <dt class="text-xs font-semibold uppercase tracking-wide text-base-content/70">{% translate "Phone" %}</dt>
+    <dd class="mb-2 min-w-0 break-words">{% include "accounts/_phone.html" with phone=profile.user.phone %}</dd>
   {% endif %}
 
-  <dt class="mt-3 font-semibold first:mt-0 sm:mt-0">{% translate "Trades" %}</dt>
+  <dt class="text-xs font-semibold uppercase tracking-wide text-base-content/70">{% translate "Trades" %}</dt>
   <dd class="flex min-w-0 flex-wrap gap-2">
     {% for name in profile.trade_names %}<span class="badge badge-outline">{{ name }}</span>{% endfor %}
   </dd>

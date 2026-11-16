@@ -1,11 +1,16 @@
 """Reviews after a done job, in both directions (#38, docs/specs/reviews.md)."""
 
+from typing import NamedTuple
+
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.db.models import Avg, Count, Exists, F, OuterRef, Q
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+
+from jobs.models import Application
 
 
 class WorkerTag(models.TextChoices):
@@ -26,6 +31,77 @@ class EmployerTag(models.TextChoices):
     SAFE_WORKPLACE = "safe_workplace", _("Safe workplace")
     CLEAR_INSTRUCTIONS = "clear_instructions", _("Clear instructions")
     RESPECTFUL = "respectful", _("Respectful")
+
+
+class Rating(NamedTuple):
+    """A user's average stars and how many reviews it is made of (#39, ratings.md R3).
+
+    `average` is None when nobody has rated the user yet (D7).
+    """
+
+    average: float | None
+    count: int
+
+
+NO_RATING = Rating(average=None, count=0)
+
+
+class ReviewQuerySet(models.QuerySet):
+    """Which reviews count and the ratings made of them (#39, ratings.md R1-R3, R6)."""
+
+    def visible(self):
+        """The reviews the other side may already see: Review.is_visible in one query.
+
+        The same rule (reviews.md R6, D3): the 14 days of the application are over, or
+        the application has a review by the other side. Every rating is counted only
+        from these, so a hidden review never shows as a change of the average (D2).
+        """
+        other_side = Review.objects.filter(application=OuterRef("application")).exclude(
+            author=OuterRef("author")
+        )
+        # done_at + 14 days <= now, written as done_at <= now - 14 days, so the database
+        # compares a column with one value. <=: the moment can_review closes, this opens.
+        period_over = Q(
+            application__job__done_at__lte=timezone.now() - Application.REVIEW_PERIOD
+        )
+        return self.filter(period_over | Exists(other_side))
+
+    def about(self, user):
+        """The reviews of `user`: on their work, written by the other side (R2).
+
+        `user` is the worker of the application, or the employer of its job; the review
+        they wrote themselves on the same application is about the other one.
+        """
+        on_their_work = Q(application__worker=user) | Q(application__job__employer=user)
+        return self.filter(on_their_work).exclude(author=user)
+
+    def rating_of(self, user):
+        """`user`'s Rating from the visible reviews about them, in one query (R3)."""
+        result = (
+            self.visible()
+            .about(user)
+            .aggregate(average=Avg("rating"), count=Count("id"))
+        )
+        return Rating(**result)
+
+    def worker_ratings(self, worker_ids):
+        """{worker id: Rating} for the workers of a list, in one query (R6, D8).
+
+        A worker nobody has rated yet is not in it; the caller uses NO_RATING. Only the
+        employers' reviews count: the worker's own review of the employer is excluded.
+        """
+        rows = (
+            self.visible()
+            .filter(application__worker__in=worker_ids)
+            .exclude(author=F("application__worker"))
+            # values() then annotate(): GROUP BY the worker, one row per worker.
+            .values("application__worker")
+            .annotate(average=Avg("rating"), count=Count("id"))
+        )
+        return {
+            row["application__worker"]: Rating(row["average"], row["count"])
+            for row in rows
+        }
 
 
 class Review(models.Model):
@@ -62,6 +138,8 @@ class Review(models.Model):
         verbose_name=_("tags"),
     )
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+
+    objects = ReviewQuerySet.as_manager()  # adds visible(), rating_of(), ... (#39)
 
     class Meta:
         verbose_name = _("review")

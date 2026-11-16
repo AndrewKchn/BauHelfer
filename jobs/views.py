@@ -32,6 +32,7 @@ from django.views.generic.detail import SingleObjectMixin
 
 from accounts.models import User
 from accounts.views import RoleRequiredMixin
+from reviews.models import NO_RATING, Review
 from translations.services import detect_language, forget, translate
 
 from .forms import ApplicationForm, JobFilterForm, JobForm, JobPhotosForm
@@ -500,10 +501,18 @@ class JobDetailView(DetailView):
                 original_id=original_id(self.request),
             )
             context["applications"] = add_review_state(applications, user)
+            # Each worker's rating, all of them in one query (#39, ratings.md R6, D8).
+            ratings = Review.objects.worker_ratings([a.worker_id for a in applications])
+            for each in applications:
+                each.worker_rating = ratings.get(each.worker_id, NO_RATING)
             # The template picks "Accept 2" or "Accept 1 of 2" and the "fills the job"
             # warning with it (accept-reject.md R7, R8); loaded with the job, no query.
             context["places_left"] = job.places_left
-        # Only for workers: a guest's page keeps its 2 queries (application.md AC11).
+        else:
+            # The employer card's rating, for everyone but the owner, who sees the
+            # applications instead (#39, ratings.md R5): one query more.
+            context["employer_rating"] = Review.objects.rating_of(job.employer)
+        # Only for workers: a guest's page keeps its queries (application.md AC11).
         if user.is_authenticated and user.role == User.Role.WORKER:
             # Their application, also when the job is closed now (D7); None if there is none.
             application = job.applications.filter(worker=user).first()
