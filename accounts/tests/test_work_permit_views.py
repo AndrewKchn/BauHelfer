@@ -211,15 +211,16 @@ def test_profile_page_shows_the_confirmation_date(worker_client, worker):
 
     1. Log in as a worker with a profile, confirmed on 5 January 2026
     2. Open "My profile"
-    3. Expect: the confirmation and its date
+    3. Expect: the card's line once, and "You confirmed it on <date>." under it (#39,
+       ratings.md D12: no second "Allowed to work in Germany")
     """
     make_profile(worker)
     confirm(worker)
 
     response = worker_client.get(reverse("worker_profile"))
 
-    assertContains(response, "Allowed to work in Germany")
-    assertContains(response, FIRST_CONFIRMATION_TEXT)
+    assertContains(response, "Allowed to work in Germany", count=1)
+    assertContains(response, f"You confirmed it on {FIRST_CONFIRMATION_TEXT}.")
 
 
 def test_profile_card_shows_confirmation_without_date(worker):
