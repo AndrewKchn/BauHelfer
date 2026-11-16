@@ -94,12 +94,14 @@ def test_no_tags_no_summary(client, employer, worker):
 def test_employer_sees_the_workers_reviews(client, employer, worker):
     """The worker page lists the reviews: company, stars, tags, job and date (R8, R9).
 
-    1. Anna rates Ivan 5 with Careful work for a demolition; Ivan applied to her new job
+    1. Anna rates Ivan 5 with On time and Careful work for a demolition; Ivan applied to
+       her new job
     2. Open Ivan's worker page as Anna
-    3. Expect: "Reviews", "Huber Bau GmbH", "★ 5", "Careful work" and
-       "Demolition · <job date>"
+    3. Expect: "Reviews", "Huber Bau GmbH", the review's own "★ 5" (the head says
+       "★ 5.0"), its tags on one line "On time, Careful work" (the summary has a line
+       per tag) and "Demolition · <job date>"
     """
-    application = rated(employer, worker, [WorkerTag.CAREFUL_WORK])
+    application = rated(employer, worker, [WorkerTag.ON_TIME, WorkerTag.CAREFUL_WORK])
     Application.objects.create(job=make_job(employer), worker=worker)
     client.force_login(employer)
 
@@ -108,8 +110,8 @@ def test_employer_sees_the_workers_reviews(client, employer, worker):
     when = date_format(application.job.date, "j M")
     assertContains(response, ">Reviews</h2>")
     assertContains(response, "Huber Bau GmbH")
-    assertContains(response, "★ 5")
-    assertContains(response, "Careful work")
+    assertContains(response, "★ 5</span>")
+    assertContains(response, "On time, Careful work")
     assertContains(response, f"Demolition · {when}")
 
 
@@ -118,7 +120,8 @@ def test_employers_page_lists_reviews_without_workers_names(client, employer, wo
 
     1. Ivan rates Anna 3 with Paid in full and on time
     2. Open "My company" as Anna
-    3. Expect: "Crew of 3", "★ 3", "Paid in full and on time"; no "Ivan Petrenko"
+    3. Expect: "Crew of 3", the review's "★ 3" (the head says "★ 3.0"), "Paid in full
+       and on time"; no "Ivan Petrenko"
     """
     rated(employer, worker, employer_tags=[EmployerTag.PAID_ON_TIME])
     client.force_login(employer)
@@ -127,7 +130,7 @@ def test_employers_page_lists_reviews_without_workers_names(client, employer, wo
 
     assertContains(response, ">Reviews</h2>")
     assertContains(response, "Crew of 3")
-    assertContains(response, "★ 3")
+    assertContains(response, "★ 3</span>")
     assertContains(response, "Paid in full and on time")
     assertNotContains(response, "Ivan Petrenko")
 

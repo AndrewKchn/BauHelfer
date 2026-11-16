@@ -9,7 +9,6 @@ import datetime
 import pytest
 from django.utils import timezone
 
-from accounts.models import EmployerProfile
 from jobs.models import Application, Job
 from jobs.tests.test_application import make_worker
 from jobs.tests.test_views import make_employer, make_job
@@ -61,19 +60,20 @@ def rated(employer, worker, worker_tags=(), employer_tags=(), stars=4):
 
 
 def test_tags_are_counted_most_often_first(employer, worker):
-    """Three reviews: "On time" twice, "Careful work" once (R7, D1).
+    """Three reviews: "Careful work" twice, "On time" once (R7, D1).
 
-    1. Anna rates Ivan three times: On time + Careful work, On time, and no tag
-    2. Expect: tags [("On time", 2), ("Careful work", 1)] out of 3 reviews
+    1. Anna rates Ivan three times: On time + Careful work, Careful work, and no tag
+       (On time comes first in the tag list, so only counting puts Careful work first)
+    2. Expect: tags [("Careful work", 2), ("On time", 1)] out of 3 reviews
     """
     rated(employer, worker, [WorkerTag.ON_TIME, WorkerTag.CAREFUL_WORK])
-    rated(employer, worker, [WorkerTag.ON_TIME])
+    rated(employer, worker, [WorkerTag.CAREFUL_WORK])
     rated(employer, worker, [])
 
     rating = Review.objects.rating_of(worker)
 
     assert rating.count == 3
-    assert rating.tags == [("On time", 2), ("Careful work", 1)]
+    assert rating.tags == [("Careful work", 2), ("On time", 1)]
 
 
 def test_tags_with_the_same_count_keep_the_list_order(employer, worker):
@@ -152,7 +152,10 @@ def test_private_employers_review_is_signed_with_the_name(worker):
     2. Expect: author_label "Petra Klein"
     """
     petra = make_employer("petra@example.com", name="Petra Klein")
-    EmployerProfile.objects.filter(user=petra).update(company_name="")
+    # Through the user: .update() in the database would leave her cached profile with the
+    # company of make_employer().
+    petra.employer_profile.company_name = ""
+    petra.employer_profile.save()
 
     assert rated(petra, worker).author_label == "Petra Klein"
 
