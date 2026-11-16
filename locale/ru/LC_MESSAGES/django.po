@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BauHelfer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-13 00:50+0100\n"
+"POT-Creation-Date: 2026-11-16 13:59+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -71,7 +71,7 @@ msgstr "Навыки"
 msgid "Languages you speak"
 msgstr "Языки, на которых вы говорите"
 
-#: accounts/forms.py templates/accounts/_worker_profile_card.html
+#: accounts/forms.py
 msgid "Legal status"
 msgstr "Правовой статус"
 
@@ -83,7 +83,7 @@ msgstr "Виды работ"
 msgid "Employer"
 msgstr "Работодатель"
 
-#: accounts/models.py
+#: accounts/models.py reviews/models.py
 msgid "Worker"
 msgstr "Рабочий"
 
@@ -281,7 +281,7 @@ msgstr "профили рабочих"
 msgid "Individual"
 msgstr "Без бригады"
 
-#: accounts/models.py
+#: accounts/models.py reviews/models.py
 #, python-format
 msgid "Crew of %(count)d"
 msgid_plural "Crew of %(count)d"
@@ -865,12 +865,13 @@ msgid "Off"
 msgstr "Выкл."
 
 #: templates/accounts/_employer_profile_card.html
-msgid "Company"
-msgstr "Компания"
-
-#: templates/accounts/_employer_profile_card.html
-msgid "Contact person"
-msgstr "Контактное лицо"
+#, python-format
+msgid "%(counter)s review →"
+msgid_plural "%(counter)s reviews →"
+msgstr[0] "%(counter)s отзыв →"
+msgstr[1] "%(counter)s отзыва →"
+msgstr[2] "%(counter)s отзывов →"
+msgstr[3] "%(counter)s отзыва →"
 
 #: templates/accounts/_employer_profile_card.html
 #: templates/accounts/employer_profile.html
@@ -884,28 +885,20 @@ msgid "not given"
 msgstr "не указан"
 
 #: templates/accounts/_worker_profile_card.html
-msgid "Name"
-msgstr "Имя"
-
-#: templates/accounts/_worker_profile_card.html
-msgid "Team"
-msgstr "Бригада"
-
-#: templates/accounts/_worker_profile_card.html
 msgid "Languages"
 msgstr "Языки"
 
 #: templates/accounts/_worker_profile_card.html
-msgid "Work permit"
-msgstr "Разрешение на работу"
+msgid "Allowed to work in Germany (confirmed by the worker)"
+msgstr "Право работать в Германии (подтверждено рабочим)"
 
-#: templates/accounts/_worker_profile_card.html
-msgid "Confirmed by the worker"
-msgstr "Подтверждено рабочим"
+#: templates/accounts/_worker_profile_card.html templates/jobs/job_detail.html
+msgid "Work permit not confirmed"
+msgstr "Разрешение на работу не подтверждено"
 
-#: templates/accounts/_worker_profile_card.html
-msgid "Not confirmed"
-msgstr "Не подтверждено"
+#: templates/accounts/employer_detail.html
+msgid "Employer profile"
+msgstr "Профиль работодателя"
 
 #: templates/accounts/employer_profile.html
 #: templates/accounts/employer_profile_form.html templates/base.html
@@ -964,8 +957,8 @@ msgstr "Мой профиль"
 
 #: templates/accounts/worker_profile.html
 #, python-format
-msgid "Allowed to work in Germany — confirmed on %(date)s."
-msgstr "Право работать в Германии подтверждено %(date)s."
+msgid "You confirmed it on %(date)s."
+msgstr "Вы подтвердили это %(date)s."
 
 #: templates/accounts/worker_profile.html
 msgid "Employers see these only after they accept your application."
@@ -1432,10 +1425,6 @@ msgid "No skill:"
 msgstr "Нет навыка:"
 
 #: templates/jobs/job_detail.html
-msgid "Work permit not confirmed"
-msgstr "Разрешение на работу не подтверждено"
-
-#: templates/jobs/job_detail.html
 #, python-format
 msgid "Sent %(date)s"
 msgstr "Отправлена %(date)s"
@@ -1747,6 +1736,32 @@ msgstr ""
 msgid "A new link can be sent once every 10 minutes."
 msgstr "Новую ссылку можно отправить раз в 10 минут."
 
+#: templates/reviews/_rating.html
+#, python-format
+msgid "★ %(average)s (%(counter)s review)"
+msgid_plural "★ %(average)s (%(counter)s reviews)"
+msgstr[0] "★ %(average)s (%(counter)s отзыв)"
+msgstr[1] "★ %(average)s (%(counter)s отзыва)"
+msgstr[2] "★ %(average)s (%(counter)s отзывов)"
+msgstr[3] "★ %(average)s (%(counter)s отзыва)"
+
+#: templates/reviews/_rating.html
+msgid "No reviews yet"
+msgstr "Пока нет отзывов"
+
+#: templates/reviews/_review_list.html
+msgid "Reviews"
+msgstr "Отзывы"
+
+#: templates/reviews/_tag_summary.html
+msgid "What went well"
+msgstr "Что было хорошо"
+
+#: templates/reviews/_tag_summary.html
+#, python-format
+msgid "%(tag)s · %(number)s of %(total)s"
+msgstr "%(tag)s · %(number)s из %(total)s"
+
 #: templates/reviews/review_form.html
 msgid "Rate the work"
 msgstr "Оценить работу"
@@ -1777,3 +1792,24 @@ msgstr ""
 #: templates/reviews/review_form.html
 msgid "Publish review"
 msgstr "Опубликовать отзыв"
+
+#~ msgid "Company"
+#~ msgstr "Компания"
+
+#~ msgid "Contact person"
+#~ msgstr "Контактное лицо"
+
+#~ msgid "Name"
+#~ msgstr "Имя"
+
+#~ msgid "Team"
+#~ msgstr "Бригада"
+
+#~ msgid "Work permit"
+#~ msgstr "Разрешение на работу"
+
+#~ msgid "Confirmed by the worker"
+#~ msgstr "Подтверждено рабочим"
+
+#~ msgid "Not confirmed"
+#~ msgstr "Не подтверждено"

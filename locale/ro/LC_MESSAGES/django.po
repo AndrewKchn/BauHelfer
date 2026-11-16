@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BauHelfer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-13 00:50+0100\n"
+"POT-Creation-Date: 2026-11-16 13:59+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -70,7 +70,7 @@ msgstr "Competențe"
 msgid "Languages you speak"
 msgstr "Limbi pe care le vorbiți"
 
-#: accounts/forms.py templates/accounts/_worker_profile_card.html
+#: accounts/forms.py
 msgid "Legal status"
 msgstr "Statut juridic"
 
@@ -82,7 +82,7 @@ msgstr "Domenii de lucru"
 msgid "Employer"
 msgstr "Angajator"
 
-#: accounts/models.py
+#: accounts/models.py reviews/models.py
 msgid "Worker"
 msgstr "Muncitor"
 
@@ -283,7 +283,7 @@ msgstr "profiluri de muncitori"
 msgid "Individual"
 msgstr "Individual"
 
-#: accounts/models.py
+#: accounts/models.py reviews/models.py
 #, python-format
 msgid "Crew of %(count)d"
 msgid_plural "Crew of %(count)d"
@@ -867,12 +867,12 @@ msgid "Off"
 msgstr "Oprit"
 
 #: templates/accounts/_employer_profile_card.html
-msgid "Company"
-msgstr "Firmă"
-
-#: templates/accounts/_employer_profile_card.html
-msgid "Contact person"
-msgstr "Persoană de contact"
+#, python-format
+msgid "%(counter)s review →"
+msgid_plural "%(counter)s reviews →"
+msgstr[0] "%(counter)s recenzie →"
+msgstr[1] "%(counter)s recenzii →"
+msgstr[2] "%(counter)s de recenzii →"
 
 #: templates/accounts/_employer_profile_card.html
 #: templates/accounts/employer_profile.html
@@ -886,28 +886,20 @@ msgid "not given"
 msgstr "nespecificat"
 
 #: templates/accounts/_worker_profile_card.html
-msgid "Name"
-msgstr "Nume"
-
-#: templates/accounts/_worker_profile_card.html
-msgid "Team"
-msgstr "Echipă"
-
-#: templates/accounts/_worker_profile_card.html
 msgid "Languages"
 msgstr "Limbi"
 
 #: templates/accounts/_worker_profile_card.html
-msgid "Work permit"
-msgstr "Permis de muncă"
+msgid "Allowed to work in Germany (confirmed by the worker)"
+msgstr "Are dreptul să lucreze în Germania (confirmat de muncitor)"
 
-#: templates/accounts/_worker_profile_card.html
-msgid "Confirmed by the worker"
-msgstr "Confirmat de muncitor"
+#: templates/accounts/_worker_profile_card.html templates/jobs/job_detail.html
+msgid "Work permit not confirmed"
+msgstr "Permis de muncă neconfirmat"
 
-#: templates/accounts/_worker_profile_card.html
-msgid "Not confirmed"
-msgstr "Neconfirmat"
+#: templates/accounts/employer_detail.html
+msgid "Employer profile"
+msgstr "Profil de angajator"
 
 #: templates/accounts/employer_profile.html
 #: templates/accounts/employer_profile_form.html templates/base.html
@@ -966,8 +958,8 @@ msgstr "Profilul meu"
 
 #: templates/accounts/worker_profile.html
 #, python-format
-msgid "Allowed to work in Germany — confirmed on %(date)s."
-msgstr "Drept de muncă în Germania — confirmat la %(date)s."
+msgid "You confirmed it on %(date)s."
+msgstr "Ați confirmat la %(date)s."
 
 #: templates/accounts/worker_profile.html
 msgid "Employers see these only after they accept your application."
@@ -1425,10 +1417,6 @@ msgid "No skill:"
 msgstr "Fără competența:"
 
 #: templates/jobs/job_detail.html
-msgid "Work permit not confirmed"
-msgstr "Permis de muncă neconfirmat"
-
-#: templates/jobs/job_detail.html
 #, python-format
 msgid "Sent %(date)s"
 msgstr "Trimisă %(date)s"
@@ -1740,6 +1728,31 @@ msgstr ""
 msgid "A new link can be sent once every 10 minutes."
 msgstr "Un link nou poate fi trimis o dată la 10 minute."
 
+#: templates/reviews/_rating.html
+#, python-format
+msgid "★ %(average)s (%(counter)s review)"
+msgid_plural "★ %(average)s (%(counter)s reviews)"
+msgstr[0] "★ %(average)s (%(counter)s recenzie)"
+msgstr[1] "★ %(average)s (%(counter)s recenzii)"
+msgstr[2] "★ %(average)s (%(counter)s de recenzii)"
+
+#: templates/reviews/_rating.html
+msgid "No reviews yet"
+msgstr "Încă nu există recenzii"
+
+#: templates/reviews/_review_list.html
+msgid "Reviews"
+msgstr "Recenzii"
+
+#: templates/reviews/_tag_summary.html
+msgid "What went well"
+msgstr "Ce a mers bine"
+
+#: templates/reviews/_tag_summary.html
+#, python-format
+msgid "%(tag)s · %(number)s of %(total)s"
+msgstr "%(tag)s · %(number)s din %(total)s"
+
 #: templates/reviews/review_form.html
 msgid "Rate the work"
 msgstr "Evaluați lucrarea"
@@ -1769,3 +1782,24 @@ msgstr ""
 #: templates/reviews/review_form.html
 msgid "Publish review"
 msgstr "Publicați recenzia"
+
+#~ msgid "Company"
+#~ msgstr "Firmă"
+
+#~ msgid "Contact person"
+#~ msgstr "Persoană de contact"
+
+#~ msgid "Name"
+#~ msgstr "Nume"
+
+#~ msgid "Team"
+#~ msgstr "Echipă"
+
+#~ msgid "Work permit"
+#~ msgstr "Permis de muncă"
+
+#~ msgid "Confirmed by the worker"
+#~ msgstr "Confirmat de muncitor"
+
+#~ msgid "Not confirmed"
+#~ msgstr "Neconfirmat"
