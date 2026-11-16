@@ -21,8 +21,9 @@ from django.utils import timezone
 from PIL import Image, ImageDraw
 
 from accounts.models import EmployerProfile, WorkerProfile
-from jobs.models import Application, JobPhoto
+from jobs.models import Application, Job, JobPhoto
 from jobs.tests.test_views import make_job
+from reviews.models import Review
 
 from .helpers import PASSWORD, log_in
 
@@ -57,10 +58,11 @@ def test_save_built_screenshots(page):
 
     1. Create an employer with three open jobs (one with three photos, one with two
        applications, one of them accepted) and a cancelled one, and a worker; Ivan with
-       an accepted, a pending and a past application (#26)
-    2. Open the job list as a guest, the job page as the worker, "Post a job", "My jobs"
-       and the job page with the applications as the employer, "My applications" as Ivan,
-       on a 390 x 844 screen in the light theme
+       an accepted, a pending and a past application (#26); Andrii rated three times by
+       another employer, both sides (#39)
+    2. Open the job list as a guest, the job page as the worker, "Post a job", "My jobs",
+       the job page with the applications and Andrii's worker page as the employer, "My
+       applications" as Ivan, on a 390 x 844 screen in the light theme
     3. Expect: one full-page PNG per screen in docs/mockups/built/
     """
     OUT.mkdir(exist_ok=True)
@@ -208,6 +210,37 @@ def test_save_built_screenshots(page):
     )
     Application.objects.create(job=over, worker=ivan)
 
+    # Andrii's reviews (#39): three done jobs of another employer, so Max's own pages do
+    # not change; both sides rated, so the reviews are visible (ratings.md D2).
+    meier = User.objects.create_user(
+        email="karl@example.com", password=PASSWORD, role="employer", name="Karl Meier"
+    )
+    EmployerProfile.objects.create(
+        user=meier, company_name="Trockenbau Meier", trades=["drywall"]
+    )
+    andrii = User.objects.get(email="andrii@example.com")
+    for days, job_type, stars, tags in (
+        (20, "site_cleaning", 5, ["on_time", "clean_site"]),
+        (12, "demolition", 4, ["on_time"]),
+        (5, "carrying", 5, ["on_time", "careful_work"]),
+    ):
+        done = make_job(
+            meier,
+            job_type=job_type,
+            date=today - days * DAY,
+            status=Job.Status.DONE,
+            done_at=timezone.now() - (days - 1) * DAY,
+        )
+        work = Application.objects.create(
+            job=done,
+            worker=andrii,
+            workers_offered=2,
+            workers_accepted=2,
+            status=Application.Status.ACCEPTED,
+        )
+        Review.objects.create(application=work, author=meier, rating=stars, tags=tags)
+        Review.objects.create(application=work, author=andrii, rating=5)
+
     # live_server does not serve uploads (in-memory storage): answer every photo address.
     picture = photo_bytes("#d9822b")
     page.route(
@@ -224,6 +257,7 @@ def test_save_built_screenshots(page):
     shoot(page, "/jobs/new/", "post-a-job")
     shoot(page, "/jobs/mine/", "my-jobs")
     shoot(page, f"/jobs/{demolition.pk}/", "job-applications")
+    shoot(page, f"/accounts/workers/{andrii.pk}/", "worker-profile")
     page.context.clear_cookies()
     log_in(page, "ivan@example.com")
     shoot(page, "/jobs/applications/", "my-applications")
