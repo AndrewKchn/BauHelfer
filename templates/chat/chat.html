@@ -32,15 +32,26 @@
       {# daisyUI chat bubbles (D7): own messages right, in the primary colour. #}
       {# whitespace-pre-line keeps the line breaks; {{ }} escapes the text, so it is #}
       {# never HTML. sender_id: no query for the sender. #}
+      {# message.shown: the text as chat.shown_text.chat_messages_for() decided (#36, R6): #}
+      {# the original or a translation; this template compares no languages. #}
       {% if message.sender_id == user.pk %}
         <div class="chat chat-end">
-          <div class="chat-bubble chat-bubble-primary whitespace-pre-line break-words">{{ message.text }}</div>
+          <div class="chat-bubble chat-bubble-primary whitespace-pre-line break-words">{{ message.shown.text }}</div>
           <div class="chat-footer text-base-content/60">{{ message.created_at|time:"H:i" }} · {% translate "you" %}</div>
         </div>
       {% else %}
-        <div class="chat chat-start">
-          <div class="chat-bubble whitespace-pre-line break-words">{{ message.text }}</div>
-          <div class="chat-footer text-base-content/60">{{ message.created_at|time:"H:i" }}</div>
+        {# The other person's message with its label under it (#36, R6, D7). id: the block #}
+        {# "Show original" swaps (R11). stringformat: `add` joins strings, the id is a number. #}
+        <div class="chat chat-start" id="message-{{ message.pk }}">
+          <div class="chat-bubble whitespace-pre-line break-words">{{ message.shown.text }}</div>
+          <div class="chat-footer block text-base-content/60">
+            {{ message.created_at|time:"H:i" }}
+            {% with pk=message.pk|stringformat:"s" %}
+              {% with original_url=request.path|add:"?original="|add:pk target="message-"|add:pk anchor="message-"|add:pk %}
+                {% include "jobs/_translation_label.html" with shown=message.shown translation_url=request.path %}
+              {% endwith %}
+            {% endwith %}
+          </div>
         </div>
       {% endif %}
     {% empty %}

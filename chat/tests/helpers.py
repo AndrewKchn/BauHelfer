@@ -30,9 +30,15 @@ def apply(employer, worker, status="accepted", date=TODAY):
     )
 
 
-def write(application, sender, text, at=NOW):
-    """Save a message of `sender`, sent at `at`."""
-    message = Message.objects.create(application=application, sender=sender, text=text)
+def write(application, sender, text, at=NOW, language="en"):
+    """Save a message of `sender`, sent at `at`, written in `language`.
+
+    English by default: the site language of both users of conftest.py, so the chat page
+    has nothing to translate (#36). The translation tests write their own messages.
+    """
+    message = Message.objects.create(
+        application=application, sender=sender, text=text, original_language=language
+    )
     Message.objects.filter(pk=message.pk).update(created_at=at)
     return message
 

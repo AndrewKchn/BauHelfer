@@ -8,14 +8,16 @@ from django.db.models.functions import Coalesce
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.utils import timezone
+from django.utils import timezone, translation
 from django.views import View
 from django.views.generic import ListView
 
 from jobs.models import Application
+from translations.services import detect_language, translate
 
 from .forms import MessageForm
 from .models import Message, with_has_messages
+from .shown_text import chat_messages_for
 
 
 def other_side(application, user):
@@ -79,7 +81,19 @@ class ChatView(LoginRequiredMixin, View):
             return self.show(application, form)
         form.instance.application = application
         form.instance.sender = request.user
-        form.save()
+        # The text's language (#36, chat-translation.md R2, D3): Claude finds it; when it
+        # cannot tell, the sender's site language.
+        language = detect_language(form.cleaned_data["text"])
+        form.instance.original_language = (
+            request.user.preferred_language if language is None else language
+        )
+        message = form.save()
+        # Translated now, into the other person's language, so their page and polls read
+        # it from the cache (R3, D1): the sender waits once, the reader never. The result is
+        # not needed here; translate() never raises, so a failure still sends (D10).
+        other_language = other_side(application, request.user).preferred_language
+        if message.original_language != other_language:
+            translate(message.text, other_language)
         return redirect("chat", application.pk)
 
     def show(self, application, form):
@@ -99,8 +113,12 @@ class ChatView(LoginRequiredMixin, View):
         else:
             job_url = reverse("job_detail", args=[application.job.pk])
             back_url = f"{job_url}#application-{application.pk}"
-        # One query: the template tells own messages by sender_id, no user needed.
-        chat_messages = list(application.messages.all())
+        # One query for the messages, one for their cached translations (#36, R4, R5):
+        # each gets `shown`, its text as this reader should see it, in the active language
+        # (job-translation.md R8). The template tells own messages by sender_id.
+        chat_messages = chat_messages_for(
+            application.messages.all(), user, translation.get_language()
+        )
         context = {
             "application": application,
             "job": application.job,
