@@ -474,4 +474,24 @@ def test_poll_asks_without_the_original(anna_client, application, worker):
 
     response = anna_client.get(page, {"original": message.pk})
 
-    assertContains(response, f'hx-get="{page}" hx-trigger="every 4s"')
+    assertContains(response, f'hx-get="{page}?after={message.pk}"')
+
+
+def test_poll_sends_after_in_its_address(anna_client, application, worker):
+    """The poll's ?after= must not reach "Show original" (found in my manual check).
+
+    HTMX adds the hx-vals of every parent to a request, also to the links inside the list
+    (hx-disinherit does not stop it). With hx-vals {"after": <last id>} on the list, the
+    click asked ?original=<id>&after=<id>: nothing newer, so a 204 and no change. The poll
+    now has ?after= in its own address, which no link inherits.
+
+    1. Save Ivan's Ukrainian message
+    2. Open the chat as Anna
+    3. Expect: no hx-vals on the page; the poll asks ?after=<its id> by its address
+    """
+    message = say(application, worker, UKRAINIAN, "uk")
+
+    response = anna_client.get(chat_url(application))
+
+    assertNotContains(response, "hx-vals")
+    assertContains(response, f'hx-get="{chat_url(application)}?after={message.pk}"')

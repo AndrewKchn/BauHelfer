@@ -28,7 +28,7 @@ def test_open_chat_asks_every_4_seconds_after_its_last_message(
     """A writable chat polls with the id of its last message (R13, R18).
 
     1. Save two messages; open the chat as Ivan
-    2. Expect: the list polls every 4 s, sends "after" = the second message's id, and
+    2. Expect: the list polls every 4 s, asks ?after=<the second message's id>, and
        takes itself (its own id) out of the answer; the hint above the form
     """
     write(application, worker, "Hello")
@@ -38,23 +38,24 @@ def test_open_chat_asks_every_4_seconds_after_its_last_message(
     response = client.get(chat_url(application))
 
     assertContains(response, 'hx-trigger="every 4s"', count=1)
-    assertContains(response, f'"after": {last.pk}')
+    # In the address, not hx-vals: HTMX passes hx-vals on to the links inside (#36).
+    assertContains(response, f'hx-get="{chat_url(application)}?after={last.pk}"')
     assertContains(response, 'id="chat-messages"', count=1)
     assertContains(response, 'hx-select="#chat-messages"', count=1)
     assertContains(response, HINT)
 
 
 def test_empty_chat_asks_after_0(client, application, worker):
-    """No message yet: "after" is 0, so the first message is new (R13).
+    """No message yet: ?after=0, so the first message is new (R13).
 
     1. Open the empty chat as Ivan
-    2. Expect: "after": 0
+    2. Expect: ?after=0 in the address it polls
     """
     client.force_login(worker)
 
     response = client.get(chat_url(application))
 
-    assertContains(response, '"after": 0')
+    assertContains(response, f'hx-get="{chat_url(application)}?after=0"')
 
 
 def test_closed_chat_does_not_ask(client, employer, worker):
@@ -105,7 +106,7 @@ def test_a_newer_message_gives_the_whole_list(client, application, employer, wor
     response = client.get(chat_url(application), {"after": seen.pk})
 
     assertContains(response, "Yes, in the yard.")
-    assertContains(response, f'"after": {answer.pk}')
+    assertContains(response, f'?after={answer.pk}"')
 
 
 def test_after_that_is_not_a_number_is_ignored(client, application, worker):

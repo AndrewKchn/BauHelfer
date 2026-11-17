@@ -20,7 +20,9 @@
   {# id>. Nothing new: an empty 204, HTMX changes nothing. Something new: the whole page, #}
   {# from which hx-select takes this list and puts it in place of the old one, with the #}
   {# new last id. A closed chat does not ask (D12). #}
-  <div id="chat-messages" class="mt-4"{% if application.chat_writable %} hx-get="{{ request.path }}" hx-trigger="every 4s" hx-vals='{"after": {{ last_id }}}' hx-select="#chat-messages" hx-swap="outerHTML"{% endif %}>
+  {# ?after= is in the address, not in hx-vals: HTMX adds a parent's hx-vals to every #}
+  {# request inside it, so "Show original" (#36) asked ?after= too and got a 204. #}
+  <div id="chat-messages" class="mt-4"{% if application.chat_writable %} hx-get="{{ request.path }}?after={{ last_id }}" hx-trigger="every 4s" hx-select="#chat-messages" hx-swap="outerHTML"{% endif %}>
     {% for message in chat_messages %}
       {# A date line before the first message of each day (R8, D8); |date shows Munich #}
       {# time, so a message at 00:30 belongs to its Munich day. #}
