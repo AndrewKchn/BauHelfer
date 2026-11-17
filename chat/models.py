@@ -3,7 +3,12 @@
 from django.conf import settings
 from django.db import models
 from django.db.models import Exists, OuterRef, Q
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
+
+from accounts.models import User
+from translations.services import forget
 
 
 class Message(models.Model):
@@ -28,6 +33,15 @@ class Message(models.Model):
     # varchar(1000): even code that skips the form cannot save more; the limit of a text
     # the translation takes (#34), so #36 can translate every message (D5).
     text = models.CharField(_("text"), max_length=1000)
+    # The language the text is written in, found by Claude when it is sent (#36,
+    # chat-translation.md R1, R2, D2, D3), as Application.original_language. Empty: a
+    # language not among our 7; also every message sent before #36.
+    original_language = models.CharField(
+        _("original language"),
+        max_length=2,
+        choices=User.Language.choices,
+        blank=True,
+    )
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
     # When the other person first saw it; empty = unread (#35, chat.md R19, D15). Set by
     # ChatView when it draws the page (R20, D17), never by a form.
@@ -41,6 +55,18 @@ class Message(models.Model):
 
     def __str__(self):
         return f"{self.sender}: {self.text[:30]}"
+
+
+@receiver(post_delete, sender=Message)
+def forget_text(sender, instance, **kwargs):
+    """Delete the cached translations of a deleted message's text (#36, R7, D9).
+
+    As jobs.models.forget_message(): the text may hold a name or a phone number and must
+    not outlive its message. A signal, so it also runs when the message goes with its
+    application, its job or an account (CASCADE). Messages are never edited, so this is
+    the only place that forgets them.
+    """
+    forget(instance.text)
 
 
 def with_has_messages(applications):

@@ -20,7 +20,9 @@
   {# id>. Nothing new: an empty 204, HTMX changes nothing. Something new: the whole page, #}
   {# from which hx-select takes this list and puts it in place of the old one, with the #}
   {# new last id. A closed chat does not ask (D12). #}
-  <div id="chat-messages" class="mt-4"{% if application.chat_writable %} hx-get="{{ request.path }}" hx-trigger="every 4s" hx-vals='{"after": {{ last_id }}}' hx-select="#chat-messages" hx-swap="outerHTML"{% endif %}>
+  {# ?after= is in the address, not in hx-vals: HTMX adds a parent's hx-vals to every #}
+  {# request inside it, so "Show original" (#36) asked ?after= too and got a 204. #}
+  <div id="chat-messages" class="mt-4"{% if application.chat_writable %} hx-get="{{ request.path }}?after={{ last_id }}" hx-trigger="every 4s" hx-select="#chat-messages" hx-swap="outerHTML"{% endif %}>
     {% for message in chat_messages %}
       {# A date line before the first message of each day (R8, D8); |date shows Munich #}
       {# time, so a message at 00:30 belongs to its Munich day. #}
@@ -32,15 +34,26 @@
       {# daisyUI chat bubbles (D7): own messages right, in the primary colour. #}
       {# whitespace-pre-line keeps the line breaks; {{ }} escapes the text, so it is #}
       {# never HTML. sender_id: no query for the sender. #}
+      {# message.shown: the text as chat.shown_text.chat_messages_for() decided (#36, R6): #}
+      {# the original or a translation; this template compares no languages. #}
       {% if message.sender_id == user.pk %}
         <div class="chat chat-end">
-          <div class="chat-bubble chat-bubble-primary whitespace-pre-line break-words">{{ message.text }}</div>
+          <div class="chat-bubble chat-bubble-primary whitespace-pre-line break-words">{{ message.shown.text }}</div>
           <div class="chat-footer text-base-content/60">{{ message.created_at|time:"H:i" }} · {% translate "you" %}</div>
         </div>
       {% else %}
-        <div class="chat chat-start">
-          <div class="chat-bubble whitespace-pre-line break-words">{{ message.text }}</div>
-          <div class="chat-footer text-base-content/60">{{ message.created_at|time:"H:i" }}</div>
+        {# The other person's message with its label under it (#36, R6, D7). id: the block #}
+        {# "Show original" swaps (R11). stringformat: `add` joins strings, the id is a number. #}
+        <div class="chat chat-start" id="message-{{ message.pk }}">
+          <div class="chat-bubble whitespace-pre-line break-words">{{ message.shown.text }}</div>
+          <div class="chat-footer block text-base-content/60">
+            {{ message.created_at|time:"H:i" }}
+            {% with pk=message.pk|stringformat:"s" %}
+              {% with original_url=request.path|add:"?original="|add:pk target="message-"|add:pk anchor="message-"|add:pk %}
+                {% include "jobs/_translation_label.html" with shown=message.shown translation_url=request.path %}
+              {% endwith %}
+            {% endwith %}
+          </div>
         </div>
       {% endif %}
     {% empty %}

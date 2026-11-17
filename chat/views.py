@@ -8,14 +8,17 @@ from django.db.models.functions import Coalesce
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.utils import timezone
+from django.utils import timezone, translation
 from django.views import View
 from django.views.generic import ListView
 
 from jobs.models import Application
+from jobs.views import original_id
+from translations.services import detect_language, translate
 
 from .forms import MessageForm
 from .models import Message, with_has_messages
+from .shown_text import chat_messages_for, chat_previews_for
 
 
 def other_side(application, user):
@@ -79,7 +82,19 @@ class ChatView(LoginRequiredMixin, View):
             return self.show(application, form)
         form.instance.application = application
         form.instance.sender = request.user
-        form.save()
+        # The text's language (#36, chat-translation.md R2, D3): Claude finds it; when it
+        # cannot tell, the sender's site language.
+        language = detect_language(form.cleaned_data["text"])
+        form.instance.original_language = (
+            request.user.preferred_language if language is None else language
+        )
+        message = form.save()
+        # Translated now, into the other person's language, so their page and polls read
+        # it from the cache (R3, D1): the sender waits once, the reader never. The result is
+        # not needed here; translate() never raises, so a failure still sends (D10).
+        other_language = other_side(application, request.user).preferred_language
+        if message.original_language != other_language:
+            translate(message.text, other_language)
         return redirect("chat", application.pk)
 
     def show(self, application, form):
@@ -99,8 +114,17 @@ class ChatView(LoginRequiredMixin, View):
         else:
             job_url = reverse("job_detail", args=[application.job.pk])
             back_url = f"{job_url}#application-{application.pk}"
-        # One query: the template tells own messages by sender_id, no user needed.
-        chat_messages = list(application.messages.all())
+        # One query for the messages, one for their cached translations (#36, R4, R5):
+        # each gets `shown`, its text as this reader should see it, in the active language
+        # (job-translation.md R8). ?original=<id> is the "Show original" link of one
+        # message (R12, D8); an id of another chat matches nothing here. The template
+        # tells own messages by sender_id.
+        chat_messages = chat_messages_for(
+            application.messages.all(),
+            user,
+            translation.get_language(),
+            original_id=original_id(self.request),
+        )
         context = {
             "application": application,
             "job": application.job,
@@ -146,6 +170,10 @@ class ChatListView(LoginRequiredMixin, ListView):
                 # The text of the newest message (D21): a subquery per row, run by the
                 # database inside the same query.
                 last_text=Subquery(last_message.values("text")[:1]),
+                # Its language and sender, for the preview in the reader's language
+                # (#36, chat-translation.md R14, D11): in the same query, as last_text.
+                last_language=Subquery(last_message.values("original_language")[:1]),
+                last_sender_id=Subquery(last_message.values("sender_id")[:1]),
                 # The newest message, or the application itself before the first (D20).
                 activity=Coalesce(Max("messages__created_at"), "created_at"),
                 # Only the other person's unread messages (as unread_count, R21).
@@ -159,11 +187,13 @@ class ChatListView(LoginRequiredMixin, ListView):
 
     @override
     def get_context_data(self, **kwargs):
-        """Keep the readable chats only and name the other person of each (R24)."""
+        """Keep the readable chats only, name the other person of each (R24) and give each
+        its last message in the reader's language (#36, R15, one query for all).
+        """
         context = super().get_context_data(**kwargs)
         user = self.request.user
         chats = [chat for chat in context["chats"] if chat.chat_readable]
         for chat in chats:
             chat.other = other_side(chat, user)
-        context["chats"] = chats
+        context["chats"] = chat_previews_for(chats, user, translation.get_language())
         return context
