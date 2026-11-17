@@ -2,7 +2,7 @@
 
 from django.conf import settings
 from django.db import models
-from django.db.models import Exists, OuterRef
+from django.db.models import Exists, OuterRef, Q
 from django.utils.translation import gettext_lazy as _
 
 
@@ -29,6 +29,9 @@ class Message(models.Model):
     # the translation takes (#34), so #36 can translate every message (D5).
     text = models.CharField(_("text"), max_length=1000)
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    # When the other person first saw it; empty = unread (#35, chat.md R19, D15). Set by
+    # ChatView when it draws the page (R20, D17), never by a form.
+    read_at = models.DateTimeField(_("read at"), null=True, blank=True, editable=False)
 
     class Meta:
         verbose_name = _("message")
@@ -49,4 +52,20 @@ def with_has_messages(applications):
     """
     return applications.annotate(
         has_messages=Exists(Message.objects.filter(application=OuterRef("pk")))
+    )
+
+
+def unread_count(user):
+    """How many messages wait for `user`: in their chats, not their own, not read (R21).
+
+    "Their chats": the applications where they are the worker or the employer of the job.
+    One COUNT query; the context processor runs it on every page (D18).
+    """
+    return (
+        Message.objects.filter(
+            Q(application__worker=user) | Q(application__job__employer=user),
+            read_at=None,
+        )
+        .exclude(sender=user)
+        .count()
     )

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Chats" %} · BauHelfer{% endblock %}
+
+{% block content %}
+  {# Every chat of the user, newest activity first (#35, docs/specs/chat.md R24, D16, D20). #}
+  <h1 class="text-2xl font-semibold">{% translate "Chats" %}</h1>
+  {% if chats %}
+    <ul class="mt-4 flex flex-col gap-2">
+      {% for chat in chats %}
+        {% with job=chat.job %}
+          <li>
+            {# The whole row is the link: easy to hit on a phone. #}
+            <a href="{% url 'chat' chat.pk %}" class="card bg-base-100 shadow-sm hover:bg-base-300">
+              <div class="card-body gap-1 p-3">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="min-w-0 break-words font-semibold">{{ chat.other.name }}</span>
+                  {% if chat.unread %}
+                    {% include "chat/_unread_badge.html" with count=chat.unread %}
+                  {% endif %}
+                </div>
+                <p class="text-sm text-base-content/70">{{ job.get_job_type_display }} · {{ job.date|date:"D j M" }}</p>
+                {# The last message, cut (D21); none yet in a new chat. #}
+                {% if chat.last_text %}
+                  <p class="truncate text-sm">{{ chat.last_text|truncatechars:60 }}</p>
+                {% endif %}
+              </div>
+            </a>
+          </li>
+        {% endwith %}
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="mt-4 text-base-content/70">{% translate "No chats yet. A chat opens when an application is accepted." %}</p>
+  {% endif %}
+{% endblock %}
