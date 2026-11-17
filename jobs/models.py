@@ -538,6 +538,31 @@ class Application(models.Model):
         return self.status == self.Status.ACCEPTED and not self.job.is_over
 
     @property
+    def chat_writable(self):
+        """Whether the worker and the employer can write in the chat (#35, chat.md R2, D1).
+
+        The rule of the contacts: the chat is for the days they still have to agree on
+        something.
+        """
+        return self.shows_contacts
+
+    @property
+    def chat_readable(self):
+        """Whether the two can open the chat (#35, chat.md R3, D1, D3).
+
+        While it can be written, and afterwards if it has a message: the history stays after
+        the job and after a cancel. "Has a message" instead of the status: a worker can
+        withdraw an accepted application, so "withdrawn" does not say it was accepted, and a
+        chat that was never writable has no message. `has_messages` comes from
+        chat.models.with_has_messages() when the list loaded it, otherwise one query.
+        """
+        if self.chat_writable:
+            return True
+        if hasattr(self, "has_messages"):
+            return self.has_messages
+        return self.messages.exists()
+
+    @property
     def tab(self):
         """Which tab of "My applications" this application is in (my-applications.md R2).
 
