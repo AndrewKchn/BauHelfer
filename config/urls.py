@@ -28,6 +28,7 @@ urlpatterns = [
     path("accounts/", include("accounts.urls")),
     path("jobs/", include("jobs.urls")),
     path("applications/", include("reviews.urls")),  # the review page (#38)
+    path("chat/", include("chat.urls")),  # #35
     path("admin/", admin.site.urls),
 ]
 

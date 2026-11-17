@@ -28,16 +28,22 @@
             <details class="dropdown dropdown-end">
               <summary class="btn btn-ghost btn-sm" aria-label="{% translate 'Menu' %}">
                 <span aria-hidden="true" class="text-xl">☰</span>
+                {# Unread chat messages, from chat.context_processors (#35, chat.md R23). #}
+                {% if unread_messages %}
+                  {% include "chat/_unread_badge.html" with count=unread_messages %}
+                {% endif %}
               </summary>
               <ul class="menu dropdown-content z-10 mt-2 w-48 rounded-box bg-base-100 p-2 shadow">
                 {# Only pages that exist; #16, #18, #20 and #26 add their own links (spec decision D4). #}
                 {% if user.role == "worker" %}
                   <li><a href="{% url 'worker_profile' %}">{% translate "My profile" %}</a></li>
                   <li><a href="{% url 'my_applications' %}">{% translate "My applications" %}</a></li>
+                  {% include "chat/_chats_menu_item.html" %}
                 {% elif user.role == "employer" %}
                   <li><a href="{% url 'employer_profile' %}">{% translate "My company" %}</a></li>
                   <li><a href="{% url 'job_create' %}">{% translate "Post a job" %}</a></li>
                   <li><a href="{% url 'my_jobs' %}">{% translate "My jobs" %}</a></li>
+                  {% include "chat/_chats_menu_item.html" %}
                 {% endif %}
                 <li>
                   {# Logout must be a POST form: a plain link could be triggered by another site. #}

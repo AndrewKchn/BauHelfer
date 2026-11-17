@@ -195,23 +195,29 @@
                     <p class="text-xs text-base-content/60">
                       {% blocktranslate with date=application.created_at|date:"j M" %}Sent {{ date }}{% endblocktranslate %}
                     </p>
-                    {# A worker who drops out: the employer cancels them (#24, R20, D2). On the #}
-                    {# date's line, so the box does not grow (D26). The browser asks first: a #}
-                    {# tap by mistake cannot be undone (D16). |safe before |escapejs: the name #}
-                    {# is escaped once, for JavaScript, not also for HTML (it would show &#x27;). #}
-                    {% if application.status == "accepted" and job.status == "open" or application.status == "accepted" and job.status == "filled" %}
-                      {% blocktranslate asvar question with name=worker.name|safe %}Cancel {{ name }}? This cannot be undone.{% endblocktranslate %}
-                      <form method="post" action="{% url 'application_cancel' application.pk %}" onsubmit="return confirm('{{ question|escapejs }}')">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-outline btn-sm">{% translate "Cancel" %}</button>
-                      </form>
-                    {% elif application.can_rate %}
-                      {# A done job: rate this worker, then the own rating instead (#38, #}
-                      {# reviews.md R11, D4, D11); set by the view (add_review_state). #}
-                      <a href="{% url 'review_create' application.pk %}" class="btn btn-primary btn-sm">{% translate "Rate" %}</a>
-                    {% elif application.own_review %}
-                      <span class="text-sm">{% blocktranslate with rating=application.own_review.rating %}Rated ★{{ rating }}{% endblocktranslate %}</span>
-                    {% endif %}
+                    <div class="flex items-center gap-2">
+                      {# The chat with this worker while it can be read (#35, chat.md R11, D6). #}
+                      {% if application.chat_readable %}
+                        <a href="{% url 'chat' application.pk %}" class="btn btn-outline btn-sm">{% translate "Chat" %}</a>
+                      {% endif %}
+                      {# A worker who drops out: the employer cancels them (#24, R20, D2). On the #}
+                      {# date's line, so the box does not grow (D26). The browser asks first: a #}
+                      {# tap by mistake cannot be undone (D16). |safe before |escapejs: the name #}
+                      {# is escaped once, for JavaScript, not also for HTML (it would show &#x27;). #}
+                      {% if application.status == "accepted" and job.status == "open" or application.status == "accepted" and job.status == "filled" %}
+                        {% blocktranslate asvar question with name=worker.name|safe %}Cancel {{ name }}? This cannot be undone.{% endblocktranslate %}
+                        <form method="post" action="{% url 'application_cancel' application.pk %}" onsubmit="return confirm('{{ question|escapejs }}')">
+                          {% csrf_token %}
+                          <button type="submit" class="btn btn-outline btn-sm">{% translate "Cancel" %}</button>
+                        </form>
+                      {% elif application.can_rate %}
+                        {# A done job: rate this worker, then the own rating instead (#38, #}
+                        {# reviews.md R11, D4, D11); set by the view (add_review_state). #}
+                        <a href="{% url 'review_create' application.pk %}" class="btn btn-primary btn-sm">{% translate "Rate" %}</a>
+                      {% elif application.own_review %}
+                        <span class="text-sm">{% blocktranslate with rating=application.own_review.rating %}Rated ★{{ rating }}{% endblocktranslate %}</span>
+                      {% endif %}
+                    </div>
                   </div>
                   {# Decisions only on a pending application of an open job (#24, R7, D5). #}
                   {# Plain POST forms: the page reloads at this application (D3, D8). #}

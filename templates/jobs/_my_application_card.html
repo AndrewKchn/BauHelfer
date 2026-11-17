@@ -18,20 +18,27 @@
       {# asks first: it cannot be undone (D4). #}
       <div class="flex items-center justify-between gap-2">
         <p class="text-sm"><span class="font-semibold">{% translate "Your crew:" %}</span> {% include "jobs/_crew.html" %}</p>
-        {% if application.can_withdraw %}
-          {% translate "Withdraw your application? This cannot be undone." as question %}
-          <form method="post" action="{% url 'application_withdraw' application.pk %}" onsubmit="return confirm('{{ question|escapejs }}')" class="shrink-0">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-outline btn-sm">{% translate "Withdraw" %}</button>
-          </form>
-        {% endif %}
-        {# A done job, on the same line: the review page, then the own rating (#38, #}
-        {# reviews.md R10, D11). The view sets can_rate and own_review (add_review_state). #}
-        {% if application.can_rate %}
-          <a href="{% url 'review_create' application.pk %}" class="btn btn-primary btn-sm shrink-0">{% translate "Rate the employer" %}</a>
-        {% elif application.own_review %}
-          <span class="shrink-0 text-sm">{% blocktranslate with rating=application.own_review.rating %}Rated ★{{ rating }}{% endblocktranslate %}</span>
-        {% endif %}
+        <div class="flex shrink-0 items-center gap-2">
+          {# The chat while it can be read: open, or closed with its history (#35, chat.md #}
+          {# R11, D6; the mockup's "Open chat"). has_messages comes with the list. #}
+          {% if application.chat_readable %}
+            <a href="{% url 'chat' application.pk %}" class="btn btn-outline btn-sm">{% translate "Chat" %}</a>
+          {% endif %}
+          {% if application.can_withdraw %}
+            {% translate "Withdraw your application? This cannot be undone." as question %}
+            <form method="post" action="{% url 'application_withdraw' application.pk %}" onsubmit="return confirm('{{ question|escapejs }}')" class="shrink-0">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-outline btn-sm">{% translate "Withdraw" %}</button>
+            </form>
+          {% endif %}
+          {# A done job, on the same line: the review page, then the own rating (#38, #}
+          {# reviews.md R10, D11). The view sets can_rate and own_review (add_review_state). #}
+          {% if application.can_rate %}
+            <a href="{% url 'review_create' application.pk %}" class="btn btn-primary btn-sm shrink-0">{% translate "Rate the employer" %}</a>
+          {% elif application.own_review %}
+            <span class="shrink-0 text-sm">{% blocktranslate with rating=application.own_review.rating %}Rated ★{{ rating }}{% endblocktranslate %}</span>
+          {% endif %}
+        </div>
       </div>
       {# The employer's name and phone and the exact address, while the contacts are shown; #}
       {# never the email (R7, D14; contacts.md R1, R5). tel: dials it on a phone. #}

@@ -1,0 +1,4 @@
+{% load i18n %}{% comment %}
+  The unread badge (#35, docs/specs/chat.md R23, R24, D19): the number for the eye, the
+  sentence for a screen reader. Needs `count`; the caller draws it only when above 0.
+{% endcomment %}<span class="badge badge-error badge-sm"><span aria-hidden="true">{{ count }}</span><span class="sr-only">{% blocktranslate count counter=count %}{{ counter }} unread message{% plural %}{{ counter }} unread messages{% endblocktranslate %}</span></span>

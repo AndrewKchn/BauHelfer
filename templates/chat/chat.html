@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% blocktranslate with name=other.name %}Chat with {{ name }}{% endblocktranslate %} · BauHelfer{% endblock %}
+
+{% block content %}
+  {# The chat of one application (#35, docs/specs/chat.md R5-R10). #}
+  {# The head as on the mockup: back, the other person, which job (R7). #}
+  <div class="flex items-center gap-2">
+    <a href="{{ back_url }}" class="btn btn-ghost btn-square shrink-0 text-3xl font-normal" aria-label="{% translate 'Back' %}">
+      <span aria-hidden="true">‹</span>
+    </a>
+    <div class="min-w-0">
+      <h1 class="break-words text-xl font-semibold">{{ other.name }}</h1>
+      <p class="text-sm text-base-content/70">{{ job.get_job_type_display }} · {{ job.date|date:"D j M" }} · {{ job.get_district_display }}</p>
+    </div>
+  </div>
+
+  {# An open chat asks every 4 s whether something is new (R13, D11-D13): ?after=<last #}
+  {# id>. Nothing new: an empty 204, HTMX changes nothing. Something new: the whole page, #}
+  {# from which hx-select takes this list and puts it in place of the old one, with the #}
+  {# new last id. A closed chat does not ask (D12). #}
+  <div id="chat-messages" class="mt-4"{% if application.chat_writable %} hx-get="{{ request.path }}" hx-trigger="every 4s" hx-vals='{"after": {{ last_id }}}' hx-select="#chat-messages" hx-swap="outerHTML"{% endif %}>
+    {% for message in chat_messages %}
+      {# A date line before the first message of each day (R8, D8); |date shows Munich #}
+      {# time, so a message at 00:30 belongs to its Munich day. #}
+      {% with day=message.created_at|date:"Y-m-d" %}
+        {% ifchanged day %}
+          <p class="my-3 text-center text-xs text-base-content/60" data-day="{{ day }}">{{ message.created_at|date:"D j M" }}</p>
+        {% endifchanged %}
+      {% endwith %}
+      {# daisyUI chat bubbles (D7): own messages right, in the primary colour. #}
+      {# whitespace-pre-line keeps the line breaks; {{ }} escapes the text, so it is #}
+      {# never HTML. sender_id: no query for the sender. #}
+      {% if message.sender_id == user.pk %}
+        <div class="chat chat-end">
+          <div class="chat-bubble chat-bubble-primary whitespace-pre-line break-words">{{ message.text }}</div>
+          <div class="chat-footer text-base-content/60">{{ message.created_at|time:"H:i" }} · {% translate "you" %}</div>
+        </div>
+      {% else %}
+        <div class="chat chat-start">
+          <div class="chat-bubble whitespace-pre-line break-words">{{ message.text }}</div>
+          <div class="chat-footer text-base-content/60">{{ message.created_at|time:"H:i" }}</div>
+        </div>
+      {% endif %}
+    {% empty %}
+      <p class="text-center text-sm text-base-content/70">{% translate "No messages yet. Write the first one." %}</p>
+    {% endfor %}
+  </div>
+
+  {% if application.chat_writable %}
+    <p class="mt-4 text-center text-xs text-base-content/60">{% translate "New messages appear every few seconds." %}</p>
+    {# A plain POST form: the page reloads with the new message (R6, R18). #}
+    <form method="post" class="mt-2 flex items-end gap-2">
+      {% csrf_token %}
+      <div class="min-w-0 flex-1">
+        <label for="{{ form.text.id_for_label }}" class="sr-only">{{ form.text.label }}</label>
+        {{ form.text }}
+        {% for error in form.text.errors %}
+          <p class="text-sm text-error">{{ error }}</p>
+        {% endfor %}
+      </div>
+      <button type="submit" class="btn btn-primary">{% translate "Send" %}</button>
+    </form>
+  {% else %}
+    {# After the job or a cancel the history stays, the form goes (R9, D1). #}
+    <p class="mt-4 text-center text-sm text-base-content/70">{% translate "This chat is closed. You can still read it." %}</p>
+  {% endif %}
+{% endblock %}

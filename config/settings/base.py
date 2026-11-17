@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "jobs",
     "translations",
     "reviews",  # #38
+    "chat",  # #35
 ]
 
 MIDDLEWARE = [
@@ -66,6 +67,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "chat.context_processors.unread_messages",  # the navigation badge (#35)
             ],
         },
     },

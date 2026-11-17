@@ -32,6 +32,7 @@ from django.views.generic.detail import SingleObjectMixin
 
 from accounts.models import User
 from accounts.views import RoleRequiredMixin
+from chat.models import with_has_messages
 from reviews.models import NO_RATING, Review
 from translations.services import detect_language, forget, translate
 
@@ -237,7 +238,8 @@ class MyApplicationsView(WorkerRequiredMixin, ListView):
         photos of all jobs in one more. Two queries however many cards (D11, D13).
         """
         # "reviews": the "Rate the employer" buttons, one query more (#38 R10, R12).
-        return (
+        # with_has_messages(): the "Chat" links in the same query (#35, chat.md R11).
+        return with_has_messages(
             self.request.user.applications.select_related("job__employer")
             .prefetch_related("job__photos", "reviews")
             .order_by("job__date", "job__start_time")
@@ -493,10 +495,13 @@ class JobDetailView(DetailView):
             # ?original=<id> is the "Show original" link of one message (R16, D8).
             # prefetch_related("reviews"): the "Rate" buttons of a done job in one more
             # query, however many workers (#38 R11, R12).
+            # with_has_messages(): the "Chat" links in the same query (#35, chat.md R11).
             applications = messages_for(
-                job.applications.select_related("worker__worker_profile")
-                .prefetch_related("reviews")
-                .order_by("-created_at"),
+                with_has_messages(
+                    job.applications.select_related("worker__worker_profile")
+                    .prefetch_related("reviews")
+                    .order_by("-created_at")
+                ),
                 translation.get_language(),
                 original_id=original_id(self.request),
             )

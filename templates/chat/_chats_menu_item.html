@@ -1,0 +1,10 @@
+{% load i18n %}
+{# "Chats" in the menu, for workers and employers, with the unread count (#35, chat.md R23, D16). #}
+<li>
+  <a href="{% url 'chat_list' %}" class="flex items-center justify-between">
+    {% translate "Chats" %}
+    {% if unread_messages %}
+      {% include "chat/_unread_badge.html" with count=unread_messages %}
+    {% endif %}
+  </a>
+</li>

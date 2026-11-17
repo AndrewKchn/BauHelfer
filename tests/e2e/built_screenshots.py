@@ -21,6 +21,7 @@ from django.utils import timezone
 from PIL import Image, ImageDraw
 
 from accounts.models import EmployerProfile, WorkerProfile
+from chat.models import Message
 from jobs.models import Application, Job, JobPhoto
 from jobs.tests.test_views import make_job
 from reviews.models import Review
@@ -59,10 +60,12 @@ def test_save_built_screenshots(page):
     1. Create an employer with three open jobs (one with three photos, one with two
        applications, one of them accepted) and a cancelled one, and a worker; Ivan with
        an accepted, a pending and a past application (#26); Andrii rated three times by
-       another employer, both sides (#39)
-    2. Open the job list as a guest, the job page as the worker, "Post a job", "My jobs",
-       the job page with the applications and Andrii's worker page as the employer, "My
-       applications" as Ivan, on a 390 x 844 screen in the light theme
+       another employer, both sides (#39); a chat of the employer with the accepted Mehmet
+       (#35)
+    2. Open the job list as a guest, the job page as the worker, the chat with Mehmet,
+       "Post a job", "My jobs", the job page with the applications and Andrii's worker page
+       as the employer, "My applications" as Ivan, on a 390 x 844 screen in the light
+       theme
     3. Expect: one full-page PNG per screen in docs/mockups/built/
     """
     OUT.mkdir(exist_ok=True)
@@ -241,6 +244,24 @@ def test_save_built_screenshots(page):
         Review.objects.create(application=work, author=meier, rating=stars, tags=tags)
         Review.objects.create(application=work, author=andrii, rating=5)
 
+    # The chat of Max and the accepted Mehmet (#35), the talk of the mockup over two days.
+    # Shot first among Max's pages: opening it reads Mehmet's messages, so the unread
+    # badge does not show on the others.
+    mehmet_application = Application.objects.get(worker__email="mehmet@example.com")
+    mehmet = mehmet_application.worker
+    for minutes_ago, sender, text in (
+        (26 * 60, mehmet, "Hello! Is there parking near the house for a van?"),
+        (25 * 60, employer, "Yes, in the yard. Drive in through the gate."),
+        (90, mehmet, "Thanks. Should I bring my own hammer drill, or do you have one?"),
+        (80, employer, "We have two. See you at 7."),
+    ):
+        message = Message.objects.create(
+            application=mehmet_application, sender=sender, text=text
+        )
+        Message.objects.filter(pk=message.pk).update(
+            created_at=timezone.now() - datetime.timedelta(minutes=minutes_ago)
+        )
+
     # live_server does not serve uploads (in-memory storage): answer every photo address.
     picture = photo_bytes("#d9822b")
     page.route(
@@ -254,6 +275,7 @@ def test_save_built_screenshots(page):
     shoot(page, f"/jobs/{job.pk}/", "job-detail")
     page.context.clear_cookies()
     log_in(page, "max@example.com")
+    shoot(page, f"/chat/{mehmet_application.pk}/", "chat")
     shoot(page, "/jobs/new/", "post-a-job")
     shoot(page, "/jobs/mine/", "my-jobs")
     shoot(page, f"/jobs/{demolition.pk}/", "job-applications")
