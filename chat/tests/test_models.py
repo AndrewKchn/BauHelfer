@@ -223,3 +223,18 @@ def test_annotated_readable_makes_no_query(employer, worker):
         readable = loaded.chat_readable
 
     assert (readable, len(queries)) == (True, 0)
+
+
+# How a message is shown in the admin and in logs (#40, a coverage gap)
+
+
+@pytest.mark.story(40)
+def test_str_shows_sender_and_start_of_the_text(employer, worker):
+    """A message is shown as its sender and the first 30 characters of its text.
+
+    1. Save Ivan's message of 40 characters: "0123456789" four times
+    2. Expect: "ivan@example.com: " and "0123456789" three times, the rest cut off
+    """
+    message = write(application(employer, worker), worker, "0123456789" * 4)
+
+    assert str(message) == "ivan@example.com: " + "0123456789" * 3
