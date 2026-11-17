@@ -3044,3 +3044,57 @@ saved the built chat screenshot, drafted the Docs sync comments and wrote the ch
   seconds, and only something new replaces the message list.
 - What a context processor is and why the unread count needs one: the navigation is in
   `base.html` on every page, so one function gives the count to every template.
+
+## 2026-11-17 · #36 Auto-translation of chat messages
+
+**Task given to AI:** translate the chat of #35 for each reader, reusing what #32 / #33
+built: the rule `shown_text()`, `translate_many()`, the label template and `forget()`, as the
+Docs sync M5 comment on the issue asked. A spec first, then three iterations in one branch.
+
+**AI helped:** it compared the chat mockup with the app, wrote the spec
+(`docs/specs/chat-translation.md`, D1–D12) and explained the one real fork, when to translate,
+with an example (Andrii writes Ukrainian, Klaus reads German) and a table of who waits. It
+wrote failing tests before each iteration, then `Message.original_language` with its
+migration, the forget signal, the wrapper `chat/shown_text.py` (`chat_messages_for`,
+`chat_previews_for`), detection and translation in `ChatView.post`, "Show original" per
+message and the translated previews on "Chats" with two `Subquery`s in the same query. When I
+asked why previews need more code if the message is already translated, it explained that the
+translation sits in the cache and every page has to read it, with a diagram. It ran 32
+mutations, took 360 px shots of both sides and both themes, updated the built chat screenshot
+(Turkish messages read in English), drafted the Docs sync comments and the cheat-sheet tab.
+
+**AI failed:**
+- "Show original" in the chat did nothing in a browser, though every test passed. The poll
+  kept `{"after": <id>}` in `hx-vals` on the message list, and HTMX adds a parent's `hx-vals`
+  to every request inside it, so the click asked `?original=1&after=1` and got the 204 of
+  "nothing new". The Django test client runs no JavaScript, so no test could see it. Its first
+  fix, `hx-disinherit="*"`, did not work either: it reproduced the click with Playwright, read
+  the htmx 2.0.10 source (`hx-vals` is collected from all parents regardless), and moved
+  `after` into the poll's address. Three #35 tests now check `?after=` instead of `hx-vals`.
+- A #35 test (same queries for 1 and 5 messages) broke: its messages had no language, so the
+  page translated each one. The test helper now writes English messages; the cached
+  translations are checked by a new test.
+- One integration test was weak: Ivan's "own" message was in his own language, so it would
+  pass without the author rule. It changed the test before the first commit.
+- The first mutation run failed every test for an unrelated reason: my IDE database viewer
+  held the test database open.
+
+**My part:**
+- D1: I chose to translate when the message is sent, as in #33: the sender waits about 3 s,
+  not the reader.
+- D11: Claude recommended leaving the last message on "Chats" in the original (b); I chose to
+  translate it (a): a message in another language in a list where everything else is in mine
+  would be confusing, and it cost little, two subqueries and one cache query, no Claude call.
+- I asked for the spec to be committed separately from the failing tests, as it was done in
+  the earlier tickets.
+- D2–D10 and D12: I accepted Claude's defaults because they repeat decisions I already made
+  in #32 / #33.
+- I checked every iteration on my local server with two browsers. In iteration 2 I found that
+  "Show original" did nothing; I checked again after the fix. I also disconnected my database
+  viewer so the mutation checks could run.
+
+**Learned:**
+- Why a test client cannot catch an HTMX bug, and why `hx-vals` on an element reaches every
+  link inside it: the poll's `after` went with my "Show original" click.
+- The difference between "translated" and "shown translated": the translation sits in the
+  cache, and every page that shows a text has to read it from there.
