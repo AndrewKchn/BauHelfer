@@ -13,6 +13,7 @@ from django.views import View
 from django.views.generic import ListView
 
 from jobs.models import Application
+from jobs.views import original_id
 from translations.services import detect_language, translate
 
 from .forms import MessageForm
@@ -115,9 +116,14 @@ class ChatView(LoginRequiredMixin, View):
             back_url = f"{job_url}#application-{application.pk}"
         # One query for the messages, one for their cached translations (#36, R4, R5):
         # each gets `shown`, its text as this reader should see it, in the active language
-        # (job-translation.md R8). The template tells own messages by sender_id.
+        # (job-translation.md R8). ?original=<id> is the "Show original" link of one
+        # message (R12, D8); an id of another chat matches nothing here. The template
+        # tells own messages by sender_id.
         chat_messages = chat_messages_for(
-            application.messages.all(), user, translation.get_language()
+            application.messages.all(),
+            user,
+            translation.get_language(),
+            original_id=original_id(self.request),
         )
         context = {
             "application": application,

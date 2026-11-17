@@ -11,18 +11,22 @@ from jobs.shown_text import shown_text
 from translations.services import translate_many
 
 
-def chat_messages_for(messages, reader, reader_lang):
+def chat_messages_for(messages, reader, reader_lang, *, original_id=None):
     """Give each message a `shown` (ShownText): its text as `reader` should see it.
 
-    The messages that need a translation (the other person's, not in `reader_lang`) are
-    read from the cache in one query (translate_many, D6); they were translated when sent
-    (D1), so normally no Claude call happens here. Returns the messages as a list.
+    The messages that need a translation (the other person's, not in `reader_lang`, not
+    the one shown as written) are read from the cache in one query (translate_many, D6);
+    they were translated when sent (D1), so normally no Claude call happens here.
+    `original_id`: the message whose "Show original" was pressed; only it is shown as
+    written (R12, D8). Returns the messages as a list.
     """
     messages = list(messages)
     needed = [
         m.text
         for m in messages
-        if m.sender_id != reader.pk and m.original_language != reader_lang
+        if m.sender_id != reader.pk
+        and m.original_language != reader_lang
+        and m.pk != original_id
     ]
     translations = translate_many(needed, reader_lang)
     for message in messages:
@@ -33,5 +37,6 @@ def chat_messages_for(messages, reader, reader_lang):
             is_author=message.sender_id == reader.pk,
             # `text=` binds this message's text now, not the loop variable (ruff B023).
             translated=lambda text=message.text: translations[text],
+            show_original=message.pk == original_id,
         )
     return messages

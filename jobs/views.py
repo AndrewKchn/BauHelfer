@@ -549,10 +549,12 @@ class JobDetailView(DetailView):
 
 
 def original_id(request):
-    """The application id in ?original=, or None (#33, R16).
+    """The id in ?original=, or None: an application's on the job page (#33, R16), a
+    message's in the chat (#36, chat-translation.md R12).
 
     Anything that is not a number is ignored: the page is shown as without it (AC12). An id
-    of another job's application matches nothing on this page, so it changes nothing.
+    of another job's application, or of another chat's message, matches nothing on the
+    page, so it changes nothing.
     """
     value = request.GET.get("original", "")
     return int(value) if value.isdecimal() else None
