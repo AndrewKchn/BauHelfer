@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BauHelfer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-17 13:11+0100\n"
+"POT-Creation-Date: 2026-11-17 17:58+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -423,6 +423,10 @@ msgstr "Absender"
 msgid "text"
 msgstr "Text"
 
+#: chat/models.py jobs/models.py
+msgid "original language"
+msgstr "Originalsprache"
+
 #: chat/models.py jobs/models.py reviews/models.py
 msgid "created at"
 msgstr "erstellt am"
@@ -550,10 +554,6 @@ msgstr "Art der Arbeit"
 #: jobs/models.py
 msgid "description"
 msgstr "Beschreibung"
-
-#: jobs/models.py
-msgid "original language"
-msgstr "Originalsprache"
 
 #: jobs/models.py
 msgid "address"
