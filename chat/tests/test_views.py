@@ -6,80 +6,24 @@ When a chat can be written and read is in test_models.py.
 """
 
 import datetime
-from zoneinfo import ZoneInfo
 
 import pytest
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
-from django.utils import timezone
 from pytest_django.asserts import assertContains, assertNotContains
 
 from chat.models import Message
 from jobs.models import Application
 from jobs.tests.test_application import make_worker
-from jobs.tests.test_views import make_employer, make_job
+from jobs.tests.test_views import make_employer
+
+from .helpers import DAY, MUNICH, NOW, TODAY, apply, chat_url, write
 
 pytestmark = [pytest.mark.django_db, pytest.mark.story(35)]
 
-# A fixed "now": 17 November 2026, 10:00 in Munich.
-MUNICH = ZoneInfo("Europe/Berlin")
-NOW = datetime.datetime(2026, 11, 17, 10, 0, tzinfo=MUNICH)
-TODAY = NOW.date()
-DAY = datetime.timedelta(days=1)
-
 CLOSED = "This chat is closed. You can still read it."
 EMPTY = "No messages yet. Write the first one."
-
-
-@pytest.fixture(autouse=True)
-def frozen_now(monkeypatch):
-    """Fix the clock at NOW, so the test does not depend on when it runs."""
-    monkeypatch.setattr(timezone, "now", lambda: NOW)
-
-
-@pytest.fixture
-def employer():
-    """Anna Huber, the employer of the job."""
-    return make_employer("anna@example.com", name="Anna Huber")
-
-
-@pytest.fixture
-def worker():
-    """Ivan Petrenko, the worker."""
-    user = make_worker("ivan@example.com")
-    user.name = "Ivan Petrenko"
-    user.save()
-    return user
-
-
-def apply(employer, worker, status="accepted", date=TODAY):
-    """`worker`'s application to a new job of `employer` on `date`."""
-    taken = 1 if status in ("accepted", "cancelled") else 0
-    return Application.objects.create(
-        job=make_job(employer, date=date),
-        worker=worker,
-        status=status,
-        workers_accepted=taken,
-    )
-
-
-@pytest.fixture
-def application(employer, worker):
-    """Ivan's accepted application to Anna's job today."""
-    return apply(employer, worker)
-
-
-def write(application, sender, text, at=NOW):
-    """Save a message of `sender`, sent at `at`."""
-    message = Message.objects.create(application=application, sender=sender, text=text)
-    Message.objects.filter(pk=message.pk).update(created_at=at)
-    return message
-
-
-def chat_url(application):
-    """The chat page of `application`."""
-    return reverse("chat", args=[application.pk])
 
 
 # Who gets the page (R4, D4; AC3)
