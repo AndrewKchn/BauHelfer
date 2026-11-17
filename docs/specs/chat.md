@@ -2,6 +2,8 @@
 
 Status: **agreed**. I decided D1 and D2 on 2026-11-17 (my criteria: simple code and ease of use
 before polish). D3–D10 are Claude's defaults, which I accepted on 2026-11-17, before any tests.
+Iteration 2: I decided D11 on 2026-11-17 (same criteria, plus the load on Render's free plan);
+D12–D14 are Claude's defaults, which I accepted on 2026-11-17, before its tests.
 
 Marks: **(mine, date)** — my decision; **(Claude's default, accepted)** — Claude's default
 that I accepted; **(Claude's recommendation)** — what Claude advised where I chose
@@ -17,7 +19,7 @@ shows how many messages are unread.
 Three iterations in one branch and one PR:
 
 1. The chat page: messages, sending, who may read and write (R1–R12, D1–D10).
-2. New messages without a reload (HTMX polling): its section is written before its tests.
+2. New messages without a reload (HTMX polling) (R13–R18, D11–D14).
 3. The unread count in the navigation: its section is written before its tests.
 
 ### Out of scope
@@ -65,6 +67,24 @@ R11. Links: the worker's card on "My applications" and every accepted or cancell
      per card.
 R12. Every new string is wrapped for translation and translated into all 7 languages.
 
+### Iteration 2: new messages without a reload
+
+R13. A writable chat asks the server every 4 seconds for new messages (D11, D13): the message
+     list (`#chat-messages`) has `hx-get` of the same page, `hx-trigger="every 4s"`,
+     `hx-select="#chat-messages"`, `hx-swap="outerHTML"`, and sends the id of its last
+     message as `?after=<id>` (`hx-vals`; 0 without messages). A closed chat does not ask
+     (D12).
+R14. GET with `?after=<id>` and no message of this chat with a higher id: **204** with an empty
+     body; HTMX then changes nothing (D11). The access check of R4 comes first: a stranger
+     still gets 404.
+R15. GET with `?after=<id>` and a newer message: the whole page as without it; HTMX takes the
+     message list out of it, so the swapped list carries the new last id and the date lines
+     stay right.
+R16. `?after=` that is not a number is ignored: the whole page, as `?original=` (#33).
+R17. A 204 costs fewer queries than the page: no message list, no navigation.
+R18. Above the form: "New messages appear every few seconds." (D14). Sending stays a plain form
+     with a reload (R6).
+
 ## Acceptance criteria (→ tests)
 
 ### Iteration 1
@@ -83,6 +103,14 @@ AC5. A closed chat with messages: the messages and the R9 line, no form.
 AC6. The same number of queries for a chat with 1 and with 5 messages.
 AC7. "Chat" link on the worker's card and in the owner's list when readable, not otherwise;
      the same number of queries for 1 and 3 accepted applications.
+
+### Iteration 2
+
+AC8. A writable chat: the list has `hx-trigger="every 4s"` and `"after": <id of its last
+     message>` (0 when empty), and the R18 line. A closed chat: neither.
+AC9. `?after=<last id>`: 204, empty. `?after=<an older id>`: 200 with the newer message.
+     `?after=abc`: 200, the whole page. A stranger with `?after=`: 404.
+AC10. The 204 makes fewer queries than the whole page.
 
 ## Decisions
 
@@ -120,11 +148,29 @@ D9. **The phone stays** (Claude's default, accepted; the question from #25, cont
 D10. **Messages are not in the Django admin** (Claude's default, accepted), as applications: a
      chat is private between two people.
 
+D11. **Ask for new messages, and get "nothing new" as an empty 204** (mine, 2026-11-17;
+     option C): the page of #32's HTMX pattern (`hx-get` the same page + `hx-select`) when
+     something is new, so no new view and the date lines stay in one template; an empty
+     answer otherwise, so an open chat costs Render little while nobody writes. Rejected: the
+     whole page on every ask (A, Claude's recommendation: simplest, but ~6 queries every 4
+     seconds per open chat); a view that sends only the new messages (B: a new view and
+     template, and the date line breaks where two pieces meet). **Revisit when** the chat
+     moves to WebSockets (#54).
+D12. **Only a writable chat asks** (Claude's default, accepted): a closed one gets no new
+     messages. A chat that closes while open (midnight after the job) keeps asking until the
+     page is reloaded; every answer is then a 204.
+D13. **Every 4 seconds** (Claude's default, accepted): the plan says 3–5 s (`docs/PLAN.md`);
+     a message is seen within 4 seconds, and 15 asks a minute per open chat.
+D14. **The mockup's line about new messages** (Claude's default, accepted): without it,
+     someone waiting for an answer reloads the page by hand.
+
 ## Known limitations (→ docs/SECURITY.md)
 
 - The messages are stored in plain text in the database: whoever has database access can
   read them (the Supabase account).
 - No limit on how many messages someone sends.
+- An open chat asks the server every 4 seconds, also in a tab in the background (the
+  browser slows it down there): each costs a request, mostly a 204 (D11, D13).
 
 ## Differences from the mockups
 
@@ -133,4 +179,4 @@ D10. **Messages are not in the Django admin** (Claude's default, accepted), as a
 | "Application accepted · Tue 20 Oct" | a date line per day | D8 |
 | "translated from Ukrainian · original" | not shown until #36 | #36 |
 | a send icon without a label | a "Send" button | a label every language can read; changed after the screenshots if I decide so |
-| "New messages load every few seconds" | iteration 2 | iteration 2 |
+| "New messages load every few seconds" | "New messages appear every few seconds.", above the form | D14 |
