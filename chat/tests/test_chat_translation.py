@@ -1,7 +1,7 @@
 """Unit tests: chat messages as their reader sees them, and forgetting them.
 
 Ticket #36. Spec: docs/specs/chat-translation.md, iteration 1 (R4, R7, D4-D6, D9),
-acceptance criteria AC3 and AC5. chat_messages_for() is called with saved messages, a
+acceptance criteria AC3 and AC5; iteration 2 (R12, D8), AC8. chat_messages_for() is called with saved messages, a
 reader and a language, without a request. The translator is the small class below, chosen
 through TRANSLATION_BACKEND; it records its calls, so nothing reaches the network.
 """
@@ -182,3 +182,28 @@ def test_deleting_forgets_the_translations_of_the_message(application, worker, d
 
     assert rows_of(UKRAINIAN) == 0
     assert rows_of("Ein anderer Text.") == 1
+
+
+# "Show original" (R12, D8; AC8)
+
+
+def test_show_original_switches_only_that_message(
+    application, employer, worker, recording
+):
+    """The message asked for is shown in the original, the others stay translated.
+
+    1. Save two Ukrainian messages of Ivan
+    2. Ask for them as Anna, reading German, with original_id = the first one
+    3. Expect: the first as written, state "original"; the second translated
+    4. Expect: one translator call, for the second only
+    """
+    first = say(application, worker, UKRAINIAN, "uk")
+    second = say(application, worker, "Дякую!", "uk")
+
+    messages = chat_messages_for([first, second], employer, "de", original_id=first.pk)
+
+    assert [m.shown for m in messages] == [
+        ShownText(UKRAINIAN, "original", "uk"),
+        ShownText("de: Дякую!", "translated", "uk"),
+    ]
+    assert recording.calls == [("Дякую!", "de")]

@@ -2,7 +2,9 @@
 person reads it translated.
 
 Ticket #36. Spec: docs/specs/chat-translation.md, iteration 1 (R1-R3, R5, R6, R8, D1-D7,
-D10), acceptance criteria AC1, AC2, AC4 and AC6. Each test goes through the whole stack:
+D10), acceptance criteria AC1, AC2, AC4 and AC6; iteration 2, "Show original" per message
+(R11-R13, D8), AC7-AC9. The test client runs no JavaScript: the click itself is for the
+E2E ticket #40 (R13). Each test goes through the whole stack:
 middleware, URL, view, form, template and database. The translator is the small class
 below, chosen through TRANSLATION_BACKEND; it records its calls, so nothing reaches the
 network. Ivan's site is in Ukrainian, Anna's in English, the language of the labels.
@@ -17,11 +19,12 @@ from pytest_django.asserts import assertContains, assertNotContains, assertRedir
 
 from chat.models import Message
 from jobs.shown_text import ShownText
+from jobs.tests.test_application import make_worker
 from translations.backends import TranslationError
 from translations.models import Translation
 from translations.services import source_hash, translate
 
-from .helpers import chat_url
+from .helpers import apply, chat_url
 
 pytestmark = [pytest.mark.django_db, pytest.mark.story(36)]
 
@@ -349,3 +352,126 @@ def test_queries_do_not_grow_with_translated_messages(anna_client, application, 
     with_five = count_page_queries(anna_client, application)
 
     assert with_five == with_one
+
+
+# "Show original" per message (R11-R13, D8; AC7-AC9)
+
+
+def htmx_link(text, href, url, target):
+    """The toggle's <a>: `href` for a plain click, `url` fetched by HTMX into `target`."""
+    return (
+        f'<a class="link" href="{href}" hx-get="{url}" hx-select="#{target}" '
+        f'hx-target="#{target}" hx-swap="outerHTML">{text}</a>'
+    )
+
+
+def test_translated_message_offers_the_original(anna_client, application, worker):
+    """ "Show original" links to the chat with this message's id, swapping its block.
+
+    1. Save Ivan's Ukrainian message
+    2. Open the chat as Anna
+    3. Expect: a link to ?original=<id>#message-<id>, fetched by HTMX into #message-<id>
+    """
+    message = say(application, worker, UKRAINIAN, "uk")
+    page = chat_url(application)
+
+    response = anna_client.get(page)
+
+    assertContains(
+        response,
+        htmx_link(
+            "Show original",
+            f"{page}?original={message.pk}#message-{message.pk}",
+            f"{page}?original={message.pk}",
+            f"message-{message.pk}",
+        ),
+        html=True,
+    )
+    assertContains(response, f'id="message-{message.pk}"')
+
+
+def test_untranslated_messages_offer_no_original(
+    anna_client, application, employer, worker
+):
+    """A message in the reader's language and the reader's own have nothing to switch.
+
+    1. Save Ivan's English message and Anna's own Ukrainian one
+    2. Open the chat as Anna
+    3. Expect: no "Show original"
+    """
+    say(application, worker, "Is there parking?", "en")
+    say(application, employer, "Так, у дворі.", "uk")
+
+    response = anna_client.get(chat_url(application))
+
+    assertNotContains(response, "Show original")
+
+
+def test_original_shows_that_message_and_offers_the_translation(
+    anna_client, application, worker, recording
+):
+    """?original=<id> shows that message as written; the other stays translated.
+
+    1. Save two Ukrainian messages of Ivan
+    2. Open the chat as Anna with ?original=<first id>
+    3. Expect: the first in the original with "Original" and "Show translation" linking to
+       the chat without the parameter; the second translated
+    4. Expect: no translation of the first message
+    """
+    first = say(application, worker, UKRAINIAN, "uk")
+    say(application, worker, "Дякую!", "uk")
+    page = chat_url(application)
+
+    response = anna_client.get(page, {"original": first.pk})
+
+    assertNotContains(response, f"en: {UKRAINIAN}")
+    assertContains(response, UKRAINIAN)
+    assertContains(response, "Original")
+    assertContains(
+        response,
+        htmx_link(
+            "Show translation",
+            f"{page}#message-{first.pk}",
+            page,
+            f"message-{first.pk}",
+        ),
+        html=True,
+    )
+    assertContains(response, "en: Дякую!")
+    assert ("translate", UKRAINIAN, "en") not in recording.calls
+
+
+@pytest.mark.parametrize("value", ["abc", "other-chat"])
+def test_wrong_original_changes_nothing(
+    anna_client, application, employer, worker, value
+):
+    """A letter or a message id of another chat: the page as without the parameter.
+
+    1. Save Ivan's Ukrainian message, and one in another chat of Anna
+    2. Open the chat with ?original=abc or ?original=<the other chat's message id>
+    3. Expect: 200, the message translated with "Show original"
+    """
+    say(application, worker, UKRAINIAN, "uk")
+    other_chat = apply(employer, make_worker("olena@example.com"))
+    other = say(other_chat, other_chat.worker, "Я одна.", "uk")
+    original = other.pk if value == "other-chat" else value
+
+    response = anna_client.get(chat_url(application), {"original": original})
+
+    assertContains(response, f"en: {UKRAINIAN}")
+    assertContains(response, "Show original")
+
+
+def test_poll_asks_without_the_original(anna_client, application, worker):
+    """The open chat's poll asks for the chat without ?original= (R13, D8).
+
+    1. Save Ivan's Ukrainian message
+    2. Open the chat as Anna with ?original=<its id>
+    3. Expect: the message list polls the chat's own path, without the parameter
+    """
+    message = say(application, worker, UKRAINIAN, "uk")
+    page = chat_url(application)
+
+    response = anna_client.get(page, {"original": message.pk})
+
+    assertContains(response, f'hx-get="{page}" hx-trigger="every 4s"')
