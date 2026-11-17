@@ -2988,3 +2988,59 @@ local database down to six test accounts and wrote a seed script for local check
   other side rated before I rate back.
 - How `values().annotate()` turns into one GROUP BY query, so the applications list asks for
   every worker's rating at once instead of once per worker.
+
+## 2026-11-17 · #35 Chat per accepted application (HTMX polling)
+
+**Task given to AI:** build the chat of an accepted application (issue #35): only the two
+participants, new messages without a reload, an unread count in the navigation. Two open
+questions from earlier tickets were to be decided here: whether the phone is still needed
+(#25) and whether a cancellation should appear in the chat (#37).
+
+**AI helped:** it compared the chat mockup with the app, wrote the spec `docs/specs/chat.md`
+and brought five forks one at a time, each with an example and a table of costs. It split the
+ticket into three iterations (chat page, polling, unread count + "Chats" page), wrote the
+failing tests first each time, then the new `chat` app, the project's first context processor
+and the templates. It explained D3 and D9 again with examples when I did not understand them.
+It ran about 70 mutations, checked the polling in a real browser (Playwright: `204, 204, 200`,
+my draft in the text box kept), took 360 px shots in both themes, measured the 204 against the
+page, translated the 17 new strings, had DE / PL / RO / TR back-translated by a separate agent,
+saved the built chat screenshot, drafted the Docs sync comments and wrote the cheat-sheet tab.
+
+**AI failed:**
+- Its own spec (R17) said that the empty 204 makes fewer database queries than the page. The
+  test showed 4 and 4. It measured what the 204 really saves (~9 KB of HTML, about half the
+  time) and corrected the spec and the test.
+- 15 mutations first survived. One test looked for `Olga's chat`, but Django escapes the
+  apostrophe, so the check could never fail. In another test the expected order of chats came
+  out by chance from the ids. A back link was hidden by the same link in the navigation. A
+  date line used the UTC day instead of Munich's (now a test with 22:00 and 00:30). The
+  tests were strengthened. One mutation showed that a status filter in the "Chats" query only
+  repeated `chat_readable`, so it was removed from the code.
+- Its first commit was stopped by the ruff hook (RUF012 on the form's `Meta`); fixed with the
+  project's usual `noqa`.
+- It reported an 86 px horizontal overflow on the chat page. It turned out to be Django's 404
+  debug page: the seed data had been recreated, so the chat id was different. The real page
+  has no overflow.
+- The tool it used to fill the `.po` files rewrapped long lines; it put the gettext format
+  back with `msgcat`, so the diff shows only the new strings. The back-translation found TR
+  "kapandı" ("has closed") where a state, "kapalı", fits better.
+
+**My part:**
+- D1: I chose that the chat stays readable after the job, and I added that the history must
+  stay visible after a cancellation too.
+- D2: I wanted a system line "Cancelled by the employer" in the chat, but left it out for lack
+  of time. It is recorded as an idea in #98.
+- D11: Claude recommended rendering the whole page on every poll (A); I chose C, the empty 204
+  when nothing is new, so as not to load the free Render server for nothing.
+- D15 `read_at` on each message and D16 a "Chats" page instead of counts on three pages: I
+  accepted Claude's recommendations because its arguments convinced me: the count query reads
+  as a sentence, and every chat is two taps away for both sides.
+- I asked for D3 and D9 to be explained again before accepting the defaults.
+- I checked all three iterations on my local server with two browsers (sending, polling, the
+  badge) and reviewed the RU and UK translations.
+
+**Learned:**
+- How HTMX polling works with `hx-select` and an empty 204: the open chat asks every 4
+  seconds, and only something new replaces the message list.
+- What a context processor is and why the unread count needs one: the navigation is in
+  `base.html` on every page, so one function gives the count to every template.
