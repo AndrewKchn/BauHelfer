@@ -347,3 +347,20 @@ def test_one_sided_review_is_shown_after_the_deadline(application, worker, monke
     assert saved.is_visible is False
     monkeypatch.setattr(timezone, "now", lambda: deadline + MINUTE)
     assert saved.is_visible is True
+
+
+# How a review is shown in the admin and in logs (#40, a coverage gap)
+
+
+@pytest.mark.story(40)
+def test_str_shows_stars_author_and_application(application, worker):
+    """A review is shown as its stars, its author and the application it is about.
+
+    1. Save Ivan's 4-star review of his application to Anna's job
+    2. Expect: "4★ by ivan@example.com on ivan@example.com → <the job>"
+    """
+    saved = review(application, worker, rating=4)
+
+    assert (
+        str(saved) == f"4★ by ivan@example.com on ivan@example.com → {application.job}"
+    )
