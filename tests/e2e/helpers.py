@@ -37,6 +37,16 @@ def assert_fits_the_screen(page):
     assert overflow <= 0, f"{page.url} is {overflow}px wider than the screen"
 
 
+def mark_page(page):
+    """Leave a mark in the page's JavaScript: a reload would wipe it."""
+    page.evaluate("window.notReloaded = true")
+
+
+def assert_not_reloaded(page):
+    """The mark of mark_page() is still there: the page changed without a reload."""
+    assert page.evaluate("window.notReloaded === true"), f"{page.url} was reloaded"
+
+
 def make_employer(email="anna@example.com", language="en"):
     """An employer with a company profile, a phone and a confirmed email.
 

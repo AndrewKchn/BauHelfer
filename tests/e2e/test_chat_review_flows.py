@@ -18,7 +18,14 @@ from playwright.sync_api import expect
 from jobs.models import Application, Job
 from jobs.tests.test_views import make_job
 
-from .helpers import assert_fits_the_screen, make_employer, make_worker, phone_page
+from .helpers import (
+    assert_fits_the_screen,
+    assert_not_reloaded,
+    make_employer,
+    make_worker,
+    mark_page,
+    phone_page,
+)
 
 pytestmark = [pytest.mark.django_db, pytest.mark.story(40)]
 
@@ -32,16 +39,6 @@ def ukrainian(text, plural=None, count=None):
         if plural is None:
             return translation.gettext(text)
         return translation.ngettext(text, plural, count) % {"stars": count}
-
-
-def mark_page(page):
-    """Leave a mark in the page's JavaScript: a reload would wipe it."""
-    page.evaluate("window.notReloaded = true")
-
-
-def assert_not_reloaded(page):
-    """The mark of mark_page() is still there: the page changed without a reload."""
-    assert page.evaluate("window.notReloaded === true"), f"{page.url} was reloaded"
 
 
 def test_chat_done_and_reviews_on_two_phones_in_two_languages(new_context):
