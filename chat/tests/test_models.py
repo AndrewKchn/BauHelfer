@@ -191,10 +191,13 @@ def test_chat_is_readable_while_writable_or_with_messages(
     """Reading: while it can be written, and afterwards if it has a message (R3, D1, D3).
 
     1. Save an application with this status and day; a message in its chat or none
-       (saved directly: the database does not ask chat_writable)
+       (saved directly: the database does not ask chat_writable); a message in another
+       worker's chat, which must not count
     2. Read it again, plain or with with_has_messages()
     3. Expect: chat_readable as in the table, the same both ways
     """
+    olga = make_worker("olga@example.com")
+    write(application(employer, olga), olga, "Another chat")
     saved = application(employer, worker, status, date)
     if with_message:
         write(saved, worker)

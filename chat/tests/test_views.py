@@ -311,6 +311,33 @@ def test_one_date_line_per_day(client, application, employer, worker):
     assertContains(response, "data-day=", count=2)
 
 
+def test_date_line_follows_the_munich_day(client, application, worker):
+    """After midnight in Munich is a new day, although it is still the same day in UTC (R8).
+
+    1. Save a message at 22:00 and one at 00:30 the next night, Munich time (21:00 and
+       23:30 UTC, the same UTC day)
+    2. Open the chat as Ivan
+    3. Expect: two date lines
+    """
+    write(
+        application,
+        worker,
+        "Late",
+        datetime.datetime(2026, 11, 16, 22, 0, tzinfo=MUNICH),
+    )
+    write(
+        application,
+        worker,
+        "Later",
+        datetime.datetime(2026, 11, 17, 0, 30, tzinfo=MUNICH),
+    )
+    client.force_login(worker)
+
+    response = client.get(chat_url(application))
+
+    assertContains(response, "data-day=", count=2)
+
+
 def test_message_text_is_escaped(client, application, employer, worker):
     """A message is text, never HTML: no script runs in the other person's browser.
 
@@ -331,14 +358,16 @@ def test_worker_sees_the_employer_and_a_way_back(client, application, worker):
     """The header: the other person's name and the back link (R7).
 
     1. Open the chat as Ivan
-    2. Expect: "Anna Huber" and a link to "My applications"
+    2. Expect: "Anna Huber"; the back link leads to "My applications" (checked in the
+       context: the navigation has a link there too)
     """
     client.force_login(worker)
 
     response = client.get(chat_url(application))
 
     assertContains(response, "Anna Huber")
-    assertContains(response, f'href="{reverse("my_applications")}"')
+    assert response.context["back_url"] == reverse("my_applications")
+    assertContains(response, f'href="{response.context["back_url"]}" class="btn')
 
 
 def test_employer_sees_the_worker_and_a_way_back(client, application, employer):
@@ -446,13 +475,16 @@ def test_job_page_links_the_owner_to_a_readable_chat(
 def test_chat_links_cost_no_query_per_application(client, employer, worker):
     """has_messages comes with the applications, on both pages (R11).
 
-    1. One job of Anna with Ivan's accepted application and a message; count the queries
+    Cancelled applications with a message: their chat is readable only because of the
+    message, so without has_messages each card would ask the database.
+
+    1. One job of Anna with Ivan's cancelled application and a message; count the queries
        of "My applications" (as Ivan) and of the job page (as Anna)
-    2. Add two more accepted workers with messages to the job and two more applications
-       of Ivan with messages; count again
+    2. Add two more cancelled workers with messages to the job and two more cancelled
+       applications of Ivan with messages; count again
     3. Expect: the same numbers
     """
-    first = apply(employer, worker)
+    first = apply(employer, worker, "cancelled")
     job = first.job
     write(first, worker, "Hi")
 
@@ -470,10 +502,10 @@ def test_chat_links_cost_no_query_per_application(client, employer, worker):
     job.save()
     for email in ("olga@example.com", "petr@example.com"):
         other = Application.objects.create(
-            job=job, worker=make_worker(email), status="accepted", workers_accepted=1
+            job=job, worker=make_worker(email), status="cancelled", workers_accepted=1
         )
         write(other, employer, "Hi")
     for email in ("bob@example.com", "eva@example.com"):
-        write(apply(make_employer(email), worker), worker, "Hi")
+        write(apply(make_employer(email), worker, "cancelled"), worker, "Hi")
 
     assert counts() == with_one
