@@ -25,6 +25,8 @@ from chat.models import Message
 from jobs.models import Application, Job, JobPhoto
 from jobs.tests.test_views import make_job
 from reviews.models import Review
+from translations.models import Translation
+from translations.services import source_hash
 
 from .helpers import PASSWORD, log_in
 
@@ -246,18 +248,38 @@ def test_save_built_screenshots(page):
 
     # The chat of Max and the accepted Mehmet (#35), the talk of the mockup over two days.
     # Shot first among Max's pages: opening it reads Mehmet's messages, so the unread
-    # badge does not show on the others.
+    # badge does not show on the others. Mehmet writes Turkish; Max reads the English
+    # translations sending saved in the cache (#36), with their labels.
     mehmet_application = Application.objects.get(worker__email="mehmet@example.com")
     mehmet = mehmet_application.worker
-    for minutes_ago, sender, text in (
-        (26 * 60, mehmet, "Hello! Is there parking near the house for a van?"),
-        (25 * 60, employer, "Yes, in the yard. Drive in through the gate."),
-        (90, mehmet, "Thanks. Should I bring my own hammer drill, or do you have one?"),
-        (80, employer, "We have two. See you at 7."),
+    for minutes_ago, sender, text, language, english in (
+        (
+            26 * 60,
+            mehmet,
+            "Merhaba! Evin yakınında minibüs için park yeri var mı?",
+            "tr",
+            "Hello! Is there parking near the house for a van?",
+        ),
+        (25 * 60, employer, "Yes, in the yard. Drive in through the gate.", "en", None),
+        (
+            90,
+            mehmet,
+            "Teşekkürler. Kendi kırıcı matkabımı getireyim mi, yoksa sizde var mı?",
+            "tr",
+            "Thanks. Should I bring my own hammer drill, or do you have one?",
+        ),
+        (80, employer, "We have two. See you at 7.", "en", None),
     ):
         message = Message.objects.create(
-            application=mehmet_application, sender=sender, text=text
+            application=mehmet_application,
+            sender=sender,
+            text=text,
+            original_language=language,
         )
+        if english:
+            Translation.objects.create(
+                source_hash=source_hash(text), target_language="en", text=english
+            )
         Message.objects.filter(pk=message.pk).update(
             created_at=timezone.now() - datetime.timedelta(minutes=minutes_ago)
         )
