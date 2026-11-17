@@ -2,7 +2,7 @@
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views import View
@@ -40,8 +40,18 @@ class ChatView(LoginRequiredMixin, View):
         return application
 
     def get(self, request, *args, **kwargs):
-        """The chat with an empty form."""
-        return self.show(self.get_application(), MessageForm())
+        """The chat with an empty form; 204 to an ask with nothing new (R14-R16, D11).
+
+        The open chat asks every 4 seconds with ?after=<its last message id>. Nothing newer:
+        an empty 204, on which HTMX changes nothing, so a quiet chat costs no page. Anything
+        else, also an ?after= that is not a number, gets the whole page. The access check
+        comes first: a stranger's ask is a 404 too.
+        """
+        application = self.get_application()
+        after = request.GET.get("after", "")
+        if after.isdecimal() and not application.messages.filter(pk__gt=after).exists():
+            return HttpResponse(status=204)
+        return self.show(application, MessageForm())
 
     def post(self, request, *args, **kwargs):
         """Save the message, then back to the chat (Post/Redirect/Get, R6).
@@ -69,11 +79,14 @@ class ChatView(LoginRequiredMixin, View):
             other = application.worker
             job_url = reverse("job_detail", args=[application.job.pk])
             back_url = f"{job_url}#application-{application.pk}"
+        # One query: the template tells own messages by sender_id, no user needed.
+        chat_messages = list(application.messages.all())
         context = {
             "application": application,
             "job": application.job,
-            # One query: the template tells own messages by sender_id, no user needed.
-            "chat_messages": application.messages.all(),
+            "chat_messages": chat_messages,
+            # What the open chat sends as ?after= when it asks (R13): 0 before the first.
+            "last_id": chat_messages[-1].pk if chat_messages else 0,
             "form": form,
             "other": other,
             "back_url": back_url,
