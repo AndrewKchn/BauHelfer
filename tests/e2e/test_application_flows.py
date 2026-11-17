@@ -8,66 +8,21 @@ in the test mailbox (`mailoutbox`): the live server runs in this test process.
 import re
 
 import pytest
-from django.contrib.auth import get_user_model
-from django.utils import timezone
 from playwright.sync_api import expect
 
-from accounts.models import EmployerProfile, WorkerProfile
 from jobs.models import Application
 from jobs.tests.test_views import make_job
 
-from .helpers import PASSWORD, PHONE, assert_fits_the_screen, log_in
+from .helpers import (
+    EMPLOYER_PHONE,
+    WORKER_PHONE,
+    assert_fits_the_screen,
+    make_employer,
+    make_worker,
+    phone_page,
+)
 
 pytestmark = [pytest.mark.django_db, pytest.mark.story(28)]
-
-User = get_user_model()
-
-EMPLOYER_PHONE = "+49 170 1111111"
-WORKER_PHONE = "+49 170 2222222"
-
-
-def make_employer(email="anna@example.com"):
-    """An employer with a company profile, a phone and a confirmed email."""
-    user = User.objects.create_user(
-        email=email,
-        password=PASSWORD,
-        role="employer",
-        name="Anna Huber",
-        phone=EMPLOYER_PHONE,
-        email_verified_at=timezone.now(),  # emails go only to a confirmed address (#81)
-    )
-    EmployerProfile.objects.create(
-        user=user, company_name="Huber Bau GmbH", trades=["demolition"]
-    )
-    return user
-
-
-def make_worker(email, name, team_size=1, phone=""):
-    """A worker who can apply: profile, work permit, confirmed email."""
-    user = User.objects.create_user(
-        email=email,
-        password=PASSWORD,
-        role="worker",
-        name=name,
-        phone=phone,
-        email_verified_at=timezone.now(),
-        work_permit_confirmed_at=timezone.now(),
-    )
-    WorkerProfile.objects.create(
-        user=user,
-        team_size=team_size,
-        skills=["demolition"],
-        languages=["de"],
-        legal_status="minijob",
-    )
-    return user
-
-
-def phone_page(new_context, email):
-    """A new 360 px phone with a touch screen (its own cookies), logged in as `email`."""
-    page = new_context(viewport=PHONE, has_touch=True).new_page()
-    log_in(page, email)
-    return page
 
 
 def link_in(email):
