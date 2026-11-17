@@ -4,7 +4,8 @@ person reads it translated.
 Ticket #36. Spec: docs/specs/chat-translation.md, iteration 1 (R1-R3, R5, R6, R8, D1-D7,
 D10), acceptance criteria AC1, AC2, AC4 and AC6; iteration 2, "Show original" per message
 (R11-R13, D8), AC7-AC9. The test client runs no JavaScript: the click itself is for the
-E2E ticket #40 (R13). Each test goes through the whole stack:
+E2E ticket #40 (R13); iteration 3, the last message on "Chats" in the reader's language
+(R14-R16, D11, D12), AC10 and AC11. Each test goes through the whole stack:
 middleware, URL, view, form, template and database. The translator is the small class
 below, chosen through TRANSLATION_BACKEND; it records its calls, so nothing reaches the
 network. Ivan's site is in Ukrainian, Anna's in English, the language of the labels.
@@ -495,3 +496,89 @@ def test_poll_sends_after_in_its_address(anna_client, application, worker):
 
     assertNotContains(response, "hx-vals")
     assertContains(response, f'hx-get="{chat_url(application)}?after={message.pk}"')
+
+
+# The last message on "Chats" (R14-R16, D11, D12; AC10, AC11)
+
+CHATS_URL = "/chat/"
+
+
+def test_chats_row_shows_the_last_message_translated(anna_client, application, worker):
+    """Anna reads Ivan's last Ukrainian message in English on "Chats", without a label.
+
+    1. Save Ivan's Ukrainian message
+    2. Open "Chats" as Anna
+    3. Expect: the translation in the row; no "by AI" label, no "Show original" (D12)
+    """
+    say(application, worker, UKRAINIAN, "uk")
+
+    response = anna_client.get(CHATS_URL)
+
+    assertContains(response, f"en: {UKRAINIAN}")
+    assertNotContains(response, "by AI")
+    assertNotContains(response, "Show original")
+
+
+def test_chats_row_shows_the_own_last_message_as_written(
+    client, application, worker, recording
+):
+    """Ivan's own last message stays as he wrote it on his "Chats" (D5).
+
+    1. Save Ivan's English message (his site is in Ukrainian)
+    2. Open "Chats" as Ivan
+    3. Expect: the message as written, no translation into Ukrainian, no translator call
+    """
+    say(application, worker, "Is there parking?", "en")
+    client.force_login(worker)
+
+    response = client.get(CHATS_URL)
+
+    assertContains(response, "Is there parking?")
+    assertNotContains(response, "uk: Is there parking?")
+    assert translations_made(recording) == []
+
+
+def test_chats_row_cuts_the_translation(anna_client, application, worker):
+    """The translation, not the original, is cut to 60 characters (R16).
+
+    1. Save Ivan's long Ukrainian message
+    2. Open "Chats" as Anna
+    3. Expect: the first 59 characters of "en: <message>" and "…"
+    """
+    long_text = "Привіт! Чи є біля будинку парковка для бусика? Ми приїдемо о сьомій."
+    say(application, worker, long_text, "uk")
+
+    response = anna_client.get(CHATS_URL)
+
+    assertContains(response, f"en: {long_text}"[:59] + "…")
+
+
+def count_chats_queries(client):
+    """How many SQL queries the "Chats" page makes."""
+    with CaptureQueriesContext(connection) as queries:
+        response = client.get(CHATS_URL)
+    assert response.status_code == 200
+    return len(queries)
+
+
+def test_chats_queries_do_not_grow_with_translated_previews(
+    anna_client, application, employer, worker
+):
+    """All cached previews come in one query, however many chats (R16).
+
+    1. One chat with Ivan's Ukrainian message, translated; count the queries of "Chats"
+    2. Add two chats of Anna with other workers' Ukrainian messages, translated; count again
+    3. Expect: the same number
+    """
+    say(application, worker, UKRAINIAN, "uk")
+    translate(UKRAINIAN, "en")
+    with_one = count_chats_queries(anna_client)
+
+    for email in ("olena@example.com", "taras@example.com"):
+        other = apply(employer, make_worker(email))
+        text = f"Привіт від {email}"
+        say(other, other.worker, text, "uk")
+        translate(text, "en")
+    with_three = count_chats_queries(anna_client)
+
+    assert with_three == with_one
