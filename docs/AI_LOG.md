@@ -3098,3 +3098,55 @@ mutations, took 360 px shots of both sides and both themes, updated the built ch
   link inside it: the poll's `after` went with my "Show original" click.
 - The difference between "translated" and "shown translated": the translation sits in the
   cache, and every page that shows a text has to read it from there.
+
+## 2026-11-17 · #40 E2E tests (Playwright) and coverage review for M6
+
+**Task given to AI:** write the E2E tests for the M6 flows (chat with translation → job done →
+both reviews → rating) and review the test coverage of chat and reviews. The issue also held
+two of my comments: the German "fits 360 px" test moved from #30, and the two M5 "Show
+original" toggles that were only checked by hand.
+
+**AI helped:** it split the ticket into 4 iterations and wrote 4 E2E tests and 3 unit tests:
+two phones in two languages (Ukrainian worker, English employer) where a chat message arrives
+by HTMX polling without a reload; the M5 toggles on the job page and in the applications; every
+page a guest, a worker and an employer can open (34) in German at 360 px; the `__str__` of
+Message, Review and Translation (coverage 99.86 % → 100 % without E2E). It explained how
+Playwright waits for a poll without `sleep`, why a JavaScript flag proves "no reload", and why
+coverage says which lines ran, not what was checked. It mutation-checked every test (22
+mutations), moved the shared E2E helpers to `tests/e2e/helpers.py`, measured E2E-only coverage
+(86 %) and mapped every E2E test to the issues it covers.
+
+**AI failed:**
+- The first chat test guessed two URLs and a msgid variable name; running it found them.
+- Its test data marked an application "accepted" in the database without `workers_accepted`,
+  so "Mark as done" never appeared. It now accepts through `Application.accept()`, as the
+  real code does.
+- The "Show original" test did not notice when the whole message list was swapped instead of
+  one bubble (a mutation survived): with one message open both look the same. It added a step
+  with two messages, and did the same in the M5 tests.
+- Some mutations proved nothing: one changed no code, one hit `Review.is_visible`, which only
+  tests call, and a `whitespace-nowrap` class had no effect on a daisyUI badge. It replaced
+  them with real ones (`ReviewQuerySet.visible()`, an inline style).
+- It miscounted 30 characters in the expected `Message.__str__` and fixed the test.
+
+**My part:**
+- I asked what M5, which had no E2E ticket, still needed. Claude checked the M5 specs for
+  "left for #40" and found exactly three items; it also suggested switching the language with
+  the header menu, so #29 is tested in a browser once.
+- I asked to run the German test once locally in Romanian too: I had never checked Romanian by
+  hand, and Claude had pointed out that its long words may break the layout as well. It found
+  that the guest header ("Autentificare" + "Înregistrare") ends at 354 px: 9 px too wide with a
+  classic scrollbar, 6 px to spare on a phone. I chose option A: keep German only in the test,
+  no fix, a comment in #98. Romanian is not a main language of the site, German matters more,
+  and on a 360 px phone nothing breaks.
+- I asked how much the E2E tests alone cover, and for a detailed explanation of the `__str__`
+  tests and of which E2E test covers which issue.
+- I accepted the iterations, the "every GET page" list and the two languages of the chat test,
+  because they repeat what I decided in the earlier E2E tickets (#28).
+- I ran all the new tests in headed mode with a 500 ms delay and read the tests themselves.
+
+**Learned:**
+- How a test waits for HTMX polling without `sleep`: Playwright's `expect` retries until the
+  text appears, and a JavaScript flag on the page proves it was not reloaded.
+- Why 100 % coverage does not mean everything is tested: templates and JavaScript are not
+  counted, and only a mutation check shows that a test really checks something.
