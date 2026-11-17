@@ -40,3 +40,35 @@ def chat_messages_for(messages, reader, reader_lang, *, original_id=None):
             show_original=message.pk == original_id,
         )
     return messages
+
+
+def chat_previews_for(chats, reader, reader_lang):
+    """Give each row of "Chats" a `shown_last`: its last message as `reader` should see it.
+
+    #36, chat-translation.md R15, D11, D12. A row carries the last message's text, language
+    and sender as plain values (`last_text`, `last_language`, `last_sender_id`, annotated by
+    ChatListView); None for a chat without messages. The previews that need a translation
+    come from the cache in one query; they were translated when sent (D1). Returns the
+    chats as a list.
+    """
+    chats = list(chats)
+    needed = [
+        c.last_text
+        for c in chats
+        if c.last_text
+        and c.last_sender_id != reader.pk
+        and c.last_language != reader_lang
+    ]
+    translations = translate_many(needed, reader_lang)
+    for chat in chats:
+        if not chat.last_text:
+            chat.shown_last = None
+            continue
+        chat.shown_last = shown_text(
+            chat.last_text,
+            chat.last_language,
+            reader_lang,
+            is_author=chat.last_sender_id == reader.pk,
+            translated=lambda text=chat.last_text: translations[text],
+        )
+    return chats

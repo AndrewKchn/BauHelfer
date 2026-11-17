@@ -21,9 +21,10 @@
                   {% endif %}
                 </div>
                 <p class="text-sm text-base-content/70">{{ job.get_job_type_display }} · {{ job.date|date:"D j M" }}</p>
-                {# The last message, cut (D21); none yet in a new chat. #}
-                {% if chat.last_text %}
-                  <p class="truncate text-sm">{{ chat.last_text|truncatechars:60 }}</p>
+                {# The last message, cut (D21); none yet in a new chat. In the reader's #}
+                {# language as chat_previews_for() decided, without a label (#36, R16, D12). #}
+                {% if chat.shown_last %}
+                  <p class="truncate text-sm">{{ chat.shown_last.text|truncatechars:60 }}</p>
                 {% endif %}
               </div>
             </a>

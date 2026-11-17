@@ -18,7 +18,7 @@ from translations.services import detect_language, translate
 
 from .forms import MessageForm
 from .models import Message, with_has_messages
-from .shown_text import chat_messages_for
+from .shown_text import chat_messages_for, chat_previews_for
 
 
 def other_side(application, user):
@@ -170,6 +170,10 @@ class ChatListView(LoginRequiredMixin, ListView):
                 # The text of the newest message (D21): a subquery per row, run by the
                 # database inside the same query.
                 last_text=Subquery(last_message.values("text")[:1]),
+                # Its language and sender, for the preview in the reader's language
+                # (#36, chat-translation.md R14, D11): in the same query, as last_text.
+                last_language=Subquery(last_message.values("original_language")[:1]),
+                last_sender_id=Subquery(last_message.values("sender_id")[:1]),
                 # The newest message, or the application itself before the first (D20).
                 activity=Coalesce(Max("messages__created_at"), "created_at"),
                 # Only the other person's unread messages (as unread_count, R21).
@@ -183,11 +187,13 @@ class ChatListView(LoginRequiredMixin, ListView):
 
     @override
     def get_context_data(self, **kwargs):
-        """Keep the readable chats only and name the other person of each (R24)."""
+        """Keep the readable chats only, name the other person of each (R24) and give each
+        its last message in the reader's language (#36, R15, one query for all).
+        """
         context = super().get_context_data(**kwargs)
         user = self.request.user
         chats = [chat for chat in context["chats"] if chat.chat_readable]
         for chat in chats:
             chat.other = other_side(chat, user)
-        context["chats"] = chats
+        context["chats"] = chat_previews_for(chats, user, translation.get_language())
         return context
