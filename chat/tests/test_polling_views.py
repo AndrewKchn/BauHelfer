@@ -28,8 +28,8 @@ def test_open_chat_asks_every_4_seconds_after_its_last_message(
     """A writable chat polls with the id of its last message (R13, R18).
 
     1. Save two messages; open the chat as Ivan
-    2. Expect: the list polls every 4 s, sends "after" = the second message's id; the hint
-       above the form
+    2. Expect: the list polls every 4 s, sends "after" = the second message's id, and
+       takes itself (its own id) out of the answer; the hint above the form
     """
     write(application, worker, "Hello")
     last = write(application, employer, "Hi")
@@ -39,6 +39,8 @@ def test_open_chat_asks_every_4_seconds_after_its_last_message(
 
     assertContains(response, 'hx-trigger="every 4s"', count=1)
     assertContains(response, f'"after": {last.pk}')
+    assertContains(response, 'id="chat-messages"', count=1)
+    assertContains(response, 'hx-select="#chat-messages"', count=1)
     assertContains(response, HINT)
 
 
@@ -137,11 +139,14 @@ def test_stranger_asking_gets_404(client, application, worker):
 # The cost (R17; AC10)
 
 
-def test_204_costs_fewer_queries_than_the_page(client, application, employer, worker):
-    """ "Nothing new" skips the message list and the page around it (R17, D11).
+def test_204_renders_no_page(client, application, employer, worker):
+    """ "Nothing new" skips the template, and asks the database no more than the page (R17).
+
+    The saving is the page itself (~9 KB, about half the time), not the queries: both make
+    4 (session, user, application, then the messages or one EXISTS).
 
     1. Save three messages; count the queries of the page and of an ask after the last
-    2. Expect: the ask makes fewer
+    2. Expect: the ask renders no template and makes no more queries than the page
     """
     for text in ("one", "two"):
         write(application, worker, text)
@@ -154,7 +159,8 @@ def test_204_costs_fewer_queries_than_the_page(client, application, employer, wo
         response = client.get(chat_url(application), {"after": last.pk})
 
     assert response.status_code == 204
-    assert len(ask) < len(page)
+    assert response.templates == []
+    assert len(ask) <= len(page)
 
 
 def test_chat_of_tomorrow_still_asks(client, employer, worker):

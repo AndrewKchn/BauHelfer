@@ -81,7 +81,9 @@ R15. GET with `?after=<id>` and a newer message: the whole page as without it; H
      message list out of it, so the swapped list carries the new last id and the date lines
      stay right.
 R16. `?after=` that is not a number is ignored: the whole page, as `?original=` (#33).
-R17. A 204 costs fewer queries than the page: no message list, no navigation.
+R17. A 204 renders no template and sends no body; it makes no more queries than the page
+     (both 4: the session, the user, the application, then the messages or one EXISTS).
+     Measured in the tests: the page with 10 messages is ~9 KB and ~13 ms, the 204 ~7 ms.
 R18. Above the form: "New messages appear every few seconds." (D14). Sending stays a plain form
      with a reload (R6).
 
@@ -110,7 +112,7 @@ AC8. A writable chat: the list has `hx-trigger="every 4s"` and `"after": <id of 
      message>` (0 when empty), and the R18 line. A closed chat: neither.
 AC9. `?after=<last id>`: 204, empty. `?after=<an older id>`: 200 with the newer message.
      `?after=abc`: 200, the whole page. A stranger with `?after=`: 404.
-AC10. The 204 makes fewer queries than the whole page.
+AC10. The 204 renders no template and makes no more queries than the whole page.
 
 ## Decisions
 
@@ -152,10 +154,10 @@ D11. **Ask for new messages, and get "nothing new" as an empty 204** (mine, 2026
      option C): the page of #32's HTMX pattern (`hx-get` the same page + `hx-select`) when
      something is new, so no new view and the date lines stay in one template; an empty
      answer otherwise, so an open chat costs Render little while nobody writes. Rejected: the
-     whole page on every ask (A, Claude's recommendation: simplest, but ~6 queries every 4
-     seconds per open chat); a view that sends only the new messages (B: a new view and
-     template, and the date line breaks where two pieces meet). **Revisit when** the chat
-     moves to WebSockets (#54).
+     whole page on every ask (A, Claude's recommendation: simplest, but the whole page,
+     ~9 KB, every 4 seconds per open chat); a view that sends only the new messages (B: a
+     new view and template, and the date line breaks where two pieces meet). **Revisit
+     when** the chat moves to WebSockets (#54).
 D12. **Only a writable chat asks** (Claude's default, accepted): a closed one gets no new
      messages. A chat that closes while open (midnight after the job) keeps asking until the
      page is reloaded; every answer is then a 204.
