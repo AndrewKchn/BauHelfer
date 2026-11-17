@@ -126,7 +126,7 @@ def test_badge_shows_the_unread_count(client, application, employer, worker, who
 
     1. Save three messages to the user from the other side
     2. Open "My applications" / "My jobs"
-    3. Expect: "3 unread messages"; the "Chats" link
+    3. Expect: "3 unread messages" twice (the menu button and "Chats"); the "Chats" link
     """
     me, other = (worker, employer) if who == "worker" else (employer, worker)
     for text in ("One", "Two", "Three"):
@@ -136,7 +136,7 @@ def test_badge_shows_the_unread_count(client, application, employer, worker, who
 
     response = client.get(reverse(page))
 
-    assertContains(response, "3 unread messages")
+    assertContains(response, "3 unread messages", count=2)
     assertContains(response, f'href="{CHATS_URL}"')
 
 
@@ -197,28 +197,33 @@ def test_guest_page_does_not_count(client, monkeypatch):
 def test_chats_page_lists_readable_chats_newest_first(client, employer, worker):
     """Every chat Ivan can read, the newest activity on top (R24, D20).
 
-    1. Ivan's chats: with Anna (last message 2 hours ago), with Bob (1 hour ago), with
-       Eva (accepted now, no message yet)
+    The applications are saved in another order than the expected one (Eva first), so the
+    order comes from the messages, not from the ids.
+
+    1. Ivan's chats: with Eva (accepted now, no message yet), with Anna (last message 2
+       hours ago), with Bob (1 hour ago)
     2. Not listed: a pending application to Karl; a cancelled one of Lena without
-       messages; Olga's chat with Anna
+       messages; one of Mia accepted for yesterday without messages; Olga's chat with Anna
     3. Open "Chats" as Ivan
-    4. Expect: Eva, Bob, Anna in this order; not Karl, Lena, Olga
+    4. Expect: Eva, Bob, Anna in this order; not Karl, Lena, Mia, Olga's chat
     """
+    apply(make_employer("eva@example.com", name="Eva Engel"), worker)
     write(apply(employer, worker), employer, "Hi", NOW - 2 * HOUR)
     bob = make_employer("bob@example.com", name="Bob Berger")
     write(apply(bob, worker), bob, "Hi", NOW - HOUR)
-    apply(make_employer("eva@example.com", name="Eva Engel"), worker)
     apply(make_employer("karl@example.com", name="Karl Kurz"), worker, "pending")
     apply(make_employer("lena@example.com", name="Lena Lang"), worker, "cancelled")
+    mia = make_employer("mia@example.com", name="Mia Moser")
+    apply(mia, worker, date=NOW.date() - datetime.timedelta(days=1))
     olga = make_worker("olga@example.com")
-    write(apply(employer, olga), olga, "Olga's chat")
+    write(apply(employer, olga), olga, "Message in the chat of Olga")
     client.force_login(worker)
 
     response = client.get(CHATS_URL)
 
     page = response.content.decode()
     assert page.index("Eva Engel") < page.index("Bob Berger") < page.index("Anna Huber")
-    for absent in ("Karl Kurz", "Lena Lang", "Olga's chat"):
+    for absent in ("Karl Kurz", "Lena Lang", "Mia Moser", "chat of Olga"):
         assert absent not in page
 
 
@@ -243,7 +248,8 @@ def test_row_shows_the_last_message_cut_and_its_unread_count(
 ):
     """Each row: the last message, cut to 60 characters, and that chat's count (R24, D21).
 
-    1. In the chat with Anna: an old message, then a long last one of Anna, both unread
+    1. In the chat with Anna: an old message, then a long last one of Anna, both unread;
+       before them an own message of Ivan that Anna has not read (not counted for Ivan)
     2. In the chat with Bob: one unread message
     3. Open "Chats" as Ivan
     4. Expect: the long message cut with "…", not the old one; "2 unread messages" for
@@ -252,6 +258,7 @@ def test_row_shows_the_last_message_cut_and_its_unread_count(
     long_text = (
         "Please bring gloves, helmets, safety boots and two hammer drills for us."
     )
+    write(application, worker, "Own message", NOW - 2 * HOUR)
     write(application, employer, "Old message", NOW - HOUR)
     write(application, employer, long_text)
     bob = make_employer("bob@example.com", name="Bob Berger")
@@ -302,8 +309,11 @@ def count_queries(client):
 def test_queries_do_not_grow_with_the_chats(client, application, employer, worker):
     """Names, jobs, last messages and counts come at once, not per row (R25).
 
+    The two added chats are cancelled: readable only because of their messages, so
+    without has_messages each row would ask the database.
+
     1. One chat of Ivan with a message; count the queries of "Chats"
-    2. Add two chats with messages; count again
+    2. Add two cancelled chats with messages; count again
     3. Expect: the same number
     """
     write(application, employer, "Hi")
@@ -312,7 +322,7 @@ def test_queries_do_not_grow_with_the_chats(client, application, employer, worke
 
     for email in ("bob@example.com", "eva@example.com"):
         other = make_employer(email)
-        write(apply(other, worker), other, "Hi")
+        write(apply(other, worker, "cancelled"), other, "Hi")
     with_three = count_queries(client)
 
     assert with_three == with_one
