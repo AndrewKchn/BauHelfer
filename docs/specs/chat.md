@@ -4,6 +4,8 @@ Status: **agreed**. I decided D1 and D2 on 2026-11-17 (my criteria: simple code 
 before polish). D3–D10 are Claude's defaults, which I accepted on 2026-11-17, before any tests.
 Iteration 2: I decided D11 on 2026-11-17 (same criteria, plus the load on Render's free plan);
 D12–D14 are Claude's defaults, which I accepted on 2026-11-17, before its tests.
+Iteration 3: I decided D15 and D16 on 2026-11-17 (same criteria; the count is on every page);
+D17–D22 are Claude's defaults, which I accepted on 2026-11-17, before its tests.
 
 Marks: **(mine, date)** — my decision; **(Claude's default, accepted)** — Claude's default
 that I accepted; **(Claude's recommendation)** — what Claude advised where I chose
@@ -20,7 +22,7 @@ Three iterations in one branch and one PR:
 
 1. The chat page: messages, sending, who may read and write (R1–R12, D1–D10).
 2. New messages without a reload (HTMX polling) (R13–R18, D11–D14).
-3. The unread count in the navigation: its section is written before its tests.
+3. The unread count in the navigation and a "Chats" page (R19–R26, D15–D22).
 
 ### Out of scope
 
@@ -87,6 +89,31 @@ R17. A 204 renders no template and sends no body; it makes no more queries than 
 R18. Above the form: "New messages appear every few seconds." (D14). Sending stays a plain form
      with a reload (R6).
 
+### Iteration 3: the unread count and the "Chats" page
+
+R19. `Message.read_at` (date and time, empty until read; not editable): when the other person
+     first saw the message (D15).
+R20. Rendering the chat page marks every message of the other person that is still unread as
+     read, in one `UPDATE`, before the page is drawn: on GET, on a form with errors, and on a
+     poll that brings something new (R15). A 204 marks nothing; own messages are never
+     marked (D17).
+R21. `unread_count(user)` in `chat/models.py`: the messages in the user's chats (as the worker
+     or as the employer of the job) that are not the user's own and not read. One query.
+R22. A context processor `chat.context_processors.unread_messages` gives every template
+     `unread_messages`: the R21 count for a logged-in worker or employer, 0 for anyone else
+     without a query (D18).
+R23. The navigation, for workers and employers: the menu button shows a badge with the count
+     when it is above 0; the menu has "Chats" with the same badge, after "My applications" /
+     "My jobs". The badge has a text for screen readers ("3 unread messages") (D19).
+R24. `ChatListView` at `/chat/` (`name="chat_list"`), login required: every readable chat of
+     the user (R3), as worker or as employer, newest activity first (the last message, or the
+     application if it has none) (D20). Each row links to its chat and shows the other
+     person's name, the job type and date, the last message cut to 60 characters, and the
+     unread count of this chat when above 0 (D21). None: "No chats yet. A chat opens when an
+     application is accepted."
+R25. The list makes the same number of queries for 1 and for 3 chats.
+R26. The "Chat" links of R11 stay as they are, without a count (D22).
+
 ## Acceptance criteria (→ tests)
 
 ### Iteration 1
@@ -114,6 +141,19 @@ AC9. `?after=<last id>`: 204, empty. `?after=<an older id>`: 200 with the newer 
      `?after=abc`: 200, the whole page. A stranger with `?after=`: 404.
 AC10. The 204 renders no template and makes no more queries than the whole page.
 
+### Iteration 3
+
+AC11. Opening the chat marks the other person's messages read, not the own ones and not those
+      of another chat; a 204 marks none; a poll with something new marks it.
+AC12. `unread_count`: counts the other person's unread messages in all the user's chats, as
+      worker and as employer; not the own ones, not read ones, not other people's chats.
+AC13. The badge on the menu button and next to "Chats" with the count; none at 0. A guest's
+      page makes no query for it.
+AC14. `/chat/`: the user's readable chats, newest activity first, each with the name, the job,
+      the last message (cut) and its unread count; not a pending application, not a closed
+      chat without messages, not another user's chat; the empty line when there are none. A
+      guest goes to the login page. The same number of queries for 1 and 3 chats.
+
 ## Decisions
 
 D1. **Writing while the contacts are shown, reading afterwards too** (mine, 2026-11-17;
@@ -138,7 +178,7 @@ D5. **At most 1000 characters** (Claude's default, accepted): the limit of a tex
 D6. **The way in: a "Chat" link on the two pages that already list the application** (Claude's
     default, accepted): the worker's card on "My applications" (the mockup's "Open chat", #26),
     the owner's list on the job page. No list of all chats: the unread count of iteration 3
-    links to them.
+    links to them. **Changed by D16:** a "Chats" page lists them all; the links stay.
 D7. **The mockup's bubbles with daisyUI `chat`** (Claude's default, accepted): `chat-start` /
     `chat-end`, `chat-bubble-primary` for own messages, no JavaScript.
 D8. **A date line per day instead of "Application accepted · <date>"** (Claude's default,
@@ -166,6 +206,30 @@ D13. **Every 4 seconds** (Claude's default, accepted): the plan says 3–5 s (`d
 D14. **The mockup's line about new messages** (Claude's default, accepted): without it,
      someone waiting for an answer reloads the page by hand.
 
+D15. **Each message knows when it was read: `read_at`** (mine, 2026-11-17; option A): one
+     field where the message is, and the count reads as a sentence: "messages in my chats,
+     not mine, not read". Rejected: "last opened" times for both sides on the application
+     (B: two fields in `jobs`, and a count whose condition depends on which side I am).
+D16. **A "Chats" page with all chats; the count leads there** (mine, 2026-11-17; option B):
+     two taps to any chat for both sides. Rejected: counts on the cards of "My jobs" / "My
+     applications" and on the "Chat" buttons (A: counts on three levels, four taps for the
+     employer); a count only in the menu (C: it does not say where the message is). Replaces
+     D6's "no list of all chats".
+D17. **Read when the page is drawn** (Claude's default, accepted): opening the chat is reading
+     it; a poll that brings a message draws it on the open page, so it is read too. A 204 draws
+     nothing. **Revisit when** a message can be missed on an open page (a long chat scrolled
+     up).
+D18. **The count on every page, by a context processor** (Claude's default, accepted): the
+     navigation is in `base.html`, which every view renders; a context processor is how Django
+     gives every template the same value. One query per page for workers and employers.
+D19. **Messages, not chats, are counted** (Claude's default, accepted): "3" says how much is
+     waiting, as in messengers; the "Chats" page shows which chat has them.
+D20. **Newest activity first** (Claude's default, accepted): the chat that just got a message
+     is on top; a new chat without messages counts from its application.
+D21. **The last message in the row** (Claude's default, accepted): as in messengers; one
+     subquery, not a query per row.
+D22. **No count on the "Chat" buttons** (Claude's default, accepted): the "Chats" page has it
+     (D16).
 ## Known limitations (→ docs/SECURITY.md)
 
 - The messages are stored in plain text in the database: whoever has database access can
@@ -181,4 +245,5 @@ D14. **The mockup's line about new messages** (Claude's default, accepted): with
 | "Application accepted · Tue 20 Oct" | a date line per day | D8 |
 | "translated from Ukrainian · original" | not shown until #36 | #36 |
 | a send icon without a label | a "Send" button | a label every language can read; changed after the screenshots if I decide so |
+| — | a "Chats" page and a count in the menu | D16 |
 | "New messages load every few seconds" | "New messages appear every few seconds.", above the form | D14 |
