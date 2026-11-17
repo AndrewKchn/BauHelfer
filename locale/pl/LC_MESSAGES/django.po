@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BauHelfer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-16 13:59+0100\n"
+"POT-Creation-Date: 2026-11-17 13:11+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -405,6 +405,42 @@ msgstr "E-mail potwierdzony. Witamy w BauHelfer!"
 msgid "Profile saved."
 msgstr "Profil zapisany."
 
+#: chat/forms.py
+msgid "Message"
+msgstr "Wiadomość"
+
+#: chat/forms.py
+msgid "Write a message…"
+msgstr "Napisz wiadomość…"
+
+#: chat/models.py jobs/models.py reviews/models.py
+msgid "application"
+msgstr "zgłoszenie"
+
+#: chat/models.py
+msgid "sender"
+msgstr "nadawca"
+
+#: chat/models.py
+msgid "text"
+msgstr "treść"
+
+#: chat/models.py jobs/models.py reviews/models.py
+msgid "created at"
+msgstr "utworzono"
+
+#: chat/models.py
+msgid "read at"
+msgstr "przeczytano"
+
+#: chat/models.py jobs/models.py
+msgid "message"
+msgstr "wiadomość"
+
+#: chat/models.py
+msgid "messages"
+msgstr "wiadomości"
+
 #: jobs/forms.py
 msgid "Hourly rate, €"
 msgstr "Stawka godzinowa, €"
@@ -563,10 +599,6 @@ msgstr "stawka godzinowa (€)"
 msgid "status"
 msgstr "status"
 
-#: jobs/models.py reviews/models.py
-msgid "created at"
-msgstr "utworzono"
-
 #: jobs/models.py
 msgid "done at"
 msgstr "data zakończenia"
@@ -624,20 +656,12 @@ msgid "worker"
 msgstr "pracownik"
 
 #: jobs/models.py
-msgid "message"
-msgstr "wiadomość"
-
-#: jobs/models.py
 msgid "workers offered"
 msgstr "zaoferowani pracownicy"
 
 #: jobs/models.py
 msgid "workers accepted"
 msgstr "przyjęci pracownicy"
-
-#: jobs/models.py reviews/models.py
-msgid "application"
-msgstr "zgłoszenie"
 
 #: jobs/models.py
 msgid "applications"
@@ -1015,6 +1039,52 @@ msgstr "Rejestracja"
 msgid "Munich"
 msgstr "Monachium"
 
+#: templates/chat/_chats_menu_item.html templates/chat/chat_list.html
+msgid "Chats"
+msgstr "Czaty"
+
+#: templates/chat/_unread_badge.html
+#, python-format
+msgid "%(counter)s unread message"
+msgid_plural "%(counter)s unread messages"
+msgstr[0] "%(counter)s nieprzeczytana wiadomość"
+msgstr[1] "%(counter)s nieprzeczytane wiadomości"
+msgstr[2] "%(counter)s nieprzeczytanych wiadomości"
+msgstr[3] "%(counter)s nieprzeczytanej wiadomości"
+
+#: templates/chat/chat.html
+#, python-format
+msgid "Chat with %(name)s"
+msgstr "Czat: %(name)s"
+
+#: templates/chat/chat.html
+msgid "Back"
+msgstr "Wstecz"
+
+#: templates/chat/chat.html
+msgid "you"
+msgstr "ja"
+
+#: templates/chat/chat.html
+msgid "No messages yet. Write the first one."
+msgstr "Brak wiadomości. Napisz pierwszą."
+
+#: templates/chat/chat.html
+msgid "New messages appear every few seconds."
+msgstr "Nowe wiadomości pojawiają się co kilka sekund."
+
+#: templates/chat/chat.html
+msgid "Send"
+msgstr "Wyślij"
+
+#: templates/chat/chat.html
+msgid "This chat is closed. You can still read it."
+msgstr "Ten czat jest zamknięty. Nadal można go czytać."
+
+#: templates/chat/chat_list.html
+msgid "No chats yet. A chat opens when an application is accepted."
+msgstr "Brak czatów. Czat otwiera się po przyjęciu zgłoszenia."
+
 #: templates/emails/_footer.txt templates/emails/verify_email_body.txt
 #: templates/registration/password_reset_email.txt
 msgid "The BauHelfer team"
@@ -1264,6 +1334,10 @@ msgstr[3] "%(photos)s zdjęcia"
 #: templates/jobs/_my_application_card.html
 msgid "Your crew:"
 msgstr "Pana/Pani ekipa:"
+
+#: templates/jobs/_my_application_card.html templates/jobs/job_detail.html
+msgid "Chat"
+msgstr "Czat"
 
 #: templates/jobs/_my_application_card.html
 msgid "Withdraw your application? This cannot be undone."
