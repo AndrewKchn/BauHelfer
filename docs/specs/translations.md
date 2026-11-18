@@ -222,6 +222,8 @@ D17. **Profile cards: on a phone each label above its value** (mine, 2026-11-07;
      still one long badge per line); a shorter Russian label (C: German and Romanian have
      the same problem). The short "Contacts" and "Email notifications" lists keep two
      columns.
+     **Changed by #39** (`docs/specs/ratings.md` D9, the card as on the mockup): both profile
+     cards put each label above its value on every width, not only on phones.
 
 ## Known limitations
 

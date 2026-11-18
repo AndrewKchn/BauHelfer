@@ -150,6 +150,8 @@ D10. **A filled job can be cancelled, and every worker who loses their place get
 D11. **A fixed text, without a reason** (mine, 2026-11-12; option a): two templates, no form.
      Rejected for now: a reason the employer writes (b: a form field, stored, translated
      by Claude); kept as an improvement for the chat, #35.
+     **Answered by #35** (`docs/specs/chat.md` D2): left out for now; first a system line
+     "Cancelled by the employer" in the chat (#165), the reason after it.
 D12. **The same email when one accepted worker is cancelled** (Claude's default,
      accepted): for the worker it is the same event, and until now they were not told
      either.

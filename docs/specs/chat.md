@@ -76,6 +76,11 @@ R13. A writable chat asks the server every 4 seconds for new messages (D11, D13)
      `hx-select="#chat-messages"`, `hx-swap="outerHTML"`, and sends the id of its last
      message as `?after=<id>` (`hx-vals`; 0 without messages). A closed chat does not ask
      (D12).
+     **Changed by #36** (`docs/specs/chat-translation.md`, commit 75dd139): `?after=<id>` is
+     now in the poll's own address (`hx-get=".../?after=<id>"`), not in `hx-vals`. HTMX adds
+     the `hx-vals` of every parent to a request, so "Show original" inside the list sent
+     `?original=<id>&after=<id>` and got the 204 of "nothing new"; `hx-disinherit` does not
+     stop it (htmx 2.0.10 `getValuesForElement`).
 R14. GET with `?after=<id>` and no message of this chat with a higher id: **204** with an empty
      body; HTMX then changes nothing (D11). The access check of R4 comes first: a stranger
      still gets 404.

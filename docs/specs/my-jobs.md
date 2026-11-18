@@ -83,6 +83,8 @@ AC8. E2E (#28, the M4 test ticket, not here): a swipe and a tap on a badge chang
 R11. After logging in, an employer lands on "My jobs"; a worker, and a user without a role
      (then sent on to the role choice by `OnboardingMiddleware`), land on the home page as
      before (D4).
+     **Changed by #38** (`docs/specs/reviews.md` R15, D16): a worker now lands on
+     "My applications".
 R12. A `?next=` address still wins: an employer sent to login from another page goes back
      there (Django's `LoginView`, unchanged).
 R13. A logged-in employer who opens the login page goes to "My jobs" too
@@ -115,6 +117,8 @@ D4. **An employer lands on "My jobs" after login** (mine, 2026-10-28, my idea fr
     care about my own jobs first. A subclass of Django's `LoginView` picks the page by role
     in `get_default_redirect_url()`, so `?next=` still wins. Added to the issue's "Done
     when…" the same day.
+    **Changed by #38** (`docs/specs/reviews.md` D16): a worker now lands on "My
+    applications" the same way.
 D5. **Soonest first in every group** (Claude's default, accepted), as before. **Revisit
     when** the Done group gets long and the newest done job should be on top.
 D6. **The number of jobs on each badge** (Claude's default, accepted): the employer sees how

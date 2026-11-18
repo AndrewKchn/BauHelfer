@@ -194,6 +194,9 @@ D5. **The translator only translates; who sees what is one rule in `jobs`, witho
     did). Rejected: the rule in `translations/display.py` (A, Claude's first default: the
     translator would know about pages); a copy of the rule for messages (C: two places to
     fix). **Revisit when** #36 needs the rule outside `jobs`.
+    **Checked in #36, kept:** `chat` imports `jobs.shown_text.shown_text` and
+    `jobs.views.original_id`, no copy. **Revisit when** a third app needs the rule: then
+    `shown_text` and `original_id` could move to `translations/`.
 D6. **Nobody sees their own message translated** (Claude's default, accepted, as
     job-translation.md D7): the worker on "My applications" reads the original; nothing
     changes there.

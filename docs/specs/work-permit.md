@@ -87,6 +87,9 @@ D5. **The first confirmation date is kept.** Re-saving the profile does not chan
 D6. **The worker sees the date on their own page; the card for employers (#23) shows only
     "Confirmed by the worker".** Employers need to know that the worker said so, not when.
     Rejected: only the worker sees it; everyone sees the date.
+    **Changed by #39** (`docs/specs/ratings.md` D12): the card says "Allowed to work in
+    Germany (confirmed by the worker)", and the worker's own page "You confirmed it on
+    <date>."
 D7. **A data migration keeps existing confirmations:** users with
     `work_permit_confirmed = True` get the migration time as their date, then the boolean is
     removed. Rejected: just dropping the boolean (on the live site only an admin could have

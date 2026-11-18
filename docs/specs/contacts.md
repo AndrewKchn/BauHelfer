@@ -81,6 +81,8 @@ D1. **The phone only, and only if the person gave one; never the email** (mine, 
     else through the chat (B, my first idea: there is no chat before #35, and the chat of
     #35 is seen only while the page is open, so a worker who is late at 06:50 could not
     reach anyone). **Revisit when** #35 brings the chat: if it can notify, the phone can go.
+    **Kept by #35** (`docs/specs/chat.md` D9): the chat sends no notifications, so a late
+    worker still needs the phone.
 D2. **A cancelled application shows no contacts** (mine, 2026-10-29): after the employer took
     the worker off, neither side needs them.
 D3. **Cancelling a job cancels its accepted applications** (mine, 2026-10-29): otherwise they
