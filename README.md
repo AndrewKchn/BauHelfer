@@ -22,7 +22,9 @@ is reliable, and the two sides often do not share a language.
 - **Employers** post a job: type of work, date, district, number of workers, hourly rate (never
   below the German minimum wage).
 - **Workers and crews** browse jobs and apply.
-- **Employers** accept applications; both sides then see each other's contacts.
+- **Employers** accept applications; both sides then see each other's contacts and can chat.
+- **After the job** both sides rate each other; the ratings show on worker and employer
+  profiles.
 
 Job descriptions and chat messages are translated automatically with the Claude API, so employers
 and workers can communicate even without a common language. The interface is available in German,
@@ -129,6 +131,6 @@ Test levels, where tests live, more commands and how tests are named:
 ## Status
 
 In development. Done: M1 (foundation and first deploy), M2 (accounts and profiles), M3 (jobs),
-M4 (applications, contacts after acceptance, email notifications) and M5 (the site in 7
-languages, job descriptions and application messages translated by AI). Next is M6, chat and
-reviews.
+M4 (applications, contacts after acceptance, email notifications), M5 (the site in 7
+languages, job descriptions and application messages translated by AI) and M6 (chat with AI
+translation, marking a job done, reviews and ratings). Next is M7: map, legal pages and GDPR.
