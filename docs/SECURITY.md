@@ -35,9 +35,18 @@ In [accounts/models.py](../accounts/models.py) and [jobs/models.py](../jobs/mode
 - **Application (#22):** the job, the worker, a free-text message (≤ 500 characters; it may
   hold a phone number or a name), how many workers were offered and accepted, the status.
   Deleted with the job or the account (`CASCADE`); the data export (#44) has to include it.
-- **Translations (#31–#33):** the cache keeps the SHA-256 of a job description or application
-  message, not the text, but the translation itself can hold the same names and phone
-  numbers. Deleted with its job or application, see [Translation](#translation-3134).
+- **Chat messages (#35):** the application, the sender, the text (≤ 1000 characters, stored in
+  plain text; it may hold a phone number or a name), its language, when it was sent and when
+  the other person read it (`read_at`). Kept as long as the application, deleted with it, its
+  job or either account (`CASCADE`). Not in the Django admin (`docs/specs/chat.md` D10); the
+  data export (#44) has to include them.
+- **Reviews (#38):** the application, the author, 1–5 stars and optional tags from a fixed
+  positive list, when it was written. No free text, so a review cannot hold personal data
+  (`docs/specs/reviews.md` D2). Deleted with the application or either account (`CASCADE`).
+- **Translations (#31–#36):** the cache keeps the SHA-256 of a job description, application
+  message or chat message, not the text, but the translation itself can hold the same names
+  and phone numbers. Deleted with its job, application or chat message, see
+  [Translation](#translation-3136).
 - **Language cookie (#29):** `django_language`, only the chosen language code (`ru`), set only
   when someone presses a language in the switcher; Django's default lifetime (until the browser
   is closed). Strictly necessary for a function the user asked for, so no consent is needed.
@@ -51,8 +60,9 @@ used on `User.phone`, so the profile forms and the admin both check it; tests in
 
 Everything is stored in the EU, see [Hosting](#hosting-and-secrets). Emails go out through
 Brevo (France, EU), which receives each recipient's address and name, the job type and the
-date, see [Email](#email-and-address-confirmation-27-81). Job descriptions and application
-messages are sent to Anthropic in the US for translation, see [Translation](#translation-3134).
+date, see [Email](#email-and-address-confirmation-27-81). Job descriptions, application
+messages and chat messages are sent to Anthropic in the US for translation, see
+[Translation](#translation-3136).
 
 ## Accounts (#9)
 
@@ -88,6 +98,8 @@ messages are sent to Anthropic in the US for translation, see [Translation](#tra
 |---|---|---|---|
 | Only employers post, edit and cancel jobs | Guests go to login, workers get 403; posting needs a company profile first | `EmployerRequiredMixin` (on `RoleRequiredMixin` from #12) in [jobs/views.py](../jobs/views.py) | `test_guest_is_sent_to_login`, `test_worker_gets_403` in [test_views.py](../jobs/tests/test_views.py) |
 | An employer changes only their own open jobs, and learns nothing about others | Edit and cancel look the job up only in `request.user.jobs.open()`: another employer's job or a job that is not open gives **404, not 403**, so the answer does not reveal that it exists. One query for GET and POST | `OwnOpenJobMixin.get_queryset` in [jobs/views.py](../jobs/views.py) | `test_other_employer_gets_404`, `test_job_that_is_not_open_gives_404` in [test_views.py](../jobs/tests/test_views.py) |
+| A job that is over cannot be changed (#37) | Edit, cancel and the photo pages of an open job whose day is over give 404; before #37 only the links were hidden | `OwnOpenJobMixin.get_object`, `JobPhotoDeleteView.get_object` in [jobs/views.py](../jobs/views.py) | `test_edit_of_a_job_that_is_over_gives_404`, `test_cancel_of_a_job_that_is_over_gives_404`, `test_photos_of_a_job_that_is_over_cannot_change` in [test_job_done_views.py](../jobs/tests/test_job_done_views.py) |
+| Workers hear when they lose their place (#37) | A filled job can be cancelled; every accepted worker gets an email, and so does a worker whose acceptance is cancelled. A failed email still cancels | `Job.cancel` in [jobs/models.py](../jobs/models.py), `notify_cancelled` in [jobs/notifications.py](../jobs/notifications.py) | `test_cancelling_a_job_emails_each_accepted_worker`, `test_cancelling_one_worker_emails_that_worker`, `test_failed_email_still_cancels` in [test_job_cancel_filled_views.py](../jobs/tests/test_job_cancel_filled_views.py) |
 | Owner and status cannot be posted | The form has no `employer` or `status` field: the view sets `employer = request.user`, the model sets `status = open`; extra POST fields are ignored | `JobForm` in [jobs/forms.py](../jobs/forms.py), [jobs/views.py](../jobs/views.py) | `test_posted_fields_for_owner_and_status_are_ignored` in [test_views.py](../jobs/tests/test_views.py), `test_form_fields` in [test_forms.py](../jobs/tests/test_forms.py) |
 | Cancelling only on purpose | POST only; the GET page only asks. The row stays with `status = cancelled` | `JobCancelView` in [jobs/views.py](../jobs/views.py) | `test_cancel_page_asks_first`, `test_owner_cancels_a_job` in [test_views.py](../jobs/tests/test_views.py) |
 | Job forms cannot be sent from another site | `{% csrf_token %}` in all three forms. The test client skips the CSRF check by default, so one test sends a POST without the token and one checks that each page puts it in its form | [templates/jobs/](../templates/jobs/) | `test_job_forms_need_the_csrf_token`, `test_job_form_pages_carry_the_csrf_token` in [test_views.py](../jobs/tests/test_views.py) |
@@ -119,12 +131,41 @@ messages are sent to Anthropic in the US for translation, see [Translation](#tra
 | Only the worker withdraws their own application (#26) | Employers get 403, another worker's application 404, GET 405; the job row is locked as for accepting | `ApplicationWithdrawView` in [jobs/views.py](../jobs/views.py), `Application.withdraw` in [jobs/models.py](../jobs/models.py) | `test_other_workers_application_gets_404`, `test_employer_gets_403`, `test_get_is_not_allowed` in [test_withdraw_views.py](../jobs/tests/test_withdraw_views.py); `test_withdraw_reads_the_state_again_and_locks_the_job` in [test_withdraw.py](../jobs/tests/test_withdraw.py) |
 | Contacts only after acceptance, and only until the job is over (#25, #26) | The job's exact address and each side's phone (if given) are shown only for an accepted application, until the day the job ends is over (Munich time). One rule, `Application.shows_contacts`, for the job page and "My applications". The email is never shown. Cancelling a job cancels its accepted applications, so their contacts disappear | `Application.shows_contacts`, `Job.cancel` in [jobs/models.py](../jobs/models.py); [_my_application_card.html](../templates/jobs/_my_application_card.html) | [test_contacts.py](../jobs/tests/test_contacts.py), [test_contacts_views.py](../jobs/tests/test_contacts_views.py); `test_accepted_card_shows_the_contact`, `test_no_contact_without_shows_contacts` in [test_my_applications_views.py](../jobs/tests/test_my_applications_views.py); end to end: `test_worker_applies_and_the_employer_accepts_on_two_phones` in [tests/e2e/test_application_flows.py](../tests/e2e/test_application_flows.py) (#28) |
 
+## Chat (#35, #36)
+
+One chat per accepted application, `/chat/<application id>/`. Spec: `docs/specs/chat.md`.
+
+| Protection | How | Code | Tests |
+|---|---|---|---|
+| Only the two people of the application read or write | The application is looked up with both its worker and its job's employer in the query: anyone else gets 404, the same as for an id that does not exist; guests go to login. The polling request is checked the same way | `ChatView.get_application` in [chat/views.py](../chat/views.py) | `test_stranger_gets_404`, `test_guest_is_sent_to_login` in [chat/tests/test_views.py](../chat/tests/test_views.py); `test_stranger_asking_gets_404` in [test_polling_views.py](../chat/tests/test_polling_views.py) |
+| Writing only while the contacts are shown | The same rule as the contacts (`Application.shows_contacts`, #25); afterwards the chat is read-only and a POST gets 404 (D1) | [chat/views.py](../chat/views.py), [chat/models.py](../chat/models.py) | `test_chat_is_writable_only_while_the_contacts_are_shown` in [chat/tests/test_models.py](../chat/tests/test_models.py); `test_closed_chat_takes_no_message` in [test_views.py](../chat/tests/test_views.py) |
+| Nobody writes in someone else's name | The sender is always the logged-in user, never a form field | `ChatView.post` in [chat/views.py](../chat/views.py) | `test_participant_sends_a_message` in [test_views.py](../chat/tests/test_views.py) |
+| A message cannot inject HTML and has a size limit | The template escapes the text; at most 1000 characters in the form and in the database (D5) | `Message` in [chat/models.py](../chat/models.py), [templates/chat/](../templates/chat/) | `test_message_text_is_escaped`, `test_message_longer_than_1000_characters_is_refused` in [test_views.py](../chat/tests/test_views.py); `test_text_longer_than_1000_characters_is_refused_by_the_database` in [test_models.py](../chat/tests/test_models.py) |
+| The unread count shows only one's own chats | A context processor counts the unread messages of the user's own chats, one query per page; guests get none and no query (`chat.md` R22, D18) | `unread_messages` in [chat/context_processors.py](../chat/context_processors.py), `unread_count` in [chat/models.py](../chat/models.py) | `test_unread_count_counts_the_other_side_in_all_chats`, `test_unread_count_is_one_query` in [test_unread.py](../chat/tests/test_unread.py); `test_guest_page_does_not_count` in [test_unread_views.py](../chat/tests/test_unread_views.py) |
+
+Chat messages are translated by the Claude API like the other texts, see
+[Translation](#translation-3136).
+
+## Done, reviews and ratings (#37–#39)
+
+Specs: `docs/specs/job-done.md`, `reviews.md`, `ratings.md`.
+
+| Protection | How | Code | Tests |
+|---|---|---|---|
+| Only the two sides of real work review, once each | Only the worker and the employer of an accepted application of a done job, within 14 days of "done"; everyone else gets 404 on the review page, guests go to login | `Application.can_review` in [jobs/models.py](../jobs/models.py), `ReviewCreateView` in [reviews/views.py](../reviews/views.py) | `test_stranger_gets_404`, `test_job_that_is_not_done_gets_404`, `test_second_review_gets_404` in [reviews/tests/test_views.py](../reviews/tests/test_views.py); [test_models.py](../reviews/tests/test_models.py) |
+| One review per side, also with two tabs | A database constraint (`review_one_per_side`); a second tab that posts at the same time gets 404, not a 500 | `Review` in [reviews/models.py](../reviews/models.py), `ReviewCreateView` | `test_review_saved_by_another_tab_meanwhile_gives_404` in [test_views.py](../reviews/tests/test_views.py) |
+| No revenge ratings | A review stays hidden until the other side rates too, or until the 14 days are over. The average, the count, the tags and the list count only visible reviews, so a hidden one never shows as a change in the average | `Review.is_visible`, `ReviewQuerySet.visible` in [reviews/models.py](../reviews/models.py) | `test_review_is_hidden_until_the_other_side_rates` in [test_models.py](../reviews/tests/test_models.py); `test_hidden_review_is_not_in_the_rating`, `test_visible_opens_a_one_sided_review_at_the_deadline` in [test_ratings.py](../reviews/tests/test_ratings.py); `test_hidden_review_is_not_listed` in [test_review_list_views.py](../reviews/tests/test_review_list_views.py) |
+| Reviews hold no personal data | No free text: stars and fixed positive tags only, so no name, phone or accusation, and no moderation or AI translation needed (`reviews.md` D2) | `Review`, `WorkerTag`, `EmployerTag` in [reviews/models.py](../reviews/models.py) | `test_tag_lists`, `test_tags_are_optional` in [test_models.py](../reviews/tests/test_models.py) (the model has no text field to test) |
+| The employer's public page does not tell where a worker worked (#39) | `/accounts/employers/<id>/` is open to everyone, like the job page: the card (no phone or email), the rating, the tag summary, the latest 5 reviews. A worker's review is signed "Worker" or "Crew of N", never by name. An id that is not an employer with a profile gives 404 | `EmployerDetailView` in [accounts/views.py](../accounts/views.py), `Review.author_label` in [reviews/models.py](../reviews/models.py) | `test_page_has_no_contact_details`, `test_page_of_someone_else_is_404` in [test_employer_detail_views.py](../accounts/tests/test_employer_detail_views.py); `test_crews_review_is_signed_crew_of_n` in [test_review_list.py](../reviews/tests/test_review_list.py) |
+| The work permit is not shown as checked (#39) | The worker card says "Allowed to work in Germany (confirmed by the worker)": the site checks no document (`ratings.md` D12) | [_worker_profile_card.html](../templates/accounts/_worker_profile_card.html) | `test_profile_card_shows_confirmation_without_date` in [test_work_permit_views.py](../accounts/tests/test_work_permit_views.py) |
+
 ## Email and address confirmation (#27, #81)
 
 | Protection | How | Code | Tests |
 |---|---|---|---|
 | Email only to a confirmed address | No email at all goes to an address whose owner has not confirmed it (`email_verified_at` empty): a typo or someone else's address gets nothing | `send` in [jobs/notifications.py](../jobs/notifications.py), `ConfirmedPasswordResetForm` in [accounts/forms.py](../accounts/forms.py) | `test_no_email_to_an_unconfirmed_employer`, `test_no_email_to_an_unconfirmed_worker` in [test_notifications.py](../jobs/tests/test_notifications.py); `test_password_reset_goes_only_to_a_confirmed_address` in [test_email_verified.py](../accounts/tests/test_email_verified.py) |
 | No contacts in emails | No phone, address or application message in any email; the person opens the site to see them | [jobs/notifications.py](../jobs/notifications.py), [templates/emails/](../templates/emails/) | `test_decision_emails_hold_no_contact_data`, `test_new_application_email_holds_no_contact_data` in [test_notifications.py](../jobs/tests/test_notifications.py) |
+| The emails of #37 and #38 hold no contacts either | "Cancelled" (#37): the job type, date and start time. "Rate the employer" (#38): the employer's name, the job type, the date and the link to the review page. Only to confirmed addresses with emails on, in the reader's language. No test checks "no contact data" for these two; the tests check the whole text | `notify_cancelled`, `notify_review_request` in [jobs/notifications.py](../jobs/notifications.py), [templates/emails/](../templates/emails/) | `test_cancelled_job_email`, `test_no_cancelled_email_when_the_worker_turned_them_off` in [test_job_cancel_filled.py](../jobs/tests/test_job_cancel_filled.py); `test_email_links_to_the_review_page`, `test_worker_who_turned_them_off_gets_no_email` in [test_review_email_views.py](../reviews/tests/test_review_email_views.py) |
 | A failed email breaks nothing and leaks nothing | The error is logged with ids and the exception class only, never the provider's error text (it can hold the address) | `send` in [jobs/notifications.py](../jobs/notifications.py) | `test_failed_email_is_logged_and_not_raised` in [test_notifications.py](../jobs/tests/test_notifications.py) |
 | A new account works only after its owner confirms the address (#81) | The account is inactive until the owner opens the emailed link and presses "Confirm email". The token is Django's reset token with its own salt and `email_verified_at` in the hash: nothing stored, works once, expires after 3 days (`PASSWORD_RESET_TIMEOUT`), and a password reset link does not confirm an address | `EmailVerificationTokenGenerator` in [accounts/tokens.py](../accounts/tokens.py), `VerifyEmailView` in [accounts/views.py](../accounts/views.py) | `test_token_works_only_until_the_address_is_confirmed`, `test_token_expires_after_the_password_reset_timeout`, `test_password_reset_token_is_not_a_confirmation_token` in [test_email_verification.py](../accounts/tests/test_email_verification.py); `test_link_works_only_once` in [test_email_verification_views.py](../accounts/tests/test_email_verification_views.py) |
 | Mail scanners cannot use up the link | Opening the link changes nothing; only the POST of the button confirms | `VerifyEmailView` in [accounts/views.py](../accounts/views.py) | `test_opening_the_link_only_shows_a_button` in [test_email_verification_views.py](../accounts/tests/test_email_verification_views.py) |
@@ -138,7 +179,7 @@ Everything goes to stdout, which Render shows in its Logs tab (`LOGGING` in
 
 | Protection | How | Code | Tests |
 |---|---|---|---|
-| Our events carry ids only | Registration, failed login (also on `/admin/`, through the `user_login_failed` signal), job created / cancelled, application created, accepted, rejected, cancelled, withdrawn, emails sent or failed: `user_id=…`, `job_id=…`, `application_id=…`. The email typed at a failed login is never logged (`unknown account`), nor an application's message | `log_failed_login` in [accounts/signals.py](../accounts/signals.py), [accounts/views.py](../accounts/views.py), [jobs/views.py](../jobs/views.py) | `test_unknown_email_is_logged_without_the_email`, `test_failed_admin_login_is_logged_too` in [accounts/tests/test_logging.py](../accounts/tests/test_logging.py); `test_applying_is_logged_with_ids_and_without_the_message` in [jobs/tests/test_logging.py](../jobs/tests/test_logging.py); `test_accepting_and_filling_are_logged_with_ids_only` in [test_accept_reject_views.py](../jobs/tests/test_accept_reject_views.py) |
+| Our events carry ids only | Registration, failed login (also on `/admin/`, through the `user_login_failed` signal), job created / cancelled / done (#37), application created, accepted, rejected, cancelled, withdrawn, review published (#38), emails sent or failed: `user_id=…`, `job_id=…`, `application_id=…`. The email typed at a failed login is never logged (`unknown account`), nor an application's message. Chat messages are not logged at all. The lines "Job done" and "Review published" have no test of their own | `log_failed_login` in [accounts/signals.py](../accounts/signals.py), [accounts/views.py](../accounts/views.py), [jobs/views.py](../jobs/views.py) | `test_unknown_email_is_logged_without_the_email`, `test_failed_admin_login_is_logged_too` in [accounts/tests/test_logging.py](../accounts/tests/test_logging.py); `test_applying_is_logged_with_ids_and_without_the_message` in [jobs/tests/test_logging.py](../jobs/tests/test_logging.py); `test_accepting_and_filling_are_logged_with_ids_only` in [test_accept_reject_views.py](../jobs/tests/test_accept_reject_views.py) |
 | Server errors reach the logs | Django prints a 500 with its traceback only with DEBUG on; our `LOGGING` sends it to stdout with DEBUG off too, once | `LOGGING` in [base.py](../config/settings/base.py) | `test_server_error_is_printed_to_stdout_with_debug_off`, `test_server_error_is_printed_once_with_debug_on`, `test_local_settings_do_not_change_the_production_levels` in [tests/test_logging.py](../tests/test_logging.py) |
 | Request lines without personal data | gunicorn's access log is off (its default line starts with the visitor's IP). Our own line: method, path without the query string, status and time — no IP, no User-Agent, no Referer. The password reset link is logged as its URL pattern `/accounts/reset/<uidb64>/<token>/`, also when another middleware answers first. Render's health check and static files are not logged | `GUNICORN_CMD_ARGS` in [render.yaml](../render.yaml), `RequestLogMiddleware` in [config/middleware.py](../config/middleware.py) (production only); `docs/specs/request-logging.md` | `test_render_starts_gunicorn_without_an_access_log` in [tests/test_request_logging_setup.py](../tests/test_request_logging_setup.py); `test_password_reset_link_is_logged_without_uid_and_token`, `test_reset_link_is_hidden_when_a_middleware_answers_first`, `test_user_agent_and_referer_are_not_logged`, `test_query_string_is_not_logged`, `test_render_health_check_is_not_logged` in [tests/test_request_logging.py](../tests/test_request_logging.py) |
 
@@ -149,21 +190,21 @@ Everything goes to stdout, which Render shows in its Logs tab (`LOGGING` in
 | The switcher changes only the language | POST only with the CSRF token; Django's `set_language` refuses a `next` on another site (no open redirect), and an unknown language code changes nothing. Since the switcher is a form on every page, guests now get the `csrftoken` cookie on every page | `LanguageView` in [accounts/views.py](../accounts/views.py); `docs/specs/i18n.md` D8 | `test_next_to_another_site_goes_home`, `test_switching_needs_a_post`, `test_unknown_language_changes_nothing` in [test_language_views.py](../accounts/tests/test_language_views.py) |
 | A logged-in user's language is in the profile, not only in the cookie | `preferred_language` can now be changed on the site (before only in the admin); signup stores the language in use; the profile wins over the cookie, so site and emails speak the same language on every device | `UserLanguageMiddleware` in [accounts/middleware.py](../accounts/middleware.py); `docs/specs/i18n.md` D1, D3 | `test_logged_in_switch_is_saved_in_the_profile`, `test_profile_language_wins_over_the_cookie` in [test_language_views.py](../accounts/tests/test_language_views.py); `test_middleware_switches_to_the_profile_language` in [test_language.py](../accounts/tests/test_language.py) |
 
-## Translation (#31–#34)
+## Translation (#31–#36)
 
-Job descriptions (#32) and application messages (#33) are translated by the Claude API
-(Anthropic). Specs: `docs/specs/ai-translation.md`, `job-translation.md`,
-`application-translation.md`.
+Job descriptions (#32), application messages (#33) and chat messages (#36) are translated by
+the Claude API (Anthropic). Specs: `docs/specs/ai-translation.md`, `job-translation.md`,
+`application-translation.md`, `chat-translation.md`.
 
 | Protection | How | Code | Tests |
 |---|---|---|---|
-| Only the text leaves, to one processor | Anthropic gets the text and nothing else: no email, name or id. When it leaves: a job description when it is saved (its language is detected, D11 of job-translation.md) and when a reader in another language opens the job; an application message when it is sent (detected and translated into the employer's language at once). Anthropic does not train on API data — a contract term, Commercial Terms section B "Customer Content" (<https://www.anthropic.com/legal/commercial-terms>), and the Privacy Center (<https://privacy.claude.com/en/articles/7996868-is-my-data-used-for-model-training>; the exceptions are feedback buttons and an opt-in, which we do not use); deleted within 30 days (up to 2 years if flagged for a policy violation). Both checked on 2026-11-10 | [translations/backends/claude.py](../translations/backends/claude.py), `JobApplyView` in [jobs/views.py](../jobs/views.py) | `test_users_text_is_data_inside_text_tags` in [test_claude_backend.py](../translations/tests/test_claude_backend.py) |
+| Only the text leaves, to one processor | Anthropic gets the text and nothing else: no email, name or id. When it leaves: a job description when it is saved (its language is detected, D11 of job-translation.md) and when a reader in another language opens the job; an application message when it is sent (detected and translated into the employer's language at once); a chat message when it is sent, twice: language detection and the translation into the other person's language (#36). Anthropic does not train on API data — a contract term, Commercial Terms section B "Customer Content" (<https://www.anthropic.com/legal/commercial-terms>), and the Privacy Center (<https://privacy.claude.com/en/articles/7996868-is-my-data-used-for-model-training>; the exceptions are feedback buttons and an opt-in, which we do not use); deleted within 30 days (up to 2 years if flagged for a policy violation). Both checked on 2026-11-10 | [translations/backends/claude.py](../translations/backends/claude.py), `JobApplyView` in [jobs/views.py](../jobs/views.py), `ChatView.post` in [chat/views.py](../chat/views.py) | `test_users_text_is_data_inside_text_tags` in [test_claude_backend.py](../translations/tests/test_claude_backend.py) |
 | The cache keeps no source text | A row is the SHA-256 of the source + language → translation | `Translation` in [translations/models.py](../translations/models.py) | `test_row_stores_the_hash_not_the_source_text` in [test_services.py](../translations/tests/test_services.py) |
-| Translations do not outlive their text | Deleting a job, an application or the account (`CASCADE`) deletes the cached translations of its text; editing a description deletes those of the old text. Application messages are never edited | `forget` in [translations/services.py](../translations/services.py); `forget_description`, `forget_message` in [jobs/models.py](../jobs/models.py); `JobEditView` in [jobs/views.py](../jobs/views.py) | `test_deleting_a_job_forgets_its_translations`, `test_deleting_the_employer_forgets_the_translations` in [test_descriptions.py](../jobs/tests/test_descriptions.py); `test_new_description_forgets_the_old_translations` in [test_job_translation_views.py](../jobs/tests/test_job_translation_views.py); `test_deleting_forgets_the_translations_of_the_message` in [test_application_translation.py](../jobs/tests/test_application_translation.py) |
+| Translations do not outlive their text | Deleting a job, an application, a chat message or the account (`CASCADE`) deletes the cached translations of its text; editing a description deletes those of the old text. Application and chat messages are never edited | `forget` in [translations/services.py](../translations/services.py); `forget_description`, `forget_message` in [jobs/models.py](../jobs/models.py); `forget_text` in [chat/models.py](../chat/models.py); `JobEditView` in [jobs/views.py](../jobs/views.py) | `test_deleting_a_job_forgets_its_translations`, `test_deleting_the_employer_forgets_the_translations` in [test_descriptions.py](../jobs/tests/test_descriptions.py); `test_new_description_forgets_the_old_translations` in [test_job_translation_views.py](../jobs/tests/test_job_translation_views.py); `test_deleting_forgets_the_translations_of_the_message` in [test_application_translation.py](../jobs/tests/test_application_translation.py) and in [test_chat_translation.py](../chat/tests/test_chat_translation.py) |
 | Logs never hold the text | The log line of a call, a failure or a skip has the language, a 12-character hash prefix, the token counts or the error class | [translations/services.py](../translations/services.py), [translations/backends/claude.py](../translations/backends/claude.py) | `test_each_call_is_logged_without_the_text` in [test_claude_backend.py](../translations/tests/test_claude_backend.py) and [test_claude_detect.py](../translations/tests/test_claude_detect.py); `test_failure_is_logged_without_the_text` in [test_errors_and_limits.py](../translations/tests/test_errors_and_limits.py) |
 | A prompt injection changes only the author's own translation | The text goes inside `<text>` tags and the prompt says it is data (ai-translation.md D9) | [translations/backends/claude.py](../translations/backends/claude.py) | `test_users_text_is_data_inside_text_tags` in [test_claude_backend.py](../translations/tests/test_claude_backend.py) |
 | A failing API never breaks a page | Network, timeout, 429, 529, a bad key or no credit: the reader gets the original with "Translation is not available right now", and nothing is cached (ai-translation.md D15) | `translate` in [translations/services.py](../translations/services.py) | `test_failed_translation_gives_the_original`, `test_failed_translation_is_not_cached` in [test_errors_and_limits.py](../translations/tests/test_errors_and_limits.py) |
-| The cost is capped | Texts over 1000 characters are not sent (job descriptions are limited to 1000 in the form); at most 300 new translations in 24 hours for the whole site; client timeout 10 s, 1 retry, `max_tokens` 1500. Outside the code: a $3/month spend limit in the Anthropic Console, auto-reload off | [translations/services.py](../translations/services.py), [translations/backends/claude.py](../translations/backends/claude.py) | `test_text_of_1001_characters_is_not_sent`, `test_new_text_is_not_sent_after_300_today`, `test_limits_are_1000_characters_and_300_a_day` in [test_errors_and_limits.py](../translations/tests/test_errors_and_limits.py); `test_description_of_1001_characters_is_refused` in [test_description_length.py](../jobs/tests/test_description_length.py) |
+| The cost is capped | Texts over 1000 characters are not sent (job descriptions are limited to 1000 in the form); at most 300 new translations in 24 hours for the whole site, shared by descriptions, applications and chat messages (#36); client timeout 10 s, 1 retry, `max_tokens` 1500. Outside the code: a $3/month spend limit in the Anthropic Console, auto-reload off | [translations/services.py](../translations/services.py), [translations/backends/claude.py](../translations/backends/claude.py) | `test_text_of_1001_characters_is_not_sent`, `test_new_text_is_not_sent_after_300_today`, `test_limits_are_1000_characters_and_300_a_day` in [test_errors_and_limits.py](../translations/tests/test_errors_and_limits.py); `test_description_of_1001_characters_is_refused` in [test_description_length.py](../jobs/tests/test_description_length.py) |
 | The key only on Render | `ANTHROPIC_API_KEY` lives only in Render's environment (`sync: false`); production does not start without it; locally and in tests the fake translator is used, so no text leaves the computer | [production.py](../config/settings/production.py), [render.yaml](../render.yaml) | `test_production_does_not_start_without_the_key`, `test_render_asks_for_the_key`, `test_local_settings_use_the_fake_translator` in [tests/test_translation_production.py](../tests/test_translation_production.py) |
 
 ## Django defaults we rely on
@@ -310,9 +351,6 @@ accepted on purpose, see [Known limitations](#known-limitations).
   only test accounts. With real users: count the invalid numbers, fix only the unambiguous ones
   in a data migration, ask users to correct the rest, never delete silently; a database
   constraint last.
-- **A filled job cannot be cancelled.** Cancelling works only for open jobs (`Job.cancel`); an
-  open job with accepted workers can be cancelled, and their applications become "cancelled",
-  but no email tells them. Revisit in #37, which changes what happens to filled jobs.
 - **Two applications at the same instant** by the same worker: the second gets a 500 from the
   unique constraint instead of a message; the data stays right (`docs/specs/application.md`
   D5).
@@ -326,8 +364,6 @@ accepted on purpose, see [Known limitations](#known-limitations).
 - **A phone that was seen cannot be taken back.** Hiding it after the job only stops the site
   from showing it. Phones given before #25 were saved without the "who sees it" hint (but shown
   to no one until then).
-- **Edit and cancel accept an open job that is already over.** #26 only hides the links;
-  revisit in #37.
 - **The address is hidden in text only.** A job photo can still show a house number, a facade,
   a face or a number plate (`docs/specs/job-photos.md` D32). Decided in #95 to keep it simple
   for now: no upload hint, no private photos.
@@ -336,14 +372,15 @@ accepted on purpose, see [Known limitations](#known-limitations).
   D30).
 - **Cancelled and past jobs keep a public page** with district, date and description, and their
   photos stay until the job or the account is deleted. Revisit with data minimisation in M7.
-- **Translated texts leave the EU (#31–#34).** Job descriptions and application messages go to
+- **Translated texts leave the EU (#31–#36).** Job descriptions, application messages and chat
+  messages go to
   Anthropic's API, which processes them in the US (no EU region). They can hold personal data,
   e.g. a name and a phone number. Legal basis: Anthropic's Data Processing Addendum with the EU
   Standard Contractual Clauses (GDPR Art. 46). Remaining risk: the contract does not stop US
   authorities from requesting data from a US company (why the EU court struck down Privacy
   Shield, Schrems II, 2020). What limits it: only the text is sent, no training, deleted within
   30 days, at most 1000 characters and 300 new translations a day, no source text in our
-  database or logs (see [Translation](#translation-3134)). Missing before a real launch: the
+  database or logs (see [Translation](#translation-3136)). Missing before a real launch: the
   privacy page must name Anthropic and the transfer to the US (GDPR Art. 13, #43); possibly an
   EU-hosted translator (Claude on AWS Bedrock in Frankfurt, or DeepL). Not done now: a new
   dependency and account, and the project has test data only.
@@ -352,6 +389,22 @@ accepted on purpose, see [Known limitations](#known-limitations).
   Two texts that are the same (two jobs, or two "Hallo" messages) share their cached
   translations, so deleting one forgets them for both (ai-translation.md D3). Applications sent
   before #33 have no language and are translated for every reader (application-translation.md
-  D10).
+  D10). Chat messages share the daily limit of 300 with the other texts, so a busy chat day
+  can use it up for everyone (`docs/specs/chat-translation.md`).
+- **"Done" is the employer's word (#37).** The app cannot know whether the work happened, so
+  an employer can mark done work that did not take place; the reviews of #38 are the only
+  check, and only if the workers write one.
+- **A filled job whose work did not happen stays "Filled" for ever** if it was not cancelled
+  before its day ended (#37, `docs/specs/job-done.md`).
+- **Ratings do not show everything (#38).** A late cancellation by either side leaves no trace
+  in the ratings (an idea for later: `docs/specs/reviews.md` D1, option B). Two users who know
+  each other can rate each other 5★ for work that did not happen.
+- **A new review shows up late (#39):** only when both sides have rated, or 14 days after
+  "done" — the price of no revenge ratings.
+- **The employer's page is public (#39):** anyone can see a company's latest ratings with the
+  job types and dates of its done jobs (`docs/specs/ratings.md` D4).
+- **Chat (#35):** no limit on how many messages someone sends; an open chat asks the server
+  every 4 seconds, also in a background tab (`docs/specs/chat.md` D11, D13). Messages are
+  stored in plain text: whoever has database access can read them.
 - **Only the phone format is checked:** "+49 (0)151 …" passes, though some phones cannot dial
   the "(0)". Decided not to add a rule for it.
