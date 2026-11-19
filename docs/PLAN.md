@@ -25,7 +25,7 @@ written issue by issue.
 | Map | **Leaflet + OpenStreetMap**, Nominatim geocoding | Free, no API keys |
 | Job photos | **Supabase Storage** (the same project as the database, Frankfurt) via `django-storages` S3 + `boto3`; **Pillow** for validation, resizing and EXIF stripping | The Render disk is wiped on every deploy. Decided in #64: Cloudflare R2 rejected, it needs a payment card even on the free tier. The database stores only paths, so moving later means new env values and copying the files. Production needs six env variables (`MEDIA_S3_*`, `MEDIA_PUBLIC_URL`) and does not start without them; the app stays stateless (can run several instances) |
 | Email | **Brevo** (France, EU; free plan 300 emails a day, no card) through its HTTP API with `django-anymail` | Decided in #27. Not SMTP: Render's free plan blocks the ports 25, 465 and 587 since 2025-09-26. Without our own domain the sender is the project's Gmail address, shown "via brevosend.com". Locally and in tests the console backend: nothing leaves the computer |
-| Chat | HTMX polling every 3–5 s | Simpler than WebSockets, enough for the MVP |
+| Chat | HTMX polling every 4 s (#35) | Simpler than WebSockets, enough for the MVP. "Nothing new" is an empty 204, so a quiet chat renders no page (`docs/specs/chat.md` D11, D13). WebSockets stay a stretch goal (#54) |
 | Tests / quality | **pytest-django**, **ruff**, **Allure Report 3** | Decided in #89: an Allure report (GitHub Pages) groups tests by level and by story, with a readable title and steps from each test's docstring, like test cases in Jira. Issue titles come from GitHub at CI time |
 | CI | **GitHub Actions**: ruff, pytest, coverage on every PR; required to merge into `main` | |
 | Hosting | **Render, Frankfurt region** (web service), **gunicorn**, static files via **WhiteNoise**; `render.yaml` Blueprint | Auto-deploy from `main` after CI is green, data stays in the EU (GDPR). Free plans only, also for the defense — a learning project. The server sleeps after 15 min without traffic (first request then takes up to a minute) |
@@ -70,8 +70,12 @@ written issue by issue.
   source text + language → translated text; the source text itself is not stored. Rows are
   deleted by `forget(text)` when their job or application is deleted or the description
   changes (#32, #33).
-- **Message**: chat within an accepted application.
-- **Review**: rating 1–5 + text, after status done, in both directions.
+- **Message** (#35, `docs/specs/chat.md`): application, sender, text (≤ 1000 characters),
+  `original_language` (#36), `created_at`, `read_at` (when the other person read it); written
+  only while the application shows contacts, deleted with the application.
+- **Review** (#38, `docs/specs/reviews.md`): application, author, rating 1–5 + optional
+  positive tags from a fixed list, no text (D2); one per side, within 14 days of the job's
+  `done_at` (#37); hidden until the other side rates or the 14 days are over.
 
 In the MVP a crew is a single account with a `team_size` field; full crews with members are a stretch goal.
 
@@ -82,7 +86,7 @@ BauHelfer/
 ├── config/            # Django settings
 ├── accounts/          # User, profiles, registration
 ├── jobs/              # Job, Application; shown_text.py: who sees a translation (#33)
-├── chat/              # Message
+├── chat/              # Message; context processor for the unread badge (#35)
 ├── reviews/           # Review
 ├── translations/      # Claude API service + cache: translate, translate_many, forget
 ├── templates/  static/  locale/
@@ -99,7 +103,7 @@ BauHelfer/
 `backend`, `frontend`, `database`, `i18n`, `ai`, `legal`, `devops`, `testing`, `docs`, `stretch`
 (+ default `bug` and `enhancement`; other default labels are removed).
 
-## Milestones and issues (95)
+## Milestones and issues (96)
 
 Each issue has a **Description** and a **Done when…** checklist. Numbers are GitHub issue numbers;
 the status of each issue lives on the board, not here.
@@ -179,11 +183,16 @@ the status of each issue lives on the board, not here.
 - #97 Docs sync — M5 (`docs`)
 
 ### M6 · Chat & Reviews — due 15 Nov
-- #35 Chat per accepted application (HTMX polling) (`backend`, `frontend`)
+- #35 Chat per accepted application (HTMX polling) (`backend`, `frontend`) — also a "Chats"
+  page and the unread count in the menu
 - #36 Auto-translation of chat messages (`ai`)
-- #37 Mark job as done (`backend`)
-- #38 Reviews and ratings in both directions (`backend`, `frontend`)
-- #39 Show rating on profiles and applications (`frontend`)
+- #37 Mark job as done (`backend`) — also: a filled job can be cancelled, with an email to the
+  workers who lose their place
+- #38 Reviews and ratings in both directions (`backend`, `frontend`) — also the "Rate the
+  employer" email, "Rate the workers" on "My jobs", and a worker lands on "My applications"
+  after login
+- #39 Show rating on profiles and applications (`frontend`) — also the employer's public page
+  with the latest reviews
 - #40 E2E tests (Playwright) and coverage review for M6 (`testing`)
 - #98 Docs sync — M6 (`docs`)
 
@@ -225,6 +234,8 @@ the status of each issue lives on the board, not here.
 - #143 Choose how many workers of a crew to accept (`backend`, `stretch`)
 - #157 Keep the application state rules in one place (`can_cancel`, `can_decide`) (`backend`,
   `stretch`)
+- #165 Chat: a system line when the employer cancels (`backend`, `frontend`, `stretch`) —
+  from #35 (`docs/specs/chat.md` D2)
 
 ## Testing approach
 
@@ -267,15 +278,23 @@ Translations are done inside each UI ticket, not in one late batch.
   meaning changed (D1, D12). Plural strings need all the language's forms: RU / UK / PL have
   4, RO 3 (D14). Known limitation: no native speaker has reviewed DE / PL / RO / TR.
 - **Long translations:** a new badge or button label must fit at 360 px in German and
-  Romanian, the longest languages; long words may hyphenate (`hyphens-auto`). No test guards
-  it yet: the E2E check is planned in #40 (`docs/specs/translations.md` D15–D17).
+  Romanian, the longest languages; long words may hyphenate (`hyphens-auto`)
+  (`docs/specs/translations.md` D15–D17). Since #40 an E2E test opens every page a guest, a
+  worker and an employer can open in German at 360 px (`tests/e2e/test_german_fits_a_phone.py`);
+  the test was run once locally in Romanian too. Romanian is the tightest in the guest header: "Autentificare"
+  and "Înregistrare" end at 354 px, so they fit a phone but not a 360 px window with a classic
+  15 px scrollbar. **Revisit when** the header gets another item for guests, a translation of
+  "Log in" / "Register" gets longer, or we support phones narrower than 360 px.
 
 User content (job descriptions, application and chat messages) is translated by the Claude API
 (#31–#34, #36), not by `.po` files. One rule decides who sees the original and who a
 translation, `shown_text()` in `jobs/shown_text.py` (#33): the author and a reader in the
 text's language get the original without an API call, everyone else a translation with the
 label "Translated by AI" and a "Show original" toggle (`templates/jobs/_translation_label.html`).
-Each kind of text has a small wrapper (`description_for`, `messages_for`; #36 adds one for chat).
+Each kind of text has a small wrapper (`description_for`, `messages_for`, and
+`chat_messages_for` in `chat/shown_text.py`, #36). The rule stays in `jobs`, which `chat` imports
+(`docs/specs/application-translation.md` D5); if a third app needs it, it could move to
+`translations/`.
 Pages that list many texts use `translate_many()`: the cached translations of all of them in one
 query.
 
@@ -308,7 +327,7 @@ Board: [BauHelfer](https://github.com/users/AndrewKchn/projects/1), columns Todo
 ## Verification
 
 - `gh label list` — 12 labels; `gh api repos/AndrewKchn/BauHelfer/milestones --jq '.[].title'` — 9 milestones.
-- `gh issue list --state all --limit 300 --json number --jq length` → 95; every issue has a
+- `gh issue list --state all --limit 300 --json number --jq length` → 96; every issue has a
   milestone and a label.
 - `gh project item-list 1 --owner AndrewKchn` — all issues are on the board, each non-Stretch
   issue has a Sprint.

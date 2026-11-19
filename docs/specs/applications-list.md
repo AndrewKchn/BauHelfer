@@ -202,6 +202,8 @@ D16. **The owner sees the list instead of the employer card** (mine, 2026-10-25)
      a worker who applied must not see the other applicants.
 D17. **"← My jobs" at the top for the owner** (Claude's default, accepted, 2026-10-25): the
      owner comes from "My jobs" and goes back there.
+     **Changed by #38** (`docs/specs/reviews.md` R16, D17): a worker who applied sees
+     "← My applications" instead of "← Jobs".
 D18. **No "Applications" link on "My jobs"** (mine, 2026-10-25): the card's title already
      opens the job page with the list. #20 adds the number of applications (done:
      `docs/specs/my-jobs.md` R6).

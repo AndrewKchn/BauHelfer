@@ -35,7 +35,7 @@ theme, full page, test data only. A ticket that changes a screen overwrites its 
 | --- | --- | --- | --- |
 | <img src="post-a-job.png" width="180" alt="Post a job"> | <img src="my-jobs.png" width="180" alt="My jobs + applications"> | <img src="chat.png" width="180" alt="Chat, dark mode"> | <img src="worker-profile.png" width="180" alt="Worker profile + review"> |
 | #16, #17, #64 | #20, #23, #24 | #35, #36 | #38, #39 |
-| **Built:** <img src="built/post-a-job.png" width="180" alt="Post a job as built"> | <img src="built/my-jobs.png" width="180" alt="My jobs as built"> <img src="built/job-applications.png" width="180" alt="Applications on the job page as built"> | not built yet | not built yet |
+| **Built:** <img src="built/post-a-job.png" width="180" alt="Post a job as built"> | <img src="built/my-jobs.png" width="180" alt="My jobs as built"> <img src="built/job-applications.png" width="180" alt="Applications on the job page as built"> | <img src="built/chat.png" width="180" alt="Chat as built"> | <img src="built/worker-profile.png" width="180" alt="Worker profile as built"> |
 
 ## Decided differently
 
@@ -52,8 +52,8 @@ theme, full page, test data only. A ticket that changes a screen overwrites its 
 | Jobs list | phone only | on laptops (from 1024 px) the filters are a column on the left | #18 (D13) |
 | Jobs list | "No photo" tile | a hard-hat icon with "No photo" | #64 (D26) |
 | Job detail | "1 of 3 workers found" | "Needs 3 workers" until someone is accepted, then "1 of 3 workers found" | #19, #24 (`docs/specs/accept-reject.md` D10) |
-| Job detail | "Translated by AI" | not shown until the translations | #19 (#32) |
-| Job detail | the employer's rating | not shown until the reviews | #19 (#39) |
+| Job detail | "Translated by AI" | built in #32: "Translated by AI" with a "Show original" toggle | #19, #32 |
+| Job detail | the employer's rating | built in #39: "★ 4,7 (3 reviews)", the tag summary and a link "3 reviews →" to the employer's page | #19, #39 (`docs/specs/ratings.md` D4) |
 | Job detail | "Workers I bring" with "−" / "+" | a number field | #22 (`docs/specs/application.md` D4) |
 | Job detail | a big photo box | without photos a low strip instead | #19 (D11) |
 | Job detail | phone only | the photo is 16 : 9 on a laptop | #19 (D11) |
@@ -66,10 +66,22 @@ theme, full page, test data only. A ticket that changes a screen overwrites its 
 | My jobs | "Accept 2" | "Accept 2", or "Accept 1 of 2" when fewer places are left | #24 (D1) |
 | My jobs | "Accepting 2 fills the job: you need only 1 more." | "Accepting fills the job: the other pending applications will be closed." | #24 (D9) |
 | My jobs | "Workers found 2 / 3" bar in the card | the bar on the owner's job page | #24 (D11, D19) |
-| My jobs | "Crew of 2 · ★ 4,7 (9) · work permit ✓" | "2 workers" in bold; no crew size, no "work permit ✓" | #24 (D22, D23) |
+| My jobs | "Crew of 2 · ★ 4,7 (9) · work permit ✓" | "2 workers" in bold; no crew size, no "work permit ✓"; since #39 "★ 4,7 (9)" on the next line | #24 (D22, D23), #39 (`docs/specs/ratings.md`) |
 | My jobs | no way to take back an acceptance | "Cancel" on an accepted application | #24 (D2, D26) |
+| My jobs | "Mark as done" | the button on the card in the "Filled" and "Past" tabs | #24, #37 (`docs/specs/job-done.md`) |
+| My jobs | — | "Rate the workers" on a done card while someone is left to rate | #38 (`docs/specs/reviews.md` D15) |
 | My applications | one list with badges | tabs by status, as "My jobs"; no badge on the card, a photo instead | #26 (`docs/specs/my-applications.md` D1, D13) |
-| My applications | "Open chat" | none until the chat | #26 (#35) |
-| My applications | "Done", "Rate the employer" | none; accepted stays "Accepted" | #26 (#37–#39, D3) |
+| My applications | "Open chat" | built in #35: a "Chat" button on the card | #26, #35 |
+| My applications | "Done", "Rate the employer" | a "Done" tab (#37); "★ Rate the employer" in orange → `btn-primary`, "Rated ★4" after the review (#38) | #26 (D3), #37, #38 (`docs/specs/reviews.md` R10, D11) |
 | My applications | green banner "… accepted your application" | none; an email instead | #26 (#27) |
 | My applications | — | a "Withdraw" button and a "Past" tab | #26 (D3, D5) |
+| Worker profile + review | the "Rate the work" form with a comment on the profile | a separate review page with stars and tags, no comment | #38 (`docs/specs/reviews.md` D2, D4) |
+| Worker profile + review | five stars | "★ 4,7 (9 reviews)" | #39 (`docs/specs/ratings.md` D10) |
+| Worker profile + review | "✓ Confirmed: allowed to work in Germany" | "✓ Allowed to work in Germany (confirmed by the worker)" | #39 (D12) |
+| Worker profile + review | "new, no reviews" | "No reviews yet" | #39 (D7) |
+| Worker profile + review | a review with a comment | a review with tags | #38, #39 (`reviews.md` D2) |
+| Chat, dark mode | "Application accepted · Tue 20 Oct" | a date line per day | #35 (`docs/specs/chat.md` D8) |
+| Chat, dark mode | a send icon | a "Send" button | #35 |
+| Chat, dark mode | "translated from Ukrainian · original" in the footer | under the bubble "Translated from Ukrainian by AI · Show original", as for descriptions and applications | #36 (`docs/specs/chat-translation.md` D7) |
+| Chat, dark mode | "New messages load every few seconds" | "New messages appear every few seconds." | #35 (D14) |
+| Chat, dark mode | — | a "Chats" page and an unread count in the menu | #35 (D16) |

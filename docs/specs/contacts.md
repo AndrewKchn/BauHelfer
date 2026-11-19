@@ -81,6 +81,8 @@ D1. **The phone only, and only if the person gave one; never the email** (mine, 
     else through the chat (B, my first idea: there is no chat before #35, and the chat of
     #35 is seen only while the page is open, so a worker who is late at 06:50 could not
     reach anyone). **Revisit when** #35 brings the chat: if it can notify, the phone can go.
+    **Kept by #35** (`docs/specs/chat.md` D9): the chat sends no notifications, so a late
+    worker still needs the phone.
 D2. **A cancelled application shows no contacts** (mine, 2026-10-29): after the employer took
     the worker off, neither side needs them.
 D3. **Cancelling a job cancels its accepted applications** (mine, 2026-10-29): otherwise they
@@ -94,6 +96,9 @@ D4. **A past job hides the contacts from the day after it ends, computed, withou
     the job starts (the "Past" badge: the call at 06:50 fails); N days after (a week of
     data shown for nothing). **Revisit when** #37 adds "done", or a question about payment
     the day after needs the phone (the chat of #35 may answer it).
+    **Kept by #37:** "done" did not change when the contacts are hidden (`Application.shows_contacts`
+    is unchanged). After the job the chat of #35 stays readable, but takes no new messages
+    (`docs/specs/chat.md` D1).
 D5. **One rule in one place: `Application.shows_contacts`** (Claude's default, accepted):
     the job page and #26 ask the same property, and the unit tests check it without HTTP.
     The view decides `show_address`, not the template (job-detail.md D4).

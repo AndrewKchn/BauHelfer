@@ -159,7 +159,12 @@ check blocks the merge:
   reload `config/urls.py` (`tests/test_debug_toolbar_page.py`, #135).
 - **Two users at once in E2E** (#28): each gets its own
   `browser.new_context(viewport=PHONE, has_touch=True)` with its own cookies, so the worker and
-  the employer stay logged in side by side.
+  the employer stay logged in side by side. In #40 the two phones also speak two languages
+  (Ukrainian worker, English employer) and chat
+  ([test_chat_review_flows.py](../tests/e2e/test_chat_review_flows.py)).
+- **Waiting for HTMX polling without `sleep`** (#40): Playwright's `expect` retries until the
+  new message appears; a JavaScript flag set on the page before proves the page was not
+  reloaded.
 - **A finger swipe in E2E** (#28): Playwright has none; `swipe()` in
   `tests/e2e/test_application_flows.py` sends touch events through Chromium's DevTools protocol
   (`Input.dispatchTouchEvent`). `Input.synthesizeScrollGesture` did not move the strip.
@@ -174,7 +179,9 @@ check blocks the merge:
   ([test_job_flows.py](../tests/e2e/test_job_flows.py), #21) and all application flows
   ([test_application_flows.py](../tests/e2e/test_application_flows.py), #28) run on a 360 px
   phone and check
-  that no page scrolls sideways; only the employer signup runs on a laptop screen. The
+  that no page scrolls sideways; since #40 every page a guest, a worker and an employer can
+  open is also checked in German, the longest language
+  ([test_german_fits_a_phone.py](../tests/e2e/test_german_fits_a_phone.py)); only the employer signup runs on a laptop screen. The
   mockups in `docs/mockups/` are 390 px wide, and so are the built screenshots next to them;
   checks stay at 360 px.
 - **Testing a data migration** (`test_migration_keeps_existing_confirmations` in
@@ -196,7 +203,17 @@ check blocks the merge:
   ([test_job_flows.py](../tests/e2e/test_job_flows.py), #21); the status tabs in
   `templates/_status_tabs.html` (tap, finger swipe, height) and the `onsubmit="return
   confirm(…)"` questions before Reject, Cancel and Withdraw
-  ([test_application_flows.py](../tests/e2e/test_application_flows.py), #28).
+  ([test_application_flows.py](../tests/e2e/test_application_flows.py), #28) and before Mark as
+  done (#37, in [test_chat_review_flows.py](../tests/e2e/test_chat_review_flows.py)); the chat's
+  polling and "Show original" ([test_chat_review_flows.py](../tests/e2e/test_chat_review_flows.py),
+  #40) and the "Show original" toggles of descriptions and applications
+  ([test_translation_toggles.py](../tests/e2e/test_translation_toggles.py), #40).
+- **What HTMX sends in a browser.** The Django test client runs no JavaScript, so an HTMX
+  element that is right in the HTML can still send the wrong request. In #36 every test passed,
+  and a manual check found that "Show original" did nothing: HTMX adds the `hx-vals` of every
+  parent to a request, so the toggle inside the polled message list also sent `?after=<id>`
+  and got the empty 204 of "nothing new" (`docs/specs/chat.md` R13). An HTMX element inside
+  another HTMX element needs a look in the browser or an E2E test (#40 has one).
 - **The `@override` rule** (`CLAUDE.md`). A one-time script found all 20 overriding methods
   in #125; no test checks new ones. Revisit when we add a type checker (it would flag
   `@override` on mixin methods) or the rule is broken in review.
