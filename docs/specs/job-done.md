@@ -53,6 +53,8 @@ R6. A done job is in the "Done" tab of "My jobs" (exists since #20). An open job
 R7. "My applications": an accepted application of a done job is in a new tab "Done", right
     after "Accepted", in the colour of the done jobs (`badge-secondary`) (D6).
 R8. No email when a job is marked done (D7).
+**Changed by #38** (`docs/specs/reviews.md` D5): every accepted worker gets the "Rate the
+employer" email.
 R9. Edit, cancel, adding and deleting a photo take only open jobs that are not over
     (`is_over`); one that is over gives 404 (D9).
 
@@ -136,6 +138,8 @@ D6. **The worker gets a "Done" tab** (Claude's default, accepted): "Rate the emp
     step of an accepted application.
 D7. **No email when a job is done** (Claude's default, accepted): the worker has nothing to do
     until #38. **Revisit when** #38 asks the worker for a review.
+    **Changed by #38** (`docs/specs/reviews.md` D5): every accepted worker gets the "Rate the
+    employer" email when the job is marked done.
 D8. **The button: `btn-primary`, right of the card's links** (Claude's default, accepted), as
     on the mockup.
 D9. **Edit, cancel and photos refuse a job that is over** (Claude's default, accepted; asked
@@ -147,6 +151,9 @@ D10. **A filled job can be cancelled, and every worker who loses their place get
      recommendation: two clicks round it, but no email); cancelling without an email (B).
      The chat message about it and rating a cancelled job are ideas for #35 and #38.
      Changes accept-reject.md D18.
+     **Answered by #35 and #38:** the chat line is left out for now (`docs/specs/chat.md` D2,
+     issue #165); rating a late cancellation is kept as an idea (`docs/specs/reviews.md` D1,
+     option B).
 D11. **A fixed text, without a reason** (mine, 2026-11-12; option a): two templates, no form.
      Rejected for now: a reason the employer writes (b: a form field, stored, translated
      by Claude); kept as an improvement for the chat, #35.

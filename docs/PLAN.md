@@ -281,7 +281,7 @@ Translations are done inside each UI ticket, not in one late batch.
   Romanian, the longest languages; long words may hyphenate (`hyphens-auto`)
   (`docs/specs/translations.md` D15–D17). Since #40 an E2E test opens every page a guest, a
   worker and an employer can open in German at 360 px (`tests/e2e/test_german_fits_a_phone.py`);
-  Romanian was checked once by hand. Romanian is the tightest in the guest header: "Autentificare"
+  the test was run once locally in Romanian too. Romanian is the tightest in the guest header: "Autentificare"
   and "Înregistrare" end at 354 px, so they fit a phone but not a 360 px window with a classic
   15 px scrollbar. **Revisit when** the header gets another item for guests, a translation of
   "Log in" / "Register" gets longer, or we support phones narrower than 360 px.

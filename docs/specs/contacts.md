@@ -96,6 +96,9 @@ D4. **A past job hides the contacts from the day after it ends, computed, withou
     the job starts (the "Past" badge: the call at 06:50 fails); N days after (a week of
     data shown for nothing). **Revisit when** #37 adds "done", or a question about payment
     the day after needs the phone (the chat of #35 may answer it).
+    **Kept by #37:** "done" did not change when the contacts are hidden (`Application.shows_contacts`
+    is unchanged). After the job the chat of #35 stays readable, but takes no new messages
+    (`docs/specs/chat.md` D1).
 D5. **One rule in one place: `Application.shows_contacts`** (Claude's default, accepted):
     the job page and #26 ask the same property, and the unit tests check it without HTTP.
     The view decides `show_address`, not the template (job-detail.md D4).

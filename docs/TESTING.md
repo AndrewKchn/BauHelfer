@@ -203,7 +203,8 @@ check blocks the merge:
   ([test_job_flows.py](../tests/e2e/test_job_flows.py), #21); the status tabs in
   `templates/_status_tabs.html` (tap, finger swipe, height) and the `onsubmit="return
   confirm(…)"` questions before Reject, Cancel and Withdraw
-  ([test_application_flows.py](../tests/e2e/test_application_flows.py), #28); the chat's
+  ([test_application_flows.py](../tests/e2e/test_application_flows.py), #28) and before Mark as
+  done (#37, in [test_chat_review_flows.py](../tests/e2e/test_chat_review_flows.py)); the chat's
   polling and "Show original" ([test_chat_review_flows.py](../tests/e2e/test_chat_review_flows.py),
   #40) and the "Show original" toggles of descriptions and applications
   ([test_translation_toggles.py](../tests/e2e/test_translation_toggles.py), #40).
