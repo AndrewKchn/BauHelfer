@@ -3150,3 +3150,60 @@ mutations), moved the shared E2E helpers to `tests/e2e/helpers.py`, measured E2E
   text appears, and a JavaScript flag on the page proves it was not reloaded.
 - Why 100 % coverage does not mean everything is tested: templates and JavaScript are not
   counted, and only a mutation check shows that a test really checks something.
+
+## 2026-11-19 · #98 Docs sync — M6
+
+**Task given to AI:** run `/sprint-docs` for M6: handle the 20 comments collected in #98 during
+#35–#40 and check `docs/PLAN.md`, `CLAUDE.md`, `docs/SECURITY.md`, `docs/TESTING.md`,
+`docs/mockups/README.md`, the specs and `README.md` against the board and the code.
+
+**AI helped:** drafted a table "comment → proposal → why" and the changes per doc, then made
+6 doc commits after my answers. SECURITY.md got two new sections ("Chat (#35, #36)" and
+"Done, reviews and ratings (#37–#39)"), chat messages and reviews under "Personal data", chat
+in "Translation (#31–#36)", and 6 new known limitations; the two limitations #37 fixed were
+removed. A script checked that every linked file and test name exists. Checking against the
+code found two gaps no comment named: the log lines "Job done" and "Review published" have no
+test, and no test checks that the #37 / #38 emails hold no contacts; both are written down as
+they are. It added 9 "Changed by / Kept by / Answered by" pointers to older specs, created
+Stretch issue #165 for the chat line idea and replied under each #98 comment.
+
+**AI failed:** a reviewer agent that saw only the comments and the diff, not the first AI's
+conclusions, found 9 real errors, fixed in one commit (e67f7d7):
+- The first pass checked only its new lines against the code. Older text that M6 had made
+  false stayed: "cancel finds only open jobs" (since #37 also filled ones), the work-permit
+  wording before #39, and `job-done.md` D7 / R8 "no email when a job is done", although
+  `reviews.md` D5 itself says "Changes job-done.md D7".
+- Language detection is not counted in the 300 translations a day and the chat has no message
+  limit, so only the Console's spend limit caps a flood of messages; the draft suggested the
+  chat was capped.
+- Smaller ones: "the tests check the whole text" (they check parts), a link to the wrong file
+  (`chat_writable` is in `jobs/models.py`), the "Mark as done" `confirm()` missing in two lists,
+  "Romanian was checked by hand" where my comment said the E2E test was run in Romanian, two
+  missing pointers.
+
+**My part:**
+- I asked for a separate agent to review the docs after the first AI had checked them: a
+  second look without the first AI's conclusions. It found the 9 errors above.
+- I added the chat message limit as a candidate to #91 (login rate limiting): the same counter
+  in Django's cache could cap messages too.
+- Of the two ideas from #35 and #38, the chat line "Cancelled by the employer" became Stretch
+  issue #165, and rating a late cancellation stays in `reviews.md` D1 without an issue, as
+  recommended: the chat line is the one I want first, and the rating needs new fields and
+  one-way reviews, too big before the defense.
+- A course task asks the README to answer what the project does, how to run it and why it was
+  built this way, in six sections. I decided to do it once the project is finished, in #50,
+  not now, so it covers M7 and M8 too, and the first screen must stay short.
+- My idea: ADRs as a summary of the specs (374 decisions in 28 specs, the big ones hard to
+  find). Written into #50: ~8 short ADRs that link down to the spec decisions, so there is no
+  second source of truth.
+- I kept the PLAN line of #50 under its old title: #50 will update it.
+- I accepted the defaults for SECURITY (two sections by feature) and for the test gaps (only
+  written down): #98 is a docs ticket, so code and tests do not change in it.
+
+**Learned:**
+- How an ADR differs from our specs and the PLAN Stack table: one short record per decision
+  that is hard to undo and touches many tickets, with its consequences, linking down to the
+  spec decisions.
+- Why checking only the new lines is not enough: a sprint also makes old text false, and two
+  facts that are each written down (detection outside the limit, no chat message limit) can
+  be a risk only together.
