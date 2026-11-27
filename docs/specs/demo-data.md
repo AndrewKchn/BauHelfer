@@ -1,8 +1,8 @@
 # Spec: demo data and the "test data only" footer (#47)
 
-Status: **agreed**. I decided D1–D3 and D15 on 2026-11-27 (my criteria: the demo must not fail
-in front of the jury, simple code, no secrets or personal data in the chat or the repo). D4–D14 are
-Claude's defaults, which I accepted on 2026-11-27, before any tests.
+Status: **agreed**. I decided D1–D3, D15 and D16 on 2026-11-27 (my criteria: the demo must
+not fail in front of the jury, simple code, no secrets or personal data in the chat or the
+repo). D4–D14 are Claude's defaults, which I accepted on 2026-11-27, before any tests.
 
 Marks: **(mine, date)** — my decision; **(Claude's default, accepted)** — Claude's default
 that I accepted; **(Claude's recommendation)** — what Claude advised where I chose
@@ -84,15 +84,14 @@ backup (#46).
 
 ## Acceptance criteria (→ tests)
 
-AC1. After `seed_demo` there are 3 employers and 5 workers on `@demo.example`, with profiles
-     as in R3, one worker with `team_size` 3.
-AC2. There are at least 8 open jobs dated after today and at least 3 done jobs; the open jobs
-     use at least 4 districts and at least 4 `original_language` values.
-AC3. Every demo worker that worked on a done job has at least one review from the employer;
-     at least one employer has a review from a worker.
+AC1. After `seed_demo` there are demo employers and workers, open jobs all dated after today,
+     a done job, and a demo worker whose rating counts at least one review (D16).
+AC2, AC3. Merged into AC1: the exact numbers, districts and languages of R3 are checked by
+     looking at the site in #49, not by tests (D16).
 AC4. Running the command twice gives the same numbers as running it once (no duplicates).
-AC5. A real user, a superuser and an `@example.com` user, with their own job, still exist
-     after the command, and so does that job.
+AC5. A real user, a superuser, an `@example.com` user with their own job, and a user on
+     `@olddemo.example` (the same ending without the `@`) still exist after the command, and
+     so does that job.
 AC6. Every demo account can log in with the given password; `email_verified_at` is empty and
      `is_active` is True.
 AC7. No email is sent and no `Translation` row is created by the command.
@@ -100,6 +99,9 @@ AC8. When creating fails half-way, no demo account is left (old ones deleted, no
      → the transaction is rolled back to the state before).
 AC9. Without `--password` the command asks for the password (`getpass` is called).
 AC10. The footer line is on a page built on `base.html`, in English and in German.
+
+Tests: `accounts/tests/test_seed_demo.py` (AC1, AC4-AC9) and
+`tests/test_base_layout.py` (AC10).
 
 ## Limitations
 
@@ -161,3 +163,8 @@ D15. **Mentors running the project locally use the same path as the demo** (mine
      creating a ready pair with confirmed addresses (more code, and run against production
      by mistake it would make Brevo send to `@demo.example`); a video only (mentors would
      not check anything themselves).
+D16. **Eight tests, not thirteen** (mine, 2026-11-27). Tests guard what can do harm or break
+     the demo: deleting other accounts, emails, translations, the transaction, the password.
+     The amounts of R3 (how many accounts, districts, languages) I check by eye on the site.
+     Rejected: one test per item of R3 (13 tests, they break on every change of the content
+     and protect nothing); no tests (the command deletes users on the live database).
