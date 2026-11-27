@@ -26,6 +26,20 @@ uv run python manage.py compilemessages --ignore .venv   # after editing locale/
                                          # commit .po and .mo together (tests check both)
 uv run pytest                            # all tests, E2E included
 uv run ruff check . && uv run ruff format .
+
+# Manual backup of the live database (#46). Our tables only (schema public); photos are in
+# Supabase Storage, not in it. Run `read` alone, then paste DATABASE_URL (not shown).
+# The dump holds personal data: keep it outside the repo.
+read -rs DB_URL && export DB_URL
+mkdir -p ~/bauhelfer-backups && docker run --rm -e DB_URL postgres:17 sh -c \
+  'pg_dump --format=custom --schema=public --no-owner --no-privileges --dbname="$DB_URL"' \
+  > ~/bauhelfer-backups/bauhelfer-$(date +%F).dump; unset DB_URL
+# Restore test into a separate local database, never into bauhelfer. The dump creates
+# schema public itself, so the empty one goes first. Drop it afterwards: dropdb.
+docker compose exec -T db createdb -U bauhelfer bauhelfer_restore
+docker compose exec -T db psql -U bauhelfer -d bauhelfer_restore -c "DROP SCHEMA public CASCADE"
+docker compose exec -T db pg_restore -U bauhelfer --no-owner --no-privileges --exit-on-error \
+  -d bauhelfer_restore < ~/bauhelfer-backups/bauhelfer-<date>.dump
 ```
 
 Copy `.env.example` to `.env` before the first run.

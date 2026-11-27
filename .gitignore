@@ -17,6 +17,9 @@ staticfiles/
 # built from tailwind/input.css, see CLAUDE.md
 static/css/app.css
 
+# Database backups (#46): they hold personal data, keep them in ~/bauhelfer-backups/
+*.dump
+
 # Environment
 .env
 .env.*

@@ -1,0 +1,32 @@
+# Keeps the live site awake for the defense (#46). Render's free plan puts the server to sleep
+# after 15 min without requests (first page then takes ~30 s), and Supabase pauses a free
+# project after 7 days without activity. A request to the home page every 10 min wakes both:
+# the page reads jobs from the database.
+#
+# Only by day (08:00-22:00 Munich time, UTC+1 in winter) on 30 Nov, 1 Dec and 2 Dec: about
+# 42 of Render's 750 free hours a month. After 2 Dec it no longer runs; delete it then.
+# GitHub may start scheduled runs late under load, so wake the site by hand before the demo
+# too ("Run workflow" in the Actions tab, or just open the site).
+name: Keep the site awake
+
+on:
+  schedule:
+    # Cron is in UTC. Minute 3, not 0: the start of the hour is GitHub's busiest moment.
+    - cron: "3,13,23,33,43,53 7-20 30 11 *"  # 30 Nov
+    - cron: "3,13,23,33,43,53 7-20 1-2 12 *"  # 1-2 Dec
+  workflow_dispatch:  # manual "Run workflow" button
+
+permissions: {}  # the job needs no access to the repository
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # The home page, not /robots.txt: Render answers that one itself while the server
+      # sleeps, so it would not wake it. Up to 90 s, so a cold start still counts as a
+      # success; --fail turns an error page into a red run.
+      - run: >-
+          curl --fail --silent --show-error --output /dev/null --max-time 90
+          --write-out "HTTP %{http_code} in %{time_total} s\n"
+          https://bauhelfer.onrender.com/
