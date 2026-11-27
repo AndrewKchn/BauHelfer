@@ -3270,3 +3270,59 @@ plus the footer line "test data only", moved here from #45.
   touches nothing else, and a failure half-way leaves the database as it was.
 - Why running locally against the production database still uses the local settings: only
   the rows go to Supabase, while files and emails would stay on my computer.
+
+## 2026-11-27 · #46 Demo readiness on free plans: wake-up, Supabase not paused, manual backup
+
+**Task given to AI:** make the live site safe for the defense on 1 Dec without paid plans:
+no cold start in front of the jury, Supabase not paused, a manual `pg_dump` backup with a
+tested restore, HTTPS checked. Context: free tiers only (my decision in #5), 4 days left.
+
+**AI helped:**
+- Measured the live site first: a 28 s cold start, http → https 301, certificate valid until
+  2027-02-17, HSTS only one hour.
+- Compared three ways to keep the site awake (by hand with an open chat tab, GitHub Actions
+  cron, UptimeRobot) and explained the cost of cron: Render's 750 free hours per workspace,
+  late scheduled runs, `/robots.txt` not waking a sleeping Render service, cron in UTC.
+- Wrote `keep-awake.yml` and a `pg_dump` / `pg_restore` procedure through the `postgres:17`
+  image that keeps the connection string out of the chat, shell history and process list.
+- Restored the dump into a separate local database and checked it: row counts,
+  `migrate --check`, the home page showing the same jobs as the live site.
+- Explained what HSTS protects against (SSL stripping on public Wi-Fi) and why an hour is
+  almost no protection; wrote the failing test, then raised it to a year.
+
+**AI failed:**
+- Its first restore command failed with `schema "public" already exists`: a dump made with
+  `--schema=public` creates the schema itself. Found by the restore test; the empty schema is
+  now dropped first, and the fix is in `CLAUDE.md`.
+- `dropdb` refused because of one idle connection left after the server stopped; fixed with
+  `--force`.
+- Its first draft of the issue update had a wrong commit reference; it fixed it before
+  posting.
+
+**My part:**
+- I chose the GitHub Actions ping over the AI's recommendation (wake by hand, keep a chat tab
+  open): it works on its own, so the site stays awake while the mentors check it and at the
+  defense. Before deciding I asked what it costs and whether it could get Render to block us,
+  and checked Render's Billing page myself: 23 of 750 hours used, one service.
+- I set the window: by day only (08:00–22:00) on 30 Nov, 1 Dec and 2 Dec, ~42 hours.
+- I decided no pytest test for the workflow YAML; the evidence is a green manual run after
+  the merge.
+- My idea: an own custom domain. I left it for after the defense: it costs money and adds DNS
+  risk four days before the defense.
+- I ran `pg_dump` against production myself (the connection string never went to the AI),
+  then opened the site on the restored database by hand and noticed the job photos were
+  missing. I decided not to back them up: there is only test data anyway, and the backup is
+  mostly for learning how it works. It is recorded as a known limitation.
+- I asked why HSTS matters before accepting a year.
+- I asked what "Supabase not paused" means when production works; after the explanation
+  (pause after 7 days without activity) I accepted today's dump and live site as the evidence.
+- I asked for the detailed dump and restore steps to be saved in my defense notes.
+
+**Learned:**
+- How the free plans of Render (sleep after 15 min, 750 hours a month) and Supabase (pause
+  after 7 days) limit the app, and how one ping on a page that reads the database works
+  around both.
+- Why a backup only counts after a tested restore: the first restore failed on something the
+  dump command alone never showed.
+- What HSTS does that the http → https redirect cannot: the browser never sends the first
+  plain http request.
