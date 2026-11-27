@@ -73,6 +73,8 @@ ANTHROPIC_API_KEY = env("ANTHROPIC_API_KEY")
 # Render terminates HTTPS in front of the app and tells Django via this header.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = True
-SECURE_HSTS_SECONDS = 3600  # raise once HTTPS is confirmed working
+# HSTS: browsers remember to open the site over HTTPS only, so a typed http:// address is
+# never sent in the clear. A year, since HTTPS was confirmed working in #46 (an hour before).
+SECURE_HSTS_SECONDS = 365 * 24 * 60 * 60
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
