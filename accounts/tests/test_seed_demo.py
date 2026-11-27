@@ -1,6 +1,6 @@
 """Integration tests: the seed_demo command fills the database with demo data (#47).
 
-Spec: docs/specs/demo-data.md, R1-R9 and R11, acceptance criteria AC1, AC4-AC9 and AC11. The command runs
+Spec: docs/specs/demo-data.md, R1-R9 and R11, acceptance criteria AC1, AC4-AC9, AC11 and AC12. The command runs
 through call_command, as `manage.py seed_demo` does, on the test database. The footer line
 (R10, AC10) is in tests/test_base_layout.py.
 """
@@ -154,6 +154,22 @@ def test_without_password_option_the_command_asks_for_it(monkeypatch):
 
     assert asked
     assert demo_users().first().check_password("typed-pass")
+
+
+def test_report_lists_every_demo_login_but_not_the_password():
+    """The command prints the demo logins, so they are documented without the repo.
+
+    1. Run seed_demo, keep its report
+    2. Expect: every demo address is in the report; the password is not
+    """
+    report = io.StringIO()
+
+    call_command("seed_demo", password=PASSWORD, stdout=report)
+
+    assert demo_users().exists()
+    for email in demo_users().values_list("email", flat=True):
+        assert email in report.getvalue()
+    assert PASSWORD not in report.getvalue()
 
 
 # What the command must not do (R7, R8, D9, D13; AC7, AC8)

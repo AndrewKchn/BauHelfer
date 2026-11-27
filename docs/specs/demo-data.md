@@ -108,8 +108,9 @@ AC10. The footer line is on a page built on `base.html`, in English and in Germa
 AC11. With the test database (localhost) some open demo jobs have photos whose image and
       thumbnail files exist; with the host set to a Supabase address the jobs have no photos
       and the report says the photos were skipped (D17).
+AC12. The report of the command lists every demo address and not the password (R9, D12).
 
-Tests: `accounts/tests/test_seed_demo.py` (AC1, AC4-AC9, AC11) and
+Tests: `accounts/tests/test_seed_demo.py` (AC1, AC4-AC9, AC11, AC12) and
 `tests/test_base_layout.py` (AC10).
 
 ## Limitations
