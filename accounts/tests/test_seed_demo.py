@@ -1,6 +1,6 @@
 """Integration tests: the seed_demo command fills the database with demo data (#47).
 
-Spec: docs/specs/demo-data.md, R1-R9, acceptance criteria AC1 and AC4-AC9. The command runs
+Spec: docs/specs/demo-data.md, R1-R9 and R11, acceptance criteria AC1, AC4-AC9 and AC11. The command runs
 through call_command, as `manage.py seed_demo` does, on the test database. The footer line
 (R10, AC10) is in tests/test_base_layout.py.
 """
@@ -12,9 +12,10 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.core.management import call_command
+from django.db import connection
 from django.utils import timezone
 
-from jobs.models import Application, Job
+from jobs.models import Application, Job, JobPhoto
 from jobs.tests.test_views import make_employer, make_job
 from reviews.models import Review
 from translations.models import Translation
@@ -192,3 +193,41 @@ def test_a_failure_half_way_leaves_the_old_demo_data(monkeypatch):
 
     assert set(demo_users().values_list("pk", flat=True)) == before_ids
     assert counts() == before
+
+
+# Photos only into a local database (R11, D17; AC11)
+
+
+def test_seed_adds_drawn_photos_with_thumbnails_to_a_local_database():
+    """Locally the demo jobs get photos, so mentors see the photo gallery and thumbnails.
+
+    1. Run seed_demo; the test database is on localhost
+    2. Expect: some open demo jobs have photos; each photo and its thumbnail file exist in
+       the storage
+    """
+    seed()
+
+    photos = JobPhoto.objects.filter(job__employer__in=demo_users())
+    assert photos.exists()
+    for photo in photos:
+        assert photo.image.storage.exists(photo.image.name)
+        assert photo.thumbnail.storage.exists(photo.thumbnail.name)
+
+
+def test_seed_adds_no_photos_to_a_remote_database(monkeypatch):
+    """Run against Supabase with local settings, files would land on my disk: no photos.
+
+    1. Make the database look remote: its host is a Supabase address
+    2. Run seed_demo
+    3. Expect: the demo jobs exist but have no photos; the report says photos were skipped
+    """
+    monkeypatch.setitem(
+        connection.settings_dict, "HOST", "aws-0-eu-central-1.pooler.supabase.com"
+    )
+    report = io.StringIO()
+
+    call_command("seed_demo", password=PASSWORD, stdout=report)
+
+    assert Job.objects.filter(employer__in=demo_users()).exists()
+    assert not JobPhoto.objects.filter(job__employer__in=demo_users()).exists()
+    assert "photos skipped" in report.getvalue().lower()

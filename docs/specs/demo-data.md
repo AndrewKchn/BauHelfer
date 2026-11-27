@@ -1,6 +1,6 @@
 # Spec: demo data and the "test data only" footer (#47)
 
-Status: **agreed**. I decided D1–D3, D15 and D16 on 2026-11-27 (my criteria: the demo must
+Status: **agreed**. I decided D1–D3 and D15–D17 on 2026-11-27 (my criteria: the demo must
 not fail in front of the jury, simple code, no secrets or personal data in the chat or the
 repo). D4–D14 are Claude's defaults, which I accepted on 2026-11-27, before any tests.
 
@@ -24,7 +24,8 @@ No screen of `docs/mockups/` has a footer, so there is nothing to compare.
 
 ### Out of scope
 
-- Job photos in the demo data (D7). I add one or two through the site to my own jobs.
+- Job photos in the live demo data (D7, D17). I add one or two through the site to my own
+  jobs.
 - Chat messages and applications between demo accounts: nobody logs in as them in the demo.
 - Cleaning up old test data of my own accounts: done by hand in Django admin in #49.
 - The demo logins in the README: #50 (D12).
@@ -66,6 +67,11 @@ R9. At the end it prints what it deleted and created, the list of demo logins (a
     and roles, not the password), and the next step: register an employer and a worker
     through the site and follow the scenario of #49 (D15).
 
+R11. When the database is on this computer (host `localhost`, `127.0.0.1` or empty), some open
+     jobs get drawn photos (a coloured picture of a house, as in
+     `tests/e2e/built_screenshots.py`), saved through `JobPhoto`, so thumbnails are made too.
+     With any other host no photo is made, and the report says "Photos skipped" (D17).
+
 ### The footer
 
 R10. `base.html` shows under the copyright line: "Student project with test data only.
@@ -99,8 +105,11 @@ AC8. When creating fails half-way, no demo account is left (old ones deleted, no
      → the transaction is rolled back to the state before).
 AC9. Without `--password` the command asks for the password (`getpass` is called).
 AC10. The footer line is on a page built on `base.html`, in English and in German.
+AC11. With the test database (localhost) some open demo jobs have photos whose image and
+      thumbnail files exist; with the host set to a Supabase address the jobs have no photos
+      and the report says the photos were skipped (D17).
 
-Tests: `accounts/tests/test_seed_demo.py` (AC1, AC4-AC9) and
+Tests: `accounts/tests/test_seed_demo.py` (AC1, AC4-AC9, AC11) and
 `tests/test_base_layout.py` (AC10).
 
 ## Limitations
@@ -136,6 +145,7 @@ D6. **Demo accounts have no confirmed address** (Claude's default, accepted 2026
     address, so Brevo never gets a bounce from a made-up address.
 D7. **No photos** (Claude's default, accepted 2026-11-27). Run locally, the command would save
     them on my disk, not in Supabase Storage.
+    **Changed by D17:** photos into a local database only.
 D8. **Dates relative to today** (Claude's default, accepted 2026-11-27). Seeded on 28
     November with fixed dates, an "upcoming" job could be in the past on 1 December.
 D9. **One transaction** (Claude's default, accepted 2026-11-27). A half-seeded live database
@@ -168,3 +178,10 @@ D16. **Eight tests, not thirteen** (mine, 2026-11-27). Tests guard what can do h
      The amounts of R3 (how many accounts, districts, languages) I check by eye on the site.
      Rejected: one test per item of R3 (13 tests, they break on every change of the content
      and protect nothing); no tests (the command deletes users on the live database).
+D17. **Drawn photos, only into a local database** (mine, 2026-11-27; Claude's recommendation,
+     after I asked for photos like the ones in the test data). Mentors running the project
+     locally see the gallery and the thumbnails. Run against Supabase with the local
+     settings, the files would go to my disk and the live site would show broken pictures,
+     so photos are made only when the database host is local. Rejected: no photos at all
+     (D7, mentors see no photos); photos on the live site too (it needs the production
+     settings, so every production secret on my computer).
