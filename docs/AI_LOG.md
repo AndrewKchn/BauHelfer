@@ -3207,3 +3207,66 @@ conclusions, found 9 real errors, fixed in one commit (e67f7d7):
 - Why checking only the new lines is not enough: a sprint also makes old text false, and two
   facts that are each written down (detection outside the limit, no chat message limit) can
   be a risk only together.
+
+## 2026-11-27 · #47 Demo seed data: employers, workers, jobs
+
+**Task given to AI:** four days before the defense, review what is left on the board and
+propose a plan. Then #47: a management command that fills the live site with demo data,
+plus the footer line "test data only", moved here from #45.
+
+**AI helped:**
+- Reviewed the board (M7: 0 of 6 done, about one feature ticket a day, six M8 tickets needed
+  for the defense) and offered three scopes with their cost: defense only, plus the map, plus
+  GDPR.
+- Explained why the free Render plan cannot run the command (no Shell, no pre-deploy) and the
+  ways around it; that `DATABASE_URL` from the environment wins over `.env`; `read -rsp` to keep
+  the address out of the screen and the history; how mentors see emails locally (console
+  backend, the `runserver` terminal).
+- Explained how Django finds a command (`management/commands/<name>.py`, `BaseCommand`,
+  `add_arguments` / `handle`).
+- Wrote the spec `docs/specs/demo-data.md` (D1–D17), 10 tests, the command, the footer and its
+  translations; 23 mutations, each caught by its test. A back-translation agent found no errors
+  in DE / PL / RO / TR.
+- Drew job photos with Pillow, only when the database is on this computer, so the live site
+  never gets a photo row without its file.
+
+**AI failed:**
+- The first phone numbers used `hash()`, which Python randomises on every run, and left an
+  unused variable; the AI noticed it before running the tests.
+- The data tables were long tuples; ruff (ISC004) warned that a missing comma would silently
+  glue two descriptions together. Rewritten as dicts with field names.
+- `footer-vertical` changed nothing on the screenshot: with `footer-center` daisyUI's names are
+  the other way round; `footer-horizontal` stacks the lines.
+- The first photos (one house, then three variants of it) did not show what the jobs are
+  about, and the tiles looked like squared paper; I pointed both out.
+- The logins test was written after the code and passed at once, so it is not test-first;
+  three mutations show it guards the output.
+- It tried to commit and push in one command when I had asked only for a commit; the
+  permission check stopped it.
+
+**My part:**
+- Scope: I chose "defense only" and kept M7 open in its milestone instead of moving it to
+  Stretch, so the board shows what was planned and what was not done. I moved #41 back to
+  "Todo" (it was "In Progress" since 19 Nov with no commits).
+- The demo heroes are my real accounts on the project's Gmail; my idea was two more workers,
+  so the rejection and cancellation emails can be shown too.
+- My idea: mentors run the project locally and need users and a flow to check (D15; the
+  scenario goes into #49).
+- I chose 8 tests over 13 after asking how many each option had: tests that count accounts,
+  districts and languages break on every change of the content and protect nothing; the 8
+  guard what can do harm (deleting other accounts, emails, translations, the transaction).
+- I asked why the footer test uses German, understood that it proves the line is translated,
+  and kept it.
+- I asked for photos in the demo data, then for nicer ones, then for pictures of what the job
+  texts say, then for a blue tile wall and a hammer.
+- I asked for the command and the footer in separate commits: they are different features.
+- I reviewed the RU and UK texts. Checked by hand locally: ran `seed_demo`, logged in as demo
+  accounts, looked at ratings, photos and the footer.
+
+**Learned:**
+- How Django finds and runs a management command: `management/commands/<name>.py` in an
+  installed app, a `Command` class whose `add_arguments` and `handle` `BaseCommand` calls.
+- Why a reset command deletes by a marker inside one transaction: it can run again and again,
+  touches nothing else, and a failure half-way leaves the database as it was.
+- Why running locally against the production database still uses the local settings: only
+  the rows go to Supabase, while files and emails would stay on my computer.

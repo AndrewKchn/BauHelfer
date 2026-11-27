@@ -17,6 +17,8 @@ uv run python manage.py runserver        # dev server (settings: config.settings
                                          # Django Debug Toolbar on every page (DEBUG on)
 uv run python manage.py makemigrations   # after model changes
 uv run python manage.py migrate          # after makemigrations and after pulling main
+uv run python manage.py seed_demo        # demo accounts on @demo.example + jobs; asks for
+                                         # their password; run again to reset (#47)
 uv run python manage.py makemessages -a --add-location file --ignore "tests/*" \
   --ignore "*/tests/*" --ignore "static/*" --ignore "media/*"  # after changing UI strings;
                                          # CI runs it too and fails if locale/ changes

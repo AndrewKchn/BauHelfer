@@ -84,8 +84,10 @@
   </main>
 
   {# Impressum and privacy policy links come in M7 (#43). #}
-  <footer class="footer footer-center bg-base-100 p-4 text-sm">
+  <footer class="footer footer-horizontal footer-center gap-2 bg-base-100 p-4 text-sm">
     <p>© {% now "Y" %} BauHelfer · {% translate "Munich" %}</p>
+    {# The site is public; nothing else tells a visitor it is a student project (#47). #}
+    <p>{% translate "Student project with test data only. Please do not enter real personal data." %}</p>
   </footer>
 </body>
 </html>

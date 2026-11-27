@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BauHelfer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-17 17:58+0100\n"
+"POT-Creation-Date: 2026-11-27 17:12+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1030,6 +1030,11 @@ msgstr "Registrieren"
 #: templates/base.html
 msgid "Munich"
 msgstr "München"
+
+#: templates/base.html
+msgid ""
+"Student project with test data only. Please do not enter real personal data."
+msgstr "Studentisches Projekt nur mit Testdaten. Bitte geben Sie keine echten personenbezogenen Daten ein."
 
 #: templates/chat/_chats_menu_item.html templates/chat/chat_list.html
 msgid "Chats"

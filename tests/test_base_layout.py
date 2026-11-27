@@ -123,3 +123,30 @@ def test_every_page_template_extends_base():
 
     assert pages, "no page templates found"
     assert not_extending == []
+
+
+FOOTER_EN = (
+    "Student project with test data only. Please do not enter real personal data."
+)
+FOOTER_DE = (
+    "Studentisches Projekt nur mit Testdaten. Bitte geben Sie keine echten "
+    "personenbezogenen Daten ein."
+)
+
+
+@pytest.mark.story(47)
+@pytest.mark.parametrize(
+    ("language", "line"), [("en", FOOTER_EN), ("de", FOOTER_DE)], ids=["en", "de"]
+)
+def test_footer_says_the_site_holds_test_data_only(client, language, line):
+    """Every page warns that this is a student project with test data (#47, R10, AC10).
+
+    1. Choose the language with the language cookie, open the home page
+    2. Expect: the footer line in that language
+    """
+    client.cookies[settings.LANGUAGE_COOKIE_NAME] = language
+
+    response = client.get(reverse("home"))
+
+    footer = response.text.split("<footer", 1)[1]
+    assert line in footer
