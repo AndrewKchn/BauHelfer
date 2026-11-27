@@ -8,21 +8,25 @@ On the live site it runs from my computer with the production database address (
 
     DATABASE_URL='<Supabase URL>' uv run python manage.py seed_demo
 
-It only writes rows: no email, no photo, no translation (D6, D7, D13), so the local
-settings it runs with cannot leak into the live site.
+It sends no email and translates nothing (D6, D13), so the local settings it runs with
+cannot leak into the live site. Photos only go into a database on this computer: with the
+local settings their files land on this disk, which the live site cannot see (D17).
 """
 
 import datetime
 import getpass
+import io
 from decimal import Decimal
 from typing import override
 
+from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand, CommandError
-from django.db import transaction
+from django.db import connection, transaction
 from django.utils import timezone
+from PIL import Image, ImageDraw
 
 from accounts.models import EmployerProfile, User, WorkerProfile
-from jobs.models import Application, Job
+from jobs.models import Application, Job, JobPhoto
 from reviews.models import Review
 
 # Reserved for examples (RFC 2606): no mail can reach it, and the local dev users on
@@ -30,6 +34,9 @@ from reviews.models import Review
 DOMAIN = "demo.example"
 
 DAY = datetime.timedelta(days=1)
+
+# Database hosts that mean "this computer" (D17); empty = a local socket.
+LOCAL_HOSTS = {"", "localhost", "127.0.0.1"}
 
 # The demo accounts (R3, D4). "key" is the part of the address before the @.
 EMPLOYERS = [
@@ -104,7 +111,8 @@ WORKERS = [
     },
 ]
 
-# Open jobs; "days" counts from the day the command runs (D8). The rest are Job fields.
+# Open jobs; "days" counts from the day the command runs (D8); "photos" are the scenes of
+# the drawn photos, made only locally (D17). The rest are Job fields.
 OPEN_JOBS = [
     {
         "employer": "thomas.berger",
@@ -116,6 +124,7 @@ OPEN_JOBS = [
         "workers_needed": 2,
         "hourly_rate": "16.00",
         "original_language": "de",
+        "photos": ["shed", "skip"],
         "description": (
             "Gartenhaus aus Holz abreißen und den Schutt in den Container laden. "
             "Werkzeug ist da, bitte Arbeitshandschuhe mitbringen."
@@ -161,6 +170,7 @@ OPEN_JOBS = [
         "workers_needed": 2,
         "hourly_rate": "16.50",
         "original_language": "de",
+        "photos": ["painting"],
         "description": (
             "Wände abkleben, Böden abdecken und nach dem Streichen aufräumen. "
             "Wohnung im 2. Stock."
@@ -191,6 +201,7 @@ OPEN_JOBS = [
         "workers_needed": 4,
         "hourly_rate": "18.00",
         "original_language": "ru",
+        "photos": ["tiles", "broken_tiles"],
         "description": (
             "Демонтаж старой кухни и плитки в ресторане. "
             "Нужна бригада, отбойные молотки предоставим."
@@ -267,6 +278,74 @@ DONE_JOBS = [
 ]
 
 
+def database_is_local():
+    """True when the database runs on this computer, not on Supabase (D17)."""
+    return connection.settings_dict["HOST"] in LOCAL_HOSTS
+
+
+def photo_bytes(scene):
+    """A drawn "photo" of what the job's text says, as JPEG bytes (D17).
+
+    Scenes: "shed" and "skip" (a garden shed to tear down, the container for it),
+    "painting" (a wall half painted, tape, a roller), "tiles" and "broken_tiles" (a kitchen
+    wall before and after the tiles come off, with a hammer).
+    """
+    image = Image.new("RGB", (1200, 900), (170, 215, 240))  # the sky
+    draw = ImageDraw.Draw(image)
+    if scene in ("shed", "skip"):
+        draw.rectangle((0, 700, 1200, 900), fill=(110, 150, 80))  # the grass
+        draw.rectangle((140, 380, 190, 700), fill=(110, 80, 50))  # a tree
+        draw.ellipse((40, 200, 290, 450), fill=(70, 130, 60))
+    if scene == "shed":
+        draw.rectangle((450, 380, 1000, 700), fill=(160, 110, 60))
+        for x in range(480, 1000, 50):  # the planks
+            draw.line([(x, 380), (x, 700)], fill=(120, 80, 40), width=6)
+        draw.polygon([(420, 390), (725, 220), (1030, 390)], fill=(90, 60, 40))
+        draw.rectangle((660, 520, 790, 700), fill=(100, 65, 35))  # the door
+    elif scene == "skip":
+        for x1, y1, x2, y2 in [
+            (450, 560, 640, 380),
+            (560, 580, 820, 420),
+            (700, 560, 900, 360),
+        ]:
+            draw.line([(x1, y1), (x2, y2)], fill=(150, 100, 55), width=28)  # old planks
+        draw.polygon(
+            [(380, 520), (1020, 520), (960, 760), (440, 760)], fill=(240, 180, 30)
+        )
+    elif scene == "painting":
+        draw.rectangle((0, 0, 1200, 700), fill=(235, 228, 210))  # the old wall
+        draw.rectangle((0, 0, 600, 700), fill=(150, 200, 190))  # the new paint
+        draw.rectangle((0, 660, 1200, 700), fill=(60, 120, 220))  # the masking tape
+        draw.rectangle((0, 700, 1200, 900), fill=(215, 220, 225))  # the plastic sheet
+        draw.rectangle((640, 300, 820, 360), fill=(150, 200, 190))  # the roller
+        draw.line([(730, 360), (730, 520)], fill=(60, 60, 60), width=14)
+    else:  # "tiles", "broken_tiles": a kitchen wall of blue tiles in a chequer pattern
+        draw.rectangle((0, 0, 1200, 900), fill=(240, 240, 235))  # the grout
+        for x in range(0, 1200, 100):
+            for y in range(0, 900, 100):
+                shade = (70, 130, 190) if (x + y) % 200 else (110, 165, 215)
+                draw.rectangle((x + 6, y + 6, x + 94, y + 94), fill=shade)
+        if scene == "broken_tiles":
+            draw.polygon(
+                [(300, 0), (900, 0), (800, 500), (350, 600)], fill=(150, 140, 130)
+            )
+            for x, y, r in [
+                (500, 820, 90),
+                (650, 840, 70),
+                (580, 760, 60),
+                (760, 850, 50),
+            ]:
+                draw.ellipse((x - r, y - r, x + r, y + r), fill=(205, 200, 190))
+        # a hammer: the handle, then the head across its top
+        draw.line([(900, 860), (1080, 560)], fill=(150, 100, 55), width=34)
+        draw.polygon(
+            [(1000, 500), (1150, 590), (1110, 655), (960, 565)], fill=(80, 80, 85)
+        )
+    buffer = io.BytesIO()
+    image.save(buffer, "JPEG")
+    return buffer.getvalue()
+
+
 def street_address(district):
     """A made-up address in the job's district: no real house is named."""
     return f"{district.replace('_', ' ').title()}, München"
@@ -290,6 +369,8 @@ class Command(BaseCommand):
         )
         if not password:
             raise CommandError("The demo accounts need a password.")
+
+        self.with_photos = database_is_local()
 
         # All or nothing: a half-seeded live database is worse than none (D9).
         with transaction.atomic():
@@ -341,7 +422,8 @@ class Command(BaseCommand):
         today = timezone.localdate()
         for data in OPEN_JOBS:
             job = dict(data)  # a copy: the table stays as it is for the next run
-            Job.objects.create(
+            scenes = job.pop("photos", [])
+            created = Job.objects.create(
                 employer=users[job.pop("employer")],
                 date=today + job.pop("days") * DAY,
                 start_time=datetime.time.fromisoformat(job.pop("start_time")),
@@ -349,6 +431,13 @@ class Command(BaseCommand):
                 address=street_address(job["district"]),
                 **job,  # job_type, district, hours, workers_needed, language, description
             )
+            if self.with_photos:
+                for scene in scenes:
+                    # save() makes the thumbnail too (#64), as for an uploaded photo.
+                    picture = photo_bytes(scene)
+                    JobPhoto.objects.create(
+                        job=created, image=ContentFile(picture, name="photo.jpg")
+                    )
 
     def create_done_jobs(self, users):
         """Done jobs where both sides reviewed each other.
@@ -400,6 +489,11 @@ class Command(BaseCommand):
             f"Created {len(users)} demo accounts, {len(OPEN_JOBS)} open jobs and "
             f"{len(DONE_JOBS)} done jobs with reviews."
         )
+        if not self.with_photos:
+            self.stdout.write(
+                "Photos skipped: the database is not on this computer, and the files "
+                "would stay on this disk (D17). Add photos through the site."
+            )
         self.stdout.write("Demo logins (all with the password you gave):")
         for user in users.values():
             self.stdout.write(f"  {user.role:<9} {user.email}")
