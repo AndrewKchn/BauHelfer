@@ -138,6 +138,19 @@ def test_production_uses_https_only():
     assert production.DEBUG is False
 
 
+@pytest.mark.story(46)
+def test_production_hsts_lasts_a_year():
+    """Browsers remember for a year to open the site over HTTPS only.
+
+    1. Load the production settings
+    2. Expect: SECURE_HSTS_SECONDS is at least one year, so a visitor who came within the
+       last year never sends a plain http request an attacker could catch
+    """
+    production = load_production_settings()
+
+    assert production.SECURE_HSTS_SECONDS >= 365 * 24 * 60 * 60
+
+
 @pytest.mark.story(14)
 def test_production_hashes_passwords_with_pbkdf2():
     """Production uses the slow PBKDF2 hasher; only the tests use the fast one.
